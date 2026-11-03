@@ -315,7 +315,8 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 - [ ] Đọc 50–100 đánh giá 1–3 sao của các đối thủ trên App Store, Google Play, Capterra; tổng hợp nỗi đau (mục 12)
 - [ ] Đăng Google Form vào nhóm Facebook chủ salon, spa, nail, pet shop
 - [x] Tạo 2 repo `datn-saas`, `datn-docs`; đưa đề cương, roadmap, quyết định vào `datn-docs` (03/11)
-- [ ] Dựng base source `datn-saas` và app docs + mock `datn-docs` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base)
+- [ ] Dựng base source `datn-saas` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base), Phần A
+- [ ] Dựng app docs + mock `datn-docs` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base), Phần B
 
 **Đầu ra:** đề cương được duyệt, bảng so sánh đối thủ có bằng chứng, tổng hợp đánh giá, repo chạy được.
 

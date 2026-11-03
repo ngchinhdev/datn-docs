@@ -20,11 +20,12 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 
 ---
 
-## T-01. Runtime: Node.js 26 LTS
+## T-01. Runtime: Node.js 24 LTS
 
-- Node 26 là Active LTS đến 27/10/2027; Node 24 hết active support 20/10/2026 (bảo mật đến 30/04/2028); **Node 22 hết bảo mật 30/04/2027, trước ngày bảo vệ** → không dùng.
-- Ghi `.nvmrc` = `26` và `"engines": { "node": ">=26" }`. Nếu một gói phụ thuộc lỗi trên 26, lùi về 24 và ghi lý do.
-- NestJS 12 yêu cầu Node ≥ 20.19 hoặc ≥ 22.12, nên 26 hợp lệ.
+- Node 24 là Maintenance LTS, còn bản vá bảo mật đến 30/04/2028, sau ngày bảo vệ. **Node 22 hết bảo mật 30/04/2027, trước ngày bảo vệ** → không dùng.
+- Ghi `.nvmrc` = `24` và `"engines": { "node": ">=24" }`; CI chạy Node 24.
+- NestJS 12 yêu cầu Node ≥ 20.19 hoặc ≥ 22.12, nên 24 hợp lệ.
+- **Đổi từ Node 26 sang 24 (03/11/2026):** máy dev đang có sẵn Node 24, người dùng chốt giữ nguyên để khỏi cài lại runtime. Code không dùng tính năng riêng của Node 26.
 
 ## T-02. Monorepo: pnpm workspaces + catalog, Turborepo
 
@@ -32,6 +33,8 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 - Gói nội bộ tham chiếu bằng `workspace:*`; gói `shared` và `scheduling-core` là gói **just-in-time**: `exports` trỏ thẳng vào `src/index.ts`, không có bước build riêng.
 - Turborepo 2.x: task `build` có `dependsOn: ["^build"]` và `outputs`; `dev` để `cache: false`, `persistent: true`; CI chạy `turbo run lint typecheck test --filter=...[origin/main]` khi repo lớn.
 - Giữ ít package (bắt đầu 4). Chỉ tách thêm khi thật cần.
+- pnpm ghim `9.15.0` trong `packageManager`, đúng bản đang cài trên máy dev. Nâng lên pnpm mới hơn thì sửa `packageManager` và tạo lại lockfile trong cùng một commit.
+- Import tương đối trong gói just-in-time ghi đuôi `.ts` (`allowImportingTsExtensions`), vì API chạy thẳng mã nguồn các gói này bằng Node (type stripping) và Node không tự đổi `.js` thành `.ts`.
 
 ## T-03. Frontend: Next.js 16.4 + React 19.3
 
@@ -42,7 +45,7 @@ datn/                      ← thư mục cha trên máy (không phải repo)
   - **Server Actions không chứa nghiệp vụ.** Mọi quy tắc nằm ở NestJS; nếu dùng Server Action thì chỉ là lớp gọi API mỏng.
 - Next 16 đổi `middleware.ts` thành **`proxy.ts`**: dùng cho chuyển hướng khi chưa đăng nhập và chuẩn hóa slug. Không kiểm tra quyền ở đây (quyền kiểm tra ở API).
 - Form: `react-hook-form` + resolver Zod, dùng **chung schema** với API từ `packages/shared`.
-- UI: Tailwind CSS 4 + shadcn/ui (cùng bộ với repo mock, để chuyển component sang dễ dàng).
+- UI: Tailwind CSS 4 + shadcn/ui preset `base-nova` (Base UI, màu nền `neutral`, icon lucide), cùng bộ với repo mock để chuyển component sang dễ dàng.
 - **Lịch lễ tân tự dựng** (CSS grid theo tài nguyên × thời gian, kéo thả bằng `dnd-kit`). Lý do: chế độ resource timeline của FullCalendar thuộc gói Premium cần license; tự dựng còn hiển thị được đoạn chờ theo đúng mô hình đoạn chiếm dụng. Kiểm tra lại license nếu muốn dùng FullCalendar.
 - Bật React Compiler nếu không gặp lỗi (Next 16 hỗ trợ `reactCompiler: true`).
 
@@ -82,7 +85,7 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 
 ## T-06. Cơ sở dữ liệu: PostgreSQL 18 + Drizzle ORM v1 (RC)
 
-- PostgreSQL 18, image chính thức trong Docker Compose và Testcontainers. Bật extension `btree_gist` (cần cho exclusion constraint có `tenant_id WITH =`). Kiểm tra lại: nếu bản 18 có hàm `uuidv7()` thì dùng làm khóa chính; nếu không, sinh UUIDv7 ở ứng dụng.
+- PostgreSQL 18, image chính thức trong Docker Compose và Testcontainers. Bật extension `btree_gist` (cần cho exclusion constraint có `tenant_id WITH =`). Khóa chính dùng `default uuidv7()`, hàm có sẵn từ PostgreSQL 18.
 - **Drizzle ORM:** bản v1 đang ở **1.0.0-rc.5** (21/10/2026), roadmap ghi 99,5%; dòng 0.x vẫn có bản vá. Chọn **v1 RC, ghim chính xác phiên bản**, nâng lên v1 stable khi phát hành. Lý do: tránh phải chuyển từ 0.x sang v1 giữa chừng (relational queries v2, định dạng migration mới).
 - Migration bằng `drizzle-kit`. Những thứ drizzle-kit không biểu diễn được (exclusion constraint, trigger chặn UPDATE/DELETE sổ cái, `FORCE ROW LEVEL SECURITY`, grant cho role) viết bằng **migration SQL tùy chỉnh** và có test đi kèm.
 - **Quy ước dữ liệu:**
@@ -94,7 +97,7 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 ## T-07. Cô lập dữ liệu: RLS hai lớp
 
 - App kết nối DB bằng role `app_user` **không phải chủ bảng, không có `BYPASSRLS`**; migration chạy bằng role chủ sở hữu. Bật `ENABLE` và `FORCE ROW LEVEL SECURITY` trên mọi bảng có `tenant_id`.
-- Policy: `tenant_id = current_setting('app.tenant_id')::uuid`. Mỗi thao tác chạy trong transaction qua helper `withTenant(tenantId, tx => ...)`, helper gọi `select set_config('app.tenant_id', $1, true)` (tham số hóa, không nối chuỗi) trước khi chạy truy vấn.
+- Policy (cả `USING` và `WITH CHECK`): `tenant_id = nullif(current_setting('app.tenant_id', true), '')::uuid`. Sau transaction có `set_config(..., true)`, kết nối trong pool giữ giá trị `''` chứ không phải `NULL`; thiếu `nullif` thì truy vấn ngoài `withTenant()` báo lỗi ép kiểu thay vì trả về 0 dòng. Mỗi thao tác chạy trong transaction qua helper `withTenant(tenantId, tx => ...)`, helper gọi `select set_config('app.tenant_id', $1, true)` (tham số hóa, không nối chuỗi) trước khi chạy truy vấn.
 - Tenant của request được guard xác định từ phiên đăng nhập hoặc slug công khai, giữ trong ngữ cảnh request (ví dụ `nestjs-cls`).
 - Định nghĩa policy bằng `pgPolicy` của Drizzle khi được; phần còn lại ở migration SQL.
 
@@ -125,10 +128,11 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 
 ## T-12. Chất lượng code
 
-- **TypeScript** strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`; `tsconfig.base.json` ở gốc.
+- **TypeScript 6.0** strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`; `tsconfig.base.json` ở gốc. Chưa dùng TypeScript 7 (compiler viết lại bằng Go) vì `@nestjs/cli` 12 còn phụ thuộc `typescript ~6.0`.
 - **oxlint** cho cả repo (mặc định của Nest 12; Next 16 đã bỏ lệnh `next lint`), bật plugin typescript, react, nextjs, import, vitest. **Prettier** để format.
 - Script CI chặn từ khóa ngành (`hair`, `nail`, `pet`, `tóc`, `thú cưng`...) trong `packages/scheduling-core` và các module lõi (BT8).
 - Commit theo Conventional Commits (`feat(scheduling): ...`), mỗi commit chạy được test.
+- Pre-commit hook bằng **husky + lint-staged**: Prettier và oxlint trên file đã stage, kiểm từ khóa ngành, `typecheck`, unit test. Integration và e2e để CI chạy.
 
 ## T-13. Triển khai và CI
 

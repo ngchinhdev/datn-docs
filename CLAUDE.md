@@ -39,7 +39,7 @@ Mở VS Code và Claude Code tại `datn/` để thấy cả hai repo.
 
 ## Tóm tắt kỹ thuật (chi tiết ở T-xx)
 
-- Node.js 26 LTS, pnpm workspaces + catalog, Turborepo. TypeScript strict, ESM.
+- Node.js 24 LTS, pnpm workspaces + catalog, Turborepo. TypeScript strict, ESM.
 - `apps/web`: Next.js 16 (App Router, Cache Components, `proxy.ts`), Tailwind 4, shadcn/ui, TanStack Query, react-hook-form + Zod.
 - `apps/api`: NestJS 12 (ESM, Vitest), REST `/v1`, Problem Details (RFC 9457), OpenAPI tại `/docs`.
 - `packages/shared`: schema Zod 4 dùng chung FE/BE. `packages/scheduling-core`: thuật toán giờ trống, hàm thuần, không phụ thuộc framework.

@@ -11,7 +11,7 @@ description: Các bước dựng datn-saas (monorepo code) và app docs + mock c
 
 | Việc | Lệnh kiểm tra | Xong khi |
 |---|---|---|
-| Node.js 26 LTS | `node -v` | `v26.x` |
+| Node.js 24 LTS | `node -v` | `v24.x` |
 | pnpm (qua Corepack) | `corepack enable && pnpm -v` | Có số phiên bản |
 | Docker Desktop đang chạy | `docker info` | Không lỗi |
 | Git, đã đăng nhập GitHub | `git --version`, `git ls-remote https://github.com/ngchinhdev/datn-saas` | Không lỗi |
@@ -21,11 +21,11 @@ description: Các bước dựng datn-saas (monorepo code) và app docs + mock c
 
 ### A1. Khung monorepo
 
-- `package.json` gốc: `private: true`, `packageManager: "pnpm@<bản hiện tại>"`, `engines.node: ">=26"`, script: `dev`, `build`, `lint`, `format`, `typecheck`, `test`, `test:integration`, `test:e2e` (gọi qua `turbo run`).
+- `package.json` gốc: `private: true`, `packageManager: "pnpm@<bản hiện tại>"`, `engines.node: ">=24"`, script: `dev`, `build`, `lint`, `format`, `typecheck`, `test`, `test:integration`, `test:e2e` (gọi qua `turbo run`).
 - `pnpm-workspace.yaml`: `packages: [apps/*, packages/*]` và `catalog:` cho `typescript`, `zod`, `vitest`, `@types/node`.
 - `turbo.json`: task `build` (`dependsOn: ["^build"]`, `outputs`), `dev` (`cache: false`, `persistent: true`), `lint`, `typecheck`, `test`, `test:integration`, `test:e2e`.
 - `tsconfig.base.json`: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `module`/`moduleResolution` phù hợp ESM (`NodeNext` cho api, `Bundler` cho web và package nội bộ).
-- `.nvmrc` (`26`), `.editorconfig`, `.gitignore`, `.prettierrc`, `.oxlintrc.json` (plugin typescript, react, nextjs, import, vitest), `.env.example`.
+- `.nvmrc` (`24`), `.editorconfig`, `.gitignore`, `.prettierrc`, `.oxlintrc.json` (plugin typescript, react, nextjs, import, vitest), `.env.example`.
 
 **Xong khi:** `pnpm install` không lỗi; `pnpm lint` chạy được (chưa có code thì không có lỗi).
 
@@ -85,7 +85,7 @@ description: Các bước dựng datn-saas (monorepo code) và app docs + mock c
 ### A7. Chặn từ khóa ngành và CI
 
 - Script `scripts/check-industry-keywords.mjs`: quét `packages/scheduling-core` và các module lõi của api, báo lỗi nếu gặp từ khóa ngành (danh sách trong script). Gọi trong `pnpm lint`.
-- `.github/workflows/ci.yml`: Node 26, pnpm cache, `pnpm install --frozen-lockfile` → `lint` → `typecheck` → `test` → `test:integration` → `test:e2e` (Playwright cài trình duyệt, lưu trace khi lỗi).
+- `.github/workflows/ci.yml`: Node 24, pnpm cache, `pnpm install --frozen-lockfile` → `lint` → `typecheck` → `test` → `test:integration` → `test:e2e` (Playwright cài trình duyệt, lưu trace khi lỗi).
 
 **Xong khi:** đẩy lên GitHub, workflow CI xanh.
 
