@@ -121,7 +121,7 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 ## T-10. Thanh toán
 
 - Interface `PaymentProvider { createPayment, verifyWebhook, refund }`.
-- Bản chính: `MockPaymentProvider` sinh QR VietQR để hiển thị, webhook giả lập ký HMAC-SHA256, nút "giả lập chuyển khoản" chỉ có ở dev và demo. Lý do: payOS không có sandbox ([D-09](../du-an/quyet-dinh#d-09-thanh-toán-payos-không-có-môi-trường-test)).
+- Bản chính: `MockPaymentProvider` sinh QR VietQR để hiển thị, webhook giả lập ký HMAC-SHA256, nút "giả lập chuyển khoản" chỉ có ở dev và demo. Lý do: payOS không có sandbox ([D-09](../du-an/quyet-dinh.md#d-09-thanh-toán-payos-không-có-môi-trường-test)).
 - Provider thật là tùy chọn sau M5.
 
 ## T-11. Email và AI

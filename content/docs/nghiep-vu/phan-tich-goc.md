@@ -3,7 +3,7 @@ title: Phân tích nghiệp vụ gốc
 description: Bản phân tích nghiệp vụ đầy đủ ban đầu (17 phân hệ, 3 ngành). Phạm vi rộng hơn đồ án; dùng để tham khảo.
 ---
 
-> **Lưu ý:** đây là bản phân tích ban đầu cho một sản phẩm thương mại đầy đủ, **rộng hơn nhiều so với phạm vi đồ án**. Phạm vi chính thức: [Đề cương](../du-an/de-cuong), [Roadmap](../du-an/roadmap) mục 3, [D-04](../du-an/quyet-dinh#d-04-cắt-phạm-vi-cho-một-người-làm). Các phần nha khoa, kho, chăm sóc khách hàng tự động, thu phí nền tảng **không làm**.
+> **Lưu ý:** đây là bản phân tích ban đầu cho một sản phẩm thương mại đầy đủ, **rộng hơn nhiều so với phạm vi đồ án**. Phạm vi chính thức: [Đề cương](../du-an/de-cuong.md), [Roadmap](../du-an/roadmap.md) mục 3, [D-04](../du-an/quyet-dinh.md#d-04-cắt-phạm-vi-cho-một-người-làm). Các phần nha khoa, kho, chăm sóc khách hàng tự động, thu phí nền tảng **không làm**.
 
 # Tổng quan hệ thống & logic nghiệp vụ
 ## Nền tảng đặt lịch và quản lý cho Salon, Spa, Nha khoa

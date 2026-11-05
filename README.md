@@ -13,10 +13,13 @@ content/docs/
 ├── nghiep-vu/    # quy tắc nghiệp vụ (BR), thuật ngữ, phân tích gốc
 └── ky-thuat/     # quyết định kỹ thuật (T), chiến lược kiểm thử, kế hoạch dựng base
 assets/           # file gốc (đề cương .docx)
+app/              # Next.js: /docs (Fumadocs) và /mock
+mock/             # dữ liệu giả (fixtures) và danh sách màn hình mock
+components/ui/    # shadcn/ui, cùng cấu hình với datn-saas/apps/web
 CLAUDE.md         # trí nhớ dự án cho Claude Code
 ```
 
-App xem tài liệu (Next.js + Fumadocs, `/docs`) và mock giao diện (`/mock`) sẽ được dựng theo Phần B của [kế hoạch dựng base source](content/docs/ky-thuat/ke-hoach-dung-base.md). Trước khi dựng app, đọc thẳng file markdown trên GitHub.
+App xem tài liệu (Next.js + Fumadocs) phục vụ `/docs`, mock giao diện ở `/mock`. Chạy bằng `pnpm install` rồi `pnpm dev`, mở http://localhost:3000/docs.
 
 ## Cài đặt môi trường làm việc (một lần)
 

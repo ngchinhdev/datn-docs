@@ -3,7 +3,7 @@ title: Roadmap
 description: Lộ trình 34 tuần, phạm vi, tám bài toán khó, kế hoạch thực nghiệm và rủi ro.
 ---
 
-> **Cập nhật 03/11/2026:** bảng quy tắc nghiệp vụ (BR) chuyển sang trang [Quy tắc nghiệp vụ](../nghiep-vu/quy-tac); công nghệ cụ thể và phiên bản xem [Quyết định kỹ thuật](../ky-thuat/quyet-dinh-ky-thuat); thanh toán đổi theo [D-09](./quyet-dinh#d-09-thanh-toán-payos-không-có-môi-trường-test).
+> **Cập nhật 03/11/2026:** bảng quy tắc nghiệp vụ (BR) chuyển sang trang [Quy tắc nghiệp vụ](../nghiep-vu/quy-tac.md); công nghệ cụ thể và phiên bản xem [Quyết định kỹ thuật](../ky-thuat/quyet-dinh-ky-thuat.md); thanh toán đổi theo [D-09](./quyet-dinh.md#d-09-thanh-toán-payos-không-có-môi-trường-test).
 
 # ROADMAP ĐỒ ÁN TỐT NGHIỆP
 ## Nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho các cơ sở dịch vụ theo lịch hẹn
@@ -24,7 +24,7 @@ description: Lộ trình 34 tuần, phạm vi, tám bài toán khó, kế hoạc
 4. [Vai trò người dùng](#4-vai-trò-người-dùng)
 5. [Kiến trúc: lõi dùng chung + gói cấu hình theo ngành](#5-kiến-trúc-lõi-dùng-chung--gói-cấu-hình-theo-ngành)
 6. [Tám bài toán khó (xương sống của đồ án)](#6-tám-bài-toán-khó-xương-sống-của-đồ-án)
-7. [Quy tắc nghiệp vụ ban đầu](#7-quy-tắc-nghiệp-vụ-ban-đầu)
+7. [Quy tắc nghiệp vụ](#7-quy-tắc-nghiệp-vụ)
 8. [Mô hình dữ liệu và vòng đời trạng thái](#8-mô-hình-dữ-liệu-và-vòng-đời-trạng-thái)
 9. [Tech stack](#9-tech-stack)
 10. [Lộ trình 34 tuần](#10-lộ-trình-34-tuần)
@@ -242,7 +242,7 @@ Mỗi bài toán là một mục trong chương 4 của báo cáo, theo khung: *
 
 ## 7. Quy tắc nghiệp vụ
 
-Bảng quy tắc nghiệp vụ (BR-xx) là tài liệu sống, nằm ở trang [Quy tắc nghiệp vụ](../nghiep-vu/quy-tac). Mỗi BR có test tương ứng; tên test bắt đầu bằng mã BR.
+Bảng quy tắc nghiệp vụ (BR-xx) là tài liệu sống, nằm ở trang [Quy tắc nghiệp vụ](../nghiep-vu/quy-tac.md). Mỗi BR có test tương ứng; tên test bắt đầu bằng mã BR.
 
 ---
 
@@ -283,7 +283,7 @@ Trong cùng transaction chuyển lịch sang "hoàn thành", ghi một dòng và
 
 ## 9. Tech stack
 
-Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](../ky-thuat/quyet-dinh-ky-thuat).
+Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](../ky-thuat/quyet-dinh-ky-thuat.md).
 
 | Lớp | Công nghệ |
 |---|---|
@@ -315,8 +315,8 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 - [ ] Đọc 50–100 đánh giá 1–3 sao của các đối thủ trên App Store, Google Play, Capterra; tổng hợp nỗi đau (mục 12)
 - [ ] Đăng Google Form vào nhóm Facebook chủ salon, spa, nail, pet shop
 - [x] Tạo 2 repo `datn-saas`, `datn-docs`; đưa đề cương, roadmap, quyết định vào `datn-docs` (03/11)
-- [x] Dựng base source `datn-saas` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base), Phần A (03/11, review 05/11)
-- [ ] Dựng app docs + mock `datn-docs` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base), Phần B
+- [x] Dựng base source `datn-saas` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base.md), Phần A (03/11, review 05/11)
+- [ ] Dựng app docs + mock `datn-docs` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base.md), Phần B
 
 **Đầu ra:** đề cương được duyệt, bảng so sánh đối thủ có bằng chứng, tổng hợp đánh giá, repo chạy được.
 

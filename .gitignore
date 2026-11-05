@@ -8,3 +8,5 @@ out/
 .DS_Store
 *.log
 ~$*.docx
+next-env.d.ts
+*.tsbuildinfo

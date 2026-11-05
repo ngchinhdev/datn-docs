@@ -3,7 +3,7 @@ title: Kế hoạch dựng base source
 description: Các bước dựng datn-saas (monorepo code) và app docs + mock của datn-docs, kèm điều kiện "xong khi" cho từng bước. Viết để Claude Code trên máy làm theo.
 ---
 
-> **Dành cho Claude Code:** làm lần lượt từng bước. Sau mỗi bước, chạy kiểm tra ở mục **Xong khi**; chỉ sang bước sau khi đạt. Phiên bản lấy theo [Quyết định kỹ thuật](./quyet-dinh-ky-thuat), nhưng **kiểm tra bản mới nhất** bằng `pnpm view <gói> version` và ghim chính xác. Nếu một quyết định kỹ thuật không làm được (gói lỗi, xung đột), **dừng lại, báo người dùng**, đề xuất phương án và ghi vào trang quyết định sau khi chốt. Commit sau mỗi bước theo Conventional Commits.
+> **Dành cho Claude Code:** làm lần lượt từng bước. Sau mỗi bước, chạy kiểm tra ở mục **Xong khi**; chỉ sang bước sau khi đạt. Phiên bản lấy theo [Quyết định kỹ thuật](./quyet-dinh-ky-thuat.md), nhưng **kiểm tra bản mới nhất** bằng `pnpm view <gói> version` và ghim chính xác. Nếu một quyết định kỹ thuật không làm được (gói lỗi, xung đột), **dừng lại, báo người dùng**, đề xuất phương án và ghi vào trang quyết định sau khi chốt. Commit sau mỗi bước theo Conventional Commits.
 >
 > **Không làm trong base:** bảng nghiệp vụ thật (thiết kế ở giai đoạn 1, ERD), xác thực, thanh toán. Base chỉ gồm khung, hạ tầng, một "bộ xương chạy được" và test mẫu cho mỗi tầng.
 
@@ -93,14 +93,14 @@ description: Các bước dựng datn-saas (monorepo code) và app docs + mock c
 
 - Cập nhật `datn-saas/CLAUDE.md` mục "Lệnh thường dùng" cho đúng script thật.
 - Cập nhật `README.md`: yêu cầu cài đặt, `docker compose up -d`, `pnpm dev`, các cổng.
-- Ghi một dòng vào [Tiến độ](../du-an/tien-do) ở repo docs; tick mục tương ứng trong Roadmap giai đoạn 0.
+- Ghi một dòng vào [Tiến độ](../du-an/tien-do.md) ở repo docs; tick mục tương ứng trong Roadmap giai đoạn 0.
 
 ## Phần B. App docs + mock trong `datn-docs`
 
 ### B1. Dựng app
 
 - Repo đã có `content/docs`, `assets`, `CLAUDE.md`, `README.md`. Tạo app Next.js 16 + Fumadocs trong **thư mục tạm** (theo hướng dẫn manual installation của Fumadocs hoặc `create-fumadocs-app`), rồi chép vào gốc repo, **giữ nguyên** `content/docs`.
-- **pnpm giống `datn-saas`** ([T-02](./quyet-dinh-ky-thuat#t-02-monorepo-pnpm-workspaces--catalog-turborepo)): `packageManager` ghim cùng bản pnpm 11 với `datn-saas`; `pnpm-workspace.yaml` có `minimumReleaseAge: 1440` và `allowBuilds` (mặc định không gói nào được chạy script cài đặt; gói nào báo `ERR_PNPM_IGNORED_BUILDS` thì xem script rồi mới ghi `true`/`false`). Thêm `.nvmrc` (`24`) và `engines.node: ">=24"`.
+- **pnpm giống `datn-saas`** ([T-02](./quyet-dinh-ky-thuat.md#t-02-monorepo-pnpm-workspaces--catalog-turborepo)): `packageManager` ghim cùng bản pnpm 11 với `datn-saas`; `pnpm-workspace.yaml` có `minimumReleaseAge: 1440` và `allowBuilds` (mặc định không gói nào được chạy script cài đặt; gói nào báo `ERR_PNPM_IGNORED_BUILDS` thì xem script rồi mới ghi `true`/`false`). Thêm `.nvmrc` (`24`) và `engines.node: ">=24"`.
 - Fumadocs MDX là ESM-only: dùng `next.config.mjs`. Tài liệu phục vụ ở `/docs`.
 - Kiểm tra Fumadocs đọc được file `.md` hiện có. Nếu không, đổi sang `.mdx` và sửa các ký tự `<`, `{` bị MDX hiểu nhầm.
 - Chép `assets/de-cuong-chi-tiet.docx` vào `public/files/` và thêm link tải ở trang Đề cương.
@@ -112,7 +112,7 @@ description: Các bước dựng datn-saas (monorepo code) và app docs + mock c
 - Tailwind 4 + `shadcn@latest init` (cùng cấu hình với `apps/web`).
 - `app/mock/layout.tsx`: thanh trên cùng có **bộ chọn tenant** (Salon Tóc Mây, Spa thú cưng Pawpaw) và bộ chọn vai trò (Khách, Lễ tân, Chủ cơ sở).
 - `app/mock/page.tsx`: danh sách màn hình mock, mỗi màn hình có trạng thái (chưa làm, đang làm, đã chốt).
-- `mock/fixtures/`: dữ liệu giả bằng TypeScript cho 2 tenant: chi nhánh, giờ mở cửa, tài nguyên, nhân viên, dịch vụ có đoạn chiếm dụng (nhuộm tóc có đoạn chờ; tắm sấy có lồng sấy), khách, thú cưng, vài lịch hẹn. Kiểu dữ liệu đặt tên theo [Thuật ngữ](../nghiep-vu/thuat-ngu).
+- `mock/fixtures/`: dữ liệu giả bằng TypeScript cho 2 tenant: chi nhánh, giờ mở cửa, tài nguyên, nhân viên, dịch vụ có đoạn chiếm dụng (nhuộm tóc có đoạn chờ; tắm sấy có lồng sấy), khách, thú cưng, vài lịch hẹn. Kiểu dữ liệu đặt tên theo [Thuật ngữ](../nghiep-vu/thuat-ngu.md).
 - Chưa vẽ màn hình nghiệp vụ: hai màn hình đầu tiên (trang đặt lịch của khách, lịch lễ tân) làm ở giai đoạn 1.
 
 **Xong khi:** `/mock` hiển thị danh sách và đổi được tenant; build không lỗi.

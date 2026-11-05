@@ -8,7 +8,7 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 - Mỗi quy tắc có mã cố định. Không đánh lại mã khi xóa; quy tắc bỏ đi ghi "(đã bỏ, lý do...)".
 - Test của một quy tắc đặt tên bắt đầu bằng mã, ví dụ `it('BR-05: đoạn chờ giải phóng nhân viên nhưng vẫn giữ ghế', ...)`.
 - Các chữ cái X, Y, N, M, K trong quy tắc là tham số **cấu hình theo cơ sở**, có giá trị mặc định trong gói cấu hình ngành.
-- Quy tắc lấy từ [Phân tích nghiệp vụ gốc](./phan-tich-goc), đã lọc theo phạm vi đồ án ([D-04](../du-an/quyet-dinh#d-04-cắt-phạm-vi-cho-một-người-làm)).
+- Quy tắc lấy từ [Phân tích nghiệp vụ gốc](./phan-tich-goc.md), đã lọc theo phạm vi đồ án ([D-04](../du-an/quyet-dinh.md#d-04-cắt-phạm-vi-cho-một-người-làm)).
 
 ## Đặt lịch
 

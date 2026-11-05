@@ -1,0 +1,9 @@
+# Supply-chain hardening, same settings as datn-saas. See T-02.
+# Do not install a version until it has been public for 1 day.
+minimumReleaseAge: 1440
+
+# Dependencies may not run install scripts unless listed here as true. With strictDepBuilds
+# (on by default) an unlisted package with a build script fails the install.
+allowBuilds:
+  # postinstall only verifies the binary from the @esbuild/<platform> optional dependency (fumadocs-mdx)
+  esbuild: false

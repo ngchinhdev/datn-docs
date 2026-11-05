@@ -33,10 +33,10 @@ Kiểm thử là **sản phẩm chính** của đồ án, không phải phần p
 
 ## Định nghĩa hoàn thành một tính năng
 
-1. Có BR tương ứng trong [Quy tắc nghiệp vụ](../nghiep-vu/quy-tac) (hoặc đã thêm mới).
+1. Có BR tương ứng trong [Quy tắc nghiệp vụ](../nghiep-vu/quy-tac.md) (hoặc đã thêm mới).
 2. Có test cho mỗi BR, ở tầng thấp nhất kiểm được nó.
 3. `pnpm lint && pnpm typecheck && pnpm test` xanh; integration và e2e liên quan xanh.
-4. Cập nhật tài liệu nếu đổi API hoặc nghiệp vụ; ghi một dòng vào [Tiến độ](../du-an/tien-do).
+4. Cập nhật tài liệu nếu đổi API hoặc nghiệp vụ; ghi một dòng vào [Tiến độ](../du-an/tien-do.md).
 
 ## Lưu kết quả thực nghiệm
 

@@ -37,6 +37,8 @@ Mở VS Code và Claude Code tại `datn/` để thấy cả hai repo.
 
 `content/docs/nghiep-vu/phan-tich-goc.md` là bản phân tích ban đầu, **rộng hơn phạm vi đồ án**: chỉ tham khảo, không làm theo.
 
+Link giữa các trang tài liệu ghi đường dẫn tới file, có đuôi `.md` (`../du-an/roadmap.md#muc`), vì Fumadocs chỉ đổi link dạng này sang URL của trang.
+
 ## Tóm tắt kỹ thuật (chi tiết ở T-xx)
 
 - Node.js 24 LTS, pnpm workspaces + catalog, Turborepo. TypeScript strict, ESM.
@@ -73,7 +75,7 @@ Mở VS Code và Claude Code tại `datn/` để thấy cả hai repo.
 
 ## Lệnh thường dùng
 
-Repo này (`datn-docs`), sau khi dựng app ở Phần B của kế hoạch:
+Repo này (`datn-docs`):
 
 ```bash
 pnpm install

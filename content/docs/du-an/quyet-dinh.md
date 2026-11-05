@@ -5,7 +5,7 @@ description: Các quyết định đã chốt về đề tài, phạm vi, cách 
 
 Mỗi quyết định có mã `D-xx`. **Không đề xuất lại phương án đã bị loại** trừ khi có thông tin mới (góp ý của giảng viên, phản hồi người dùng thật, ràng buộc kỹ thuật mới). Khi một quyết định thay đổi, không xóa: thêm dòng "Thay thế bởi D-yy" và ghi quyết định mới ở cuối.
 
-Quyết định kỹ thuật chi tiết nằm ở [Quyết định kỹ thuật](../ky-thuat/quyet-dinh-ky-thuat).
+Quyết định kỹ thuật chi tiết nằm ở [Quyết định kỹ thuật](../ky-thuat/quyet-dinh-ky-thuat.md).
 
 ---
 
@@ -41,7 +41,7 @@ Quyết định kỹ thuật chi tiết nằm ở [Quyết định kỹ thuật]
 
 ## D-04. Cắt phạm vi cho một người làm
 
-- Tài liệu phân tích gốc ([Phân tích nghiệp vụ gốc](../nghiep-vu/phan-tich-goc)) có 17 phân hệ, 3 ngành: khoảng một năm của cả nhóm. Phạm vi đồ án chỉ lấy phần lõi.
+- Tài liệu phân tích gốc ([Phân tích nghiệp vụ gốc](../nghiep-vu/phan-tich-goc.md)) có 17 phân hệ, 3 ngành: khoảng một năm của cả nhóm. Phạm vi đồ án chỉ lấy phần lõi.
 - **Không làm** (đưa vào chương Hướng phát triển): nha khoa; kho và vật tư; tính năng riêng ngành thú cưng; ngành thứ ba; hạng thành viên, điểm thưởng, kịch bản chăm sóc tự động; thu phí nền tảng thật; dự đoán bỏ hẹn bằng ML; app di động native; hóa đơn điện tử; đặt vượt số lượng; bảng lương đầy đủ.
 
 ## D-05. Giữ chatbot, nhưng trên web và làm sau cùng
@@ -65,7 +65,7 @@ Quyết định kỹ thuật chi tiết nằm ở [Quyết định kỹ thuật]
 
 - Phiên chat ban đầu (claude.ai) không giữ được trí nhớ lâu dài. Trí nhớ dự án = `CLAUDE.md` + thư mục `content/docs` của repo này.
 - Trên máy: thư mục cha `datn/` chứa `CLAUDE.md` import `datn-docs/CLAUDE.md`, hai repo nằm cạnh nhau, mở VS Code và Claude Code tại `datn/`.
-- Cuối mỗi phiên làm việc: cập nhật [Tiến độ](./tien-do); quyết định mới ghi vào trang này.
+- Cuối mỗi phiên làm việc: cập nhật [Tiến độ](./tien-do.md); quyết định mới ghi vào trang này.
 
 ## D-09. Thanh toán: payOS không có môi trường test
 

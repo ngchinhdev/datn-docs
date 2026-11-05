@@ -4,7 +4,7 @@ description: Bản đề cương đã gửi giảng viên hướng dẫn ngày 0
 ---
 
 > **Trạng thái:** đã gửi ThS. Nguyễn Thị Thùy Trâm ngày 03/11/2026, đang chờ phản hồi.
-> Bản Word gốc: `assets/de-cuong-chi-tiet.docx`. Khi đề cương thay đổi theo góp ý của cô, cập nhật **cả hai** bản và ghi vào [Nhật ký quyết định](./quyet-dinh).
+> Bản Word gốc: [tải `de-cuong-chi-tiet.docx`](/files/de-cuong-chi-tiet.docx) (nguồn: `assets/de-cuong-chi-tiet.docx`). Khi đề cương thay đổi theo góp ý của cô, cập nhật **cả hai** bản và ghi vào [Nhật ký quyết định](./quyet-dinh.md).
 
 | Mục | Nội dung |
 |---|---|
@@ -88,7 +88,7 @@ Hệ thống có khả năng:
 
 ## Kế hoạch thực hiện (bản gửi cô, không ghi ngày)
 
-| # | Nội dung | Mốc dự kiến (theo [Roadmap](./roadmap)) |
+| # | Nội dung | Mốc dự kiến (theo [Roadmap](./roadmap.md)) |
 |---|---|---|
 | 1 | Khảo sát hiện trạng, dùng thử các nền tảng đặt lịch trong nước và quốc tế, tổng hợp đánh giá người dùng; hoàn thiện đề cương | 02/11 – 15/11/2026 |
 | 2 | Phân tích nghiệp vụ, xây dựng bộ quy tắc nghiệp vụ; thiết kế kiến trúc, cơ sở dữ liệu, gói cấu hình theo ngành; thiết kế giao diện và prototype | 16/11 – 06/12/2026 |
