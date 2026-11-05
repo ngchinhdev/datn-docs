@@ -34,7 +34,7 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 - Turborepo 2.x: task `build` có `dependsOn: ["^build"]` và `outputs`; `dev` để `cache: false`, `persistent: true`; CI chạy `turbo run lint typecheck test --filter=...[origin/main]` khi repo lớn.
 - Giữ ít package (bắt đầu 4). Chỉ tách thêm khi thật cần.
 - pnpm ghim `9.15.0` trong `packageManager`, đúng bản đang cài trên máy dev. Nâng lên pnpm mới hơn thì sửa `packageManager` và tạo lại lockfile trong cùng một commit.
-- Import tương đối trong gói just-in-time ghi đuôi `.ts` (`allowImportingTsExtensions`), vì API chạy thẳng mã nguồn các gói này bằng Node (type stripping) và Node không tự đổi `.js` thành `.ts`.
+- Import tương đối trong gói just-in-time ghi đuôi `.ts` (`allowImportingTsExtensions`), vì API chạy thẳng mã nguồn các gói này bằng Node (type stripping) và Node không tự đổi `.js` thành `.ts`. Vì type stripping chỉ xóa được cú pháp kiểu thuần, hai gói này bật `erasableSyntaxOnly`: không dùng `enum`, `namespace`, parameter property (dùng `z.enum` hoặc object `as const` thay cho `enum`).
 
 ## T-03. Frontend: Next.js 16.4 + React 19.3
 
