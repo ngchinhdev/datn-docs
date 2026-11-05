@@ -287,7 +287,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 
 | Lớp | Công nghệ |
 |---|---|
-| Runtime, monorepo | Node.js 26 LTS, pnpm workspaces (catalog), Turborepo |
+| Runtime, monorepo | Node.js 24 LTS, pnpm 11 workspaces (catalog), Turborepo |
 | Frontend | Next.js 16.4 (App Router, Cache Components), React 19.3, Tailwind CSS 4, shadcn/ui, TanStack Query |
 | Lịch lễ tân | Tự dựng timeline theo tài nguyên (CSS grid + dnd-kit); FullCalendar resource timeline là gói trả phí |
 | Backend | NestJS 12 (ESM, Express), validation bằng Zod 4 qua Standard Schema, OpenAPI |

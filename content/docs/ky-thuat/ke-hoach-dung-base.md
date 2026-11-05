@@ -12,7 +12,7 @@ description: Các bước dựng datn-saas (monorepo code) và app docs + mock c
 | Việc | Lệnh kiểm tra | Xong khi |
 |---|---|---|
 | Node.js 24 LTS | `node -v` | `v24.x` |
-| pnpm (qua Corepack) | `corepack enable && pnpm -v` | Có số phiên bản |
+| pnpm 11 (qua Corepack) | `corepack enable`, rồi `pnpm -v` trong repo | `11.x` |
 | Docker Desktop đang chạy | `docker info` | Không lỗi |
 | Git, đã đăng nhập GitHub | `git --version`, `git ls-remote https://github.com/ngchinhdev/datn-saas` | Không lỗi |
 | Thư mục cha | `datn/` chứa `datn-docs/`, `datn-saas/`, và `datn/CLAUDE.md` có dòng `@datn-docs/CLAUDE.md` | Claude Code mở tại `datn/` thấy được bối cảnh |
@@ -100,6 +100,7 @@ description: Các bước dựng datn-saas (monorepo code) và app docs + mock c
 ### B1. Dựng app
 
 - Repo đã có `content/docs`, `assets`, `CLAUDE.md`, `README.md`. Tạo app Next.js 16 + Fumadocs trong **thư mục tạm** (theo hướng dẫn manual installation của Fumadocs hoặc `create-fumadocs-app`), rồi chép vào gốc repo, **giữ nguyên** `content/docs`.
+- **pnpm giống `datn-saas`** ([T-02](./quyet-dinh-ky-thuat#t-02-monorepo-pnpm-workspaces--catalog-turborepo)): `packageManager` ghim cùng bản pnpm 11 với `datn-saas`; `pnpm-workspace.yaml` có `minimumReleaseAge: 1440` và `allowBuilds` (mặc định không gói nào được chạy script cài đặt; gói nào báo `ERR_PNPM_IGNORED_BUILDS` thì xem script rồi mới ghi `true`/`false`). Thêm `.nvmrc` (`24`) và `engines.node: ">=24"`.
 - Fumadocs MDX là ESM-only: dùng `next.config.mjs`. Tài liệu phục vụ ở `/docs`.
 - Kiểm tra Fumadocs đọc được file `.md` hiện có. Nếu không, đổi sang `.mdx` và sửa các ký tự `<`, `{` bị MDX hiểu nhầm.
 - Chép `assets/de-cuong-chi-tiet.docx` vào `public/files/` và thêm link tải ở trang Đề cương.

@@ -20,7 +20,7 @@ App xem tài liệu (Next.js + Fumadocs, `/docs`) và mock giao diện (`/mock`)
 
 ## Cài đặt môi trường làm việc (một lần)
 
-1. Cài **Git**, **Node.js 26 LTS**, bật pnpm bằng `corepack enable`, cài **Docker Desktop**, **VS Code** và extension **Claude Code**.
+1. Cài **Git**, **Node.js 24 LTS**, bật pnpm bằng `corepack enable` (Corepack tự tải pnpm 11 theo `packageManager` của từng repo), cài **Docker Desktop**, **VS Code** và extension **Claude Code**.
 2. Tạo thư mục cha và clone hai repo:
 
    ```bash
