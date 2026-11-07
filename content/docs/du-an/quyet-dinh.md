@@ -104,7 +104,8 @@ Vẽ trên canvas Claude Design "Sapio · Màn hình đầu tiên" (07/11/2026),
   - Bỏ phương án C (lịch tháng kiểu Cal.com).
   - Trên máy tính: cùng luồng, bố cục hai cột (tóm tắt bên trái, chọn ngày giờ bên phải).
 - **Lịch lễ tân: ưu tiên máy tính và tablet, chọn phương án A "Lịch + chi tiết".**
-  - Lịch nhiều cột đặt nhân viên và tài nguyên (ghế) cạnh nhau, để thấy đoạn chờ và ghế bận cùng lúc. Bấm một lịch hẹn mở bảng chi tiết.
+  - Hai kiểu xem, không trộn: **Nhân viên** (mặc định; ghế, giường gội ghi trong khối) và **Tài nguyên** (mỗi cột một ghế, phòng, lồng sấy; khối ghi tên nhân viên). Bản đầu đặt cột thợ và cột ghế chung một lưới làm mỗi lịch hẹn hiện hai lần, nên đã bỏ (07/11). Chuyển qua lại hai tab cho thấy cùng một lịch hẹn: vạch chờ bên thợ, liền khối bên ghế. Bấm một lịch hẹn mở bảng chi tiết.
+  - Không dùng nền đen hay màu mực ở bất kỳ component nào; màu mực chỉ cho chữ.
   - iPad ngang: bảng chi tiết thành ngăn trượt đè lên lịch.
   - Điện thoại: lịch từng nhân viên (đổi bằng tab) cùng thẻ "tiếp theo" và thanh điều hướng dưới.
   - Phương án B (hàng chờ "Hôm nay": đang làm, chờ thanh toán, sắp đến) làm trang riêng của khu quản trị.
