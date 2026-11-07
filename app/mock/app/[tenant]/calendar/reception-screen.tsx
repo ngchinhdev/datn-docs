@@ -21,7 +21,7 @@ import {
 } from '@/mock/reception';
 import { addDays, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
 import { useAppointmentActions } from '../_reception/actions';
-import { DetailPanel, PhoneNav, ViewTabs, type CalendarView } from '../_reception/parts';
+import { DetailPanel, ViewTabs, type CalendarView } from '../_reception/parts';
 import { useReception } from '../_reception/use-reception';
 
 const WIDE_QUERY = '(min-width: 1200px)';
@@ -85,14 +85,9 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
   const calendarLabel = `Lịch ${view === 'staff' ? 'nhân viên' : 'tài nguyên'} ${branch.name}, ${formatDay(date)}`;
 
   return (
-    <div className="flex flex-col">
-      {/* Admin header, tablet and up. */}
+    <div className="sp-shell__content sp-shell__content--wide">
+      {/* Top bar, tablet and up. */}
       <header className="hidden flex-wrap items-center gap-x-(--space-5) gap-y-(--space-3) rounded-(--radius-md) bg-(--surface-raised) px-(--space-4) py-(--space-3) shadow-[0_0_0_1px_var(--line)] md:flex">
-        <div className="flex items-center gap-(--space-3)">
-          <span className="heading font-bold">Sapio</span>
-          <span aria-hidden="true" className="h-5 w-px bg-(--line)" />
-          <span className="body-sm">{branch.name}</span>
-        </div>
         <div className="flex items-center gap-(--space-1)">
           <Button
             variant="ghost"
@@ -190,7 +185,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
         )}
       </div>
 
-      <main className="mt-(--space-4) flex flex-wrap items-start gap-(--space-5) pb-24 md:pb-0">
+      <main className="flex flex-wrap items-start gap-(--space-5)">
         <section
           aria-label="Lịch"
           className="flex min-w-0 flex-[999_1_720px] flex-col gap-(--space-3)"
@@ -286,8 +281,6 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
         )}
         {actions.dialog}
       </main>
-
-      <PhoneNav notify={notify} />
     </div>
   );
 }

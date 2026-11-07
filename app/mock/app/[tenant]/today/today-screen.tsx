@@ -1,7 +1,6 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { Button } from '@/components/sapio/button';
@@ -22,7 +21,7 @@ import {
 } from '@/mock/reception';
 import { formatCountdown, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
 import { useAppointmentActions } from '../_reception/actions';
-import { DetailPanel, PhoneNav } from '../_reception/parts';
+import { DetailPanel } from '../_reception/parts';
 import { useReception } from '../_reception/use-reception';
 
 function Row({
@@ -106,19 +105,13 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
   const collect = actions.collect;
 
   return (
-    <div className="flex flex-col gap-(--space-4) pb-24 md:pb-0">
-      <header className="flex flex-wrap items-center gap-x-(--space-5) gap-y-(--space-3) rounded-(--radius-md) bg-(--surface-raised) px-(--space-4) py-(--space-3) shadow-[0_0_0_1px_var(--line)]">
-        <span className="heading font-bold">Sapio</span>
-        <nav aria-label="Khu quản trị" className="flex flex-wrap gap-(--space-1)">
-          <span aria-current="page" className="sp-btn sp-btn--sm bg-(--fill-tonal) text-(--ink)">
-            Hôm nay
-          </span>
-          <Link href={appHref('calendar')} className="sp-btn sp-btn--ghost sp-btn--sm no-underline">
-            Lịch
-          </Link>
-        </nav>
-        <div className="ms-auto flex flex-wrap items-center gap-(--space-3)">
-          <span className="body-sm hidden text-(--ink-muted) md:inline">{branch.name}</span>
+    <div className="sp-shell__content">
+      <header className="sp-page-head">
+        <div>
+          <h1 className="sp-page-head__title">Hôm nay</h1>
+          <p className="sp-page-head__sub">{branch.name}</p>
+        </div>
+        <div className="sp-page-head__actions flex flex-wrap items-center gap-(--space-3)">
           <Button onClick={() => notify('Khách vãng lai: chưa có trong mock.')}>
             Khách vãng lai
           </Button>
@@ -135,7 +128,7 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
           className="flex max-w-[420px] min-w-0 flex-[1_1_340px] flex-col gap-(--space-4)"
         >
           <div className="flex flex-col gap-0.5">
-            <h1 className="title m-0">{formatDay(date)}</h1>
+            <h2 className="title m-0">{formatDay(date)}</h2>
             <span className="body-sm sp-num text-(--ink-muted)">
               {day.length - held} lịch hẹn · {held} đang giữ chỗ · bây giờ {formatTime(now)}
             </span>
@@ -238,7 +231,6 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
         )}
         {actions.dialog}
       </main>
-      <PhoneNav notify={notify} />
     </div>
   );
 }

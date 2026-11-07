@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarDays, Ellipsis, Users, Wallet, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { SegmentedNav } from '@/components/sapio/segmented';
 import type { ReactNode } from 'react';
@@ -34,39 +34,6 @@ export function ViewTabs({ view }: { view: CalendarView }) {
         { href: hrefFor('resources'), label: 'Tài nguyên', current: view === 'resources' },
       ]}
     />
-  );
-}
-
-export function PhoneNav({ notify }: { notify: (m: string) => void }) {
-  const items: [string, ReactNode][] = [
-    ['Khách', <Users key="k" size={20} aria-hidden="true" />],
-    ['Thu chi', <Wallet key="t" size={20} aria-hidden="true" />],
-    ['Thêm', <Ellipsis key="m" size={20} aria-hidden="true" />],
-  ];
-  const cls =
-    'label flex min-h-13 flex-col items-center justify-center gap-0.5 border-0 bg-transparent';
-  return (
-    <nav
-      aria-label="Điều hướng chính"
-      data-phone-nav
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 bg-(--surface-raised) shadow-[0_-1px_0_var(--line)] md:hidden"
-    >
-      <span aria-current="page" className={cn(cls, 'text-(--brand)')}>
-        <CalendarDays size={20} aria-hidden="true" />
-        Hôm nay
-      </span>
-      {items.map(([label, icon]) => (
-        <button
-          key={label}
-          type="button"
-          className={cn(cls, 'text-(--ink-muted)')}
-          onClick={() => notify(`${label}: chưa có trong mock.`)}
-        >
-          {icon}
-          {label}
-        </button>
-      ))}
-    </nav>
   );
 }
 
