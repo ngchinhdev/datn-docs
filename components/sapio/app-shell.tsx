@@ -114,6 +114,7 @@ export function PhoneHeaderAction({ children }: { children: ReactNode }) {
 function Mark({ workspace, small = false }: { workspace: ShellWorkspace; small?: boolean }) {
   return (
     <span
+      aria-hidden="true"
       className={cn('sp-switcher__mark', workspace.accentClass)}
       style={{
         background: 'var(--accent-soft)',
@@ -139,7 +140,6 @@ function Switcher({
   'workspace' | 'branchName' | 'branches' | 'otherWorkspaces' | 'newWorkspaceHref'
 > & { rail: boolean; compact: boolean }) {
   const menu = useMenu();
-  const label = `Đổi cơ sở hoặc chi nhánh: ${workspace.name}, ${branchName}`;
   return (
     <div className={cn('relative', compact && 'min-w-0')}>
       <button
@@ -149,16 +149,22 @@ function Switcher({
         style={compact ? { width: 'auto' } : undefined}
         aria-haspopup="menu"
         aria-expanded={menu.open}
-        aria-label={label}
         onClick={() => menu.setOpen((v) => !v)}
         onKeyDown={menu.onTriggerKeyDown}
       >
         <Mark workspace={workspace} />
         <span className="sp-switcher__text">
-          <span className="sp-switcher__name">{workspace.name}</span>
+          <span className="sp-switcher__name">{workspace.name}</span>{' '}
           <span className="sp-switcher__sub">{branchName}</span>
         </span>
         <ChevronsUpDown className="sp-switcher__chevron" aria-hidden="true" />
+        {/* The name comes from the text on screen; in the rail the text is hidden, so it is repeated. */}
+        {rail && (
+          <span className="sr-only">
+            {workspace.name} {branchName}
+          </span>
+        )}
+        <span className="sr-only">, đổi cơ sở hoặc chi nhánh</span>
       </button>
       {menu.open && (
         <div
@@ -261,17 +267,24 @@ function Account({
         className="flex min-w-0 grow items-center gap-(--space-2) rounded-(--radius-sm) border-0 bg-transparent p-0 text-left text-(--ink)"
         aria-haspopup="menu"
         aria-expanded={menu.open}
-        aria-label={`Tài khoản: ${account.name}, ${account.roleLabel}`}
         onClick={() => menu.setOpen((v) => !v)}
         onKeyDown={menu.onTriggerKeyDown}
       >
-        <span className="sp-avatar sp-avatar--sm">{account.initials}</span>
+        <span className="sp-avatar sp-avatar--sm" aria-hidden="true">
+          {account.initials}
+        </span>
         <span className="sp-account__text">
           <span className="sp-switcher__name" style={{ fontSize: 13, lineHeight: '18px' }}>
             {account.name}
-          </span>
+          </span>{' '}
           <span className="sp-switcher__sub">{account.roleLabel}</span>
         </span>
+        {rail && (
+          <span className="sr-only">
+            {account.name} {account.roleLabel}
+          </span>
+        )}
+        <span className="sr-only">, menu tài khoản</span>
       </button>
       <ThemeButton />
       {menu.open && (

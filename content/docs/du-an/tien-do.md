@@ -7,6 +7,21 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 07/11/2026 (đêm khuya): mock Bước 8, khung ứng dụng, danh sách và form
+- **Đã làm:** Bước 8 (8a–8f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-8-route-tiếng-anh-khung-ứng-dụng-mẫu-danh-sách-và-form), mỗi mục một commit trên nhánh `feat/mock-app-shell`.
+  - Route theo [T-15](../ky-thuat/quyet-dinh-ky-thuat.md#t-15-route-của-web-tiếng-anh-slug-cơ-sở-trong-url): `/mock/[tenant]/book`, `/mock/app/[tenant]/…`; URL cũ chuyển hướng 308; trạng thái xem nằm trong query.
+  - `AppShell` (MH-07): thanh bên 240px, dải icon 68px, thanh tab dưới 768px; menu đổi chi nhánh và cơ sở dùng bàn phím; thêm vai trò kỹ thuật viên và quản lý.
+  - Mẫu danh sách (MH-08) với Khách hàng (MH-32, 130 và 60 khách có sáu tháng lịch sử sinh bằng seed) và Nhân sự (MH-47); mẫu form (MH-09) với Hồ sơ nhân viên (MH-48).
+  - `IndustryTemplate`: từ ngữ và schema đối tượng được phục vụ của ngành nằm trong dữ liệu; luật chọn biến thể theo khoảng số (10 kg) nằm trong dịch vụ (BR-13, BR-71).
+  - `/mock` liệt kê đủ 60 màn theo khu A–H, lọc theo đợt và trạng thái; màn chưa làm mở trang "Chưa làm" thay vì 404.
+- **Kiểm:** Playwright trên các route mới ở 390, 1024 và 1440px (không cuộn ngang, bàn phím, lưu trong URL, rời trang khi còn thay đổi); axe-core với luật mặc định: 86 lượt (trang, menu mở, bảng trượt lên) ở 390 và 1440px, hai theme, 0 lỗi serious hoặc critical; `pnpm build`, `pnpm typecheck`, `prettier --check` xanh.
+- **Vướng:**
+  - Luật `label-content-name-mismatch` của axe bắt khối lịch hẹn, ô chọn ngày và ô đổi cơ sở: chữ nhìn thấy phải nằm trong tên truy cập, kể cả đoạn chờ và khoảng trắng giữa các dòng. Đã sửa `AppointmentBlock`, `DateStrip` và `AppShell`.
+  - Trên Windows, `git mv` thư mục `[tenant]` báo `Permission denied` khi dev server đang chạy; chép rồi xóa thay cho đổi tên.
+  - `next.config.mjs` (chuyển hướng) chỉ có hiệu lực sau khi khởi động lại dev server.
+  - Sapio cần bổ sung: `.sp-shell__side` không dính trên trang dài (mock thêm `sticky top-0 h-screen`); `.sp-shell__content--fill` giữ chiều cao 100vh cả trên điện thoại (mock chỉ dùng từ 768px); thanh bên không nói tên cơ sở và chi nhánh nằm ở đâu khi dưới 768px (mock đặt ô đổi cơ sở ở đầu trang như `QuanTriDienThoai`).
+- **Tiếp theo:** review PR; chốt hai màn MH-07, MH-08, MH-09 với cô; phiên claude.ai vẽ MH-02 Đăng ký cơ sở có chọn ngành.
+
 ### 07/11/2026 (đêm): chốt khung ứng dụng, mẫu danh sách và mẫu form
 - **Đã làm:**
   - Review lại PR #2 (Bước 7): đạt. Người dùng đã merge.
