@@ -4,6 +4,7 @@ import { ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
+import { useStaffStore } from '@/components/mock/staff-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { Button } from '@/components/sapio/button';
 import { DataTable, type Column } from '@/components/sapio/data-table';
@@ -26,6 +27,7 @@ export function StaffListScreen({ tenantSlug }: { tenantSlug: string }) {
   const searchParams = useSearchParams();
   const appHref = useAppHref(tenantSlug);
   const toast = useToast();
+  const { staff } = useStaffStore();
 
   const q = searchParams.get('q') ?? '';
   const onlineOnly = searchParams.get('online') === '1';
@@ -48,14 +50,14 @@ export function StaffListScreen({ tenantSlug }: { tenantSlug: string }) {
 
   const rows = useMemo(
     () =>
-      fixture.staff.filter(
+      staff.filter(
         (s) =>
           (!onlineOnly || s.profile.bookableOnline) &&
           (!q.trim() ||
             fold(s.profile.displayName).includes(fold(q)) ||
             fold(s.profile.fullName).includes(fold(q))),
       ),
-    [fixture, q, onlineOnly],
+    [staff, q, onlineOnly],
   );
   const pages = Math.max(1, Math.ceil(rows.length / size));
   const page = Math.min(Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1, pages);
@@ -105,7 +107,7 @@ export function StaffListScreen({ tenantSlug }: { tenantSlug: string }) {
     <>
       <PageHeader
         title="Nhân sự"
-        sub={`${fixture.staff.length} nhân viên · ${branch.name}`}
+        sub={`${staff.length} nhân viên · ${branch.name}`}
         actions={
           <Button
             variant="primary"

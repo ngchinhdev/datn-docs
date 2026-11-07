@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { settingsEntries } from '@/components/mock/app-nav';
 import { useAppHref } from '@/components/mock/use-app-href';
+import { SettingsNav } from '@/components/sapio/settings-nav';
 
 /**
  * Settings pages: the menu on the left from 900px; below that the menu is the page `/settings`
@@ -26,22 +27,15 @@ export function SettingsFrame({
   return (
     <div className="sp-shell__content">
       <div className="flex flex-wrap items-start gap-(--space-6)">
-        <nav className="sp-subnav" aria-label="Cài đặt">
-          {settingsEntries.map((entry) => (
-            <Link
-              key={entry.id}
-              href={appHref(entry.path)}
-              aria-current={
-                pathname === `${base}/${entry.path}` ||
-                pathname.startsWith(`${base}/${entry.path}/`)
-                  ? 'page'
-                  : undefined
-              }
-            >
-              {entry.label}
-            </Link>
-          ))}
-        </nav>
+        <SettingsNav
+          items={settingsEntries.map((entry) => ({
+            id: entry.id,
+            label: entry.label,
+            href: appHref(entry.path),
+            current:
+              pathname === `${base}/${entry.path}` || pathname.startsWith(`${base}/${entry.path}/`),
+          }))}
+        />
         <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-(--space-5)">
           {!isRoot && (
             <Link

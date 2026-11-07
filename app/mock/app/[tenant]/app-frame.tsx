@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { navByRole, tabIds } from '@/components/mock/app-nav';
+import { useStaffStore } from '@/components/mock/staff-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { AppShell, type ShellNavItem } from '@/components/sapio/app-shell';
 import { useToast } from '@/components/sapio/toast';
@@ -38,6 +39,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   const searchParams = useSearchParams();
   const appHref = useAppHref(tenantSlug);
   const toast = useToast();
+  const { staff } = useStaffStore();
   const role = staffRoleOf(searchParams.get('role'));
   const branch =
     fixture.branches.find((b) => b.id === searchParams.get('branch')) ?? fixture.branches[0]!;
@@ -67,7 +69,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
     });
 
   const person =
-    role === 'technician' ? (fixture.staff[0]?.profile.fullName ?? 'Kỹ thuật viên') : PEOPLE[role];
+    role === 'technician' ? (staff[0]?.profile.displayName ?? 'Kỹ thuật viên') : PEOPLE[role];
 
   const withQuery = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
