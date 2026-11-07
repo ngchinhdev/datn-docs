@@ -231,14 +231,14 @@ function Switcher({
   );
 }
 
-function ThemeButton() {
+function ThemeButton({ rail }: { rail: boolean }) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const dark = mounted && resolvedTheme === 'dark';
   const label = dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối';
   return (
-    <Tip label={label}>
+    <Tip label={label} side={rail ? 'right' : 'top-end'}>
       <button
         type="button"
         className="sp-icon-btn"
@@ -286,7 +286,7 @@ function Account({
         )}
         <span className="sr-only">, menu tài khoản</span>
       </button>
-      <ThemeButton />
+      <ThemeButton rail={rail} />
       {menu.open && (
         <div
           ref={menu.menuRef}
@@ -437,7 +437,7 @@ export function AppShell(props: ShellProps) {
       <nav ref={sideRef} className="sp-shell__side" id="app-sidebar" aria-label="Điều hướng chính">
         <div className="sp-brand">
           <span className="sp-brand__name">Sapio</span>
-          <Tip label={toggleLabel} side={rail ? 'right' : 'bottom'}>
+          <Tip label={toggleLabel} side={rail ? 'right' : 'bottom-end'}>
             <button
               ref={toggleRef}
               type="button"
