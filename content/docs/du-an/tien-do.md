@@ -7,6 +7,10 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 07/11/2026 (trưa): tên sản phẩm và hệ thống thiết kế
+- **Đã làm:** chốt tên **Sapio** và hướng thiết kế "ấm và chính xác" ([D-11](./quyet-dinh.md#d-11-tên-sản-phẩm-sapio-và-hệ-thống-thiết-kế)). Dựng "Sapio Design System" trên Claude Design: tokens sáng/tối (đã kiểm tương phản), font Be Vietnam Pro, màu trạng thái, màu hai cơ sở, 8 component có preview. Docs chạy cổng 3100 để không trùng web 3000. Phiên claude.ai đã liên kết với máy (thư mục `D:\UITProgress\DoAn\source`).
+- **Tiếp theo:** đưa token Sapio vào `apps/web` và `datn-docs` (thay theme shadcn mặc định); vẽ hai màn hình đầu (luồng đặt lịch của khách, lịch lễ tân) trên Claude Design, 2–3 hướng mỗi màn; tách "Trang đặt lịch của khách" trong `/mock` thành "Trang cơ sở" và "Luồng đặt lịch".
+
 ### 07/11/2026: review Phần B
 - **Đã làm:** review app docs + mock. CI (thêm qua [PR #1 của datn-docs](https://github.com/ngchinhdev/datn-docs/pull/1)) xanh: Prettier, typecheck, build 16 trang (`/docs` tĩnh, `/mock` động, `/api/search`), lockfile 584 gói qua kiểm tra chuỗi cung ứng của pnpm. Không gói nào nằm trong danh sách bị chiếm quyền (Shai-Hulud, `keyv`/`cacheable`, `chalk`/`debug`, các gói độc tháng 10–11/2026). `pnpm audit`: 0 high/critical; 1 moderate (`minimatch`) + 1 low (`deepmerge`), cùng hai lỗ hổng đã biết từ `datn-saas`, đến từ CLI `shadcn`, không chạy khi xem trang.
 - **Ghi chú cho ERD (giai đoạn 1):** `ServedSubject.kind` trong fixtures là `'self' | 'pet'`, tức là từ khóa ngành nằm trong kiểu dữ liệu. Khi thiết kế bảng thật, loại đối tượng được phục vụ nên do `industryTemplate` khai báo (dữ liệu), lõi chỉ phân biệt "chính khách hàng" hay "đối tượng khác" (quy tắc 5).
