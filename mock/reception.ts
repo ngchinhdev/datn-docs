@@ -90,9 +90,11 @@ export function staffColumns(
   now: string,
   selectedId: string | null,
   onSelect: (id: string) => void,
+  date?: string,
 ): CalendarColumn[] {
   const L = lookups(fixture);
   return fixture.staff.map((s) => {
+    const off = fixture.staffTimeOff.find((t) => t.resourceId === s.resourceId && t.date === date);
     const mine = appts.filter(
       (a) => isLive(a, now) && a.bookings.some((b) => b.resourceId === s.resourceId),
     );
@@ -137,7 +139,8 @@ export function staffColumns(
       id: s.resourceId,
       name: s.profile.displayName,
       kind: `${s.profile.title} · ${mine.length} lịch`,
-      label: `${s.profile.displayName}, ${s.profile.title}, ${mine.length} lịch hẹn`,
+      label: `${s.profile.displayName}, ${s.profile.title}, ${off ? 'nghỉ' : `${mine.length} lịch hẹn`}`,
+      ...(off ? { offLabel: `Nghỉ · ${off.note}` } : {}),
       blocks,
     };
   });
@@ -262,7 +265,11 @@ export function appointmentDetail(fixture: TenantFixture, appt: Appointment) {
     items,
     total,
     deposit,
-    due: appt.settled ? 0n : total - deposit,
+    // Nothing is collected for a settled, cancelled or no-show appointment.
+    due:
+      appt.settled || appt.status === 'cancelled' || appt.status === 'no_show'
+        ? 0n
+        : total - deposit,
     commission: unique(appt.items.map((i) => L.name(i.staffResourceId))).join(', '),
     channel: { online: 'Trang đặt lịch', walk_in: 'Tại quầy', phone: 'Điện thoại' }[appt.channel],
   };

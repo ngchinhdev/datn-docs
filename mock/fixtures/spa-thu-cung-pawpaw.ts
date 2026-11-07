@@ -1,5 +1,15 @@
 import { appointmentBuilder } from './bookings';
-import type { BusinessHours, Service, TenantFixture, Weekday } from './types';
+import { generateWeek } from './generate';
+import type {
+  Appointment,
+  BusinessHours,
+  Customer,
+  ServedSubject,
+  Service,
+  Staff,
+  TenantFixture,
+  Weekday,
+} from './types';
 
 const tenantId = 'pawpaw';
 const branchId = 'pawpaw-td';
@@ -140,6 +150,230 @@ const resources = [
 
 const appointment = appointmentBuilder({ tenantId, branchId, services, resources });
 
+const staffList: Staff[] = [
+  {
+    resourceId: 'paw-khoa',
+    profile: {
+      displayName: 'Khoa',
+      title: 'Chăm sóc chính',
+      specialty: 'cắt tỉa chó lớn',
+      bookableOnline: true,
+      fullName: 'Nguyễn Đăng Khoa',
+      employeeCode: 'PP-001',
+      phone: '+84902000001',
+    },
+    skillServiceIds: ['paw-bath', 'paw-groom'],
+  },
+  {
+    resourceId: 'paw-vy',
+    profile: {
+      displayName: 'Vy',
+      title: 'Chăm sóc',
+      specialty: 'tắm cho mèo',
+      bookableOnline: true,
+      fullName: 'Trịnh Hải Vy',
+      employeeCode: 'PP-002',
+      phone: '+84902000002',
+    },
+    skillServiceIds: ['paw-bath'],
+  },
+];
+
+const regulars: Customer[] = [
+  {
+    id: 'paw-c-linh',
+    tenantId,
+    name: 'Phạm Khánh Linh',
+    callName: 'Chị Linh',
+    phone: '+84909111222',
+  },
+  { id: 'paw-c-duc', tenantId, name: 'Võ Minh Đức', callName: 'Anh Đức', phone: '+84938333444' },
+];
+
+const regularSubjects: ServedSubject[] = [
+  {
+    id: 'paw-s-mochi',
+    tenantId,
+    customerId: 'paw-c-linh',
+    kind: 'other',
+    name: 'Mochi',
+    attributes: { species: 'dog', size: 'small', breed: 'Poodle', weightKg: '6' },
+  },
+  {
+    id: 'paw-s-bong',
+    tenantId,
+    customerId: 'paw-c-linh',
+    kind: 'other',
+    name: 'Bông',
+    attributes: { species: 'cat', breed: 'Mèo Anh lông ngắn', weightKg: '4' },
+  },
+  {
+    id: 'paw-s-lucky',
+    tenantId,
+    customerId: 'paw-c-duc',
+    kind: 'other',
+    name: 'Lucky',
+    attributes: { species: 'dog', size: 'large', breed: 'Golden Retriever', weightKg: '28' },
+  },
+];
+
+// Customers and pets that appear on the rest of the week. [key, name, call name, pets]
+const others = (
+  [
+    ['hoa', 'Nguyễn Thị Hoa', 'Chị Hoa', [['Milo', 'dog', 'Corgi', 11]]],
+    ['nam', 'Trần Hoài Nam', 'Anh Nam', [['Na', 'cat', 'Mèo ta', 3]]],
+    [
+      'quynh',
+      'Lê Diễm Quỳnh',
+      'Chị Quỳnh',
+      [
+        ['Bơ', 'dog', 'Phốc sóc', 3],
+        ['Sữa', 'dog', 'Chihuahua', 2],
+      ],
+    ],
+    ['tri', 'Phạm Minh Trí', 'Anh Trí', [['Rex', 'dog', 'Husky', 22]]],
+    ['ngan', 'Võ Kim Ngân', 'Chị Ngân', [['Mướp', 'cat', 'Mèo Ba Tư', 5]]],
+    ['phat', 'Đỗ Tấn Phát', 'Anh Phát', [['Kem', 'dog', 'Poodle', 5]]],
+    ['uyen', 'Huỳnh Tú Uyên', 'Chị Uyên', [['Bin', 'dog', 'Shiba', 9]]],
+  ] as const
+).map(([key, name, callName, pets], i) => ({
+  customer: {
+    id: `paw-c-${key}`,
+    tenantId,
+    name,
+    callName,
+    phone: `+8490500${1000 + i}`,
+    visitCount: 1 + (i % 4),
+  } satisfies Customer,
+  subjects: pets.map(([pet, species, breed, kg], j): ServedSubject => ({
+    id: `paw-s-${key}-${j + 1}`,
+    tenantId,
+    customerId: `paw-c-${key}`,
+    kind: 'other',
+    name: pet,
+    attributes: {
+      species,
+      breed,
+      weightKg: String(kg),
+      ...(species === 'dog' ? { size: kg < 10 ? 'small' : 'large' } : {}),
+    },
+  })),
+}));
+
+const customers = [...regulars, ...others.map((o) => o.customer)];
+const servedSubjects = [...regularSubjects, ...others.flatMap((o) => o.subjects)];
+
+const at = (hhmm: string) => new Date(`2026-11-07T${hhmm}:00+07:00`).toISOString();
+
+// Saturday 07/11/2026 at Pawpaw: now is 10:20.
+const saturday: Appointment[] = [
+  // Two pets of one customer booked together (group booking).
+  appointment(
+    'paw-a-group',
+    'paw-c-linh',
+    at('08:30'),
+    'completed',
+    [
+      {
+        variantId: 'paw-bath-small',
+        subjectId: 'paw-s-mochi',
+        resourceIds: ['paw-khoa', 'paw-bath-1', 'paw-dryer-1'],
+      },
+      {
+        variantId: 'paw-bath-cat',
+        subjectId: 'paw-s-bong',
+        resourceIds: ['paw-vy', 'paw-bath-2', 'paw-dryer-2'],
+        startAt: at('08:30'),
+      },
+    ],
+    { settled: true },
+  ),
+  // Over 10 kg takes the large variant; the dryer stays busy while Khoa is free (BR-05).
+  appointment(
+    'paw-a-lucky',
+    'paw-c-duc',
+    at('10:00'),
+    'checked_in',
+    [
+      {
+        variantId: 'paw-bath-large',
+        subjectId: 'paw-s-lucky',
+        resourceIds: ['paw-khoa', 'paw-bath-1', 'paw-dryer-1'],
+      },
+    ],
+    { checkedInAt: at('09:55') },
+  ),
+  appointment('paw-a-kem', 'paw-c-phat', at('09:30'), 'no_show', [
+    {
+      variantId: 'paw-bath-small',
+      subjectId: 'paw-s-phat-1',
+      resourceIds: ['paw-vy', 'paw-bath-2', 'paw-dryer-2'],
+    },
+  ]),
+  appointment('paw-a-na', 'paw-c-nam', at('10:45'), 'confirmed', [
+    {
+      variantId: 'paw-bath-cat',
+      subjectId: 'paw-s-nam-1',
+      resourceIds: ['paw-vy', 'paw-bath-2', 'paw-dryer-2'],
+    },
+  ]),
+  appointment(
+    'paw-a-rex',
+    'paw-c-tri',
+    at('13:00'),
+    'confirmed',
+    [
+      {
+        variantId: 'paw-groom-large',
+        subjectId: 'paw-s-tri-1',
+        resourceIds: ['paw-khoa', 'paw-table-1'],
+      },
+    ],
+    { note: 'Rex sợ máy sấy, sấy tay ở chế độ nhỏ.' },
+  ),
+  appointment('paw-a-milo', 'paw-c-hoa', at('14:00'), 'confirmed', [
+    {
+      variantId: 'paw-bath-large',
+      subjectId: 'paw-s-hoa-1',
+      resourceIds: ['paw-vy', 'paw-bath-1', 'paw-dryer-3'],
+    },
+  ]),
+  appointment('paw-a-bo', 'paw-c-quynh', at('15:30'), 'confirmed', [
+    {
+      variantId: 'paw-groom-small',
+      subjectId: 'paw-s-quynh-1',
+      resourceIds: ['paw-khoa', 'paw-table-1'],
+    },
+  ]),
+];
+
+const week = generateWeek({
+  seed: 20261107,
+  idPrefix: 'paw',
+  branch: {
+    id: branchId,
+    tenantId,
+    name: '',
+    address: '',
+    timeZone: 'Asia/Ho_Chi_Minh',
+    businessHours: [
+      ...mondayToSaturday('08:00', '18:00'),
+      { weekday: 0, open: '08:00', close: '12:00' },
+    ],
+    specialDays: [],
+  },
+  services,
+  resources,
+  staff: staffList,
+  staffTypeId: 'paw-rt-groomer',
+  subjects: servedSubjects,
+  timeOff: [],
+  build: appointment,
+  dates: ['2026-11-02', '2026-11-03', '2026-11-04', '2026-11-05', '2026-11-06', '2026-11-08'],
+  today: '2026-11-07',
+  fixed: saturday,
+});
+
 export const spaThuCungPawpaw: TenantFixture = {
   tenant: { id: tenantId, slug: 'pawpaw', name: 'Spa thú cưng Pawpaw', industry: 'pet_spa' },
   branches: [
@@ -165,92 +399,10 @@ export const spaThuCungPawpaw: TenantFixture = {
     { id: 'paw-rt-table', tenantId, name: 'Bàn cắt tỉa', isStaff: false },
   ],
   resources,
-  staff: [
-    {
-      resourceId: 'paw-khoa',
-      profile: {
-        displayName: 'Khoa',
-        title: 'Chăm sóc chính',
-        specialty: 'cắt tỉa chó lớn',
-        bookableOnline: true,
-        fullName: 'Nguyễn Đăng Khoa',
-        employeeCode: 'PP-001',
-        phone: '+84902000001',
-      },
-      skillServiceIds: ['paw-bath', 'paw-groom'],
-    },
-    {
-      resourceId: 'paw-vy',
-      profile: {
-        displayName: 'Vy',
-        title: 'Chăm sóc',
-        specialty: 'tắm cho mèo',
-        bookableOnline: true,
-        fullName: 'Trịnh Hải Vy',
-        employeeCode: 'PP-002',
-        phone: '+84902000002',
-      },
-      skillServiceIds: ['paw-bath'],
-    },
-  ],
+  staff: staffList,
+  staffTimeOff: [],
   services,
-  customers: [
-    {
-      id: 'paw-c-linh',
-      tenantId,
-      name: 'Phạm Khánh Linh',
-      callName: 'Chị Linh',
-      phone: '+84909111222',
-    },
-    { id: 'paw-c-duc', tenantId, name: 'Võ Minh Đức', callName: 'Anh Đức', phone: '+84938333444' },
-  ],
-  servedSubjects: [
-    {
-      id: 'paw-s-mochi',
-      tenantId,
-      customerId: 'paw-c-linh',
-      kind: 'other',
-      name: 'Mochi',
-      attributes: { species: 'dog', size: 'small', breed: 'Poodle', weightKg: '6' },
-    },
-    {
-      id: 'paw-s-bong',
-      tenantId,
-      customerId: 'paw-c-linh',
-      kind: 'other',
-      name: 'Bông',
-      attributes: { species: 'cat', breed: 'Mèo Anh lông ngắn', weightKg: '4' },
-    },
-    {
-      id: 'paw-s-lucky',
-      tenantId,
-      customerId: 'paw-c-duc',
-      kind: 'other',
-      name: 'Lucky',
-      attributes: { species: 'dog', size: 'large', breed: 'Golden Retriever', weightKg: '28' },
-    },
-  ],
-  appointments: [
-    // One visit, two pets side by side.
-    appointment('paw-a-1', 'paw-c-linh', '2026-11-10T02:00:00Z', 'confirmed', [
-      {
-        variantId: 'paw-bath-small',
-        subjectId: 'paw-s-mochi',
-        resourceIds: ['paw-khoa', 'paw-bath-1', 'paw-dryer-1'],
-      },
-      {
-        variantId: 'paw-bath-cat',
-        subjectId: 'paw-s-bong',
-        resourceIds: ['paw-vy', 'paw-bath-2', 'paw-dryer-2'],
-        startAt: '2026-11-10T02:00:00Z',
-      },
-    ]),
-    appointment('paw-a-2', 'paw-c-duc', '2026-11-10T06:00:00Z', 'confirmed', [
-      {
-        variantId: 'paw-groom-large',
-        subjectId: 'paw-s-lucky',
-        resourceIds: ['paw-khoa', 'paw-table-1'],
-      },
-    ]),
-  ],
+  customers,
+  servedSubjects,
+  appointments: [...saturday, ...week],
 };

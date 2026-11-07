@@ -45,6 +45,7 @@ export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
     (s) =>
       s.profile.bookableOnline &&
       s.skillServiceIds.includes(query.serviceId) &&
+      !fixture.staffTimeOff.some((t) => t.resourceId === s.resourceId && t.date === date) &&
       (query.staffResourceId === ANY_STAFF || s.resourceId === query.staffResourceId),
   );
   const busy = fixture.appointments

@@ -173,12 +173,21 @@ export interface Appointment {
   note?: string;
 }
 
+/** A staff member off for a whole local day; no appointment can use them that day. */
+export interface StaffTimeOff {
+  resourceId: string;
+  /** Local date `YYYY-MM-DD`. */
+  date: string;
+  note: string;
+}
+
 export interface TenantFixture {
   tenant: Tenant;
   branches: Branch[];
   resourceTypes: ResourceType[];
   resources: Resource[];
   staff: Staff[];
+  staffTimeOff: StaffTimeOff[];
   services: Service[];
   customers: Customer[];
   servedSubjects: ServedSubject[];

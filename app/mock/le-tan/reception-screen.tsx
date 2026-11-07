@@ -45,7 +45,11 @@ export function ReceptionScreen({
   const actions = useAppointmentActions(fixture, appointments, replace, now);
   const day = dayAppointments(appointments, date);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = day.find((a) => a.id === selectedId && isLive(a, now)) ?? null;
+  const cancelled = appointments.filter(
+    (a) => a.status === 'cancelled' && localDate(a.startAt) === date,
+  );
+  const selected =
+    [...day, ...cancelled].find((a) => a.id === selectedId && isLive(a, now)) ?? null;
 
   // Only the wide layout opens a detail at load; below 1200px the drawer would cover the calendar.
   useEffect(() => {
@@ -68,6 +72,7 @@ export function ReceptionScreen({
     now,
     selectedId,
     setSelectedId,
+    date,
   );
   const [phoneColumn, setPhoneColumn] = useState(columns[0]?.id ?? '');
   const phoneCol = columns.find((c) => c.id === phoneColumn) ?? columns[0];
@@ -227,6 +232,21 @@ export function ReceptionScreen({
               />
             )}
           </div>
+          {cancelled.length > 0 && (
+            <div className="flex flex-wrap items-center gap-(--space-2)">
+              <span className="body-sm text-(--ink-muted)">Đã hủy trong ngày:</span>
+              {cancelled.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  className="sp-badge sp-badge--cancelled cursor-pointer border-0"
+                  onClick={() => setSelectedId(a.id)}
+                >
+                  {formatTime(a.startAt)} {L.who(a)} · {L.services(a)}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="hidden flex-wrap items-center gap-x-(--space-3) gap-y-(--space-2) md:flex">
             {(['held', 'confirmed', 'checked_in', 'completed', 'no_show'] as const).map((s) => (
               <StatusBadge key={s} status={s} />
