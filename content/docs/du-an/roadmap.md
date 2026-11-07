@@ -316,7 +316,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 - [ ] Đăng Google Form vào nhóm Facebook chủ salon, spa, nail, pet shop
 - [x] Tạo 2 repo `datn-saas`, `datn-docs`; đưa đề cương, roadmap, quyết định vào `datn-docs` (03/11)
 - [x] Dựng base source `datn-saas` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base.md), Phần A (03/11, review 05/11)
-- [ ] Dựng app docs + mock `datn-docs` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base.md), Phần B
+- [x] Dựng app docs + mock `datn-docs` theo [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base.md), Phần B (05/11, deploy 07/11: https://datn-docs.vercel.app)
 
 **Đầu ra:** đề cương được duyệt, bảng so sánh đối thủ có bằng chứng, tổng hợp đánh giá, repo chạy được.
 

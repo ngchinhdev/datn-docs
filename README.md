@@ -19,6 +19,8 @@ components/ui/    # shadcn/ui, cùng cấu hình với datn-saas/apps/web
 CLAUDE.md         # trí nhớ dự án cho Claude Code
 ```
 
+Bản online: **https://datn-docs.vercel.app** (tài liệu ở [`/docs`](https://datn-docs.vercel.app/docs), mock ở [`/mock`](https://datn-docs.vercel.app/mock)); Vercel tự deploy mỗi lần push lên `main`.
+
 App xem tài liệu (Next.js + Fumadocs) phục vụ `/docs`, mock giao diện ở `/mock`. Chạy bằng `pnpm install` rồi `pnpm dev`, mở http://localhost:3000/docs.
 
 ## Cài đặt môi trường làm việc (một lần)
