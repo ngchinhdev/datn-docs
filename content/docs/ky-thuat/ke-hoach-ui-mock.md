@@ -62,7 +62,76 @@ Theo `LeTanChiTiet.dc.html`, `LeTanTaiNguyen.dc.html`, `LeTanTablet.dc.html`, `L
 - `pnpm build`, `pnpm typecheck`, `pnpm exec prettier --check app components lib mock` xanh (CI chạy đúng các lệnh này).
 - Mở pull request vào `main` với mô tả: đã làm gì theo từng bước, mục "Tự quyết", ảnh chụp ba bề rộng nếu chụp được. Ghi một mục vào [Tiến độ](../du-an/tien-do.md).
 
+## Bước 7. Sửa theo review PR #2
+
+Review ngày 07/11/2026 (phiên claude.ai, đã xem bản deploy ở 390px, 1024px, 1280px, 1440px, hai theme). Hệ thống thiết kế đã cập nhật: `design/sapio/README.md` (mục "Xác nhận và hoàn tác", "Trang khách"), component mới `ConfirmDialog`, `Toast`, `Segmented`, token `fill-selected`; bản chép `app/sapio/*.css` đã cập nhật sẵn. Quyết định: [D-13](../du-an/quyet-dinh.md#d-13-otp-của-khách-gửi-qua-email-không-qua-sms), [D-14](../du-an/quyet-dinh.md#d-14-mẫu-xác-nhận-thao-tác-và-cách-hiện-giờ-trống); quy tắc BR-16, BR-17. Làm tiếp trên nhánh `feat/ui-mock`, mỗi mục 7a–7f một commit, đẩy lên cùng PR #2.
+
+### 7a. Component mới và sửa component cũ
+
+- Thêm `ConfirmDialog` (bọc `<dialog>` + `showModal()`), `Toast` kèm `useToast()` (một vùng `.sp-toast-region` trong layout của `/mock`, hỗ trợ nút Hoàn tác, dừng đếm khi rê chuột hoặc focus), `Segmented` theo README của từng component. Thêm ví dụ vào `/mock/components`.
+- `StaffPicker` dùng nền phủ `.sp-scrim` thay cho lớp `bg-(--surface) opacity-70` tự viết.
+- `AppointmentBlock`: không đặt `<div>` trong `<button>`; đổi thành `<span className="block ...">` (HTML không cho phần tử khối trong nút).
+- `ResourceCalendar`: bỏ `role="grid"`/`columnheader`/`gridcell` (lưới thiếu `role="row"` nên axe báo lỗi). Mỗi cột là `<section aria-label="Mai, Thợ chính, 3 lịch hẹn">`, khối lịch hẹn là nút có tên đọc được.
+- Tab Nhân viên / Tài nguyên ở lễ tân dùng `Segmented` dạng `<nav>`.
+
+### 7b. Luồng đặt lịch của khách
+
+- **Giờ theo buổi (D-14):** thay các nhóm giờ bằng `Segmented` Sáng / Chiều / Tối (`--lg --block`, có số giờ mỗi buổi), mỗi lần hiện một buổi; mặc định buổi sớm nhất còn giờ, đổi ngày thì chọn lại; buổi hết giờ để `disabled`. Theo `design/sapio/components/SlotPicker/`.
+- **Máy tính ≥ 900px:** làm đúng `KhachDesktop.dc.html`: cột trái gồm tóm tắt cơ sở, dịch vụ đã chọn, **danh sách thợ dạng dọc** (cùng dữ liệu và BR-14 như bảng trượt), giờ đã chọn và nút chính; cột trái `position: sticky` để nút chính luôn nhìn thấy ở 1280×800. Bảng trượt chọn thợ chỉ dùng dưới 900px.
+- **OTP qua email (D-13, BR-16):** bước Thông tin có Họ và tên, Số điện thoại, Email. "Gửi mã" gửi tới email: "Đã gửi mã 6 số tới thu@example.com." Bỏ mọi chữ "tin nhắn". Mã nào 6 số cũng đúng (giữ như cũ). Màn Đã đặt lịch ghi "Đã gửi email xác nhận tới …".
+- **Pawpaw, bước "Cho bé nào?" (BR-17):** luôn có lựa chọn "Thêm bé" như `KhachMotTrang.dc.html` (tên, loài, cân nặng; giá biến thể lọc theo BR-13 ngay khi nhập). Thêm tham số `?khach=moi` cho `/mock/dat-lich`: khách mới không có bé đã lưu, chỉ có "Thêm bé"; mặc định là khách cũ như hiện tại. Bộ chọn ở `/mock` có thêm "Khách cũ / Khách mới".
+- **Xác nhận:** nút cuối "Xác nhận đặt lịch" (không thêm hộp hỏi). Bảng tóm tắt không để nhãn xuống dòng ("Liên hệ"): nhãn một dòng, giá trị xuống dòng nếu dài.
+- **Đã đặt lịch:** bỏ mũi tên quay lại và "Bước 4/4"; thêm ba việc: "Thêm vào lịch điện thoại" (tải file `.ics` tạo tại chỗ), "Xem lịch hẹn của bạn", "Về trang Tóc Mây". Hai nút sau chỉ cần thông báo "chưa có trong mock".
+- Chữ gợi ý trong ô nhập dạng "Ví dụ: Nguyễn Minh Thư", "Ví dụ: 0912 345 678".
+
+### 7c. Lịch lễ tân và Hôm nay
+
+- **Xác nhận theo D-14:**
+  - "Hoàn thành và thu tiền" và "Thu tiền" (trang Hôm nay) mở `ConfirmDialog`: tiêu đề "Thu 400.000 ₫ của chị Hà?", bảng giá dịch vụ, đã cọc, còn phải thu, chọn Tiền mặt / Chuyển khoản; nút "Thu 400.000 ₫". Xong hiện toast "Đã thu 400.000 ₫ tiền mặt. Lịch hẹn hoàn thành."
+  - "Đánh dấu không đến" và "Hủy lịch" (thêm vào bảng chi tiết, kiểu `--danger`, chỉ hiện khi hợp lệ) mở `ConfirmDialog` nêu giờ, thợ và tiền cọc theo BR-23.
+  - "Check-in" chạy ngay, toast "Đã check-in chị Ngọc lúc 10:20." có Hoàn tác 5 giây.
+- **Ẩn nút không còn hợp lệ:** lịch hoàn thành không còn Check-in, Đổi giờ, Thêm dịch vụ, Thu tiền; lịch không đến hoặc đã hủy chỉ còn xem.
+- **Mở trang không chọn sẵn lịch hẹn** ở dưới 1200px (ngăn trượt che cột Hùng ở 1024px). Từ 1200px, cột phải khi chưa chọn hiện `.sp-empty` "Chọn một lịch hẹn để xem chi tiết.".
+- **Đổi ngày:** nút ngày trước, ngày sau và "Hôm nay" chạy thật trên dữ liệu 7a–7d; ngày đóng cửa hiện vùng `surface-sunken` toàn cột với dòng "Đóng cửa: …".
+
+### 7d. Dữ liệu một tuần, cả hai cơ sở
+
+- Dữ liệu từ **Thứ Hai 02/11 đến Chủ Nhật 08/11/2026** cho cả Tóc Mây và Pawpaw. Ngày 07/11 của Tóc Mây giữ nguyên như hiện tại (khớp canvas). Pawpaw có lịch 07/11 riêng, dùng được ở lịch lễ tân (chọn tenant Pawpaw ở `/mock`).
+- Các ngày khác sinh bằng hàm có seed cố định (`mock/fixtures/generate.ts`, không dùng `Math.random()` không seed), mỗi lần chạy cùng kết quả, mỗi ngày 6–14 lịch hẹn, đúng kỹ năng (BR-03) và không chồng tài nguyên (BR-01). Ngày đã qua có lịch Hoàn thành, Không đến, Đã hủy; ngày tới chỉ có Đã xác nhận.
+- Phải có, mỗi trường hợp ít nhất một lần (ghi danh sách vào comment đầu file):
+  - Mai kín lịch Chủ Nhật 08/11 → trang khách hiện Mai mờ, "Hết giờ ngày này" (BR-14).
+  - Lan nghỉ Thứ Ba 03/11 (thêm `StaffTimeOff` vào `types.ts`) → không có cột lịch hẹn, cột ghi "Nghỉ".
+  - Một ngày đặc biệt đóng cửa (`specialDays`, ví dụ Thứ Hai 09/11 bảo trì) → trang khách gạch ngày đó, lễ tân thấy "Đóng cửa".
+  - Một ngày chỉ có 1–2 lịch hẹn (gần trống).
+  - Lịch hẹn nhiều dịch vụ (gội, cắt, nhuộm nối nhau, có đoạn chờ).
+  - Lịch đã hủy (vẽ gạch ngang theo README), khách tên dài trên 30 ký tự, lịch có ghi chú dài.
+  - Pawpaw: một khách hai bé đặt cùng giờ (đặt nhóm), một bé trên 10 kg (biến thể giá khác), lồng sấy là tài nguyên bận trong đoạn chờ của thợ.
+- `mock/availability.ts` dùng dữ liệu mới (giữ comment "không phải thuật toán thật").
+
+### 7e. Khung `/mock`
+
+- **Nút sáng/tối** ở thanh trên của `/mock` (ba trạng thái Sáng / Tối / Theo máy, dùng `useTheme` của provider đang có trong `app/layout.tsx`), đổi một chỗ thì `/docs` và `/mock` cùng đổi.
+- **Bộ chọn vai trò theo trang:** vai trò đang sáng suy ra từ route (`/mock/dat-lich` → Khách, `/mock/le-tan*` và `/mock/hom-nay` → Lễ tân, `/mock` → theo query như cũ). Bấm vai trò thì chuyển sang trang chính của vai trò đó, giữ `tenant`.
+- Trên điện thoại, thanh chọn của mock thu gọn thành một dòng (tenant · vai trò · nút mở rộng), để màn hình thật không bị đẩy xuống 170px.
+
+### 7f. Kiểm tra và hoàn tất
+
+- Thêm `@axe-core/playwright` vào script kiểm tra Playwright đang dùng; chạy trên `/mock/dat-lich` (mỗi bước), `/mock/le-tan`, `/mock/le-tan/tai-nguyen`, `/mock/hom-nay`: 0 lỗi mức serious/critical ở cả hai theme.
+- `pnpm build`, `pnpm typecheck`, `pnpm exec prettier --check app components lib mock` xanh.
+- Cập nhật mô tả PR #2 (mục "Đã sửa theo review" theo 7a–7e, "Tự quyết" mới nếu có) và một mục [Tiến độ](../du-an/tien-do.md).
+
+**Xong khi:**
+- Ở 1280×800, bước Ngày giờ của khách thấy nút Tiếp tục mà không cuộn, danh sách thợ nằm ở cột trái.
+- Không còn chữ "tin nhắn" trong `app/` và `components/`.
+- Đi hết luồng khách mới của Pawpaw bằng "Thêm bé".
+- Mọi nút thu tiền, không đến, hủy lịch đều qua hộp xác nhận. Check-in có Hoàn tác.
+- Lịch lễ tân bấm được qua 7 ngày, ở cả hai cơ sở, thấy đủ các trường hợp ở 7d.
+- Nút sáng/tối đổi cả `/docs` lẫn `/mock`.
+- Kiểm tra axe không có lỗi serious/critical.
+
 ## Câu lệnh gợi ý cho Claude Code
+
+Bước 1–6:
 
 ```
 Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md,
@@ -71,4 +140,16 @@ Thực hiện datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md từ Bước 1
 trên nhánh feat/ui-mock, mỗi bước một commit, kiểm tra "Xong khi" trước khi
 sang bước sau. Xong thì mở pull request, không merge. Dừng lại hỏi mình nếu
 thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 7 (sau review):
+
+```
+git checkout feat/ui-mock && git pull. Đọc CLAUDE.md, mục mới nhất của
+datn-docs/content/docs/du-an/tien-do.md, D-13 và D-14 trong quyet-dinh.md,
+BR-16 và BR-17 trong quy-tac.md, design/sapio/README.md và README của
+ConfirmDialog, Toast, Segmented, SlotPicker. Làm Bước 7 trong
+datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 7a đến 7f, mỗi mục một
+commit, đẩy lên PR #2. Kiểm "Xong khi" trước khi báo xong. Không merge.
+Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
 ```

@@ -283,7 +283,138 @@ body {
 .sp-field--error .sp-field__control { border-color: var(--danger); }
 .sp-field--error .sp-field__help { color: var(--danger); }
 
+/* ---------- Segmented control ---------- */
+/* One choice out of a few: Sáng / Chiều / Tối on the customer page, Nhân viên / Tài nguyên in admin. */
+.sp-segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-md);
+  background: var(--fill-tonal);
+}
+.sp-segmented--block { display: flex; }
+.sp-segmented--block > .sp-segmented__item { flex: 1 1 0; }
+.sp-segmented__item {
+  appearance: none;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-muted);
+  font: 500 14px/20px var(--font-sans);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+.sp-segmented__item:hover { color: var(--ink); }
+.sp-segmented__item[aria-selected="true"],
+.sp-segmented__item[aria-pressed="true"],
+.sp-segmented__item[aria-current="page"] {
+  background: var(--fill-selected);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
+}
+.sp-segmented__item[disabled] { opacity: 0.45; cursor: not-allowed; }
+.sp-segmented__item:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.sp-segmented__count { font: 500 12px/16px var(--font-sans); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+/* Customer pages: taller, round. */
+.sp-segmented--lg { padding: 4px; border-radius: var(--radius-pill); }
+.sp-segmented--lg .sp-segmented__item { min-height: 44px; border-radius: var(--radius-pill); font-size: 15px; }
+
+/* ---------- Confirm dialog ---------- */
+/* Native <dialog> opened with showModal(): focus trap, Escape and inert page come free. */
+dialog.sp-dialog {
+  width: min(420px, calc(100vw - 32px));
+  box-sizing: border-box;
+  margin: auto;
+  padding: var(--space-6);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--line), var(--shadow-popover);
+}
+dialog.sp-dialog[open] { display: flex; flex-direction: column; gap: var(--space-4); }
+dialog.sp-dialog::backdrop,
+.sp-scrim {
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(2px);
+}
+.sp-scrim { position: fixed; inset: 0; }
+.sp-dialog__title { margin: 0; font: 600 18px/26px var(--font-sans); letter-spacing: -0.01em; }
+.sp-dialog__body { margin: 0; font: 400 14px/20px var(--font-sans); color: var(--ink-muted); }
+.sp-dialog__facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 0;
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--fill-tonal);
+  font: 400 14px/20px var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+.sp-dialog__facts dt { color: var(--ink-muted); }
+.sp-dialog__facts dd { margin: 0; padding-left: var(--space-4); text-align: right; font-weight: 600; }
+.sp-dialog__facts .sp-dialog__total { padding-top: 6px; box-shadow: 0 -1px 0 var(--line); font-size: 15px; }
+.sp-dialog__actions { display: flex; flex-wrap: wrap-reverse; justify-content: flex-end; gap: var(--space-2); }
+.sp-dialog__actions .sp-btn { height: 44px; }
+@media (max-width: 480px) {
+  .sp-dialog__actions .sp-btn { flex: 1 1 0; }
+}
+
+/* ---------- Toast ---------- */
+/* Short note after an action. With an undo button for actions that can be reversed. */
+.sp-toast-region {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: min(420px, calc(100vw - 32px));
+  pointer-events: none;
+}
+.sp-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 6px 6px 6px var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--line), var(--shadow-popover);
+  font: 500 14px/20px var(--font-sans);
+  pointer-events: auto;
+}
+.sp-toast__text { flex: 1 1 auto; min-width: 0; }
+.sp-toast__action {
+  appearance: none;
+  flex: none;
+  border: 0;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--brand);
+  font: 600 14px/20px var(--font-sans);
+  cursor: pointer;
+}
+.sp-toast__action:hover { background: var(--brand-soft); }
+.sp-toast__action:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.sp-toast--danger .sp-toast__text { color: var(--danger); }
+
 @media (prefers-reduced-motion: reduce) {
-  .sp-btn, .sp-appt, .sp-date, .sp-slot, .sp-variant, .sp-field__control { transition: none; }
+  .sp-btn, .sp-appt, .sp-date, .sp-slot, .sp-variant, .sp-field__control, .sp-segmented__item { transition: none; }
   .sp-btn:active:not([disabled]) { transform: none; }
 }
