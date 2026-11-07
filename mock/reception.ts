@@ -137,6 +137,7 @@ export function staffColumns(
       id: s.resourceId,
       name: s.profile.displayName,
       kind: `${s.profile.title} · ${mine.length} lịch`,
+      label: `${s.profile.displayName}, ${s.profile.title}, ${mine.length} lịch hẹn`,
       blocks,
     };
   });
@@ -198,7 +199,13 @@ export function resourceColumns(
           };
         }),
       );
-      return { id: r.id, name: r.name, kind: typeName(r.resourceTypeId), blocks };
+      return {
+        id: r.id,
+        name: r.name,
+        kind: typeName(r.resourceTypeId),
+        label: `${r.name}, ${typeName(r.resourceTypeId)}, ${blocks.length} lịch hẹn`,
+        blocks,
+      };
     });
 }
 

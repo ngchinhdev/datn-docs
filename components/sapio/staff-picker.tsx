@@ -147,11 +147,7 @@ export function StaffPicker({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 bg-(--surface) opacity-70"
-            onClick={close}
-          />
+          <div aria-hidden="true" className="sp-scrim" onClick={close} />
           <div
             ref={sheetRef}
             role="dialog"

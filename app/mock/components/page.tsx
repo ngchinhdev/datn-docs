@@ -4,6 +4,9 @@ import { useState, type ReactNode } from 'react';
 import { AppointmentBlock } from '@/components/sapio/appointment-block';
 import { BottomBar } from '@/components/sapio/bottom-bar';
 import { Button } from '@/components/sapio/button';
+import { ConfirmDialog } from '@/components/sapio/confirm-dialog';
+import { SegmentedNav, SegmentedTabs } from '@/components/sapio/segmented';
+import { useToast } from '@/components/sapio/toast';
 import { DateStrip } from '@/components/sapio/date-strip';
 import { HoldBanner } from '@/components/sapio/hold-banner';
 import { PhoneField } from '@/components/sapio/phone-field';
@@ -37,6 +40,9 @@ export default function ComponentsPage() {
   const [variant, setVariant] = useState<string | null>('short');
   const [phone, setPhone] = useState('');
   const [touched, setTouched] = useState(false);
+  const toast = useToast();
+  const [dialog, setDialog] = useState(false);
+  const [part, setPart] = useState('morning');
   const [holdUntil, setHoldUntil] = useState(addMinutes(MOCK_NOW, 10));
   const statuses: AppointmentStatus[] = [
     'held',
@@ -67,6 +73,70 @@ export default function ComponentsPage() {
             Tắt
           </Button>
         </div>
+      </Example>
+
+      <Example name="ConfirmDialog">
+        <div>
+          <Button variant="primary" onClick={() => setDialog(true)}>
+            Hoàn thành và thu tiền
+          </Button>
+        </div>
+        <ConfirmDialog
+          open={dialog}
+          title="Thu 400.000 ₫ của chị Hà?"
+          facts={[
+            { term: 'Nhuộm tóc · Tóc ngắn', value: '500.000 ₫' },
+            { term: 'Đã cọc', value: '−100.000 ₫' },
+            { term: 'Còn phải thu', value: '400.000 ₫', total: true },
+          ]}
+          confirmLabel="Thu 400.000 ₫"
+          pendingLabel="Đang thu…"
+          onConfirm={() => {
+            setDialog(false);
+            toast({ text: 'Đã thu 400.000 ₫ tiền mặt. Lịch hẹn hoàn thành.' });
+          }}
+          onClose={() => setDialog(false)}
+        />
+      </Example>
+
+      <Example name="Toast">
+        <div className="sp-row">
+          <Button
+            onClick={() => toast({ text: 'Đã check-in chị Ngọc lúc 10:20.', undo: () => {} })}
+          >
+            Có Hoàn tác
+          </Button>
+          <Button onClick={() => toast({ text: 'Đã thu 400.000 ₫ tiền mặt.' })}>Chỉ báo</Button>
+          <Button
+            onClick={() =>
+              toast({ text: 'Không thu được tiền. Kiểm tra kết nối rồi thử lại.', tone: 'danger' })
+            }
+          >
+            Lỗi
+          </Button>
+        </div>
+      </Example>
+
+      <Example name="Segmented">
+        <SegmentedNav
+          label="Kiểu xem"
+          items={[
+            { href: '/mock/components', label: 'Nhân viên', current: true },
+            { href: '/mock/components#tai-nguyen', label: 'Tài nguyên', current: false },
+          ]}
+        />
+        <SegmentedTabs
+          label="Buổi"
+          size="lg"
+          block
+          value={part}
+          onChange={setPart}
+          items={[
+            { value: 'morning', label: 'Sáng', count: 3 },
+            { value: 'afternoon', label: 'Chiều', count: 12 },
+            { value: 'evening', label: 'Tối', count: 0, disabled: true },
+          ]}
+        />
       </Example>
 
       <Example name="StatusBadge">

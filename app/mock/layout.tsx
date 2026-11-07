@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { MockToolbar } from '@/components/mock/mock-toolbar';
+import { ToastProvider } from '@/components/sapio/toast';
 
 export const metadata: Metadata = {
   title: 'Mock giao diện',
@@ -27,7 +28,9 @@ export default function MockLayout({ children }: LayoutProps<'/mock'>) {
           </Link>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+        <ToastProvider>{children}</ToastProvider>
+      </main>
     </div>
   );
 }

@@ -65,17 +65,17 @@ export function AppointmentBlock({
       style={style}
     >
       {segments.map((segment, i) => (
-        <div
+        <span
           key={segment.startAt}
-          className={cn('sp-appt__seg', segment.kind === 'wait' && 'sp-appt__seg--wait')}
+          className={cn('sp-appt__seg block', segment.kind === 'wait' && 'sp-appt__seg--wait')}
           style={{ height: slots(minutesBetween(segment.startAt, segment.endAt)) }}
         >
-          {i === 0 && <div className="sp-appt__title">{title}</div>}
+          {i === 0 && <span className="sp-appt__title">{title}</span>}
           {meta && (single || (i === segments.length - 1 && i > 0)) && (
-            <div className="sp-appt__meta">{meta}</div>
+            <span className="sp-appt__meta block">{meta}</span>
           )}
-          {segment.note && <div className="sp-appt__meta">{segment.note}</div>}
-        </div>
+          {segment.note && <span className="sp-appt__meta block">{segment.note}</span>}
+        </span>
       ))}
     </button>
   );

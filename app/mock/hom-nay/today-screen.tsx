@@ -20,7 +20,7 @@ import {
   staffColumns,
 } from '@/mock/reception';
 import { formatCountdown, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
-import { DetailPanel, PhoneNav, Toast } from '../le-tan/parts';
+import { DetailPanel, PhoneNav } from '../le-tan/parts';
 import { useReception } from '../le-tan/use-reception';
 
 function Row({
@@ -71,7 +71,7 @@ export function TodayScreen({ tenantSlug, query }: { tenantSlug: string; query: 
   const now = useMockNow();
   const date = localDate(MOCK_NOW);
   const hours = openingHours(fixture, date) ?? { open: '08:00', close: '18:00' };
-  const { appointments, setStatus, toast, notify } = useReception(fixture);
+  const { appointments, setStatus, notify } = useReception(fixture);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const day = dayAppointments(appointments, date).filter((a) => isLive(a, now));
@@ -241,7 +241,6 @@ export function TodayScreen({ tenantSlug, query }: { tenantSlug: string; query: 
         )}
       </main>
       <PhoneNav notify={notify} />
-      <Toast message={toast} />
     </div>
   );
 }

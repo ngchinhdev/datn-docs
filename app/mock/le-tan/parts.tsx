@@ -1,7 +1,7 @@
 'use client';
 
 import { CalendarDays, Ellipsis, Users, Wallet, X } from 'lucide-react';
-import Link from 'next/link';
+import { SegmentedNav } from '@/components/sapio/segmented';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/sapio/button';
 import { StatusBadge, statusLabel } from '@/components/sapio/status-badge';
@@ -11,49 +11,20 @@ import { formatPhone, formatVnd } from '@/mock/format';
 import { appointmentDetail, lookups } from '@/mock/reception';
 import { formatTime } from '@/mock/time';
 
-export function Toast({ message }: { message: string | null }) {
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 bottom-20 z-[60] flex justify-center px-(--space-4) md:bottom-6"
-    >
-      {message && (
-        <span className="body-sm rounded-(--radius-md) bg-(--surface-raised) px-(--space-4) py-(--space-3) shadow-(--shadow-popover)">
-          {message}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** Nhân viên / Tài nguyên tabs; two routes, query string kept. */
+/** Nhân viên / Tài nguyên: two routes, query string kept. */
 export function ViewTabs({ view, query }: { view: 'staff' | 'resource'; query: string }) {
-  const tab = (active: boolean) =>
-    cn(
-      'sp-btn sp-btn--sm no-underline',
-      active ? 'bg-(--surface-raised) text-(--ink) shadow-(--shadow-xs)' : 'sp-btn--ghost',
-    );
   return (
-    <nav
-      aria-label="Kiểu xem"
-      className="flex gap-0.5 rounded-(--radius-sm) bg-(--fill-tonal) p-[3px]"
-    >
-      <Link
-        href={`/mock/le-tan${query}`}
-        aria-current={view === 'staff' ? 'page' : undefined}
-        className={tab(view === 'staff')}
-      >
-        Nhân viên
-      </Link>
-      <Link
-        href={`/mock/le-tan/tai-nguyen${query}`}
-        aria-current={view === 'resource' ? 'page' : undefined}
-        className={tab(view === 'resource')}
-      >
-        Tài nguyên
-      </Link>
-    </nav>
+    <SegmentedNav
+      label="Kiểu xem"
+      items={[
+        { href: `/mock/le-tan${query}`, label: 'Nhân viên', current: view === 'staff' },
+        {
+          href: `/mock/le-tan/tai-nguyen${query}`,
+          label: 'Tài nguyên',
+          current: view === 'resource',
+        },
+      ]}
+    />
   );
 }
 
@@ -68,6 +39,7 @@ export function PhoneNav({ notify }: { notify: (m: string) => void }) {
   return (
     <nav
       aria-label="Điều hướng chính"
+      data-phone-nav
       className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 bg-(--surface-raised) shadow-[0_-1px_0_var(--line)] md:hidden"
     >
       <span aria-current="page" className={cn(cls, 'text-(--brand)')}>

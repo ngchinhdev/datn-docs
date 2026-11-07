@@ -1,9 +1,9 @@
 'use client';
 
 import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/sapio/button';
+import { SegmentedNav } from '@/components/sapio/segmented';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
 import { StatusBadge } from '@/components/sapio/status-badge';
 import { useMockNow } from '@/components/sapio/use-mock-now';
@@ -20,7 +20,7 @@ import {
   staffColumns,
 } from '@/mock/reception';
 import { formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
-import { DetailPanel, PhoneNav, Toast, ViewTabs } from './parts';
+import { DetailPanel, PhoneNav, ViewTabs } from './parts';
 import { useReception } from './use-reception';
 
 const PHONE_QUERY = '(max-width: 767px)';
@@ -43,7 +43,7 @@ export function ReceptionScreen({
   const from = `${hours.open.slice(0, 2)}:00`;
   const to = `${String(Math.ceil(Number(hours.close.slice(0, 2)) + Number(hours.close.slice(3)) / 60)).padStart(2, '0')}:00`;
 
-  const { appointments, setStatus, toast, notify } = useReception(fixture);
+  const { appointments, setStatus, notify } = useReception(fixture);
   const day = dayAppointments(appointments, date);
   const [selectedId, setSelectedId] = useState<string | null>(
     () => day.find((a) => a.status === 'checked_in')?.id ?? null,
@@ -133,17 +133,14 @@ export function ReceptionScreen({
             <Plus size={20} aria-hidden="true" />
           </Button>
         </div>
-        <div className="grid grid-cols-2 gap-0.5 rounded-(--radius-sm) bg-(--fill-tonal) p-[3px]">
-          <Link href={`/mock/hom-nay${query}`} className="sp-btn sp-btn--ghost h-10! no-underline">
-            Danh sách
-          </Link>
-          <span
-            aria-current="page"
-            className="sp-btn h-10! bg-(--surface-raised) text-(--ink) shadow-(--shadow-xs)"
-          >
-            Lịch
-          </span>
-        </div>
+        <SegmentedNav
+          label="Danh sách hoặc lịch"
+          block
+          items={[
+            { href: `/mock/hom-nay${query}`, label: 'Danh sách', current: false },
+            { href: `/mock/le-tan${query}`, label: 'Lịch', current: true },
+          ]}
+        />
         <ViewTabs view={view} query={query} />
         <div className="flex gap-(--space-2) overflow-x-auto" role="group" aria-label="Chọn cột">
           {columns.map((c) => (
@@ -256,7 +253,6 @@ export function ReceptionScreen({
       </main>
 
       <PhoneNav notify={notify} />
-      <Toast message={toast} />
     </div>
   );
 }
