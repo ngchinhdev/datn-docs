@@ -21,7 +21,7 @@ CLAUDE.md         # trí nhớ dự án cho Claude Code
 
 Bản online: **https://datn-docs.vercel.app** (tài liệu ở [`/docs`](https://datn-docs.vercel.app/docs), mock ở [`/mock`](https://datn-docs.vercel.app/mock)); Vercel tự deploy mỗi lần push lên `main`.
 
-App xem tài liệu (Next.js + Fumadocs) phục vụ `/docs`, mock giao diện ở `/mock`. Chạy bằng `pnpm install` rồi `pnpm dev`, mở http://localhost:3000/docs.
+App xem tài liệu (Next.js + Fumadocs) phục vụ `/docs`, mock giao diện ở `/mock`. Chạy bằng `pnpm install` rồi `pnpm dev`, mở http://localhost:3100/docs (cổng 3100 để không trùng `datn-saas`: web 3000, API 4000).
 
 ## Cài đặt môi trường làm việc (một lần)
 

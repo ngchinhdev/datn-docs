@@ -105,7 +105,7 @@ description: Các bước dựng datn-saas (monorepo code) và app docs + mock c
 - Kiểm tra Fumadocs đọc được file `.md` hiện có. Nếu không, đổi sang `.mdx` và sửa các ký tự `<`, `{` bị MDX hiểu nhầm.
 - Chép `assets/de-cuong-chi-tiet.docx` vào `public/files/` và thêm link tải ở trang Đề cương.
 
-**Xong khi:** `pnpm dev` mở `http://localhost:3000/docs` đọc được đủ các trang, mục lục đúng thứ tự `meta.json`, tìm kiếm hoạt động, link giữa các trang không gãy.
+**Xong khi:** `pnpm dev` mở `http://localhost:3100/docs` đọc được đủ các trang, mục lục đúng thứ tự `meta.json`, tìm kiếm hoạt động, link giữa các trang không gãy.
 
 ### B2. Khung mock
 

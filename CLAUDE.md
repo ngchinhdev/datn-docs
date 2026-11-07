@@ -79,7 +79,7 @@ Repo này (`datn-docs`):
 
 ```bash
 pnpm install
-pnpm dev        # http://localhost:3000/docs và /mock
+pnpm dev        # http://localhost:3100/docs và /mock (3000 là web của datn-saas)
 pnpm build
 ```
 
