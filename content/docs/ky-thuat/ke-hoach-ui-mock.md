@@ -129,6 +129,147 @@ Review ngày 07/11/2026 (phiên claude.ai, đã xem bản deploy ở 390px, 1024
 - Nút sáng/tối đổi cả `/docs` lẫn `/mock`.
 - Kiểm tra axe không có lỗi serious/critical.
 
+## Bước 8. Route tiếng Anh, khung ứng dụng, mẫu danh sách và form
+
+Sau khi PR #2 merge. Căn cứ:
+- [T-15](./quyet-dinh-ky-thuat.md#t-15-route-của-web-tiếng-anh-slug-cơ-sở-trong-url) và [Danh sách màn hình](../thiet-ke/man-hinh.md).
+- Các màn đã chốt trong `design/screens/QuanTri*.dc.html` (bảng ở `design/README.md`).
+- README của `AppShell`, `DataTable`, `FormSection` trong `design/sapio/components/`, và mục "Khu quản trị" của `design/sapio/README.md`.
+
+Bản chép `app/sapio/*.css` đã cập nhật sẵn. Làm trên nhánh `feat/mock-app-shell`, mỗi mục 8a–8f một commit, mở PR mới, không merge.
+
+### 8a. Route theo T-15
+
+- Đổi route:
+
+  | Route cũ | Route mới |
+  |---|---|
+  | `/mock/dat-lich?tenant=` | `/mock/[tenant]/book` |
+  | `/mock/le-tan` và `/mock/le-tan/tai-nguyen` | gộp thành `/mock/app/[tenant]/calendar?view=staff\|resources` (một màn MH-24, hai kiểu xem) |
+  | `/mock/hom-nay` | `/mock/app/[tenant]/today` |
+
+  `[tenant]` là `toc-may` hoặc `pawpaw`. Slug lạ thì trả `notFound()`.
+- Trạng thái xem vào query: `?date=`, `?view=`, `?step=`, `?khach=moi`.
+- Route cũ chuyển hướng 308 sang route mới (`redirects()` trong `next.config.mjs`), vì link cũ có thể đã gửi cho cô.
+- Bộ chọn cơ sở ở thanh trên của `/mock` đổi slug trong đường dẫn, không còn dùng `?tenant=`.
+- Thêm vai trò `technician` (Kỹ thuật viên) và `manager` (Quản lý chi nhánh) vào `mock/selection.ts`. Vai trò ở khu `/mock/app` lấy từ `?role=` (mặc định `owner`). Vai trò quyết định các mục trên thanh bên, theo README của AppShell.
+- Thêm `app/mock/app/[tenant]/[...rest]/page.tsx`: các mục trên thanh bên chưa có màn hình thì vào trang này, hiện "MH-xx · <tên màn> · Chưa làm" (lấy từ `mock/screens.ts`) và link về danh sách màn, không trả 404.
+
+### 8b. Khung ứng dụng (MH-07)
+
+- **Component `AppShell`** trong `components/sapio/` dùng cho mọi trang trong `/mock/app/[tenant]`. Dựng theo `QuanTriKhachHang.dc.html` và `QuanTriThuGon.dc.html`.
+- **Hàng đầu:** chữ Sapio và nút thu gọn/mở rộng.
+  - Lưu lựa chọn trong `localStorage` (khóa `sapio.sidebar`). Đọc và ghi trong `try/catch`.
+  - Từ 768 đến 1199px mặc định thu gọn. Mở rộng thì thanh bên trượt đè lên nội dung; Escape hoặc bấm ra ngoài thì đóng.
+  - Ở dải icon, mỗi mục có `aria-label` và tooltip.
+- **Ô đổi cơ sở** mở `.sp-menu` gồm:
+  - Các chi nhánh của cơ sở, có dấu ✓ ở chi nhánh đang xem (lưu vào `?branch=`).
+  - Cơ sở kia, kèm vai trò.
+  - Mục "Đăng ký cơ sở mới", trỏ tới trang chưa làm.
+- **Phím trong menu:** mũi tên lên/xuống đi giữa các mục, Escape đóng, đóng xong focus về lại ô.
+- **Hàng tài khoản:** avatar, tên, vai trò, nút sáng/tối. Nút này dùng chung `useTheme` với nút ở thanh trên của `/mock`.
+- **Dưới 768px:** bỏ thanh bên, dùng `.sp-tabbar` với 4 mục:
+  - Lễ tân: Hôm nay, Lịch, Khách, Thêm.
+  - Kỹ thuật viên: Lịch của tôi, Xin nghỉ, Hoa hồng, Thêm.
+  - "Thêm" mở `.sp-sheet` chứa các mục còn lại.
+  - "Thu chi" trong `LeTanDienThoai.dc.html` bỏ, chuyển vào "Thêm" (Hóa đơn).
+- **Đưa Lịch và Hôm nay vào khung:**
+  - Chữ Sapio dời lên thanh bên.
+  - Thanh trên của trang lịch còn: ngày (trước, Hôm nay, sau), `Segmented` Nhân viên / Tài nguyên, tìm khách, nút "Lịch hẹn".
+  - Trang lịch dùng `.sp-shell__content--wide`.
+
+### 8c. Mẫu danh sách: Khách hàng (MH-32) và Nhân sự (MH-47)
+
+- **Component:** `DataTable` (cột có kiểu: nhãn, căn, sắp xếp, ô hiển thị), `Pagination`, `PageSizeSelect`, `FilterSheet`, `PageHeader`, `Toolbar`.
+- **`/mock/app/[tenant]/customers`:** đúng `QuanTriKhachHang.dc.html`, `QuanTriDienThoai.dc.html`, `QuanTriDienThoaiLoc.dc.html`.
+  - Bảng cuộn trong khung, dòng tiêu đề cột và chân bảng dính.
+  - Chân bảng: "Hiển thị 1–20 trong N khách" bên trái; số trang rồi ô "20 / trang" bên phải.
+  - Bấm tiêu đề cột thì sắp xếp được.
+- **Dữ liệu:** thêm khách cho đủ nhiều trang. Sinh bằng `seeded()` sẵn có, khoảng 130 khách cho Tóc Mây và 60 cho Pawpaw. Số lần đến và số lần không đến tính từ lịch hẹn trong dữ liệu.
+- **Tìm và lọc:**
+  - Tìm theo tên không dấu (gõ "ha" ra "Hà") và theo số điện thoại đã chuẩn hóa: gõ "0934 567" hay "+84934567" đều khớp (BR-61).
+  - Bộ lọc nhanh chạy thật trên dữ liệu.
+  - Trang, số dòng, sắp xếp, bộ lọc, từ khóa đều nằm trong URL.
+  - Đổi bộ lọc hoặc số dòng thì về trang 1.
+- **Trạng thái trống:** khi lọc không ra kết quả, hiện `.sp-empty` kèm nút "Bỏ lọc".
+- **Điện thoại:**
+  - Danh sách thẻ, nút "Bộ lọc" có số bộ lọc đang bật.
+  - Bộ lọc đang bật hiện thành chip có nút ✕, không cuộn ngang.
+  - Phân trang rút gọn "‹ Trang 1/65 ›".
+- **`/mock/app/[tenant]/settings/staff`:** dùng lại đúng các component trên, không thêm style.
+  - Cột: nhân viên (avatar, tên hiển thị, chức danh), vai trò, chi nhánh, nhận đặt online, số kỹ năng.
+  - Mỗi hàng có nút ghost "Xem lịch".
+
+### 8d. Mẫu form: Hồ sơ nhân viên (MH-48)
+
+- **Component:** `FormSection`, `Field` (`--sm`), `Select`, `Switch`, `Checkbox`, `SaveBar`, `SettingsNav`.
+- **`/mock/app/[tenant]/settings/staff/[id]`:** đúng `QuanTriNhanVien.dc.html`, với 4 nhóm trường:
+  - Hồ sơ công khai (BR-15).
+  - Thông tin nội bộ.
+  - Vai trò.
+  - Cấp và kỹ năng (BR-03): danh sách kỹ năng lấy từ dịch vụ của cơ sở.
+- **Thanh lưu:**
+  - Chỉ hiện khi có thay đổi, kèm số thay đổi.
+  - "Bỏ thay đổi" trả về giá trị ban đầu.
+  - "Lưu" cập nhật state của trang, hiện toast "Đã lưu hồ sơ Mai.", và tên mới hiện ngay trên thanh bên và trong bảng Nhân sự.
+  - Rời trang khi còn thay đổi: hỏi lại bằng `ConfirmDialog` khi bấm link trong app, và bằng `beforeunload` khi đóng tab.
+- **Kiểm tra hợp lệ:** tên hiển thị bắt buộc, thế mạnh tối đa 40 ký tự, email đúng dạng. Lỗi hiện dưới từng trường theo `FormSection`.
+- **`/mock/app/[tenant]/settings`:**
+  - Từ 900px: chuyển sang mục đầu tiên, có menu cài đặt bên trái.
+  - Dưới 900px: hiện danh sách các mục cài đặt, mỗi mục một dòng. Trang con có nút quay lại.
+
+### 8e. Từ ngữ và luật của ngành ra gói cấu hình (sửa theo review PR #2)
+
+- **Kiểu dữ liệu:** thêm `IndustryTemplate` vào `mock/fixtures/types.ts` và một bản cho mỗi ngành (`hair_salon`, `pet_spa`):
+
+  ```ts
+  interface IndustryTemplate {
+    id: string;
+    name: string;
+    vocabulary: {
+      staff: string;
+      subject: string | null;
+      subjectQuestion: string | null;
+      addSubject: string | null;
+    };
+    subjectSchema: SubjectField[]; // ngành không có đối tượng khác thì rỗng
+  }
+  type SubjectField =
+    | { key: string; label: string; type: 'enum'; options: { value: string; label: string }[]; required: boolean }
+    | { key: string; label: string; type: 'number'; unit?: string; required: boolean | Record<string, string> }
+    | { key: string; label: string; type: 'text'; required: boolean };
+  ```
+
+  Ví dụ một trường số: `{ key: 'weightKg', label: 'Cân nặng', type: 'number', unit: 'kg', required: { species: 'dog' } }`.
+- **Điều kiện chọn biến thể:** `ServiceVariant.match` nhận cả khoảng số, ví dụ `{ species: 'dog', weightKg: { max: 10 } }` (cận trên không tính). Bỏ thuộc tính `size` và hằng số `SMALL_DOG_MAX_KG`. Biến thể vẫn chọn theo BR-13.
+- **Trang đặt lịch:** form "Thêm bé" dựng từ `subjectSchema`. Mọi chữ "bé", "Cho bé nào?", "Thêm bé", "Chó", "Mèo" lấy từ gói cấu hình. Kiểm tra theo BR-71.
+- **Lỗi nhỏ còn lại:** toast `persist` có nút đóng (`.sp-icon-btn`, `aria-label="Đóng"`).
+- **Xong khi:** `grep -rnE "bé|Chó|Mèo|tóc|Tóc|groom" app/mock components/sapio` chỉ còn tên cơ sở trong dữ liệu, không còn trong code giao diện.
+
+### 8f. Danh sách màn hình trên `/mock` và hoàn tất
+
+- **`mock/screens.ts`:** đủ 60 màn MH-01 đến MH-60 theo [Danh sách màn hình](../thiet-ke/man-hinh.md). Mỗi màn có mã, tên, khu, vai trò, đợt, mức, route, trạng thái.
+  - "Đang làm": MH-07, MH-08, MH-09, MH-12, MH-24, MH-25, MH-32, MH-47, MH-48.
+  - Các màn còn lại: "Chưa làm".
+- **Trang `/mock`:**
+  - Nhóm màn theo khu A–H.
+  - Lọc theo đợt và theo trạng thái.
+  - Mỗi màn có link nếu đã có route.
+  - Đếm số màn theo trạng thái ("9/60 đang làm").
+- **Kiểm tra:**
+  - Chạy lại axe trên các route mới, cả hai theme. Không được có lỗi serious hoặc critical.
+  - `pnpm build`, `pnpm typecheck`, `pnpm exec prettier --check app components lib mock` xanh.
+- **Mở PR:** mô tả theo 8a–8f, mục "Tự quyết", ảnh ba bề rộng (1440, 1024, 390). Ghi một mục vào Tiến độ.
+
+**Xong khi:**
+- Mọi route cũ chuyển hướng đúng.
+- Ở 1440px, thanh bên thu gọn được và tải lại trang vẫn nhớ. Ở 1024px, thanh bên mặc định là dải icon.
+- Menu đổi chi nhánh và đổi cơ sở dùng được bằng bàn phím.
+- Bảng Khách hàng ở 1440×900: cuộn trong khung, tiêu đề cột và chân bảng không trôi. Tìm "ha" ra chị Hà. Sang trang 2, đổi "50 / trang", tải lại vẫn giữ nguyên.
+- Ở 390px: không có cuộn ngang trên mọi trang `/mock/app`. Bộ lọc mở bằng bảng trượt lên.
+- Hồ sơ Mai: sửa tên thì thanh lưu hiện; rời trang thì bị hỏi lại; lưu xong thấy tên mới ở bảng Nhân sự.
+- Trang đặt lịch của Pawpaw không còn chữ của ngành trong code.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -152,4 +293,17 @@ ConfirmDialog, Toast, Segmented, SlotPicker. Làm Bước 7 trong
 datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 7a đến 7f, mỗi mục một
 commit, đẩy lên PR #2. Kiểm "Xong khi" trước khi báo xong. Không merge.
 Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 8:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-app-shell.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, T-15 trong
+quyet-dinh-ky-thuat.md, content/docs/thiet-ke/man-hinh.md, design/README.md,
+design/sapio/README.md (mục "Khu quản trị") và README của AppShell, DataTable,
+FormSection. Làm Bước 8 trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md,
+mục 8a đến 8f, mỗi mục một commit. Bố cục và chữ lấy theo design/screens/QuanTri*.dc.html.
+Kiểm "Xong khi" trước khi báo xong, mở PR mới, không merge. Dừng lại hỏi mình nếu
+thiết kế mâu thuẫn với quy tắc nghiệp vụ.
 ```

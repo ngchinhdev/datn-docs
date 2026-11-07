@@ -7,6 +7,23 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 07/11/2026 (đêm): chốt khung ứng dụng, mẫu danh sách và mẫu form
+- **Đã làm:**
+  - Review lại PR #2 (Bước 7): đạt. Người dùng đã merge.
+  - Sửa hover của nút chính trong Sapio: đậm hơn thay vì mờ đi, tương phản từ 6,3:1 trở lên.
+  - Viết [Danh sách màn hình](../thiet-ke/man-hinh.md): 60 màn, chia 3 đợt. Chốt route [T-15](../ky-thuat/quyet-dinh-ky-thuat.md#t-15-route-của-web-tiếng-anh-slug-cơ-sở-trong-url) và quy tắc slug BR-72.
+  - Thiết kế và chốt khung ứng dụng (MH-07), mẫu danh sách (MH-08), mẫu form (MH-09) trên canvas, 5 màn `QuanTri*`.
+- **Theo góp ý của người dùng:**
+  - Thanh bên thu gọn được. Ô đổi cơ sở trông như ô chọn.
+  - Phân trang có số trang. Chân bảng kiểu Ant Design: "Hiển thị 1–20 trong 1.284 khách" bên trái; số trang rồi ô "20 / trang" bên phải.
+  - Bảng cuộn trong khung, dòng tiêu đề cột và chân bảng đứng yên.
+  - Trên điện thoại không cuộn ngang: bộ lọc nằm trong bảng trượt lên.
+  - Thêm vào Sapio: AppShell, DataTable, FormSection, menu, tooltip, bảng trượt lên, ô chọn nhỏ.
+- **Cách làm từ nay:** phiên claude.ai chỉ sửa trên canvas cho đến khi người dùng nói chốt, rồi mới cập nhật hệ thống thiết kế, chép vào repo, commit và push.
+- **Tiếp theo:**
+  - Claude Code làm [Bước 8](../ky-thuat/ke-hoach-ui-mock.md#bước-8-route-tiếng-anh-khung-ứng-dụng-mẫu-danh-sách-và-form).
+  - Phiên claude.ai vẽ MH-02 Đăng ký cơ sở có chọn ngành.
+
 ### 07/11/2026 (khuya): sửa mock theo review PR #2
 - **Đã làm:** Bước 7 (7a–7f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-7-sửa-theo-review-pr-2), mỗi mục một commit trên PR #2. ConfirmDialog, Toast (có Hoàn tác), Segmented; giờ trống theo buổi; cột trái sticky có danh sách thợ ở máy tính; OTP qua email (BR-16); "Thêm bé" và `?khach=moi` (BR-17); thu tiền, không đến, hủy lịch qua hộp hỏi, check-in có Hoàn tác (D-14); dữ liệu 02/11–08/11 cho hai cơ sở sinh bằng seed (`mock/fixtures/generate.ts`); nút sáng/tối, vai trò theo route, thanh chọn gọn trên điện thoại. Kiểm bằng Playwright và axe-core: 28 trang và bước, hai theme, 0 lỗi serious/critical; `pnpm build` xanh.
 - **Vướng:** `.sp-btn--accent:hover { opacity: 0.9 }` trong Sapio hạ tương phản nút cam của Pawpaw xuống 3,94:1 khi rê chuột; cần sửa trong Design System (bản chép `app/sapio/` không sửa tại chỗ).
