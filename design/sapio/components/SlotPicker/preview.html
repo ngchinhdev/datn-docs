@@ -1,4 +1,4 @@
-<!-- @dsCard group="Booking" height=330 subtitle="Chọn ngày và giờ trống, màu theo cơ sở." -->
+<!-- @dsCard group="Booking" height=300 subtitle="Chọn ngày và giờ trống, màu theo cơ sở." -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>SlotPicker</title></head>
@@ -14,15 +14,17 @@
     <button class="sp-date" type="button" aria-pressed="false">T5<b>12</b></button>
     <button class="sp-date" type="button" disabled>T6<b>13</b></button>
   </div>
-  <div class="label sp-muted">Buổi sáng</div>
-  <div class="sp-slots" role="group" aria-label="Giờ trống buổi sáng">
+  <div class="sp-segmented sp-segmented--lg sp-segmented--block" role="tablist" aria-label="Buổi">
+    <button class="sp-segmented__item" type="button" role="tab" aria-selected="true">Sáng <span class="sp-segmented__count">4</span></button>
+    <button class="sp-segmented__item" type="button" role="tab" aria-selected="false" disabled>Chiều <span class="sp-segmented__count">0</span></button>
+    <button class="sp-segmented__item" type="button" role="tab" aria-selected="false">Tối <span class="sp-segmented__count">2</span></button>
+  </div>
+  <div class="sp-slots" role="tabpanel" aria-label="Giờ trống buổi sáng">
     <button class="sp-slot" type="button" aria-pressed="false">08:30</button>
     <button class="sp-slot" type="button" aria-pressed="true">09:15</button>
     <button class="sp-slot" type="button" aria-pressed="false">10:00</button>
     <button class="sp-slot" type="button" aria-pressed="false">11:30</button>
   </div>
-  <div class="label sp-muted">Buổi chiều</div>
-  <div class="sp-empty">Hết giờ trống buổi chiều. Gần nhất còn 14:00 Chủ Nhật, 08/11.</div>
 </div>
 </body>
 </html>

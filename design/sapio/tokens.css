@@ -5,6 +5,7 @@
   --surface-sunken: #eef2f1;
   --fill-tonal: #eef2f1;
   --surface-hover: #e3e9e7;
+  --fill-selected: #ffffff;
   --line: #e0e6e4;
   --line-strong: #87938f;
   --ink: #121817;
@@ -43,6 +44,7 @@
   --surface-sunken: #0a0e0d;
   --fill-tonal: #1d2524;
   --surface-hover: #27312f;
+  --fill-selected: #2f3b38;
   --line: #242d2b;
   --line-strong: #66736f;
   --ink: #edf2f0;

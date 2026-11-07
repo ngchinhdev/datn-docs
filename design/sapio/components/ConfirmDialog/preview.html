@@ -1,0 +1,33 @@
+<!-- @dsCard group="Feedback" height=380 subtitle="Hỏi lại trước thao tác về tiền hoặc khó đảo lại. Ghi rõ đối tượng và con số." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ConfirmDialog</title></head>
+<body>
+<div class="sp-pad sp-row" style="align-items: flex-start; gap: 24px;">
+  <dialog class="sp-dialog" open aria-labelledby="cd-pay" style="position: static; margin: 0;">
+    <h2 class="sp-dialog__title" id="cd-pay">Thu 400.000 ₫ của chị Hà?</h2>
+    <dl class="sp-dialog__facts">
+      <dt>Nhuộm tóc · Tóc ngắn</dt><dd>500.000 ₫</dd>
+      <dt>Đã cọc</dt><dd>−100.000 ₫</dd>
+      <dt class="sp-dialog__total">Còn phải thu</dt><dd class="sp-dialog__total">400.000 ₫</dd>
+    </dl>
+    <div class="sp-segmented sp-segmented--block" role="radiogroup" aria-label="Hình thức">
+      <button class="sp-segmented__item" type="button" role="radio" aria-checked="true" aria-pressed="true">Tiền mặt</button>
+      <button class="sp-segmented__item" type="button" role="radio" aria-checked="false">Chuyển khoản</button>
+    </div>
+    <div class="sp-dialog__actions">
+      <button class="sp-btn sp-btn--secondary" type="button">Quay lại</button>
+      <button class="sp-btn sp-btn--primary" type="button">Thu 400.000 ₫</button>
+    </div>
+  </dialog>
+  <dialog class="sp-dialog" open aria-labelledby="cd-ns" style="position: static; margin: 0;">
+    <h2 class="sp-dialog__title" id="cd-ns">Đánh dấu anh Phúc không đến?</h2>
+    <p class="sp-dialog__body">Lịch 09:15 với Lan được giải phóng cho khách khác. Tiền cọc 50.000 ₫ không hoàn (BR-23).</p>
+    <div class="sp-dialog__actions">
+      <button class="sp-btn sp-btn--secondary" type="button">Quay lại</button>
+      <button class="sp-btn sp-btn--danger" type="button">Đánh dấu không đến</button>
+    </div>
+  </dialog>
+</div>
+</body>
+</html>
