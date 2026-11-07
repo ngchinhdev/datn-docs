@@ -14,16 +14,26 @@ export interface MockScreen {
   description: string;
   roles: Role[];
   status: ScreenStatus;
+  /** Mock routes that implement the screen. */
+  routes?: { href: string; label: string }[];
 }
 
 /** Screens to agree on with the supervisor (roadmap, giai đoạn 1). Set `approved` once signed off. */
 export const mockScreens: MockScreen[] = [
   {
-    slug: 'dat-lich',
-    title: 'Trang đặt lịch của khách',
-    description: 'Chọn dịch vụ và đối tượng được phục vụ, xem giờ trống, giữ chỗ, xác nhận.',
+    slug: 'trang-co-so',
+    title: 'Trang cơ sở',
+    description: 'Giới thiệu cơ sở, danh sách dịch vụ và nhân viên, nút vào luồng đặt lịch.',
     roles: ['customer'],
     status: 'todo',
+  },
+  {
+    slug: 'dat-lich',
+    title: 'Luồng đặt lịch',
+    description: 'Chọn dịch vụ và đối tượng được phục vụ, xem giờ trống, giữ chỗ, xác nhận.',
+    roles: ['customer'],
+    status: 'in_progress',
+    routes: [{ href: '/mock/dat-lich', label: 'Đặt lịch' }],
   },
   {
     slug: 'lich-le-tan',
@@ -31,7 +41,12 @@ export const mockScreens: MockScreen[] = [
     description:
       'Lưới tài nguyên theo thời gian trong ngày, thấy đoạn chờ; tạo, đổi, check-in lịch hẹn.',
     roles: ['receptionist', 'owner'],
-    status: 'todo',
+    status: 'in_progress',
+    routes: [
+      { href: '/mock/le-tan', label: 'Theo nhân viên' },
+      { href: '/mock/le-tan/tai-nguyen', label: 'Theo tài nguyên' },
+      { href: '/mock/hom-nay', label: 'Hôm nay' },
+    ],
   },
   {
     slug: 'cau-hinh-dich-vu',

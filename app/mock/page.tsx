@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -54,8 +55,21 @@ export default async function MockIndexPage({ searchParams }: PageProps<'/mock'>
                   </CardAction>
                   <CardDescription>{screen.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="text-xs text-muted-foreground">
-                  Vai trò: {screen.roles.map(roleLabel).join(', ')}
+                <CardContent className="flex flex-col gap-2 text-xs text-muted-foreground">
+                  <span>Vai trò: {screen.roles.map(roleLabel).join(', ')}</span>
+                  {screen.routes && (
+                    <span className="flex flex-wrap gap-3">
+                      {screen.routes.map((route) => (
+                        <Link
+                          key={route.href}
+                          href={`${route.href}?tenant=${fixture.tenant.slug}`}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {route.label}
+                        </Link>
+                      ))}
+                    </span>
+                  )}
                 </CardContent>
               </Card>
             </li>

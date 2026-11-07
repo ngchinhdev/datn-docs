@@ -7,6 +7,11 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 07/11/2026 (tối): code giao diện mock
+- **Đã làm:** 6 bước của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md) trên nhánh `feat/ui-mock`. Token Sapio và font Be Vietnam Pro cho cả `/docs` lẫn `/mock`; fixtures ngày 07/11 có đoạn chiếm dụng, `StaffProfile` hai lớp, `ServedSubject.kind` là `'self' | 'other'`; 11 component trong `components/sapio/` (ví dụ ở `/mock/components`); `/mock/dat-lich` cho hai cơ sở; `/mock/le-tan`, `/mock/le-tan/tai-nguyen`, `/mock/hom-nay`. Kiểm bằng Playwright headless: đi hết luồng khách chỉ bằng bàn phím ở 390px và 1280px; lịch lễ tân ở 1440px, 1024px, 390px không lỗi, không cuộn ngang.
+- **Vướng:** `pnpm dev` (Turbopack) giữ bản cũ của module phía server khi file đổi export, gây lỗi `is not a function` và lỗi hydration; khởi động lại dev server là hết. Class trong `components.css` không nằm trong `@layer`, nên muốn utility Tailwind đè lên `.sp-btn` phải thêm `!`.
+- **Tiếp theo:** review pull request; chốt hai màn hình với cô; ERD giai đoạn 1.
+
 ### 07/11/2026 (chiều): bàn giao giao diện cho Claude Code
 - **Đã làm:** chốt UI hai màn hình đầu (D-12; BR-14, BR-15). Chép Design System và các màn hình đã vẽ vào `design/` để Claude Code đọc offline. Viết [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md) 6 bước.
 - **Cách làm từ đây:** phiên claude.ai lo phân tích, thiết kế, review; Claude Code trên máy code theo kế hoạch trên nhánh `feat/ui-mock`, mở pull request để review.
