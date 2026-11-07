@@ -7,6 +7,11 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 07/11/2026 (khuya): sửa mock theo review PR #2
+- **Đã làm:** Bước 7 (7a–7f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-7-sửa-theo-review-pr-2), mỗi mục một commit trên PR #2. ConfirmDialog, Toast (có Hoàn tác), Segmented; giờ trống theo buổi; cột trái sticky có danh sách thợ ở máy tính; OTP qua email (BR-16); "Thêm bé" và `?khach=moi` (BR-17); thu tiền, không đến, hủy lịch qua hộp hỏi, check-in có Hoàn tác (D-14); dữ liệu 02/11–08/11 cho hai cơ sở sinh bằng seed (`mock/fixtures/generate.ts`); nút sáng/tối, vai trò theo route, thanh chọn gọn trên điện thoại. Kiểm bằng Playwright và axe-core: 28 trang và bước, hai theme, 0 lỗi serious/critical; `pnpm build` xanh.
+- **Vướng:** `.sp-btn--accent:hover { opacity: 0.9 }` trong Sapio hạ tương phản nút cam của Pawpaw xuống 3,94:1 khi rê chuột; cần sửa trong Design System (bản chép `app/sapio/` không sửa tại chỗ).
+- **Tiếp theo:** review lại PR #2; sửa hover của nút nhấn trong Sapio; chốt hai màn hình với cô.
+
 ### 07/11/2026 (tối, sau đó): review PR #2 của mock
 - **Đã làm:** review [PR #2 của datn-docs](https://github.com/ngchinhdev/datn-docs/pull/2): đọc code và xem bản deploy trên trình duyệt ở 390px, 1024px, 1280px, 1440px, hai theme, đi hết luồng của cả hai cơ sở. Bản này sát canvas, code sạch (không màu viết cứng, không `Date.now()`). Cần sửa: OTP ghi "tin nhắn" trái với roadmap; Pawpaw thiếu "Thêm bé" nên khách mới bị kẹt; trang khách trên máy tính không có danh sách thợ ở cột trái và nút Tiếp tục bị đẩy khỏi màn hình; thu tiền chạy ngay không hỏi; bộ chọn vai trò không theo trang; `<div>` trong `<button>`, lưới ARIA thiếu dòng. Người dùng góp thêm: hộp xác nhận cho thao tác quan trọng, dữ liệu đa dạng hơn một ngày, nút sáng/tối.
 - **Chốt:** OTP gửi qua email, khách vẫn nhập số điện thoại ([D-13](./quyet-dinh.md#d-13-otp-của-khách-gửi-qua-email-không-qua-sms), BR-16, BR-17); ba mức xác nhận và giờ trống hiện theo buổi ([D-14](./quyet-dinh.md#d-14-mẫu-xác-nhận-thao-tác-và-cách-hiện-giờ-trống)). Sapio Design System thêm ConfirmDialog, Toast, Segmented và token `fill-selected`; bản sao trong `design/sapio/` và `app/sapio/` đã cập nhật.
