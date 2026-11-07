@@ -15,6 +15,7 @@ Dùng **đúng một tên** cho mỗi khái niệm, cả trong tài liệu lẫn
 | Khách hàng | `customer` | Người đặt lịch và trả tiền tại một khách thuê; nhận diện theo số điện thoại chuẩn hóa |
 | Đối tượng được phục vụ | `servedSubject` | Người hoặc vật được làm dịch vụ: chính khách hàng (salon) hoặc thú cưng của khách (spa thú cưng) |
 | Tài nguyên | `resource` | Thứ có hạn cần đặt chỗ: nhân viên, phòng, ghế, bàn tắm, lồng sấy, máy |
+| Hồ sơ nhân viên | `staffProfile` | Hai lớp: công khai (`displayName`, `avatar`, `title`, `specialty`, `bookableOnline`) cho trang khách; nội bộ (`fullName`, `employeeCode`, `phone`) chỉ trong quản trị (BR-15) |
 | Loại tài nguyên | `resourceType` | Dịch vụ yêu cầu loại tài nguyên, hệ thống tự chọn tài nguyên cụ thể còn rảnh |
 | Dịch vụ | `service` | Thứ khách đặt; có biến thể, giá, các đoạn chiếm dụng |
 | Biến thể dịch vụ | `serviceVariant` | Cùng dịch vụ nhưng khác thời lượng, giá (tóc ngắn/dài, chó nhỏ/lớn) |
