@@ -1,7 +1,10 @@
 import { appointmentBuilder } from './bookings';
-import { generateWeek } from './generate';
+import { dateRange, generateWeek } from './generate';
+import { generatePeople, withVisitCounts } from './people';
+import { petSpaTemplate } from './templates';
 import type {
   Appointment,
+  Branch,
   BusinessHours,
   Customer,
   ServedSubject,
@@ -32,7 +35,7 @@ const services: Service[] = [
         name: 'Chó dưới 10 kg',
         shortName: 'Tắm chó nhỏ',
         priceVnd: 150_000n,
-        match: { species: 'dog', size: 'small' },
+        match: { species: 'dog', weightKg: { max: 10 } },
         segments: [
           {
             startMinute: 0,
@@ -55,7 +58,7 @@ const services: Service[] = [
         name: 'Chó từ 10 kg',
         shortName: 'Tắm chó lớn',
         priceVnd: 250_000n,
-        match: { species: 'dog', size: 'large' },
+        match: { species: 'dog', weightKg: { min: 10 } },
         segments: [
           {
             startMinute: 0,
@@ -108,7 +111,7 @@ const services: Service[] = [
         name: 'Chó dưới 10 kg',
         shortName: 'Tỉa chó nhỏ',
         priceVnd: 250_000n,
-        match: { species: 'dog', size: 'small' },
+        match: { species: 'dog', weightKg: { max: 10 } },
         segments: [
           {
             startMinute: 0,
@@ -123,7 +126,7 @@ const services: Service[] = [
         name: 'Chó từ 10 kg',
         shortName: 'Tỉa chó lớn',
         priceVnd: 400_000n,
-        match: { species: 'dog', size: 'large' },
+        match: { species: 'dog', weightKg: { min: 10 } },
         segments: [
           {
             startMinute: 0,
@@ -161,7 +164,11 @@ const staffList: Staff[] = [
       fullName: 'Nguyễn Đăng Khoa',
       employeeCode: 'PP-001',
       phone: '+84902000001',
+      email: 'khoa@pawpaw.vn',
+      joinedAt: '2024-08',
     },
+    role: 'manager',
+    level: 2,
     skillServiceIds: ['paw-bath', 'paw-groom'],
   },
   {
@@ -174,7 +181,11 @@ const staffList: Staff[] = [
       fullName: 'Trịnh Hải Vy',
       employeeCode: 'PP-002',
       phone: '+84902000002',
+      email: 'vy@pawpaw.vn',
+      joinedAt: '2025-04',
     },
+    role: 'technician',
+    level: 1,
     skillServiceIds: ['paw-bath'],
   },
 ];
@@ -197,7 +208,7 @@ const regularSubjects: ServedSubject[] = [
     customerId: 'paw-c-linh',
     kind: 'other',
     name: 'Mochi',
-    attributes: { species: 'dog', size: 'small', breed: 'Poodle', weightKg: '6' },
+    attributes: { species: 'dog', breed: 'Poodle', weightKg: '6' },
   },
   {
     id: 'paw-s-bong',
@@ -213,7 +224,7 @@ const regularSubjects: ServedSubject[] = [
     customerId: 'paw-c-duc',
     kind: 'other',
     name: 'Lucky',
-    attributes: { species: 'dog', size: 'large', breed: 'Golden Retriever', weightKg: '28' },
+    attributes: { species: 'dog', breed: 'Golden Retriever', weightKg: '28' },
   },
 ];
 
@@ -255,13 +266,82 @@ const others = (
       species,
       breed,
       weightKg: String(kg),
-      ...(species === 'dog' ? { size: kg < 10 ? 'small' : 'large' } : {}),
     },
   })),
 }));
 
-const customers = [...regulars, ...others.map((o) => o.customer)];
-const servedSubjects = [...regularSubjects, ...others.flatMap((o) => o.subjects)];
+// The week 02/11–08/11 books only the pets above; the rest come in earlier and later weeks.
+const weekSubjects = [...regularSubjects, ...others.flatMap((o) => o.subjects)];
+const PET_NAMES = [
+  'Bơ',
+  'Sữa',
+  'Bông',
+  'Mực',
+  'Lu',
+  'Cam',
+  'Nấm',
+  'Xoài',
+  'Gấu',
+  'Bi',
+  'Mun',
+  'Vàng',
+  'Su',
+  'Tôm',
+  'Kiwi',
+  'Béo',
+  'Đậu',
+  'Cốm',
+  'Xíu',
+  'Bánh Bao',
+  'Heo',
+  'Mít',
+  'Sóc',
+  'Chip',
+];
+const DOG_BREEDS = [
+  'Poodle',
+  'Corgi',
+  'Phốc sóc',
+  'Shiba',
+  'Golden Retriever',
+  'Husky',
+  'Chihuahua',
+  'Pug',
+];
+const CAT_BREEDS = ['Mèo ta', 'Mèo Anh lông ngắn', 'Mèo Ba Tư', 'Mèo Munchkin'];
+const people = generatePeople({
+  seed: 20261103,
+  prefix: 'paw',
+  tenantId,
+  count: 51,
+  existing: [...regulars, ...others.map((o) => o.customer)],
+  notes: [
+    'Bé sợ máy sấy, sấy tay ở chế độ nhỏ.',
+    'Bé hay cắn khi cắt móng, cần hai người giữ.',
+    'Da nhạy cảm, dùng sữa tắm riêng của chủ mang theo.',
+    'Đón bé đúng giờ hẹn, chủ có việc gấp.',
+  ],
+  subjects: (rand, customer, n) =>
+    Array.from({ length: rand() < 0.2 ? 2 : 1 }, (_, j) => {
+      const species = rand() < 0.7 ? 'dog' : 'cat';
+      const kg = species === 'dog' ? 2 + Math.floor(rand() * 29) : 2 + Math.floor(rand() * 6);
+      const breeds = species === 'dog' ? DOG_BREEDS : CAT_BREEDS;
+      return {
+        id: `paw-s-g${n}-${j + 1}`,
+        tenantId,
+        customerId: customer.id,
+        kind: 'other' as const,
+        name: PET_NAMES[Math.floor(rand() * PET_NAMES.length)]!,
+        attributes: {
+          species,
+          breed: breeds[Math.floor(rand() * breeds.length)]!,
+          weightKg: String(kg),
+        },
+      };
+    }),
+});
+const everyone = [...regulars, ...others.map((o) => o.customer), ...people.customers];
+const servedSubjects = [...weekSubjects, ...people.subjects];
 
 const at = (hhmm: string) => new Date(`2026-11-07T${hhmm}:00+07:00`).toISOString();
 
@@ -347,26 +427,29 @@ const saturday: Appointment[] = [
   ]),
 ];
 
+/** Hours only; what the generator needs to place appointments. */
+const weekBranch: Branch = {
+  id: branchId,
+  tenantId,
+  name: '',
+  address: '',
+  timeZone: 'Asia/Ho_Chi_Minh',
+  businessHours: [
+    ...mondayToSaturday('08:00', '18:00'),
+    { weekday: 0, open: '08:00', close: '12:00' },
+  ],
+  specialDays: [],
+};
+
 const week = generateWeek({
   seed: 20261107,
   idPrefix: 'paw',
-  branch: {
-    id: branchId,
-    tenantId,
-    name: '',
-    address: '',
-    timeZone: 'Asia/Ho_Chi_Minh',
-    businessHours: [
-      ...mondayToSaturday('08:00', '18:00'),
-      { weekday: 0, open: '08:00', close: '12:00' },
-    ],
-    specialDays: [],
-  },
+  branch: weekBranch,
   services,
   resources,
   staff: staffList,
   staffTypeId: 'paw-rt-groomer',
-  subjects: servedSubjects,
+  subjects: weekSubjects,
   timeOff: [],
   build: appointment,
   dates: ['2026-11-02', '2026-11-03', '2026-11-04', '2026-11-05', '2026-11-06', '2026-11-08'],
@@ -374,8 +457,45 @@ const week = generateWeek({
   fixed: saturday,
 });
 
+const longRun = {
+  idPrefix: 'paw',
+  branch: weekBranch,
+  services,
+  resources,
+  staff: staffList,
+  staffTypeId: 'paw-rt-groomer',
+  subjects: servedSubjects,
+  timeOff: [],
+  build: appointment,
+  today: '2026-11-07',
+  fixed: [],
+  defaultCount: 2,
+};
+// Six months before the week, so counts of visits and no-shows (BR-10) come from appointments.
+const history = generateWeek({
+  ...longRun,
+  seed: 20260508,
+  idPrefix: 'paw-h',
+  dates: dateRange('2026-05-08', '2026-11-01'),
+  pastMix: { noShow: 0.04, cancelled: 0.06 },
+});
+const upcoming = generateWeek({
+  ...longRun,
+  seed: 20261110,
+  idPrefix: 'paw-f',
+  dates: dateRange('2026-11-10', '2026-11-22'),
+});
+const appointments = [...history, ...saturday, ...week, ...upcoming];
+
 export const spaThuCungPawpaw: TenantFixture = {
-  tenant: { id: tenantId, slug: 'pawpaw', name: 'Spa thú cưng Pawpaw', industry: 'pet_spa' },
+  tenant: {
+    id: tenantId,
+    slug: 'pawpaw',
+    name: 'Spa thú cưng Pawpaw',
+    industry: 'pet_spa',
+    monogram: 'P',
+  },
+  template: petSpaTemplate,
   branches: [
     {
       id: branchId,
@@ -400,9 +520,11 @@ export const spaThuCungPawpaw: TenantFixture = {
   ],
   resources,
   staff: staffList,
+  staffTitles: ['Chăm sóc chính', 'Chăm sóc', 'Học việc'],
+  staffLevels: ['Chăm sóc', 'Chăm sóc chính', 'Chăm sóc cả'],
   staffTimeOff: [],
   services,
-  customers,
+  customers: withVisitCounts(everyone, appointments),
   servedSubjects,
-  appointments: [...saturday, ...week],
+  appointments,
 };

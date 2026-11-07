@@ -23,20 +23,20 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 
 | File | Màn hình | Trạng thái | Route trong `/mock` |
 |---|---|---|---|
-| `Main.dc.html` | Khách · bước chọn ngày giờ, điện thoại | **Đã chọn** (phương án A) | `/mock/dat-lich` bước "Ngày giờ" |
-| `KhachChonTho.dc.html` | Khách · bảng chọn thợ trượt lên | **Đã chọn** | `/mock/dat-lich`, mở từ dòng "Thợ" |
-| `KhachDesktop.dc.html` | Khách · chọn ngày giờ, máy tính | **Đã chọn** | `/mock/dat-lich` ở màn hình ≥ 900px |
-| `KhachMotTrang.dc.html` | Khách · một trang (Pawpaw) | Lấy một phần: bước chọn thú cưng, giá theo cân nặng | `/mock/dat-lich?tenant=pawpaw` bước "Cho bé nào?" |
+| `Main.dc.html` | Khách · bước chọn ngày giờ, điện thoại | **Đã chọn** (phương án A) | `/mock/[tenant]/book` bước "Ngày giờ" |
+| `KhachChonTho.dc.html` | Khách · bảng chọn thợ trượt lên | **Đã chọn** | `/mock/[tenant]/book`, mở từ dòng "Thợ" |
+| `KhachDesktop.dc.html` | Khách · chọn ngày giờ, máy tính | **Đã chọn** | `/mock/[tenant]/book` ở màn hình ≥ 900px |
+| `KhachMotTrang.dc.html` | Khách · một trang (Pawpaw) | Lấy một phần: bước chọn thú cưng, giá theo cân nặng | `/mock/pawpaw/book` bước "Cho bé nào?" |
 | `KhachLichThang.dc.html` | Khách · lịch tháng | Không chọn | không làm |
-| `LeTanChiTiet.dc.html` | Lễ tân · lịch theo nhân viên + bảng chi tiết, máy tính | **Đã chọn** | `/mock/le-tan` |
-| `LeTanTaiNguyen.dc.html` | Lễ tân · lịch theo tài nguyên | **Đã chọn** | `/mock/le-tan/tai-nguyen` |
-| `LeTanTablet.dc.html` | Lễ tân · iPad ngang, bảng chi tiết dạng ngăn trượt | **Đã chọn** | `/mock/le-tan` ở 768–1199px |
-| `LeTanDienThoai.dc.html` | Lễ tân · điện thoại, lịch từng thợ | **Đã chọn** | `/mock/le-tan` ở < 768px |
-| `LeTanHangCho.dc.html` | Lễ tân · "Hôm nay" (hàng chờ) | **Đã chọn**, trang riêng | `/mock/hom-nay` |
-| `QuanTriKhachHang.dc.html` | MH-07 khung ứng dụng + MH-08 mẫu danh sách (Khách hàng), máy tính | **Đã chọn** | `/mock/app/toc-may/customers` (Bước 8) |
+| `LeTanChiTiet.dc.html` | Lễ tân · lịch theo nhân viên + bảng chi tiết, máy tính | **Đã chọn** | `/mock/app/[tenant]/calendar` |
+| `LeTanTaiNguyen.dc.html` | Lễ tân · lịch theo tài nguyên | **Đã chọn** | `/mock/app/[tenant]/calendar?view=resources` |
+| `LeTanTablet.dc.html` | Lễ tân · iPad ngang, bảng chi tiết dạng ngăn trượt | **Đã chọn** | `/mock/app/[tenant]/calendar` ở 768–1199px |
+| `LeTanDienThoai.dc.html` | Lễ tân · điện thoại, lịch từng thợ | **Đã chọn** | `/mock/app/[tenant]/calendar` ở < 768px |
+| `LeTanHangCho.dc.html` | Lễ tân · "Hôm nay" (hàng chờ) | **Đã chọn**, trang riêng | `/mock/app/[tenant]/today` |
+| `QuanTriKhachHang.dc.html` | MH-07 khung ứng dụng + MH-08 mẫu danh sách (Khách hàng), máy tính | **Đã chọn** | `/mock/app/[tenant]/customers` |
 | `QuanTriThuGon.dc.html` | MH-07 thanh bên thu gọn, menu đổi cơ sở đang mở | **Đã chọn** | như trên, trạng thái thu gọn |
-| `QuanTriNhanVien.dc.html` | MH-09 mẫu form (Cài đặt › Nhân sự › Mai) | **Đã chọn** | `/mock/app/toc-may/settings/staff/[id]` (Bước 8) |
-| `QuanTriDienThoai.dc.html` | MH-07 + MH-08 trên điện thoại | **Đã chọn** | `/mock/app/toc-may/customers` dưới 768px |
+| `QuanTriNhanVien.dc.html` | MH-09 mẫu form (Cài đặt › Nhân sự › Mai) | **Đã chọn** | `/mock/app/[tenant]/settings/staff/[id]` |
+| `QuanTriDienThoai.dc.html` | MH-07 + MH-08 trên điện thoại | **Đã chọn** | `/mock/app/[tenant]/customers` dưới 768px |
 | `QuanTriDienThoaiLoc.dc.html` | MH-08 bảng Bộ lọc trên điện thoại | **Đã chọn** | như trên, bộ lọc mở |
 
 Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-13, BR-14, BR-15 trong `content/docs/nghiep-vu/quy-tac.md`.

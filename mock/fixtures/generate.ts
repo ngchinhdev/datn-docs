@@ -11,7 +11,7 @@
  * - Tóc Mây, Thứ Sáu 06/11: a cancelled appointment, a customer name over 30 characters, a long note.
  * - Pawpaw, Thứ Bảy 07/11: two pets booked together, a dog over 10 kg, dryers busy during the groomer's wait.
  */
-import { bookVariant, findVariant, type ItemSpec } from './bookings';
+import { bookVariant, findVariant, matchesAttributes, type ItemSpec } from './bookings';
 import type {
   Appointment,
   AppointmentStatus,
@@ -64,6 +64,10 @@ export interface WeekConfig {
   fixed: Appointment[];
   /** Target count per date; default random 6–14. */
   counts?: Record<string, number>;
+  /** Target count for dates not in `counts`; overrides the random 6–14. */
+  defaultCount?: number;
+  /** Share of past appointments that end as no-show and as cancelled; the rest complete. */
+  pastMix?: { noShow: number; cancelled: number };
   /** Staff not to use on a date (besides time off). */
   avoidStaff?: Record<string, string[]>;
 }
@@ -143,7 +147,7 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
   for (const date of cfg.dates) {
     const hours = openRange(cfg.branch, date);
     if (!hours) continue;
-    const target = cfg.counts?.[date] ?? 6 + Math.floor(rand() * 9);
+    const target = cfg.counts?.[date] ?? cfg.defaultCount ?? 6 + Math.floor(rand() * 9);
     const already = cfg.fixed.filter((a) => toLocal(a.startAt) === date).length;
     const off = new Set([
       ...cfg.timeOff.filter((t) => t.date === date).map((t) => t.resourceId),
@@ -157,9 +161,7 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
       const subject = pick(cfg.subjects);
       const service = pick(cfg.services);
       // BR-13: the variant follows the served subject.
-      const variant = service.variants.find((v) =>
-        Object.entries(v.match).every(([k, val]) => subject.attributes[k] === val),
-      );
+      const variant = service.variants.find((v) => matchesAttributes(v.match, subject.attributes));
       if (!variant) continue;
       // BR-03: only staff with the skill.
       const staff = cfg.staff.filter(
@@ -180,7 +182,7 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
       );
       if (!occ.fits(bookings)) continue;
 
-      const status = statusFor(date, cfg.today, rand);
+      const status = statusFor(date, cfg.today, rand, cfg.pastMix);
       const appt = cfg.build(
         `${cfg.idPrefix}-g${++n}`,
         subject.customerId,
@@ -205,9 +207,27 @@ function toLocal(utc: string) {
   return new Date(Date.parse(utc) + 7 * 60 * MINUTE).toISOString().slice(0, 10);
 }
 
-function statusFor(date: string, today: string, rand: () => number): AppointmentStatus {
-  if (date > today) return 'confirmed';
-  if (date === today) return 'confirmed';
+function statusFor(
+  date: string,
+  today: string,
+  rand: () => number,
+  mix: { noShow: number; cancelled: number } = { noShow: 0.12, cancelled: 0.12 },
+): AppointmentStatus {
+  if (date >= today) return 'confirmed';
   const r = rand();
-  return r < 0.76 ? 'completed' : r < 0.88 ? 'no_show' : 'cancelled';
+  if (r < 1 - mix.noShow - mix.cancelled) return 'completed';
+  return r < 1 - mix.cancelled ? 'no_show' : 'cancelled';
+}
+
+/** Every local date from `from` to `to`, both included. */
+export function dateRange(from: string, to: string): string[] {
+  const out: string[] = [];
+  for (
+    let t = Date.parse(`${from}T00:00:00Z`);
+    t <= Date.parse(`${to}T00:00:00Z`);
+    t += 86_400_000
+  ) {
+    out.push(new Date(t).toISOString().slice(0, 10));
+  }
+  return out;
 }

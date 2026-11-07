@@ -1,7 +1,10 @@
 import { appointmentBuilder } from './bookings';
-import { generateWeek } from './generate';
+import { dateRange, generateWeek } from './generate';
+import { generatePeople, withVisitCounts } from './people';
+import { hairSalonTemplate } from './templates';
 import type {
   Appointment,
+  Branch,
   BusinessHours,
   Customer,
   ServedSubject,
@@ -169,7 +172,11 @@ const staffList: Staff[] = [
       fullName: 'Trần Thị Mai',
       employeeCode: 'TM-001',
       phone: '+84901000001',
+      email: 'mai@tocmay.vn',
+      joinedAt: '2024-03',
     },
+    role: 'technician',
+    level: 2,
     skillServiceIds: ['may-cut', 'may-wash', 'may-dye'],
   },
   {
@@ -182,7 +189,11 @@ const staffList: Staff[] = [
       fullName: 'Phạm Ngọc Lan',
       employeeCode: 'TM-002',
       phone: '+84901000002',
+      email: 'lan@tocmay.vn',
+      joinedAt: '2025-01',
     },
+    role: 'technician',
+    level: 1,
     skillServiceIds: ['may-cut', 'may-wash'],
   },
   {
@@ -195,7 +206,11 @@ const staffList: Staff[] = [
       fullName: 'Lê Văn Hùng',
       employeeCode: 'TM-003',
       phone: '+84901000003',
+      email: 'hung@tocmay.vn',
+      joinedAt: '2023-06',
     },
+    role: 'manager',
+    level: 2,
     skillServiceIds: ['may-cut', 'may-wash', 'may-dye'],
   },
 ];
@@ -436,8 +451,34 @@ const others = (
   } satisfies ServedSubject,
 }));
 
-const customers = [...regulars, ...others.map((o) => o.customer)];
-const servedSubjects = [...regularSubjects, ...others.map((o) => o.subject)];
+// The week 02/11–08/11 books only the customers above; the rest come in earlier and later weeks.
+const weekSubjects = [...regularSubjects, ...others.map((o) => o.subject)];
+const people = generatePeople({
+  seed: 20261101,
+  prefix: 'may',
+  tenantId,
+  count: 109,
+  existing: [...regulars, ...others.map((o) => o.customer)],
+  notes: [
+    'Da đầu nhạy cảm, dùng thuốc không amoniac.',
+    'Thích ngồi ghế gần cửa sổ.',
+    'Hay đến sớm 10 phút, mời nước trước.',
+    'Chỉ nhận cắt, không nhận nhuộm tại chỗ.',
+    'Dị ứng mùi thuốc uốn.',
+  ],
+  subjects: (rand, customer, n) => [
+    {
+      id: `may-s-g${n}`,
+      tenantId,
+      customerId: customer.id,
+      kind: 'self',
+      name: customer.name,
+      attributes: { hairLength: rand() < 0.5 ? 'short' : 'long' },
+    },
+  ],
+});
+const everyone = [...regulars, ...others.map((o) => o.customer), ...people.customers];
+const servedSubjects = [...weekSubjects, ...people.subjects];
 
 const staffTimeOff: StaffTimeOff[] = [
   { resourceId: 'may-lan', date: '2026-11-03', note: 'Phép năm' },
@@ -524,23 +565,26 @@ const handwritten: Appointment[] = [
   ),
 ];
 
+/** Hours only; what the generator needs to place appointments. */
+const weekBranch: Branch = {
+  id: branchId,
+  tenantId,
+  name: '',
+  address: '',
+  timeZone: 'Asia/Ho_Chi_Minh',
+  businessHours: everyDay('09:00', '20:00'),
+  specialDays: [],
+};
+
 const week = generateWeek({
   seed: 20261102,
   idPrefix: 'may',
-  branch: {
-    id: branchId,
-    tenantId,
-    name: '',
-    address: '',
-    timeZone: 'Asia/Ho_Chi_Minh',
-    businessHours: everyDay('09:00', '20:00'),
-    specialDays: [],
-  },
+  branch: weekBranch,
   services,
   resources,
   staff: staffList,
   staffTypeId: 'may-rt-stylist',
-  subjects: servedSubjects,
+  subjects: weekSubjects,
   timeOff: staffTimeOff,
   build: appointment,
   dates: ['2026-11-02', '2026-11-03', '2026-11-04', '2026-11-05', '2026-11-06', '2026-11-08'],
@@ -550,8 +594,45 @@ const week = generateWeek({
   avoidStaff: { '2026-11-08': ['may-mai'] },
 });
 
+const longRun = {
+  idPrefix: 'may',
+  branch: weekBranch,
+  services,
+  resources,
+  staff: staffList,
+  staffTypeId: 'may-rt-stylist',
+  subjects: servedSubjects,
+  timeOff: [],
+  build: appointment,
+  today: '2026-11-07',
+  fixed: [],
+  defaultCount: 3,
+};
+// Six months before the week, so counts of visits and no-shows (BR-10) come from appointments.
+const history = generateWeek({
+  ...longRun,
+  seed: 20260508,
+  idPrefix: 'may-h',
+  dates: dateRange('2026-05-08', '2026-11-01'),
+  pastMix: { noShow: 0.04, cancelled: 0.06 },
+});
+const upcoming = generateWeek({
+  ...longRun,
+  seed: 20261110,
+  idPrefix: 'may-f',
+  dates: dateRange('2026-11-10', '2026-11-22'),
+});
+const appointments = [...history, ...saturday, ...handwritten, ...week, ...upcoming];
+
 export const salonTocMay: TenantFixture = {
-  tenant: { id: tenantId, slug: 'toc-may', name: 'Salon Tóc Mây', industry: 'hair_salon' },
+  tenant: {
+    id: tenantId,
+    slug: 'toc-may',
+    name: 'Salon Tóc Mây',
+    industry: 'hair_salon',
+    monogram: 'M',
+  },
+  template: hairSalonTemplate,
   branches: [
     {
       id: branchId,
@@ -575,9 +656,11 @@ export const salonTocMay: TenantFixture = {
   ],
   resources,
   staff: staffList,
+  staffTitles: ['Thợ chính', 'Thợ', 'Học việc'],
+  staffLevels: ['Thợ', 'Thợ chính', 'Thợ cả'],
   staffTimeOff,
   services,
-  customers,
+  customers: withVisitCounts(everyone, appointments),
   servedSubjects,
-  appointments: [...saturday, ...handwritten, ...week],
+  appointments,
 };

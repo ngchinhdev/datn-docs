@@ -2,7 +2,7 @@
 
 Mẫu trang danh sách cho mọi màn mức **DS** trong [Danh sách màn hình](https://datn-docs.vercel.app/docs/thiet-ke/man-hinh): `.sp-page-head` → `.sp-toolbar` → `.sp-table-card` > (`.sp-table-wrap` > `table.sp-table`) + `.sp-table-foot`.
 
-- **Cuộn trong khung:** trang dùng `.sp-shell__content--fill`, thẻ bảng chiếm phần màn hình còn lại; chỉ thân bảng cuộn (`.sp-table-wrap`, `tabindex="0"`, `role="region"` có nhãn để cuộn được bằng bàn phím). Dòng tiêu đề cột dính trên, chân bảng dính dưới. Mỗi dòng cao 56px.
+- **Cuộn trong khung (từ 768px):** trang dùng `.sp-shell__content--fill`, thẻ bảng chiếm phần màn hình còn lại; chỉ thân bảng cuộn (`.sp-table-wrap`, `tabindex="0"`, `role="region"` có nhãn để cuộn được bằng bàn phím). Dòng tiêu đề cột dính trên, chân bảng dính dưới. Mỗi dòng cao 56px. Dưới 768px danh sách thẻ cuộn theo trang như bình thường.
 
 - **Tiêu đề:** tên trang, dòng phụ có tổng số và phạm vi (chi nhánh); một nút chính bên phải ("Thêm khách").
 - **Thanh công cụ:** ô tìm `.sp-search` (tìm ngay khi gõ, theo tên và số điện thoại chuẩn hóa), các bộ lọc nhanh `.sp-chip` (`aria-pressed`), bộ lọc có giá trị ghi `.sp-chip__value`. Bộ lọc nằm trong URL.

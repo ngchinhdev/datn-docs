@@ -20,8 +20,7 @@ export function DateStrip({ dates, selected, onSelect }: DateStripProps) {
           aria-label={closed ? `${weekdayShort(date)} ${dayOfMonth(date)}, nghỉ` : undefined}
           onClick={() => onSelect(date)}
         >
-          {weekdayShort(date)}
-          <b>{dayOfMonth(date)}</b>
+          {weekdayShort(date)} <b>{dayOfMonth(date)}</b>
         </button>
       ))}
     </div>

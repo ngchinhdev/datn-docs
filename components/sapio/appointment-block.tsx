@@ -49,13 +49,21 @@ export function AppointmentBlock({
     height: slots(minutesBetween(first.startAt, last.endAt)),
   };
   const single = segments.length === 1;
+  const showsMeta = (i: number) => single || (i === segments.length - 1 && i > 0);
+  // Same texts in the same order as on screen, so the name contains what is visible.
+  const label = [
+    title,
+    ...segments.flatMap((s, i) => [s.note, meta && showsMeta(i) ? meta : undefined]),
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      aria-label={[title, meta].filter(Boolean).join(', ')}
+      aria-label={label}
       className={cn(
         'sp-appt border-0 p-0 text-left',
         `sp-appt--${statusModifier[status]}`,
@@ -70,11 +78,17 @@ export function AppointmentBlock({
           className={cn('sp-appt__seg block', segment.kind === 'wait' && 'sp-appt__seg--wait')}
           style={{ height: slots(minutesBetween(segment.startAt, segment.endAt)) }}
         >
-          {i === 0 && <span className="sp-appt__title">{title}</span>}
-          {meta && (single || (i === segments.length - 1 && i > 0)) && (
-            <span className="sp-appt__meta block">{meta}</span>
+          {i === 0 && (
+            <>
+              <span className="sp-appt__title">{title}</span>{' '}
+            </>
           )}
-          {segment.note && <span className="sp-appt__meta block">{segment.note}</span>}
+          {segment.note && (
+            <>
+              <span className="sp-appt__meta block">{segment.note}</span>{' '}
+            </>
+          )}
+          {meta && showsMeta(i) && <span className="sp-appt__meta block">{meta}</span>}
         </span>
       ))}
     </button>

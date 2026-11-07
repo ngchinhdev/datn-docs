@@ -8,53 +8,66 @@ import { useEffect, useState } from 'react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { tenantFixtures } from '@/mock/fixtures';
-import { parseSelection, roles, type Role } from '@/mock/selection';
+import {
+  fixtureBySlug,
+  roleLabel,
+  roles,
+  staffRoleOf,
+  type Role,
+  type StaffRole,
+} from '@/mock/selection';
 
-/** The role a route belongs to; `/mock` itself follows `?role=`. */
-function roleOf(pathname: string, queryRole: Role): Role {
-  if (pathname.startsWith('/mock/dat-lich')) return 'customer';
-  if (pathname.startsWith('/mock/le-tan') || pathname.startsWith('/mock/hom-nay')) {
-    return 'receptionist';
-  }
-  return queryRole;
+/** Where a mock URL points: the tenant slug and which area it is in. */
+function locate(pathname: string): { area: 'book' | 'app' | 'index'; slug: string | null } {
+  const [, , first, second] = pathname.split('/');
+  if (first === 'app' && second) return { area: 'app', slug: second };
+  if (first && second === 'book') return { area: 'book', slug: first };
+  return { area: 'index', slug: null };
 }
 
-/** Main page of each role; the owner has no screen yet, so it stays on the index. */
-const roleHome: Record<Role, string> = {
-  customer: '/mock/dat-lich',
-  receptionist: '/mock/le-tan',
-  owner: '/mock',
+/** First page of each role in `/mock/app/[tenant]`; the owner has no overview screen yet. */
+const staffHome: Record<StaffRole, string> = {
+  receptionist: 'calendar',
+  technician: 'my/schedule',
+  manager: 'calendar',
+  owner: 'calendar',
 };
 
 export function MockToolbar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const selection = parseSelection(searchParams.get('tenant'), searchParams.get('role'));
-  const { fixture } = selection;
-  const role = roleOf(pathname, selection.role);
+  const { area, slug } = locate(pathname);
+  const fixture = fixtureBySlug(slug ?? undefined);
+  const role: Role | null =
+    area === 'book' ? 'customer' : area === 'app' ? staffRoleOf(searchParams.get('role')) : null;
   const [open, setOpen] = useState(false);
-  const isBooking = pathname.startsWith('/mock/dat-lich');
+  const isBooking = area === 'book';
   const newCustomer = searchParams.get('khach') === 'moi';
 
-  const hrefWith = (key: 'tenant' | 'khach', value: string) => {
+  const tenantHref = (target: string) => {
+    const query = searchParams.toString();
+    const path = pathname.replace(`/${slug}/`, `/${target}/`);
+    return query ? `${path}?${query}` : path;
+  };
+  const khachHref = (value: string) => {
     const params = new URLSearchParams(searchParams);
-    params.set(key, value);
+    params.set('khach', value);
     return `${pathname}?${params}`;
   };
   const roleHref = (r: Role) => {
-    const params = new URLSearchParams({ tenant: fixture.tenant.slug });
-    if (r === 'owner') params.set('role', r);
-    return `${roleHome[r]}?${params}`;
+    if (!slug) return pathname;
+    if (r === 'customer') return `/mock/${slug}/book`;
+    const params = r === 'owner' ? '' : `?role=${r}`;
+    return `/mock/app/${slug}/${staffHome[r]}${params}`;
   };
-  const roleLabel = roles.find((r) => r.id === role)?.label ?? '';
 
-  const pickers = (
+  const pickers = fixture && role && (
     <>
       <Picker
         label="Cơ sở"
         options={tenantFixtures.map((f) => ({ value: f.tenant.slug, label: f.tenant.name }))}
         selected={fixture.tenant.slug}
-        hrefFor={(value) => hrefWith('tenant', value)}
+        hrefFor={tenantHref}
       />
       <Picker
         label="Vai trò"
@@ -70,7 +83,7 @@ export function MockToolbar() {
             { value: 'moi', label: 'Khách mới' },
           ]}
           selected={newCustomer ? 'moi' : 'cu'}
-          hrefFor={(value) => hrefWith('khach', value)}
+          hrefFor={khachHref}
         />
       )}
     </>
@@ -78,34 +91,38 @@ export function MockToolbar() {
 
   return (
     <div className="flex min-w-0 grow flex-wrap items-center gap-x-6 gap-y-2">
-      {/* Phone: one line, the pickers open below on demand. */}
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls="mock-pickers"
-        onClick={() => setOpen((v) => !v)}
-        className="flex min-w-0 items-center gap-1 text-sm md:hidden"
-      >
-        <span className="truncate">
-          {fixture.tenant.name} · {roleLabel}
-          {isBooking && ` · ${newCustomer ? 'Khách mới' : 'Khách cũ'}`}
-        </span>
-        <ChevronDown
-          size={16}
-          aria-hidden="true"
-          className={cn('flex-none transition-transform', open && 'rotate-180')}
-        />
-        <span className="sr-only">Đổi lựa chọn</span>
-      </button>
-      <div
-        id="mock-pickers"
-        className={cn(
-          'w-full flex-col gap-2 md:flex md:w-auto md:flex-row md:flex-wrap md:items-center md:gap-x-6',
-          open ? 'flex' : 'hidden',
-        )}
-      >
-        {pickers}
-      </div>
+      {pickers && (
+        <>
+          {/* Phone: one line, the pickers open below on demand. */}
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls="mock-pickers"
+            onClick={() => setOpen((v) => !v)}
+            className="flex min-w-0 items-center gap-1 text-sm md:hidden"
+          >
+            <span className="truncate">
+              {fixture?.tenant.name} · {role && roleLabel(role)}
+              {isBooking && ` · ${newCustomer ? 'Khách mới' : 'Khách cũ'}`}
+            </span>
+            <ChevronDown
+              size={16}
+              aria-hidden="true"
+              className={cn('flex-none transition-transform', open && 'rotate-180')}
+            />
+            <span className="sr-only">Đổi lựa chọn</span>
+          </button>
+          <div
+            id="mock-pickers"
+            className={cn(
+              'w-full flex-col gap-2 md:flex md:w-auto md:flex-row md:flex-wrap md:items-center md:gap-x-6',
+              open ? 'flex' : 'hidden',
+            )}
+          >
+            {pickers}
+          </div>
+        </>
+      )}
       <ThemeSwitch />
     </div>
   );

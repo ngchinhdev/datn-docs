@@ -1,5 +1,6 @@
 'use client';
 
+import { X } from 'lucide-react';
 import {
   createContext,
   useCallback,
@@ -67,6 +68,16 @@ function ToastView({
       {item.undo && (
         <button type="button" className="sp-toast__action" onClick={() => onUndo(item)}>
           Hoàn tác
+        </button>
+      )}
+      {item.persist && (
+        <button
+          type="button"
+          className="sp-icon-btn size-7!"
+          aria-label="Đóng"
+          onClick={() => onExpire(item.id)}
+        >
+          <X aria-hidden="true" />
         </button>
       )}
     </div>

@@ -20,8 +20,8 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 **Mức thiết kế:**
 
 - **Vẽ:** vẽ riêng trên canvas Claude Design rồi mới code. Dành cho màn thể hiện bài toán của đề tài hoặc có tương tác riêng.
-- **DS:** dựng từ *mẫu trang danh sách* (MH-09): tiêu đề, nút chính, tìm kiếm, bộ lọc, bảng hoặc thẻ trên điện thoại, phân trang, trạng thái trống. Ghi rõ cột và bộ lọc là đủ.
-- **Form:** dựng từ *mẫu trang form* (MH-10): các nhóm trường, lưu, hủy thay đổi, lỗi từng trường. Ghi rõ trường là đủ.
+- **DS:** dựng từ *mẫu trang danh sách* (MH-08): tiêu đề, nút chính, tìm kiếm, bộ lọc, bảng hoặc thẻ trên điện thoại, phân trang, trạng thái trống. Ghi rõ cột và bộ lọc là đủ.
+- **Form:** dựng từ *mẫu trang form* (MH-09): các nhóm trường, lưu, hủy thay đổi, lỗi từng trường. Ghi rõ trường là đủ.
 - **Nhẹ:** trang đơn giản theo khung chung, không cần vẽ.
 
 **Trạng thái:** Chưa làm · Đang làm · Đã chốt (cô đồng ý). Trạng thái hiện trên trang `/mock` (lấy từ `mock/screens.ts`).
@@ -43,7 +43,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 - `[tenant]` là slug của cơ sở (`toc-may`, `pawpaw`). Slug nằm trong URL cả ở khu nội bộ, để mở hai cơ sở ở hai tab không lẫn, và link gửi cho đồng nghiệp mở đúng cơ sở. Quyền vẫn xét theo cặp (cơ sở, vai trò) của tài khoản.
 - Slug theo BR-72: chữ thường không dấu, số, gạch ngang, duy nhất, không trùng từ dành riêng (`app`, `admin`, `login`...).
 - Trạng thái xem đặt trong query để chia sẻ link và tải lại không mất: `?date=2026-11-07`, `?view=resources`, `?branch=q3`, `?step=time`.
-- **Mock** dùng đúng route thật, thêm tiền tố `/mock`: `/mock/toc-may/book`, `/mock/app/toc-may/calendar`. Đổi cơ sở là đổi slug trong URL. Các route mock hiện có (`/mock/dat-lich`, `/mock/le-tan`, `/mock/hom-nay`) đổi tên sau khi PR #2 merge.
+- **Mock** dùng đúng route thật, thêm tiền tố `/mock`: `/mock/toc-may/book`, `/mock/app/toc-may/calendar`. Đổi cơ sở là đổi slug trong URL. Các URL mock cũ (`/mock/dat-lich`, `/mock/le-tan`, `/mock/hom-nay`) chuyển hướng 308 sang route mới; cơ sở lấy từ `?tenant=`.
 
 ## A. Tài khoản và đăng ký cơ sở
 
