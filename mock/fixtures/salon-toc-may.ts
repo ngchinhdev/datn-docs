@@ -74,6 +74,7 @@ const services: Service[] = [
         id: 'may-dye-short',
         name: 'Tóc ngắn',
         priceVnd: 500_000n,
+        depositVnd: 100_000n,
         match: { hairLength: 'short' },
         segments: [
           {
@@ -95,6 +96,7 @@ const services: Service[] = [
         id: 'may-dye-long',
         name: 'Tóc dài',
         priceVnd: 700_000n,
+        depositVnd: 100_000n,
         match: { hairLength: 'long' },
         segments: [
           {

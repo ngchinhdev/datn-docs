@@ -34,7 +34,7 @@ const toMs = (iso: string) => Date.parse(iso);
 const localToUtcMs = (date: string, time: string) =>
   Date.parse(`${date}T${time}:00Z`) - BRANCH_UTC_OFFSET_MINUTES * 60_000;
 
-function openingHours(fixture: TenantFixture, date: string) {
+export function openingHours(fixture: TenantFixture, date: string) {
   const branch = fixture.branches[0];
   if (!branch) return null;
   const special = branch.specialDays.find((d) => d.date === date);

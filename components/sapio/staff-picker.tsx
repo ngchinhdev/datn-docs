@@ -18,7 +18,7 @@ export interface StaffOption {
   /** "Sớm nhất 09:45"; `null` when fully booked on the day being viewed. */
   earliest: string | null;
   /** Shown under "Hết giờ ngày này", e.g. "Sớm nhất CN 08/11". */
-  nextDay?: string;
+  nextDay?: string | undefined;
 }
 
 export interface StaffPickerProps {

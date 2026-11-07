@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 export interface BottomBarProps {
   title: string;
-  subtitle?: string;
+  subtitle?: string | undefined;
   action: ReactNode;
   /** Fixed to the viewport bottom below 900px; static inside the desktop column. */
   className?: string;

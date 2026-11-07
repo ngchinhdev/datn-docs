@@ -88,6 +88,8 @@ export interface ServiceVariant {
   name: string;
   /** Integer VND. */
   priceVnd: bigint;
+  /** Integer VND paid online to confirm; absent = no deposit. */
+  depositVnd?: bigint;
   /** Served-subject attributes that select this variant (BR-13). */
   match: Record<string, string>;
   segments: ServiceSegment[];
