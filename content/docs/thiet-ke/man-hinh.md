@@ -28,7 +28,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 
 ## Quy ước route
 
-> **Đề xuất, chờ chốt** (sẽ ghi thành quyết định kỹ thuật khi đồng ý).
+Đã chốt ở [T-15](../ky-thuat/quyet-dinh-ky-thuat.md#t-15-route-của-web-tiếng-anh-slug-cơ-sở-trong-url).
 
 - **Tiếng Anh**, chữ thường, nối bằng gạch ngang, danh từ số nhiều cho tập hợp (`/customers/[id]`), cùng từ với [Thuật ngữ](../nghiep-vu/thuat-ngu.md). Lý do: khớp tên trong code và API (`/v1/customers`), không có vấn đề dấu tiếng Việt trong URL, theo thói quen của các sản phẩm SaaS. Chữ hiển thị trên màn hình vẫn là tiếng Việt; tài liệu `/docs` giữ đường dẫn tiếng Việt.
 - **Bốn khu:**
@@ -41,7 +41,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 | Quản trị nền tảng | `/admin/...` | QTNT |
 
 - `[tenant]` là slug của cơ sở (`toc-may`, `pawpaw`). Slug nằm trong URL cả ở khu nội bộ, để mở hai cơ sở ở hai tab không lẫn, và link gửi cho đồng nghiệp mở đúng cơ sở. Quyền vẫn xét theo cặp (cơ sở, vai trò) của tài khoản.
-- Slug: chữ thường không dấu, số, gạch ngang, 3–40 ký tự, duy nhất trên nền tảng, **không trùng từ dành riêng**: `app`, `admin`, `api`, `signup`, `login`, `logout`, `invite`, `verify-email`, `forgot-password`, `reset-password`, `select-workspace`, `docs`, `mock`, `help`, `about`, `terms`, `privacy`, `static`, `assets`.
+- Slug theo BR-72: chữ thường không dấu, số, gạch ngang, duy nhất, không trùng từ dành riêng (`app`, `admin`, `login`...).
 - Trạng thái xem đặt trong query để chia sẻ link và tải lại không mất: `?date=2026-11-07`, `?view=resources`, `?branch=q3`, `?step=time`.
 - **Mock** dùng đúng route thật, thêm tiền tố `/mock`: `/mock/toc-may/book`, `/mock/app/toc-may/calendar`. Đổi cơ sở là đổi slug trong URL. Các route mock hiện có (`/mock/dat-lich`, `/mock/le-tan`, `/mock/hom-nay`) đổi tên sau khi PR #2 merge.
 

@@ -149,6 +149,18 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 - Mock dùng cùng Tailwind 4 + shadcn/ui với `apps/web`, dữ liệu giả là fixture TypeScript trong repo, có cả tenant salon và spa thú cưng.
 - Fumadocs MDX là ESM-only: file cấu hình là `next.config.mjs`.
 
+## T-15. Route của web: tiếng Anh, slug cơ sở trong URL
+
+Chốt ngày 07/11/2026 cùng [Danh sách màn hình](../thiet-ke/man-hinh.md).
+
+- **Route tiếng Anh**, chữ thường, nối bằng gạch ngang, danh từ số nhiều cho tập hợp, cùng từ với [Thuật ngữ](../nghiep-vu/thuat-ngu.md) và REST API (`/app/toc-may/customers` ↔ `GET /v1/customers`). Chữ trên màn hình vẫn là tiếng Việt. Tài liệu `/docs` giữ đường dẫn tiếng Việt.
+- **Bốn khu:** công khai của Sapio (`/`, `/signup`, `/login`), trang khách của một cơ sở (`/[tenant]/...`), khu nội bộ (`/app/[tenant]/...`), quản trị nền tảng (`/admin/...`). Trong `apps/web` là bốn route group của App Router, mỗi group một layout; `proxy.ts` kiểm phiên cho `/app` và `/admin`.
+- **Slug cơ sở nằm trong URL cả ở khu nội bộ:** mở hai cơ sở ở hai tab không lẫn nhau, link gửi đồng nghiệp mở đúng cơ sở. Server lấy tenant từ slug, kiểm tài khoản có membership ở tenant đó rồi mới đặt `app.tenant_id` cho RLS (T-07); slug không phải là quyền.
+- **Trạng thái xem trong query** (`?date=`, `?view=`, `?branch=`, `?step=`): chia sẻ link và tải lại không mất.
+- **Slug** theo BR-72 (danh sách từ dành riêng).
+- **Mock** trong `datn-docs` dùng đúng route thật, thêm tiền tố `/mock`.
+- **Vì sao không giữ tenant trong phiên** (`/app/calendar`): gọn URL hơn nhưng hai tab hai cơ sở dùng chung phiên sẽ ghi nhầm dữ liệu; link chia sẻ không mang theo cơ sở.
+
 ## Nguồn
 
 - [Next.js 16.4](https://nextjs.org/blog/next-16-4) · [Renaming Middleware to Proxy](https://nextjs.org/docs/messages/middleware-to-proxy) · [Upgrade to version 16](https://nextjs.org/docs/app/guides/upgrading/version-16)
