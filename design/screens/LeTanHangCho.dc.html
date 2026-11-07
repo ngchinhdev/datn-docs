@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hàng chờ hôm nay và lịch</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 900px; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans);">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 12px 24px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <span style="font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: -0.02em;">Sapio</span>
+    <nav aria-label="Khu quản trị" style="display: flex; flex-wrap: wrap; gap: 4px;">
+      <a href="#" aria-current="page" class="sp-btn sp-btn--sm" style="background: var(--fill-tonal); color: var(--ink); text-decoration: none;">Hôm nay</a>
+      <a href="#" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Lịch</a>
+      <a href="#" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Khách hàng</a>
+      <a href="#" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Thu chi</a>
+      <a href="#" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Báo cáo</a>
+    </nav>
+    <div style="margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+      <span style="font-size: 14px; line-height: 20px; color: var(--ink-muted);">Tóc Mây Quận 3</span>
+      <button type="button" class="sp-btn sp-btn--secondary">Khách vãng lai</button>
+      <button type="button" class="sp-btn sp-btn--primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        Tạo lịch hẹn
+      </button>
+    </div>
+  </header>
+
+  <main style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; padding: 20px 24px; max-width: 1600px; margin: 0 auto;">
+    <aside style="flex: 1 1 340px; max-width: 420px; display: flex; flex-direction: column; gap: 20px;" aria-label="Hàng chờ hôm nay">
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.02em;">Thứ Bảy, 07/11</h1>
+        <span style="font-size: 14px; line-height: 20px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">8 lịch hẹn · 1 đang giữ chỗ · bây giờ 10:20</span>
+      </div>
+
+      <section style="display: flex; flex-direction: column; gap: 8px;" aria-label="Đang làm">
+        <h2 style="margin: 0; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--ink-muted);">Đang làm · 2</h2>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line);">
+          <span style="width: 44px; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums;">09:00</span>
+          <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+            <span style="font-size: 14px; line-height: 20px; font-weight: 600;">Chị Hà · Nhuộm ngắn</span>
+            <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">Mai · chờ lên màu đến 10:15</span>
+          </div>
+          <span class="sp-badge sp-badge--checked-in">Đã check-in</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line);">
+          <span style="width: 44px; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums;">09:30</span>
+          <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+            <span style="font-size: 14px; line-height: 20px; font-weight: 600;">Anh Bảo An · Gội, cắt</span>
+            <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">Hùng · Ghế 3 · xong lúc 10:45</span>
+          </div>
+          <span class="sp-badge sp-badge--checked-in">Đã check-in</span>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 8px;" aria-label="Chờ thanh toán">
+        <h2 style="margin: 0; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--ink-muted);">Chờ thanh toán · 1</h2>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line);">
+          <span style="width: 44px; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums;">09:30</span>
+          <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+            <span style="font-size: 14px; line-height: 20px; font-weight: 600;">Anh Tuấn · Cắt ngắn</span>
+            <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">Mai · 150.000 ₫</span>
+          </div>
+          <button type="button" class="sp-btn sp-btn--primary sp-btn--sm">Thu tiền</button>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 8px;" aria-label="Sắp đến">
+        <h2 style="margin: 0; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--ink-muted);">Sắp đến · 4</h2>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; box-shadow: inset 0 0 0 1.5px var(--brand);">
+          <span style="width: 44px; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums;">10:30</span>
+          <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+            <span style="font-size: 14px; line-height: 20px; font-weight: 600;">Khách đang đặt online</span>
+            <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">Lan · Ghế 2 · giữ chỗ còn 07:42</span>
+          </div>
+          <span class="sp-badge sp-badge--hold">Đang giữ chỗ</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line);">
+          <span style="width: 44px; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums;">11:00</span>
+          <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+            <span style="font-size: 14px; line-height: 20px; font-weight: 600;">Chị Ngọc · Cắt dài</span>
+            <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Mai · Ghế 1</span>
+          </div>
+          <button type="button" class="sp-btn sp-btn--secondary sp-btn--sm">Check-in</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line);">
+          <span style="width: 44px; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums;">11:30</span>
+          <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+            <span style="font-size: 14px; line-height: 20px; font-weight: 600;">Chị Vân · Cắt ngắn</span>
+            <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Hùng · Ghế 2</span>
+          </div>
+          <button type="button" class="sp-btn sp-btn--secondary sp-btn--sm">Check-in</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line);">
+          <span style="width: 44px; font-size: 14px; line-height: 20px; font-weight: 600; font-variant-numeric: tabular-nums;">13:00</span>
+          <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+            <span style="font-size: 14px; line-height: 20px; font-weight: 600;">Chị Thư · Nhuộm dài</span>
+            <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Hùng · Ghế 3 · đã cọc 150.000 ₫</span>
+          </div>
+          <button type="button" class="sp-btn sp-btn--secondary sp-btn--sm">Check-in</button>
+        </div>
+      </section>
+
+      <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Đã xong 1 · Không đến 1 (Anh Phúc, 09:15)</span>
+    </aside>
+
+    <section style="flex: 999 1 640px; min-width: 0;" aria-label="Lịch nhân viên">
+      <div class="sp-cal" style="--cols: 3;" role="grid" aria-label="Lịch nhân viên, Thứ Bảy 07/11">
+        <div class="sp-cal__head"></div>
+        <div class="sp-cal__head"><div class="sp-cal__name">Mai</div><div class="sp-cal__kind">Thợ chính · 4 lịch</div></div>
+        <div class="sp-cal__head"><div class="sp-cal__name">Lan</div><div class="sp-cal__kind">Thợ · 3 lịch</div></div>
+        <div class="sp-cal__head"><div class="sp-cal__name">Hùng</div><div class="sp-cal__kind">Thợ · 3 lịch</div></div>
+
+        <div class="sp-cal__ruler" style="height: 448px;">
+          <span class="sp-cal__hour" style="top: 0;">08:00</span>
+          <span class="sp-cal__hour" style="top: 64px;">09:00</span>
+          <span class="sp-cal__hour" style="top: 128px;">10:00</span>
+          <span class="sp-cal__hour" style="top: 192px;">11:00</span>
+          <span class="sp-cal__hour" style="top: 256px;">12:00</span>
+          <span class="sp-cal__hour" style="top: 320px;">13:00</span>
+          <span class="sp-cal__hour" style="top: 384px;">14:00</span>
+        </div>
+
+        <div class="sp-cal__col" style="height: 448px;">
+          <div class="sp-appt sp-appt--checked-in" style="top: 64px; height: 112px;">
+            <div class="sp-appt__seg" style="height: 32px;"><div class="sp-appt__title">Chị Hà · Nhuộm ngắn</div></div>
+            <div class="sp-appt__seg sp-appt__seg--wait" style="height: 48px;"></div>
+            <div class="sp-appt__seg" style="height: 32px;"><div class="sp-appt__meta">09:00–10:45 · Ghế 1</div></div>
+          </div>
+          <div class="sp-appt sp-appt--completed sp-appt--inset" style="top: 96px; height: 48px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Anh Tuấn · Cắt</div><div class="sp-appt__meta">09:30–10:15 · Ghế 2</div></div>
+          </div>
+          <div class="sp-appt sp-appt--confirmed" style="top: 192px; height: 64px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Chị Ngọc · Cắt dài</div><div class="sp-appt__meta">11:00–12:00 · Ghế 1</div></div>
+          </div>
+          <div class="sp-cal__now" style="top: 149px;"></div>
+        </div>
+
+        <div class="sp-cal__col" style="height: 448px;">
+          <div class="sp-appt sp-appt--completed" style="top: 32px; height: 32px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Chị Vy · Gội sấy</div></div>
+          </div>
+          <div class="sp-appt sp-appt--no-show" style="top: 80px; height: 48px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Anh Phúc · Cắt</div><div class="sp-appt__meta">Không đến</div></div>
+          </div>
+          <div class="sp-appt sp-appt--hold" style="top: 160px; height: 48px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Đang giữ chỗ</div><div class="sp-appt__meta">còn 07:42 · Ghế 2</div></div>
+          </div>
+          <div class="sp-cal__now" style="top: 149px;"></div>
+        </div>
+
+        <div class="sp-cal__col" style="height: 448px;">
+          <div class="sp-appt sp-appt--checked-in" style="top: 96px; height: 80px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Anh Bảo An · Gội, cắt</div><div class="sp-appt__meta">09:30–10:45 · Ghế 3</div></div>
+          </div>
+          <div class="sp-appt sp-appt--confirmed" style="top: 224px; height: 48px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Chị Vân · Cắt ngắn</div><div class="sp-appt__meta">11:30–12:15 · Ghế 2</div></div>
+          </div>
+          <div class="sp-appt sp-appt--confirmed" style="top: 320px; height: 128px;">
+            <div class="sp-appt__seg" style="height: 43px;"><div class="sp-appt__title">Chị Thư · Nhuộm dài</div></div>
+            <div class="sp-appt__seg sp-appt__seg--wait" style="height: 48px;"><div class="sp-appt__meta">Chờ lên màu · Hùng rảnh</div></div>
+            <div class="sp-appt__seg" style="height: 37px;"><div class="sp-appt__meta">13:00–15:00 · Ghế 3</div></div>
+          </div>
+          <div class="sp-cal__now" style="top: 149px;"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

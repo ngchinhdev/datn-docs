@@ -34,6 +34,8 @@ Mở VS Code và Claude Code tại `datn/` để thấy cả hai repo.
 | Phiên bản, kiến trúc, pattern (T-xx) | `content/docs/ky-thuat/quyet-dinh-ky-thuat.md` |
 | Cách viết test | `content/docs/ky-thuat/chien-luoc-kiem-thu.md` |
 | Dựng base source từng bước | `content/docs/ky-thuat/ke-hoach-dung-base.md` |
+| Code giao diện mock từng bước | `content/docs/ky-thuat/ke-hoach-ui-mock.md` |
+| Thiết kế: màu, chữ, component, màn hình đã chốt | `design/README.md`, `design/sapio/README.md` |
 
 `content/docs/nghiep-vu/phan-tich-goc.md` là bản phân tích ban đầu, **rộng hơn phạm vi đồ án**: chỉ tham khảo, không làm theo.
 
@@ -90,4 +92,6 @@ Lệnh của `datn-saas` xem `datn-saas/CLAUDE.md`.
 - Nằm ở `app/mock/*` trong repo này, dùng dữ liệu giả trong `mock/fixtures/` (TypeScript), không gọi API thật.
 - Có bộ chọn tenant (Salon Tóc Mây, Spa thú cưng Pawpaw) và bộ chọn vai trò.
 - Dùng cùng Tailwind 4 + shadcn/ui với `apps/web` để chuyển component sang dễ.
+- Giao diện theo hệ thống thiết kế **Sapio** (`design/sapio/`): chỉ dùng biến trong `tokens.css` và class trong `components.css`, không tự đặt màu; không nền đen ở đâu. Màn hình tham chiếu ở `design/screens/`.
+- Chia việc: phiên claude.ai lo phân tích, thiết kế, review; Claude Code trên máy lo code theo kế hoạch, làm trên nhánh riêng và mở pull request để review, không tự merge.
 - Mock là bản phác để chốt luồng với giảng viên; khi chốt, đổi trạng thái màn hình thành "đã chốt".

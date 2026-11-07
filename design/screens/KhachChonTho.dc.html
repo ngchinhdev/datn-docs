@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Chọn thợ</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-tenant-{{tenant}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--surface); color: var(--ink); font-family: var(--font-sans);">
+  <dc-import name="Main" dark="{{dark}}" tenant="{{tenant}}" hint-size="390px,844px"></dc-import>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.4);"></div>
+
+  <div role="dialog" aria-modal="true" aria-labelledby="chon-tho-title" style="position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 14px; padding: 8px 16px 24px 16px; border-radius: 24px 24px 0 0; background: var(--surface-raised); box-shadow: var(--shadow-popover);">
+    <span aria-hidden="true" style="align-self: center; width: 36px; height: 4px; border-radius: 999px; background: var(--fill-tonal);"></span>
+    <div style="display: flex; align-items: flex-start; gap: 8px;">
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px;">
+        <h2 id="chon-tho-title" style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em;">Chọn thợ</h2>
+        <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Thợ làm được Nhuộm tóc · Thứ Bảy 07/11</span>
+      </div>
+      <a href="Main.dc.html" aria-label="Đóng" class="sp-btn sp-btn--ghost" style="width: 44px; height: 44px; padding: 0; border-radius: 999px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;" role="radiogroup" aria-label="Thợ">
+      <button type="button" role="radio" aria-checked="true" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 0; border-radius: 16px; background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); color: var(--ink); text-align: left; font-family: var(--font-sans); cursor: pointer;">
+        <span aria-hidden="true" style="flex: none; width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--surface-raised); color: var(--accent);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+          <span style="font-size: 15px; line-height: 22px; font-weight: 600;">Bất kỳ ai</span>
+          <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Xếp thợ trống sớm nhất, nhiều giờ để chọn nhất</span>
+        </span>
+        <span style="font-size: 13px; line-height: 18px; font-weight: 600; font-variant-numeric: tabular-nums;">09:00</span>
+      </button>
+      <button type="button" role="radio" aria-checked="false" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 0; border-radius: 16px; background: var(--fill-tonal); color: var(--ink); text-align: left; font-family: var(--font-sans); cursor: pointer;">
+        <span aria-hidden="true" style="flex: none; width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--status-checked-in-soft); color: var(--status-checked-in); font-size: 16px; font-weight: 700;">M</span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+          <span style="font-size: 15px; line-height: 22px; font-weight: 600;">Mai</span>
+          <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Thợ chính · chuyên nhuộm</span>
+        </span>
+        <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">Sớm nhất 09:45</span>
+      </button>
+      <button type="button" role="radio" aria-checked="false" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 0; border-radius: 16px; background: var(--fill-tonal); color: var(--ink); text-align: left; font-family: var(--font-sans); cursor: pointer;">
+        <span aria-hidden="true" style="flex: none; width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--status-confirmed-soft); color: var(--status-confirmed); font-size: 16px; font-weight: 700;">L</span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+          <span style="font-size: 15px; line-height: 22px; font-weight: 600;">Lan</span>
+          <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Thợ · cắt, uốn</span>
+        </span>
+        <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">Sớm nhất 10:30</span>
+      </button>
+      <button type="button" role="radio" aria-checked="false" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 14px; border: 0; border-radius: 16px; background: var(--fill-tonal); color: var(--ink-muted); text-align: left; font-family: var(--font-sans); cursor: pointer;">
+        <span aria-hidden="true" style="flex: none; width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--surface-raised); color: var(--ink-muted); font-size: 16px; font-weight: 700;">H</span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+          <span style="font-size: 15px; line-height: 22px; font-weight: 600;">Hùng</span>
+          <span style="font-size: 13px; line-height: 18px;">Thợ · nhuộm, tạo kiểu</span>
+        </span>
+        <span style="font-size: 13px; line-height: 18px; text-align: right;">Hết giờ ngày này<br>Sớm nhất CN 08/11</span>
+      </button>
+    </div>
+
+    <a href="Main.dc.html" class="sp-btn sp-btn--accent sp-btn--lg sp-btn--block" style="text-decoration: none; box-sizing: border-box;">Xong</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"tenant":{"editor":"enum","options":["may","pawpaw"],"default":"may","section":"Giao diện"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { dark: !!this.props.dark, theme: this.props.dark ? 'dark' : 'light', tenant: this.props.tenant ?? 'may' };
+  }
+}
+</script>
+</body>
+</html>

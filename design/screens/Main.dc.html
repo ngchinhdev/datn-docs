@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Chọn ngày giờ, từng bước</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-tenant-{{tenant}}" style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans);">
+  <div style="display: flex; flex-direction: column; gap: 20px; padding: 16px 16px 120px 16px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button type="button" aria-label="Quay lại" class="sp-btn sp-btn--ghost" style="width: 44px; height: 44px; padding: 0; border-radius: 999px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+      </button>
+      <div style="flex-grow: 1; display: flex; flex-direction: column;">
+        <span style="font-size: 15px; line-height: 20px; font-weight: 600;">Salon Tóc Mây</span>
+        <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Tóc Mây Quận 3</span>
+      </div>
+      <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">Bước 3/4</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px;" aria-hidden="true">
+      <div style="height: 4px; border-radius: 999px; background: var(--accent);"></div>
+      <div style="height: 4px; border-radius: 999px; background: var(--accent);"></div>
+      <div style="height: 4px; border-radius: 999px; background: var(--accent);"></div>
+      <div style="height: 4px; border-radius: 999px; background: var(--fill-tonal);"></div>
+    </div>
+
+    <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.02em;">Chọn ngày giờ</h1>
+
+    <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 20px; background: var(--fill-tonal);">
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px;">
+        <span style="font-size: 15px; line-height: 22px; font-weight: 600;">Nhuộm tóc · Tóc ngắn</span>
+        <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">105 phút · 500.000 ₫</span>
+      </div>
+      <a href="#" style="font-size: 14px; font-weight: 600; text-decoration: none;">Đổi</a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="label" style="color: var(--ink-muted);">Thợ</span>
+      <a href="KhachChonTho.dc.html" aria-haspopup="dialog" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: var(--fill-tonal); color: var(--ink); text-decoration: none;">
+        <span aria-hidden="true" style="flex: none; display: flex;">
+          <span style="width: 32px; height: 32px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--status-checked-in-soft); color: var(--status-checked-in); font-size: 13px; font-weight: 700; box-shadow: 0 0 0 2px var(--fill-tonal);">M</span>
+          <span style="width: 32px; height: 32px; margin-left: -10px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--status-confirmed-soft); color: var(--status-confirmed); font-size: 13px; font-weight: 700; box-shadow: 0 0 0 2px var(--fill-tonal);">L</span>
+          <span style="width: 32px; height: 32px; margin-left: -10px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--surface-raised); color: var(--ink-muted); font-size: 13px; font-weight: 700; box-shadow: 0 0 0 2px var(--fill-tonal);">H</span>
+        </span>
+        <span style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0;">
+          <span style="font-size: 14px; line-height: 20px; font-weight: 600;">Bất kỳ ai</span>
+          <span style="font-size: 12px; line-height: 16px; color: var(--ink-muted);">Xếp thợ trống sớm nhất</span>
+        </span>
+        <span style="display: flex; align-items: center; gap: 2px; font-size: 14px; font-weight: 600; color: var(--accent);">
+          Đổi
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+        </span>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="label" style="color: var(--ink-muted);">Tháng 11</span>
+      <div class="sp-dates" role="group" aria-label="Ngày">
+        <button class="sp-date" type="button" aria-pressed="true">T7<b>07</b></button>
+        <button class="sp-date" type="button" aria-pressed="false">CN<b>08</b></button>
+        <button class="sp-date" type="button" aria-pressed="false">T2<b>09</b></button>
+        <button class="sp-date" type="button" aria-pressed="false">T3<b>10</b></button>
+        <button class="sp-date" type="button" aria-pressed="false">T4<b>11</b></button>
+        <button class="sp-date" type="button" aria-pressed="false">T5<b>12</b></button>
+        <button class="sp-date" type="button" disabled>T6<b>13</b></button>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="label" style="color: var(--ink-muted);">Buổi sáng</span>
+      <div class="sp-slots" role="group" aria-label="Giờ trống buổi sáng">
+        <button class="sp-slot" type="button" aria-pressed="false">09:00</button>
+        <button class="sp-slot" type="button" aria-pressed="true">09:45</button>
+        <button class="sp-slot" type="button" aria-pressed="false">10:30</button>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="label" style="color: var(--ink-muted);">Buổi chiều</span>
+      <div class="sp-slots" role="group" aria-label="Giờ trống buổi chiều">
+        <button class="sp-slot" type="button" aria-pressed="false">13:15</button>
+        <button class="sp-slot" type="button" aria-pressed="false">14:00</button>
+        <button class="sp-slot" type="button" aria-pressed="false">15:30</button>
+        <button class="sp-slot" type="button" aria-pressed="false">16:15</button>
+      </div>
+    </div>
+
+    <p style="margin: 0; font-size: 13px; line-height: 18px; color: var(--ink-muted);">Thời lượng đã gồm thời gian chờ thuốc lên màu. Giờ theo giờ Việt Nam.</p>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; padding: 12px 16px 20px 16px; background: var(--surface-raised); box-shadow: 0 -1px 0 var(--line);">
+    <div style="flex-grow: 1; display: flex; flex-direction: column;">
+      <span style="font-size: 15px; line-height: 22px; font-weight: 600; font-variant-numeric: tabular-nums;">09:45 · Thứ Bảy 07/11</span>
+      <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Thợ được xếp tự động</span>
+    </div>
+    <button type="button" class="sp-btn sp-btn--accent sp-btn--lg">Tiếp tục</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"tenant":{"editor":"enum","options":["may","pawpaw"],"default":"may","section":"Giao diện"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light', tenant: this.props.tenant ?? 'may' };
+  }
+}
+</script>
+</body>
+</html>

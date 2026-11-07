@@ -1,0 +1,42 @@
+<!-- @dsCard group="Calendar" height=200 subtitle="Đoạn chờ vạch chéo: thợ rảnh, ghế vẫn bận." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>AppointmentBlock</title></head>
+<body>
+<div class="sp-pad" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:var(--space-4)">
+  <div style="position:relative;height:112px">
+    <div class="sp-appt sp-appt--checked-in" style="top:0;height:112px">
+      <div class="sp-appt__seg" style="height:32px"><div class="sp-appt__title">Chị Hạnh · Nhuộm</div></div>
+      <div class="sp-appt__seg sp-appt__seg--wait" style="height:48px"><div class="sp-appt__meta">Chờ lên màu · thợ rảnh</div></div>
+      <div class="sp-appt__seg" style="height:32px"><div class="sp-appt__meta">09:00–10:45 · Ghế 1</div></div>
+    </div>
+  </div>
+  <div style="position:relative;height:112px">
+    <div class="sp-appt sp-appt--checked-in" style="top:0;height:112px">
+      <div class="sp-appt__seg" style="height:32px"><div class="sp-appt__title">Chị Hạnh · Nhuộm</div></div>
+      <div class="sp-appt__seg sp-appt__seg--wait" style="height:48px"></div>
+      <div class="sp-appt__seg" style="height:32px"><div class="sp-appt__meta">09:00–10:45</div></div>
+    </div>
+    <div class="sp-appt sp-appt--confirmed sp-appt--inset" style="top:32px;height:48px">
+      <div class="sp-appt__seg"><div class="sp-appt__title">Anh Tuấn · Cắt</div><div class="sp-appt__meta">09:30–10:15</div></div>
+    </div>
+  </div>
+  <div style="position:relative;height:112px">
+    <div class="sp-appt sp-appt--hold" style="top:0;height:48px">
+      <div class="sp-appt__seg"><div class="sp-appt__title">Đang giữ chỗ</div><div class="sp-appt__meta">còn 07:42 · Cắt ngắn</div></div>
+    </div>
+    <div class="sp-appt sp-appt--no-show" style="top:64px;height:48px">
+      <div class="sp-appt__seg"><div class="sp-appt__title">Anh Phúc · Cắt</div><div class="sp-appt__meta">Không đến · 11:15</div></div>
+    </div>
+  </div>
+  <div style="position:relative;height:112px">
+    <div class="sp-appt sp-appt--completed" style="top:0;height:32px">
+      <div class="sp-appt__seg"><div class="sp-appt__title">Chị Vy · Gội sấy</div></div>
+    </div>
+    <div class="sp-appt sp-appt--confirmed sp-appt--dragging" style="top:48px;height:64px">
+      <div class="sp-appt__seg"><div class="sp-appt__title">Bé Mochi · Tắm sấy</div><div class="sp-appt__meta">Đang kéo sang 14:00</div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

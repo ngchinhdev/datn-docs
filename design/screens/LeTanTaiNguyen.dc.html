@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Lịch lễ tân theo tài nguyên</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 700px; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans);">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 12px 24px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <span style="font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: -0.02em;">Sapio</span>
+    <span style="font-size: 15px; line-height: 22px; font-weight: 600; font-variant-numeric: tabular-nums;">Thứ Bảy, 07/11/2026</span>
+    <nav aria-label="Kiểu xem" style="display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--fill-tonal);">
+      <a href="LeTanChiTiet.dc.html" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Nhân viên</a>
+      <a href="LeTanTaiNguyen.dc.html" aria-current="page" class="sp-btn sp-btn--sm" style="background: var(--surface-raised); color: var(--ink); box-shadow: var(--shadow-xs); text-decoration: none;">Tài nguyên</a>
+    </nav>
+    <div role="group" aria-label="Loại tài nguyên" style="display: flex; flex-wrap: wrap; gap: 6px;">
+      <button type="button" class="sp-slot" aria-pressed="true" style="height: 32px; padding: 0 12px; font-size: 13px; --accent: var(--brand); --on-accent: var(--on-brand);">Tất cả</button>
+      <button type="button" class="sp-slot" aria-pressed="false" style="height: 32px; padding: 0 12px; font-size: 13px;">Ghế làm tóc</button>
+      <button type="button" class="sp-slot" aria-pressed="false" style="height: 32px; padding: 0 12px; font-size: 13px;">Giường gội</button>
+    </div>
+    <span style="margin-left: auto; font-size: 14px; line-height: 20px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">Lúc 10:20 còn trống: Ghế 2, Giường gội 1</span>
+  </header>
+
+  <main style="padding: 20px 24px; max-width: 1600px; margin: 0 auto;">
+    <div class="sp-cal" style="--cols: 4;" role="grid" aria-label="Lịch tài nguyên Tóc Mây Quận 3, Thứ Bảy 07/11">
+      <div class="sp-cal__head"></div>
+      <div class="sp-cal__head"><div class="sp-cal__name">Ghế 1</div><div class="sp-cal__kind">Ghế làm tóc</div></div>
+      <div class="sp-cal__head"><div class="sp-cal__name">Ghế 2</div><div class="sp-cal__kind">Ghế làm tóc</div></div>
+      <div class="sp-cal__head"><div class="sp-cal__name">Ghế 3</div><div class="sp-cal__kind">Ghế làm tóc</div></div>
+      <div class="sp-cal__head"><div class="sp-cal__name">Giường gội 1</div><div class="sp-cal__kind">Giường gội</div></div>
+
+      <div class="sp-cal__ruler" style="height: 448px;">
+        <span class="sp-cal__hour" style="top: 0;">08:00</span>
+        <span class="sp-cal__hour" style="top: 64px;">09:00</span>
+        <span class="sp-cal__hour" style="top: 128px;">10:00</span>
+        <span class="sp-cal__hour" style="top: 192px;">11:00</span>
+        <span class="sp-cal__hour" style="top: 256px;">12:00</span>
+        <span class="sp-cal__hour" style="top: 320px;">13:00</span>
+        <span class="sp-cal__hour" style="top: 384px;">14:00</span>
+      </div>
+
+      <div class="sp-cal__col" style="height: 448px;">
+        <div class="sp-appt sp-appt--checked-in" style="top: 64px; height: 112px; outline: 2px solid var(--brand); outline-offset: 1px;">
+          <div class="sp-appt__seg"><div class="sp-appt__title">Chị Hà · Nhuộm ngắn</div><div class="sp-appt__meta">09:00–10:45 · Mai</div><div class="sp-appt__meta">Ghế bận suốt, kể cả lúc chờ thuốc</div></div>
+        </div>
+        <div class="sp-appt sp-appt--confirmed" style="top: 192px; height: 64px;">
+          <div class="sp-appt__seg"><div class="sp-appt__title">Chị Ngọc · Cắt dài</div><div class="sp-appt__meta">11:00–12:00 · Mai</div></div>
+        </div>
+        <div class="sp-cal__now" style="top: 149px;"></div>
+      </div>
+
+      <div class="sp-cal__col" style="height: 448px;">
+        <div class="sp-appt sp-appt--completed" style="top: 96px; height: 48px;">
+          <div class="sp-appt__seg"><div class="sp-appt__title">Anh Tuấn · Cắt ngắn</div><div class="sp-appt__meta">09:30–10:15 · Mai</div></div>
+        </div>
+        <div class="sp-appt sp-appt--hold" style="top: 160px; height: 48px;">
+          <div class="sp-appt__seg"><div class="sp-appt__title">Đang giữ chỗ</div><div class="sp-appt__meta">10:30–11:15 · Lan · còn 07:42</div></div>
+        </div>
+        <div class="sp-appt sp-appt--confirmed" style="top: 224px; height: 48px;">
+          <div class="sp-appt__seg"><div class="sp-appt__title">Chị Vân · Cắt ngắn</div><div class="sp-appt__meta">11:30–12:15 · Hùng</div></div>
+        </div>
+        <div class="sp-cal__now" style="top: 149px;"></div>
+      </div>
+
+      <div class="sp-cal__col" style="height: 448px;">
+        <div class="sp-appt sp-appt--checked-in" style="top: 128px; height: 48px;">
+          <div class="sp-appt__seg"><div class="sp-appt__title">Anh Bảo An · Cắt</div><div class="sp-appt__meta">10:00–10:45 · Hùng</div></div>
+        </div>
+        <div class="sp-appt sp-appt--confirmed" style="top: 320px; height: 128px;">
+          <div class="sp-appt__seg"><div class="sp-appt__title">Chị Thư · Nhuộm dài</div><div class="sp-appt__meta">13:00–15:00 · Hùng</div><div class="sp-appt__meta">Ghế bận suốt</div></div>
+        </div>
+        <div class="sp-cal__now" style="top: 149px;"></div>
+      </div>
+
+      <div class="sp-cal__col" style="height: 448px;">
+        <div class="sp-appt sp-appt--completed" style="top: 32px; height: 32px;">
+          <div class="sp-appt__seg"><div class="sp-appt__title">Chị Vy · Gội sấy · Lan</div></div>
+        </div>
+        <div class="sp-appt sp-appt--checked-in" style="top: 96px; height: 32px;">
+          <div class="sp-appt__seg"><div class="sp-appt__title">Anh Bảo An · Gội · Hùng</div></div>
+        </div>
+        <div class="sp-cal__now" style="top: 149px;"></div>
+      </div>
+    </div>
+    <p style="margin: 12px 0 0 0; font-size: 13px; line-height: 18px; color: var(--ink-muted);">Cùng các lịch hẹn ở tab Nhân viên: chị Hà làm Mai rảnh 45 phút ở giữa, nhưng Ghế 1 không trống lúc nào từ 09:00 đến 10:45.</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1280,"height":700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

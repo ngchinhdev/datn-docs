@@ -7,6 +7,11 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 07/11/2026 (chiều): bàn giao giao diện cho Claude Code
+- **Đã làm:** chốt UI hai màn hình đầu (D-12; BR-14, BR-15). Chép Design System và các màn hình đã vẽ vào `design/` để Claude Code đọc offline. Viết [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md) 6 bước.
+- **Cách làm từ đây:** phiên claude.ai lo phân tích, thiết kế, review; Claude Code trên máy code theo kế hoạch trên nhánh `feat/ui-mock`, mở pull request để review.
+- **Tiếp theo:** Claude Code làm kế hoạch UI mock; giai đoạn 0 còn: dùng thử SimplyBook.me và một phần mềm Việt Nam, sửa đề cương nếu cô góp ý.
+
 ### 07/11/2026 (trưa): tên sản phẩm và hệ thống thiết kế
 - **Đã làm:** chốt tên **Sapio** và hướng thiết kế "ấm và chính xác" ([D-11](./quyet-dinh.md#d-11-tên-sản-phẩm-sapio-và-hệ-thống-thiết-kế)). Dựng "Sapio Design System" trên Claude Design: tokens sáng/tối (đã kiểm tương phản), font Be Vietnam Pro, màu trạng thái, màu hai cơ sở, 8 component có preview. Docs chạy cổng 3100 để không trùng web 3000. Phiên claude.ai đã liên kết với máy (thư mục `D:\UITProgress\DoAn\source`).
 - **Sau đó:** làm mềm Design System (bỏ viền đậm, nền `fill-tonal`, bóng mềm, góc tròn hơn), đổi màu Pawpaw sang cam quýt. Vẽ canvas "Sapio · Màn hình đầu tiên": 3 hướng trang khách, 2 hướng lịch lễ tân, cùng bản máy tính, iPad, điện thoại; chốt hướng ([D-12](./quyet-dinh.md#d-12-hướng-giao-diện-hai-màn-hình-đầu)).

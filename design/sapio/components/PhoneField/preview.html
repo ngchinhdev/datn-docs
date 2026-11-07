@@ -1,0 +1,19 @@
+<!-- @dsCard group="Booking" height=210 subtitle="Ô nhập số điện thoại, có trạng thái lỗi." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>PhoneField</title></head>
+<body>
+<div class="sp-pad sp-stack" style="max-width:420px">
+  <div class="sp-field">
+    <label class="sp-field__label" for="sdt">Số điện thoại</label>
+    <div class="sp-field__control"><span class="sp-field__prefix">+84</span><input id="sdt" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="912 345 678" value="912 345 678"></div>
+    <div class="sp-field__help">Cơ sở dùng số này để nhận ra bạn ở lần sau.</div>
+  </div>
+  <div class="sp-field sp-field--error">
+    <label class="sp-field__label" for="sdt-loi">Số điện thoại</label>
+    <div class="sp-field__control"><span class="sp-field__prefix">+84</span><input id="sdt-loi" type="tel" inputmode="tel" value="91234" aria-invalid="true" aria-describedby="sdt-loi-help"></div>
+    <div class="sp-field__help" id="sdt-loi-help">Số điện thoại chưa đúng. Ví dụ: 0912 345 678.</div>
+  </div>
+</div>
+</body>
+</html>

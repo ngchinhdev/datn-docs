@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Lịch lễ tân theo nhân viên</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="min-height: 900px; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans);">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 12px 24px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 18px; line-height: 24px; font-weight: 700; letter-spacing: -0.02em;">Sapio</span>
+      <span aria-hidden="true" style="width: 1px; height: 20px; background: var(--line);"></span>
+      <button type="button" class="sp-btn sp-btn--ghost" style="color: var(--ink);">
+        Tóc Mây Quận 3
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+      </button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 4px;">
+      <button type="button" aria-label="Ngày trước" class="sp-btn sp-btn--ghost" style="width: 36px; padding: 0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+      </button>
+      <button type="button" class="sp-btn sp-btn--secondary sp-btn--sm">Hôm nay</button>
+      <button type="button" aria-label="Ngày sau" class="sp-btn sp-btn--ghost" style="width: 36px; padding: 0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+      </button>
+      <span style="margin-left: 8px; font-size: 15px; line-height: 22px; font-weight: 600; font-variant-numeric: tabular-nums;">Thứ Bảy, 07/11/2026</span>
+    </div>
+    <nav aria-label="Kiểu xem" style="display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--fill-tonal);">
+      <a href="LeTanChiTiet.dc.html" aria-current="page" class="sp-btn sp-btn--sm" style="background: var(--surface-raised); color: var(--ink); box-shadow: var(--shadow-xs); text-decoration: none;">Nhân viên</a>
+      <a href="LeTanTaiNguyen.dc.html" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Tài nguyên</a>
+    </nav>
+    <div style="margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+      <label for="tim-khach" style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 8px; background: var(--fill-tonal); color: var(--ink-muted);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input id="tim-khach" type="search" placeholder="Tìm khách hoặc số điện thoại" style="width: 220px; border: 0; background: transparent; color: var(--ink); font: 400 14px/20px var(--font-sans); outline: none;">
+      </label>
+      <button type="button" class="sp-btn sp-btn--primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        Tạo lịch hẹn
+      </button>
+    </div>
+  </header>
+
+  <main style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; padding: 20px 24px; max-width: 1600px; margin: 0 auto;">
+    <section style="flex: 999 1 720px; min-width: 0; display: flex; flex-direction: column; gap: 12px;" aria-label="Lịch">
+      <div class="sp-cal" style="--cols: 3;" role="grid" aria-label="Lịch nhân viên Tóc Mây Quận 3, Thứ Bảy 07/11">
+        <div class="sp-cal__head"></div>
+        <div class="sp-cal__head"><div class="sp-cal__name">Mai</div><div class="sp-cal__kind">Thợ chính · 3 lịch</div></div>
+        <div class="sp-cal__head"><div class="sp-cal__name">Lan</div><div class="sp-cal__kind">Thợ · 3 lịch</div></div>
+        <div class="sp-cal__head"><div class="sp-cal__name">Hùng</div><div class="sp-cal__kind">Thợ · 3 lịch</div></div>
+
+        <div class="sp-cal__ruler" style="height: 448px;">
+          <span class="sp-cal__hour" style="top: 0;">08:00</span>
+          <span class="sp-cal__hour" style="top: 64px;">09:00</span>
+          <span class="sp-cal__hour" style="top: 128px;">10:00</span>
+          <span class="sp-cal__hour" style="top: 192px;">11:00</span>
+          <span class="sp-cal__hour" style="top: 256px;">12:00</span>
+          <span class="sp-cal__hour" style="top: 320px;">13:00</span>
+          <span class="sp-cal__hour" style="top: 384px;">14:00</span>
+        </div>
+
+        <div class="sp-cal__col" style="height: 448px;">
+          <div class="sp-appt sp-appt--checked-in" style="top: 64px; height: 112px; outline: 2px solid var(--brand); outline-offset: 1px;">
+            <div class="sp-appt__seg" style="height: 32px;"><div class="sp-appt__title">Chị Hà · Nhuộm ngắn</div></div>
+            <div class="sp-appt__seg sp-appt__seg--wait" style="height: 48px;"></div>
+            <div class="sp-appt__seg" style="height: 32px;"><div class="sp-appt__meta">09:00–10:45 · Ghế 1</div></div>
+          </div>
+          <div class="sp-appt sp-appt--completed sp-appt--inset" style="top: 96px; height: 48px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Anh Tuấn · Cắt ngắn</div><div class="sp-appt__meta">09:30–10:15 · Ghế 2</div></div>
+          </div>
+          <div class="sp-appt sp-appt--confirmed" style="top: 192px; height: 64px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Chị Ngọc · Cắt dài</div><div class="sp-appt__meta">11:00–12:00 · Ghế 1</div></div>
+          </div>
+          <div class="sp-cal__now" style="top: 149px;"></div>
+        </div>
+
+        <div class="sp-cal__col" style="height: 448px;">
+          <div class="sp-appt sp-appt--completed" style="top: 32px; height: 32px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Chị Vy · Gội sấy · Giường gội 1</div></div>
+          </div>
+          <div class="sp-appt sp-appt--no-show" style="top: 80px; height: 48px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Anh Phúc · Cắt ngắn</div><div class="sp-appt__meta">Không đến · Ghế 3 đã trả</div></div>
+          </div>
+          <div class="sp-appt sp-appt--hold" style="top: 160px; height: 48px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Đang giữ chỗ · đặt online</div><div class="sp-appt__meta">10:30–11:15 · Ghế 2 · còn 07:42</div></div>
+          </div>
+          <div class="sp-cal__now" style="top: 149px;"></div>
+        </div>
+
+        <div class="sp-cal__col" style="height: 448px;">
+          <div class="sp-appt sp-appt--checked-in" style="top: 96px; height: 80px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Anh Bảo An · Gội, cắt</div><div class="sp-appt__meta">09:30–10:45 · Giường gội 1, Ghế 3</div></div>
+          </div>
+          <div class="sp-appt sp-appt--confirmed" style="top: 224px; height: 48px;">
+            <div class="sp-appt__seg"><div class="sp-appt__title">Chị Vân · Cắt ngắn</div><div class="sp-appt__meta">11:30–12:15 · Ghế 2</div></div>
+          </div>
+          <div class="sp-appt sp-appt--confirmed" style="top: 320px; height: 128px;">
+            <div class="sp-appt__seg" style="height: 43px;"><div class="sp-appt__title">Chị Thư · Nhuộm dài</div></div>
+            <div class="sp-appt__seg sp-appt__seg--wait" style="height: 48px;"><div class="sp-appt__meta">Chờ lên màu · Hùng rảnh</div></div>
+            <div class="sp-appt__seg" style="height: 37px;"><div class="sp-appt__meta">13:00–15:00 · Ghế 3</div></div>
+          </div>
+          <div class="sp-cal__now" style="top: 149px;"></div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;">
+        <span class="sp-badge sp-badge--hold">Đang giữ chỗ</span>
+        <span class="sp-badge sp-badge--confirmed">Đã xác nhận</span>
+        <span class="sp-badge sp-badge--checked-in">Đã check-in</span>
+        <span class="sp-badge sp-badge--completed">Hoàn thành</span>
+        <span class="sp-badge sp-badge--no-show">Không đến</span>
+        <span style="display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; color: var(--ink-muted);">
+          <span aria-hidden="true" style="width: 28px; height: 16px; border-radius: 4px; background: repeating-linear-gradient(135deg, var(--status-checked-in-soft) 0 4px, var(--surface-raised) 4px 10px); box-shadow: 0 0 0 1px var(--line);"></span>
+          Vạch chéo: thợ rảnh, ghế vẫn bận. Xem ghế ở tab Tài nguyên.
+        </span>
+      </div>
+    </section>
+
+    <aside style="flex: 1 1 320px; max-width: 400px; display: flex; flex-direction: column; gap: 16px; padding: 20px; border-radius: 12px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line), var(--shadow-card);" aria-label="Chi tiết lịch hẹn">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <span class="sp-badge sp-badge--checked-in">Đã check-in 08:56</span>
+        <button type="button" aria-label="Đóng" class="sp-btn sp-btn--ghost" style="width: 36px; padding: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em;">Lê Thu Hà</h2>
+        <span style="font-size: 14px; line-height: 20px; color: var(--ink-muted); font-variant-numeric: tabular-nums;">0934 567 890 · khách lần thứ 6</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 12px; background: var(--fill-tonal);">
+        <div style="display: flex; justify-content: space-between; gap: 8px;">
+          <span style="font-size: 15px; line-height: 22px; font-weight: 600;">Nhuộm tóc · Tóc ngắn</span>
+          <span style="font-size: 15px; line-height: 22px; font-weight: 600; font-variant-numeric: tabular-nums;">500.000 ₫</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 18px; font-variant-numeric: tabular-nums;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 4px; background: var(--status-checked-in-soft); box-shadow: inset 0 0 0 1px var(--status-checked-in);"></span>
+            <span style="width: 88px; color: var(--ink-muted);">09:00–09:30</span>
+            <span>Mai, Ghế 1</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 4px; background: repeating-linear-gradient(135deg, var(--status-checked-in-soft) 0 3px, var(--surface-raised) 3px 7px); box-shadow: inset 0 0 0 1px var(--status-checked-in);"></span>
+            <span style="width: 88px; color: var(--ink-muted);">09:30–10:15</span>
+            <span>Ghế 1 · chờ lên màu, Mai rảnh</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 4px; background: var(--status-checked-in-soft); box-shadow: inset 0 0 0 1px var(--status-checked-in);"></span>
+            <span style="width: 88px; color: var(--ink-muted);">10:15–10:45</span>
+            <span>Mai, Ghế 1 · gội, sấy</span>
+          </div>
+        </div>
+      </div>
+
+      <dl style="margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; font-size: 14px; line-height: 20px;">
+        <div><dt style="color: var(--ink-muted); font-size: 13px;">Đã cọc</dt><dd style="margin: 0; font-weight: 600; font-variant-numeric: tabular-nums;">100.000 ₫</dd></div>
+        <div><dt style="color: var(--ink-muted); font-size: 13px;">Còn phải thu</dt><dd style="margin: 0; font-weight: 600; font-variant-numeric: tabular-nums;">400.000 ₫</dd></div>
+        <div><dt style="color: var(--ink-muted); font-size: 13px;">Đặt qua</dt><dd style="margin: 0;">Trang đặt lịch</dd></div>
+        <div><dt style="color: var(--ink-muted); font-size: 13px;">Hoa hồng</dt><dd style="margin: 0;">Mai</dd></div>
+      </dl>
+
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted);">Ghi chú</span>
+        <span style="font-size: 14px; line-height: 20px;">Da đầu nhạy cảm, dùng thuốc không amoniac.</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+        <button type="button" class="sp-btn sp-btn--primary" style="height: 40px;">Hoàn thành và thu tiền</button>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+          <button type="button" class="sp-btn sp-btn--secondary">Đổi giờ</button>
+          <button type="button" class="sp-btn sp-btn--secondary">Thêm dịch vụ</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

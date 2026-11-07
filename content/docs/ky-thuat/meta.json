@@ -1,4 +1,9 @@
 {
   "title": "Kỹ thuật",
-  "pages": ["quyet-dinh-ky-thuat", "chien-luoc-kiem-thu", "ke-hoach-dung-base"]
+  "pages": [
+    "quyet-dinh-ky-thuat",
+    "chien-luoc-kiem-thu",
+    "ke-hoach-dung-base",
+    "ke-hoach-ui-mock"
+  ]
 }
