@@ -81,11 +81,15 @@ export interface ServiceSegment {
   endMinute: number;
   kind: 'work' | 'wait';
   resourceTypeIds: string[];
+  /** What happens during a wait, e.g. "chờ lên màu". */
+  label?: string;
 }
 
 export interface ServiceVariant {
   id: string;
   name: string;
+  /** Calendar label, e.g. "Nhuộm ngắn". */
+  shortName: string;
   /** Integer VND. */
   priceVnd: bigint;
   /** Integer VND paid online to confirm; absent = no deposit. */
@@ -108,6 +112,8 @@ export interface Customer {
   name: string;
   /** E.164, normalized (BR-61). */
   phone: string;
+  /** How staff address them on the calendar, e.g. "Chị Hà". */
+  callName: string;
   /** Visits so far, including today. */
   visitCount?: number;
 }
@@ -139,6 +145,9 @@ export interface ResourceBooking {
   startAt: string;
   endAt: string;
   kind: 'work' | 'wait';
+  /** Index into `Appointment.items`. */
+  itemIndex: number;
+  label?: string;
 }
 
 export interface Appointment {
@@ -159,6 +168,8 @@ export interface Appointment {
   checkedInAt?: string;
   /** Integer VND. */
   depositVnd?: bigint;
+  /** Paid in full; a completed appointment without it waits for payment. */
+  settled?: boolean;
   note?: string;
 }
 

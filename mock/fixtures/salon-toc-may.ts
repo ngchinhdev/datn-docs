@@ -16,6 +16,7 @@ const services: Service[] = [
       {
         id: 'may-cut-short',
         name: 'Tóc ngắn',
+        shortName: 'Cắt ngắn',
         priceVnd: 150_000n,
         match: { hairLength: 'short' },
         segments: [
@@ -30,6 +31,7 @@ const services: Service[] = [
       {
         id: 'may-cut-long',
         name: 'Tóc dài',
+        shortName: 'Cắt dài',
         priceVnd: 200_000n,
         match: { hairLength: 'long' },
         segments: [
@@ -51,6 +53,7 @@ const services: Service[] = [
       {
         id: 'may-wash-std',
         name: 'Tiêu chuẩn',
+        shortName: 'Gội sấy',
         priceVnd: 80_000n,
         match: {},
         segments: [
@@ -73,6 +76,7 @@ const services: Service[] = [
       {
         id: 'may-dye-short',
         name: 'Tóc ngắn',
+        shortName: 'Nhuộm ngắn',
         priceVnd: 500_000n,
         depositVnd: 100_000n,
         match: { hairLength: 'short' },
@@ -83,7 +87,13 @@ const services: Service[] = [
             kind: 'work',
             resourceTypeIds: ['may-rt-stylist', 'may-rt-chair'],
           },
-          { startMinute: 30, endMinute: 75, kind: 'wait', resourceTypeIds: ['may-rt-chair'] },
+          {
+            startMinute: 30,
+            endMinute: 75,
+            kind: 'wait',
+            resourceTypeIds: ['may-rt-chair'],
+            label: 'chờ lên màu',
+          },
           {
             startMinute: 75,
             endMinute: 105,
@@ -95,6 +105,7 @@ const services: Service[] = [
       {
         id: 'may-dye-long',
         name: 'Tóc dài',
+        shortName: 'Nhuộm dài',
         priceVnd: 700_000n,
         depositVnd: 100_000n,
         match: { hairLength: 'long' },
@@ -105,7 +116,13 @@ const services: Service[] = [
             kind: 'work',
             resourceTypeIds: ['may-rt-stylist', 'may-rt-chair'],
           },
-          { startMinute: 40, endMinute: 85, kind: 'wait', resourceTypeIds: ['may-rt-chair'] },
+          {
+            startMinute: 40,
+            endMinute: 85,
+            kind: 'wait',
+            resourceTypeIds: ['may-rt-chair'],
+            label: 'chờ lên màu',
+          },
           {
             startMinute: 85,
             endMinute: 120,
@@ -194,14 +211,70 @@ export const salonTocMay: TenantFixture = {
   ],
   services,
   customers: [
-    { id: 'may-c-thu', tenantId, name: 'Nguyễn Minh Thư', phone: '+84912345678', visitCount: 3 },
-    { id: 'may-c-an', tenantId, name: 'Trần Bảo An', phone: '+84987654321', visitCount: 2 },
-    { id: 'may-c-ha', tenantId, name: 'Lê Thu Hà', phone: '+84934567890', visitCount: 6 },
-    { id: 'may-c-tuan', tenantId, name: 'Đỗ Anh Tuấn', phone: '+84903111222', visitCount: 4 },
-    { id: 'may-c-ngoc', tenantId, name: 'Hoàng Bích Ngọc', phone: '+84903222333', visitCount: 1 },
-    { id: 'may-c-vy', tenantId, name: 'Ngô Tường Vy', phone: '+84903333444', visitCount: 5 },
-    { id: 'may-c-phuc', tenantId, name: 'Bùi Hữu Phúc', phone: '+84903444555', visitCount: 2 },
-    { id: 'may-c-van', tenantId, name: 'Vũ Thanh Vân', phone: '+84903555666', visitCount: 1 },
+    {
+      id: 'may-c-thu',
+      tenantId,
+      name: 'Nguyễn Minh Thư',
+      callName: 'Chị Thư',
+      phone: '+84912345678',
+      visitCount: 3,
+    },
+    {
+      id: 'may-c-an',
+      tenantId,
+      name: 'Trần Bảo An',
+      callName: 'Anh Bảo An',
+      phone: '+84987654321',
+      visitCount: 2,
+    },
+    {
+      id: 'may-c-ha',
+      tenantId,
+      name: 'Lê Thu Hà',
+      callName: 'Chị Hà',
+      phone: '+84934567890',
+      visitCount: 6,
+    },
+    {
+      id: 'may-c-tuan',
+      tenantId,
+      name: 'Đỗ Anh Tuấn',
+      callName: 'Anh Tuấn',
+      phone: '+84903111222',
+      visitCount: 4,
+    },
+    {
+      id: 'may-c-ngoc',
+      tenantId,
+      name: 'Hoàng Bích Ngọc',
+      callName: 'Chị Ngọc',
+      phone: '+84903222333',
+      visitCount: 1,
+    },
+    {
+      id: 'may-c-vy',
+      tenantId,
+      name: 'Ngô Tường Vy',
+      callName: 'Chị Vy',
+      phone: '+84903333444',
+      visitCount: 5,
+    },
+    {
+      id: 'may-c-phuc',
+      tenantId,
+      name: 'Bùi Hữu Phúc',
+      callName: 'Anh Phúc',
+      phone: '+84903444555',
+      visitCount: 2,
+    },
+    {
+      id: 'may-c-van',
+      tenantId,
+      name: 'Vũ Thanh Vân',
+      callName: 'Chị Vân',
+      phone: '+84903555666',
+      visitCount: 1,
+    },
   ],
   servedSubjects: (
     [
@@ -243,13 +316,20 @@ export const salonTocMay: TenantFixture = {
       },
     ),
     // Fills Mai's wait while Hà's color processes (BR-05).
-    appointment('may-a-tuan', 'may-c-tuan', '2026-11-07T02:30:00Z', 'completed', [
-      {
-        variantId: 'may-cut-short',
-        subjectId: 'may-s-tuan',
-        resourceIds: ['may-mai', 'may-chair-2'],
-      },
-    ]),
+    appointment(
+      'may-a-tuan',
+      'may-c-tuan',
+      '2026-11-07T02:30:00Z',
+      'completed',
+      [
+        {
+          variantId: 'may-cut-short',
+          subjectId: 'may-s-tuan',
+          resourceIds: ['may-mai', 'may-chair-2'],
+        },
+      ],
+      { settled: false },
+    ),
     appointment('may-a-ngoc', 'may-c-ngoc', '2026-11-07T04:00:00Z', 'confirmed', [
       {
         variantId: 'may-cut-long',
@@ -257,9 +337,20 @@ export const salonTocMay: TenantFixture = {
         resourceIds: ['may-mai', 'may-chair-1'],
       },
     ]),
-    appointment('may-a-vy', 'may-c-vy', '2026-11-07T01:30:00Z', 'completed', [
-      { variantId: 'may-wash-std', subjectId: 'may-s-vy', resourceIds: ['may-lan', 'may-wash-1'] },
-    ]),
+    appointment(
+      'may-a-vy',
+      'may-c-vy',
+      '2026-11-07T01:30:00Z',
+      'completed',
+      [
+        {
+          variantId: 'may-wash-std',
+          subjectId: 'may-s-vy',
+          resourceIds: ['may-lan', 'may-wash-1'],
+        },
+      ],
+      { settled: true },
+    ),
     appointment('may-a-phuc', 'may-c-phuc', '2026-11-07T02:15:00Z', 'no_show', [
       {
         variantId: 'may-cut-short',
@@ -301,12 +392,19 @@ export const salonTocMay: TenantFixture = {
         resourceIds: ['may-hung', 'may-chair-2'],
       },
     ]),
-    appointment('may-a-thu', 'may-c-thu', '2026-11-07T06:00:00Z', 'confirmed', [
-      {
-        variantId: 'may-dye-long',
-        subjectId: 'may-s-thu',
-        resourceIds: ['may-hung', 'may-chair-3'],
-      },
-    ]),
+    appointment(
+      'may-a-thu',
+      'may-c-thu',
+      '2026-11-07T06:00:00Z',
+      'confirmed',
+      [
+        {
+          variantId: 'may-dye-long',
+          subjectId: 'may-s-thu',
+          resourceIds: ['may-hung', 'may-chair-3'],
+        },
+      ],
+      { depositVnd: 150_000n },
+    ),
   ],
 };

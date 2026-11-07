@@ -4,6 +4,7 @@
  * The real one lives in datn-saas/packages/scheduling-core.
  */
 import type { Appointment, ServiceVariant, TenantFixture } from './fixtures';
+import { openingHours } from './hours';
 
 export const ANY_STAFF = 'any';
 
@@ -33,15 +34,6 @@ const BRANCH_UTC_OFFSET_MINUTES = 7 * 60;
 const toMs = (iso: string) => Date.parse(iso);
 const localToUtcMs = (date: string, time: string) =>
   Date.parse(`${date}T${time}:00Z`) - BRANCH_UTC_OFFSET_MINUTES * 60_000;
-
-export function openingHours(fixture: TenantFixture, date: string) {
-  const branch = fixture.branches[0];
-  if (!branch) return null;
-  const special = branch.specialDays.find((d) => d.date === date);
-  if (special) return special.hours;
-  const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
-  return branch.businessHours.find((h) => h.weekday === weekday) ?? null;
-}
 
 /** Free start times; with `ANY_STAFF`, each time keeps the first qualified staff who is free. */
 export function freeSlots(query: AvailabilityQuery): FreeSlot[] {

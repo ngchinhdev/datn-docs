@@ -13,7 +13,8 @@ import { ANY_STAFF, StaffPicker, type StaffOption } from '@/components/sapio/sta
 import { StatusBadge } from '@/components/sapio/status-badge';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
-import { freeSlots, openingHours, type FreeSlot } from '@/mock/availability';
+import { freeSlots, type FreeSlot } from '@/mock/availability';
+import { openingHours } from '@/mock/hours';
 import { tenantFixtures, type ServedSubject, type ServiceVariant } from '@/mock/fixtures';
 import { formatMinutes, formatPhone, formatVnd, normalizePhone } from '@/mock/format';
 import {
@@ -564,7 +565,7 @@ export function BookingFlow({ tenantSlug }: { tenantSlug: string }) {
         <Button
           variant="ghost"
           aria-label="Quay lại"
-          className="size-11 rounded-(--radius-pill) p-0"
+          className="size-11! rounded-(--radius-pill)! p-0!"
           disabled={stepIndex === 0 || confirmed}
           onClick={back}
         >

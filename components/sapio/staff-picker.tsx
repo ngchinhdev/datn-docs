@@ -170,7 +170,7 @@ export function StaffPicker({
                 </h2>
                 <span className="body-sm text-(--ink-muted)">{context}</span>
               </div>
-              <Button variant="ghost" aria-label="Đóng" onClick={close} className="size-11 p-0">
+              <Button variant="ghost" aria-label="Đóng" onClick={close} className="size-11! p-0!">
                 <X size={20} aria-hidden="true" />
               </Button>
             </div>

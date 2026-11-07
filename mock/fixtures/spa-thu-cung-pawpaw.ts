@@ -20,6 +20,7 @@ const services: Service[] = [
       {
         id: 'paw-bath-small',
         name: 'Chó dưới 10 kg',
+        shortName: 'Tắm chó nhỏ',
         priceVnd: 150_000n,
         match: { species: 'dog', size: 'small' },
         segments: [
@@ -29,13 +30,20 @@ const services: Service[] = [
             kind: 'work',
             resourceTypeIds: ['paw-rt-groomer', 'paw-rt-bath'],
           },
-          { startMinute: 20, endMinute: 50, kind: 'wait', resourceTypeIds: ['paw-rt-dryer'] },
+          {
+            startMinute: 20,
+            endMinute: 50,
+            kind: 'wait',
+            resourceTypeIds: ['paw-rt-dryer'],
+            label: 'sấy lồng',
+          },
           { startMinute: 50, endMinute: 60, kind: 'work', resourceTypeIds: ['paw-rt-groomer'] },
         ],
       },
       {
         id: 'paw-bath-large',
         name: 'Chó từ 10 kg',
+        shortName: 'Tắm chó lớn',
         priceVnd: 250_000n,
         match: { species: 'dog', size: 'large' },
         segments: [
@@ -45,13 +53,20 @@ const services: Service[] = [
             kind: 'work',
             resourceTypeIds: ['paw-rt-groomer', 'paw-rt-bath'],
           },
-          { startMinute: 30, endMinute: 75, kind: 'wait', resourceTypeIds: ['paw-rt-dryer'] },
+          {
+            startMinute: 30,
+            endMinute: 75,
+            kind: 'wait',
+            resourceTypeIds: ['paw-rt-dryer'],
+            label: 'sấy lồng',
+          },
           { startMinute: 75, endMinute: 90, kind: 'work', resourceTypeIds: ['paw-rt-groomer'] },
         ],
       },
       {
         id: 'paw-bath-cat',
         name: 'Mèo',
+        shortName: 'Tắm mèo',
         priceVnd: 180_000n,
         match: { species: 'cat' },
         segments: [
@@ -61,7 +76,13 @@ const services: Service[] = [
             kind: 'work',
             resourceTypeIds: ['paw-rt-groomer', 'paw-rt-bath'],
           },
-          { startMinute: 25, endMinute: 55, kind: 'wait', resourceTypeIds: ['paw-rt-dryer'] },
+          {
+            startMinute: 25,
+            endMinute: 55,
+            kind: 'wait',
+            resourceTypeIds: ['paw-rt-dryer'],
+            label: 'sấy lồng',
+          },
           { startMinute: 55, endMinute: 60, kind: 'work', resourceTypeIds: ['paw-rt-groomer'] },
         ],
       },
@@ -75,6 +96,7 @@ const services: Service[] = [
       {
         id: 'paw-groom-small',
         name: 'Chó dưới 10 kg',
+        shortName: 'Tỉa chó nhỏ',
         priceVnd: 250_000n,
         match: { species: 'dog', size: 'small' },
         segments: [
@@ -89,6 +111,7 @@ const services: Service[] = [
       {
         id: 'paw-groom-large',
         name: 'Chó từ 10 kg',
+        shortName: 'Tỉa chó lớn',
         priceVnd: 400_000n,
         match: { species: 'dog', size: 'large' },
         segments: [
@@ -172,8 +195,14 @@ export const spaThuCungPawpaw: TenantFixture = {
   ],
   services,
   customers: [
-    { id: 'paw-c-linh', tenantId, name: 'Phạm Khánh Linh', phone: '+84909111222' },
-    { id: 'paw-c-duc', tenantId, name: 'Võ Minh Đức', phone: '+84938333444' },
+    {
+      id: 'paw-c-linh',
+      tenantId,
+      name: 'Phạm Khánh Linh',
+      callName: 'Chị Linh',
+      phone: '+84909111222',
+    },
+    { id: 'paw-c-duc', tenantId, name: 'Võ Minh Đức', callName: 'Anh Đức', phone: '+84938333444' },
   ],
   servedSubjects: [
     {

@@ -27,6 +27,7 @@ export function bookVariant(
   startAt: string,
   variant: ServiceVariant,
   assign: Record<string, string>,
+  itemIndex = 0,
 ): ResourceBooking[] {
   return variant.segments.flatMap((segment) =>
     segment.resourceTypeIds.map((typeId) => {
@@ -37,6 +38,8 @@ export function bookVariant(
         startAt: addMinutes(startAt, segment.startMinute),
         endAt: addMinutes(startAt, segment.endMinute),
         kind: segment.kind,
+        itemIndex,
+        ...(segment.label ? { label: segment.label } : {}),
       };
     }),
   );
@@ -74,11 +77,11 @@ export function appointmentBuilder(ctx: {
   ): Appointment => {
     let cursor = startAt;
     const bookings: ResourceBooking[] = [];
-    const appointmentItems: AppointmentItem[] = items.map((item) => {
+    const appointmentItems: AppointmentItem[] = items.map((item, itemIndex) => {
       const variant = findVariant(ctx.services, item.variantId);
       if (item.startAt) cursor = item.startAt;
       const assign = Object.fromEntries(item.resourceIds.map((r) => [typeOf.get(r) ?? '', r]));
-      bookings.push(...bookVariant(cursor, variant, assign));
+      bookings.push(...bookVariant(cursor, variant, assign, itemIndex));
       cursor = variantEnd(cursor, variant);
       return {
         serviceVariantId: variant.id,

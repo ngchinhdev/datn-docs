@@ -71,10 +71,10 @@ export function AppointmentBlock({
           style={{ height: slots(minutesBetween(segment.startAt, segment.endAt)) }}
         >
           {i === 0 && <div className="sp-appt__title">{title}</div>}
-          {segment.note && <div className="sp-appt__meta">{segment.note}</div>}
           {meta && (single || (i === segments.length - 1 && i > 0)) && (
             <div className="sp-appt__meta">{meta}</div>
           )}
+          {segment.note && <div className="sp-appt__meta">{segment.note}</div>}
         </div>
       ))}
     </button>
