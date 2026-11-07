@@ -27,7 +27,7 @@ export function PhoneField({ id, label, value, onChange, onBlur, error, help }: 
           type="tel"
           inputMode="tel"
           autoComplete="tel-national"
-          placeholder="0912 345 678"
+          placeholder="Ví dụ: 0912 345 678"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}

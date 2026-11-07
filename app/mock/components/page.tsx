@@ -315,7 +315,7 @@ export default function ComponentsPage() {
           value={phone}
           onChange={setPhone}
           onBlur={() => setTouched(true)}
-          help="Mã xác nhận gửi qua tin nhắn."
+          help="Để cơ sở liên hệ khi cần."
           error={
             touched && !normalizePhone(phone)
               ? 'Số điện thoại chưa đúng. Ví dụ: 0912 345 678.'

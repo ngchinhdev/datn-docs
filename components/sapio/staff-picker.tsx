@@ -58,6 +58,102 @@ function Avatar({ name, index, dim }: { name: string; index: number; dim?: boole
   );
 }
 
+/** The radio list itself: inside the sheet below 900px, inline in the left column from 900px. */
+export function StaffOptionList({
+  options,
+  value,
+  onChange,
+  anyEarliest,
+  noun,
+  compact = false,
+}: Pick<StaffPickerProps, 'options' | 'value' | 'onChange' | 'anyEarliest' | 'noun'> & {
+  compact?: boolean;
+}) {
+  const rows = [
+    {
+      id: ANY_STAFF,
+      name: 'Bất kỳ ai',
+      sub: compact
+        ? `Xếp ${noun.toLowerCase()} trống sớm nhất`
+        : `Xếp ${noun.toLowerCase()} trống sớm nhất, nhiều giờ để chọn nhất`,
+      right: anyEarliest,
+      full: false,
+      nextDay: undefined as string | undefined,
+    },
+    ...options.map((o) => ({
+      id: o.id,
+      name: o.displayName,
+      sub: `${o.title} · ${o.specialty}`,
+      right: o.earliest,
+      full: o.earliest === null,
+      nextDay: o.nextDay,
+    })),
+  ];
+
+  return (
+    <div className="flex flex-col gap-(--space-2)" role="radiogroup" aria-label={noun}>
+      {rows.map((row, i) => {
+        const checked = row.id === value;
+        return (
+          <button
+            key={row.id}
+            type="button"
+            role="radio"
+            aria-checked={checked}
+            onClick={() => onChange(row.id)}
+            className={cn(
+              compact ? 'min-h-14 py-(--space-1)' : 'min-h-16 py-(--space-2)',
+              'flex items-center gap-(--space-3) rounded-(--radius-md) border-0 px-(--space-4) text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)',
+              checked
+                ? 'bg-(--accent-soft) text-(--ink) shadow-[inset_0_0_0_1.5px_var(--accent)]'
+                : 'bg-(--fill-tonal) hover:bg-(--surface-hover)',
+              row.full ? 'text-(--ink-muted)' : 'text-(--ink)',
+            )}
+          >
+            {row.id === ANY_STAFF ? (
+              <span
+                aria-hidden="true"
+                className="flex size-11 flex-none items-center justify-center rounded-(--radius-pill) bg-(--surface-raised) text-(--accent)"
+              >
+                <Users size={20} />
+              </span>
+            ) : (
+              <Avatar name={row.name} index={i - 1} dim={row.full} />
+            )}
+            <span className="flex min-w-0 grow flex-col">
+              <span className="body font-semibold">{row.name}</span>
+              <span className={cn('body-sm', !row.full && 'text-(--ink-muted)')}>{row.sub}</span>
+            </span>
+            <span
+              className={cn(
+                'body-sm sp-num text-right',
+                compact && 'whitespace-nowrap',
+                row.id === ANY_STAFF ? 'font-semibold' : !row.full && 'text-(--ink-muted)',
+              )}
+            >
+              {row.full ? (
+                <>
+                  Hết giờ ngày này
+                  {row.nextDay && (
+                    <>
+                      <br />
+                      {row.nextDay}
+                    </>
+                  )}
+                </>
+              ) : row.id === ANY_STAFF ? (
+                row.right
+              ) : (
+                `Sớm nhất ${row.right}`
+              )}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 /** "Bất kỳ ai · Đổi" row plus a bottom sheet (BR-14): "Bất kỳ ai" first and preselected. */
 export function StaffPicker({
   options,
@@ -88,25 +184,6 @@ export function StaffPicker({
     setOpen(false);
     triggerRef.current?.focus();
   }
-
-  const rows = [
-    {
-      id: ANY_STAFF,
-      name: 'Bất kỳ ai',
-      sub: `Xếp ${noun.toLowerCase()} trống sớm nhất, nhiều giờ để chọn nhất`,
-      right: anyEarliest,
-      full: false,
-      nextDay: undefined as string | undefined,
-    },
-    ...options.map((o) => ({
-      id: o.id,
-      name: o.displayName,
-      sub: `${o.title} · ${o.specialty}`,
-      right: o.earliest,
-      full: o.earliest === null,
-      nextDay: o.nextDay,
-    })),
-  ];
 
   return (
     <div className="flex flex-col gap-(--space-2)">
@@ -170,66 +247,13 @@ export function StaffPicker({
                 <X size={20} aria-hidden="true" />
               </Button>
             </div>
-            <div className="flex flex-col gap-(--space-2)" role="radiogroup" aria-label={noun}>
-              {rows.map((row, i) => {
-                const checked = row.id === draft;
-                return (
-                  <button
-                    key={row.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={checked}
-                    onClick={() => setDraft(row.id)}
-                    className={cn(
-                      'flex min-h-16 items-center gap-(--space-3) rounded-(--radius-md) border-0 px-(--space-4) py-(--space-2) text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--focus-ring)',
-                      checked
-                        ? 'bg-(--accent-soft) text-(--ink) shadow-[inset_0_0_0_1.5px_var(--accent)]'
-                        : 'bg-(--fill-tonal) hover:bg-(--surface-hover)',
-                      row.full ? 'text-(--ink-muted)' : 'text-(--ink)',
-                    )}
-                  >
-                    {row.id === ANY_STAFF ? (
-                      <span
-                        aria-hidden="true"
-                        className="flex size-11 flex-none items-center justify-center rounded-(--radius-pill) bg-(--surface-raised) text-(--accent)"
-                      >
-                        <Users size={20} />
-                      </span>
-                    ) : (
-                      <Avatar name={row.name} index={i - 1} dim={row.full} />
-                    )}
-                    <span className="flex min-w-0 grow flex-col">
-                      <span className="body font-semibold">{row.name}</span>
-                      <span className={cn('body-sm', !row.full && 'text-(--ink-muted)')}>
-                        {row.sub}
-                      </span>
-                    </span>
-                    <span
-                      className={cn(
-                        'body-sm sp-num text-right',
-                        row.id === ANY_STAFF ? 'font-semibold' : !row.full && 'text-(--ink-muted)',
-                      )}
-                    >
-                      {row.full ? (
-                        <>
-                          Hết giờ ngày này
-                          {row.nextDay && (
-                            <>
-                              <br />
-                              {row.nextDay}
-                            </>
-                          )}
-                        </>
-                      ) : row.id === ANY_STAFF ? (
-                        row.right
-                      ) : (
-                        `Sớm nhất ${row.right}`
-                      )}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <StaffOptionList
+              options={options}
+              value={draft}
+              onChange={setDraft}
+              anyEarliest={anyEarliest}
+              noun={noun}
+            />
             <Button
               variant="accent"
               size="lg"

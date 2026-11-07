@@ -11,7 +11,7 @@ export function MockToolbar() {
   const searchParams = useSearchParams();
   const { fixture, role } = parseSelection(searchParams.get('tenant'), searchParams.get('role'));
 
-  const hrefWith = (key: 'tenant' | 'role', value: string) => {
+  const hrefWith = (key: 'tenant' | 'role' | 'khach', value: string) => {
     const params = new URLSearchParams(searchParams);
     params.set(key, value);
     return `${pathname}?${params}`;
@@ -30,6 +30,15 @@ export function MockToolbar() {
         options={roles.map((r) => ({ value: r.id, label: r.label }))}
         selected={role}
         hrefFor={(value) => hrefWith('role', value)}
+      />
+      <Picker
+        label="Khách"
+        options={[
+          { value: 'cu', label: 'Khách cũ' },
+          { value: 'moi', label: 'Khách mới' },
+        ]}
+        selected={searchParams.get('khach') === 'moi' ? 'moi' : 'cu'}
+        hrefFor={(value) => hrefWith('khach', value)}
       />
     </div>
   );
