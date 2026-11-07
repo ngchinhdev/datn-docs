@@ -1,0 +1,420 @@
+/* Copied from design/sapio, do not edit here */
+
+/* Sapio components. Every color, size and radius comes from tokens.css. */
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 22px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sp-num { font-variant-numeric: tabular-nums; }
+.sp-muted { color: var(--ink-muted); }
+
+.sp-stack { display: flex; flex-direction: column; gap: var(--space-3); }
+.sp-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.sp-pad { padding: var(--space-4); }
+
+/* Focus: solid 2px ring, 2px gap in the page color. */
+.sp-btn:focus-visible,
+.sp-slot:focus-visible,
+.sp-date:focus-visible,
+.sp-service:focus-within,
+.sp-field__control:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Tenant accent scopes: the customer pages set one of these on their root. */
+.sp-tenant-may { --accent: var(--tenant-may); --accent-soft: var(--tenant-may-soft); --on-accent: var(--on-tenant-may); }
+.sp-tenant-pawpaw { --accent: var(--tenant-pawpaw); --accent-soft: var(--tenant-pawpaw-soft); --on-accent: var(--on-tenant-pawpaw); }
+
+/* ---------- Button ---------- */
+.sp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 36px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  font: 500 14px/20px var(--font-sans);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms ease, transform 120ms ease, opacity 120ms ease;
+}
+.sp-btn:active:not([disabled]) { transform: translateY(1px); }
+.sp-btn--primary { background: var(--primary); color: var(--on-primary); font-weight: 600; box-shadow: var(--shadow-xs); }
+.sp-btn--primary:hover { opacity: 0.88; }
+.sp-btn--secondary { background: var(--fill-tonal); color: var(--ink); }
+.sp-btn--secondary:hover { background: var(--surface-hover); }
+.sp-btn--ghost { background: transparent; color: var(--ink-muted); }
+.sp-btn--ghost:hover { background: var(--fill-tonal); color: var(--ink); }
+.sp-btn--danger { background: var(--danger-soft); color: var(--danger); }
+.sp-btn--sm { height: 28px; padding: 0 var(--space-3); font-size: 13px; }
+.sp-btn--accent { background: var(--accent); color: var(--on-accent); font-weight: 600; box-shadow: var(--shadow-xs); }
+.sp-btn--accent:hover { opacity: 0.9; }
+.sp-btn--lg { height: 48px; padding: 0 var(--space-6); border-radius: var(--radius-pill); font-size: 16px; }
+.sp-btn--block { width: 100%; }
+.sp-btn[disabled] { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+/* ---------- Status badge ---------- */
+.sp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  font: 500 12px/16px var(--font-sans);
+  white-space: nowrap;
+}
+.sp-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.sp-badge--confirmed { color: var(--status-confirmed); background: var(--status-confirmed-soft); }
+.sp-badge--checked-in { color: var(--status-checked-in); background: var(--status-checked-in-soft); }
+.sp-badge--completed { color: var(--status-completed); background: var(--status-completed-soft); }
+.sp-badge--no-show { color: var(--status-no-show); background: var(--status-no-show-soft); }
+.sp-badge--cancelled { color: var(--ink-muted); background: var(--surface-sunken); text-decoration: line-through; }
+.sp-badge--cancelled::before { background: var(--ink-muted); }
+.sp-badge--hold { color: var(--brand); background: transparent; box-shadow: inset 0 0 0 1px var(--brand); }
+
+/* ---------- Appointment block ---------- */
+.sp-appt {
+  --appt-line: var(--status-confirmed);
+  --appt-soft: var(--status-confirmed-soft);
+  position: absolute;
+  left: var(--space-1);
+  right: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+  background: var(--appt-soft);
+  color: var(--ink);
+  box-shadow: 0 0 0 1.5px var(--surface-raised);
+  transition: box-shadow 120ms ease;
+}
+.sp-appt:hover { box-shadow: 0 0 0 1.5px var(--surface-raised), var(--shadow-card); }
+.sp-appt--confirmed { --appt-line: var(--status-confirmed); --appt-soft: var(--status-confirmed-soft); }
+.sp-appt--checked-in { --appt-line: var(--status-checked-in); --appt-soft: var(--status-checked-in-soft); }
+.sp-appt--completed { --appt-line: var(--status-completed); --appt-soft: var(--status-completed-soft); }
+.sp-appt--no-show { --appt-line: var(--status-no-show); --appt-soft: var(--status-no-show-soft); }
+.sp-appt--hold { --appt-line: var(--brand); --appt-soft: var(--surface-raised); outline: 1.5px dashed var(--brand); outline-offset: -1.5px; }
+.sp-appt--inset { left: 28px; z-index: 2; box-shadow: 0 0 0 2px var(--surface-raised), var(--shadow-card); }
+.sp-appt--dragging { box-shadow: var(--shadow-drag); }
+.sp-appt__seg { flex: none; padding: 4px 8px; overflow: hidden; }
+.sp-appt__seg--wait {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--appt-soft) 0 var(--hatch-step),
+      transparent var(--hatch-step) calc(var(--hatch-step) * 2.5)
+    ),
+    var(--surface-raised);
+}
+.sp-appt__title { display: flex; align-items: center; gap: 6px; font: 600 13px/16px var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sp-appt__title::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--appt-line); }
+.sp-appt__meta { font: 400 12px/16px var(--font-sans); color: var(--ink-muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- Resource calendar ---------- */
+.sp-cal {
+  display: grid;
+  grid-template-columns: var(--ruler-width) repeat(var(--cols, 4), minmax(var(--column-min-width), 1fr));
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: 0 0 0 1px var(--line), var(--shadow-card);
+}
+.sp-cal__head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: var(--space-2) var(--space-2);
+  border-bottom: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  background: var(--surface-raised);
+}
+.sp-cal__head:first-child { border-left: 0; }
+.sp-cal__name { font: 600 13px/16px var(--font-sans); }
+.sp-cal__kind { font: 400 12px/16px var(--font-sans); color: var(--ink-muted); }
+.sp-cal__ruler { position: relative; }
+.sp-cal__hour {
+  position: absolute;
+  right: var(--space-2);
+  margin-top: 2px;
+  font: 500 12px/16px var(--font-sans);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.sp-cal__col {
+  position: relative;
+  border-left: 1px solid var(--line);
+  background-image:
+    repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px calc(var(--slot-height) * 4));
+}
+.sp-cal__closed { position: absolute; left: 0; right: 0; background: var(--surface-sunken); }
+.sp-cal__now { position: absolute; left: 0; right: 0; z-index: 4; height: 1.5px; background: var(--brand); }
+.sp-cal__now::before { content: ""; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
+
+/* ---------- Date strip + slot picker (customer) ---------- */
+.sp-dates { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); }
+.sp-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-2) 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--ink-muted);
+  font: 500 12px/16px var(--font-sans);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.sp-date b { color: var(--ink); }
+.sp-date:hover:not([disabled]) { background: var(--fill-tonal); }
+.sp-date b { font: 600 17px/24px var(--font-sans); font-variant-numeric: tabular-nums; }
+.sp-date[aria-pressed="true"], .sp-date[aria-pressed="true"] b { background: var(--accent); color: var(--on-accent); }
+.sp-date[disabled], .sp-date[disabled] b { color: var(--ink-muted); text-decoration: line-through; cursor: not-allowed; }
+.sp-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: var(--space-2); }
+.sp-slot {
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--fill-tonal);
+  color: var(--ink);
+  font: 500 15px/20px var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.sp-slot:hover { background: var(--accent-soft); color: var(--ink); }
+.sp-slot[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; box-shadow: var(--shadow-xs); }
+.sp-empty {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--fill-tonal);
+  color: var(--ink-muted);
+  font: 400 14px/20px var(--font-sans);
+}
+
+/* ---------- Service card (customer) ---------- */
+.sp-service {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  box-shadow: 0 0 0 1px var(--line), var(--shadow-card);
+}
+.sp-service__name { font: 600 17px/24px var(--font-sans); }
+.sp-variant {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--fill-tonal);
+  cursor: pointer;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+.sp-variant:hover { background: var(--surface-hover); }
+.sp-variant input { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
+.sp-variant:has(input:checked) { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.sp-variant__name { font: 500 15px/22px var(--font-sans); }
+.sp-variant__meta { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.sp-variant__price { font: 600 15px/22px var(--font-sans); font-variant-numeric: tabular-nums; }
+
+/* ---------- Hold banner ---------- */
+.sp-hold {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+.sp-hold__title { font: 600 14px/20px var(--font-sans); }
+.sp-hold__note { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.sp-hold__time { grid-row: span 2; font: 600 22px/28px var(--font-sans); color: var(--accent); font-variant-numeric: tabular-nums; }
+.sp-hold__bar { grid-column: 1 / -1; height: 3px; border-radius: var(--radius-pill); background: var(--surface-raised); overflow: hidden; }
+.sp-hold__bar span { display: block; height: 100%; background: var(--accent); }
+
+/* ---------- Field ---------- */
+.sp-field { display: flex; flex-direction: column; gap: 6px; }
+.sp-field__label { font: 500 13px/18px var(--font-sans); }
+.sp-field__control {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+  transition: border-color 120ms ease;
+}
+.sp-field__control:hover { border-color: var(--ink-muted); }
+.sp-field__prefix { padding: 0 var(--space-3); align-self: stretch; display: flex; align-items: center; border-right: 1px solid var(--line); color: var(--ink-muted); font: 500 15px/22px var(--font-sans); font-variant-numeric: tabular-nums; }
+.sp-field__control input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 400 16px/22px var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.sp-field__control input::placeholder { color: var(--ink-muted); }
+.sp-field__help { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.sp-field--error .sp-field__control { border-color: var(--danger); }
+.sp-field--error .sp-field__help { color: var(--danger); }
+
+/* ---------- Segmented control ---------- */
+/* One choice out of a few: Sáng / Chiều / Tối on the customer page, Nhân viên / Tài nguyên in admin. */
+.sp-segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-md);
+  background: var(--fill-tonal);
+}
+.sp-segmented--block { display: flex; }
+.sp-segmented--block > .sp-segmented__item { flex: 1 1 0; }
+.sp-segmented__item {
+  appearance: none;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-muted);
+  font: 500 14px/20px var(--font-sans);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+.sp-segmented__item:hover { color: var(--ink); }
+.sp-segmented__item[aria-selected="true"],
+.sp-segmented__item[aria-pressed="true"],
+.sp-segmented__item[aria-current="page"] {
+  background: var(--fill-selected);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
+}
+.sp-segmented__item[disabled] { opacity: 0.45; cursor: not-allowed; }
+.sp-segmented__item:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.sp-segmented__count { font: 500 12px/16px var(--font-sans); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+/* Customer pages: taller, round. */
+.sp-segmented--lg { padding: 4px; border-radius: var(--radius-pill); }
+.sp-segmented--lg .sp-segmented__item { min-height: 44px; border-radius: var(--radius-pill); font-size: 15px; }
+
+/* ---------- Confirm dialog ---------- */
+/* Native <dialog> opened with showModal(): focus trap, Escape and inert page come free. */
+dialog.sp-dialog {
+  width: min(420px, calc(100vw - 32px));
+  box-sizing: border-box;
+  margin: auto;
+  padding: var(--space-6);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--line), var(--shadow-popover);
+}
+dialog.sp-dialog[open] { display: flex; flex-direction: column; gap: var(--space-4); }
+dialog.sp-dialog::backdrop,
+.sp-scrim {
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(2px);
+}
+.sp-scrim { position: fixed; inset: 0; }
+.sp-dialog__title { margin: 0; font: 600 18px/26px var(--font-sans); letter-spacing: -0.01em; }
+.sp-dialog__body { margin: 0; font: 400 14px/20px var(--font-sans); color: var(--ink-muted); }
+.sp-dialog__facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 0;
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--fill-tonal);
+  font: 400 14px/20px var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+.sp-dialog__facts dt { color: var(--ink-muted); }
+.sp-dialog__facts dd { margin: 0; padding-left: var(--space-4); text-align: right; font-weight: 600; }
+.sp-dialog__facts .sp-dialog__total { padding-top: 6px; box-shadow: 0 -1px 0 var(--line); font-size: 15px; }
+.sp-dialog__actions { display: flex; flex-wrap: wrap-reverse; justify-content: flex-end; gap: var(--space-2); }
+.sp-dialog__actions .sp-btn { height: 44px; }
+@media (max-width: 480px) {
+  .sp-dialog__actions .sp-btn { flex: 1 1 0; }
+}
+
+/* ---------- Toast ---------- */
+/* Short note after an action. With an undo button for actions that can be reversed. */
+.sp-toast-region {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: min(420px, calc(100vw - 32px));
+  pointer-events: none;
+}
+.sp-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 6px 6px 6px var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--line), var(--shadow-popover);
+  font: 500 14px/20px var(--font-sans);
+  pointer-events: auto;
+}
+.sp-toast__text { flex: 1 1 auto; min-width: 0; }
+.sp-toast__action {
+  appearance: none;
+  flex: none;
+  border: 0;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--brand);
+  font: 600 14px/20px var(--font-sans);
+  cursor: pointer;
+}
+.sp-toast__action:hover { background: var(--brand-soft); }
+.sp-toast__action:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.sp-toast--danger .sp-toast__text { color: var(--danger); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-btn, .sp-appt, .sp-date, .sp-slot, .sp-variant, .sp-field__control, .sp-segmented__item { transition: none; }
+  .sp-btn:active:not([disabled]) { transform: none; }
+}

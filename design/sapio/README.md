@@ -18,7 +18,7 @@ Sapio có hai mật độ, dùng chung một bộ token:
 ## Màu
 
 - Nền trang `surface`; thẻ, bảng, cột lịch `surface-raised`; vùng ngoài giờ mở cửa và ô bị khóa `surface-sunken`.
-- Nút phụ, ô giờ, lựa chọn biến thể, hộp thông báo trống: nền `fill-tonal`, không viền; rê chuột `surface-hover`. `fill-tonal` sáng hơn nền trang trong theme tối, nên không dùng `surface-sunken` thay cho nó.
+- Nút phụ, ô giờ, lựa chọn biến thể, hộp thông báo trống: nền `fill-tonal`, không viền; rê chuột `surface-hover`. Mục đang chọn trong `Segmented`: `fill-selected`. `fill-tonal` sáng hơn nền trang trong theme tối, nên không dùng `surface-sunken` thay cho nó.
 - Chữ chính `ink`, chữ phụ `ink-muted`. Cả hai đọc được trên ba nền trên và trên mọi nền `*-soft`.
 - Đường kẻ mảnh và viền thẻ `line`. Chỉ ô nhập và checkbox có viền `line-strong` (đạt 3:1, để người nhìn kém vẫn thấy ô).
 - Nút chính trong quản trị: nền `primary` (ngọc bích, cùng màu `brand`), chữ `on-primary`. Mỗi màn hình tối đa một nút chính. Màu mực `ink` chỉ dành cho chữ: không component nào có nền đen hay nền `ink` (nút, ô giờ đang chọn, chip, khối trang trí).
@@ -42,7 +42,7 @@ Trang khách đặt một lớp phạm vi lên phần tử gốc: `.sp-tenant-ma
 
 - Bước khoảng cách 4px: `space-1` … `space-12`. Lề hai bên tối thiểu `space-4` trên điện thoại.
 - Góc: `radius-xs` khối lịch hẹn, `radius-sm` nút quản trị, `radius-md` thẻ, popover, khung lịch, ô nhập, lựa chọn biến thể, `radius-lg` thẻ và khung trang khách, `radius-pill` nút chính, ô giờ trang khách và badge.
-- Tách lớp bằng nền và bóng mềm, không bằng viền đậm: thẻ và khung lịch dùng viền `line` 1px cộng `shadow-card`; nút chính và ô nhập `shadow-xs`; popover, menu, hộp thoại `shadow-popover`; khối đang kéo `shadow-drag`. Không đổ bóng cho mọi phần tử.
+- Tách lớp bằng nền và bóng mềm, không bằng viền đậm: thẻ và khung lịch dùng viền `line` 1px cộng `shadow-card`; nút chính và ô nhập `shadow-xs`; popover, menu, hộp thoại, toast `shadow-popover`; khối đang kéo `shadow-drag`. Không đổ bóng cho mọi phần tử.
 - Chuyển động: 120ms `ease` cho rê chuột và nhấn (nút lún 1px khi nhấn); tắt hết khi `prefers-reduced-motion`.
 - Focus: vòng liền 2px `focus-ring`, cách phần tử 2px (`outline-offset: 2px`). Không bỏ focus.
 
@@ -63,6 +63,24 @@ Lịch là màn hình đặc trưng của Sapio; giữ đúng các quy tắc sau
 - Mỗi bước một quyết định: dịch vụ → (đối tượng được phục vụ) → ngày giờ → thông tin liên hệ → xác nhận.
 - Ô giờ (`.sp-slot`) dạng viên thuốc, giờ trống mới hiện; không có giờ trống thì hiện `.sp-empty` kèm gợi ý ngày gần nhất còn trống.
 - Khi đã giữ chỗ, banner `.sp-hold` hiện thời gian còn lại ở đầu các bước sau.
+- Giờ trống chia ba buổi bằng `Segmented`, mỗi lần hiện một buổi, mặc định buổi sớm nhất còn giờ (xem `SlotPicker`).
+- Từ 900px: hai cột. Cột trái (tóm tắt, danh sách thợ dạng dọc, giờ đã chọn và nút chính) đứng yên khi cuộn (`position: sticky`), nút chính luôn nhìn thấy. Dưới 900px: thanh tóm tắt và nút chính cố định ở đáy.
+- Bước Xác nhận là màn kiểm lại: nút cuối "Xác nhận đặt lịch", không thêm hộp hỏi. Màn "Đã đặt lịch" không còn nút quay lại hay số bước, và có việc làm tiếp: thêm vào lịch điện thoại, xem hoặc đổi lịch, về trang cơ sở.
+- Chữ gợi ý trong ô nhập viết dạng "Ví dụ: …" để không trông như đã điền.
+
+## Xác nhận và hoàn tác
+
+Hỏi lại quá nhiều thì người dùng bấm theo phản xạ và hộp hỏi mất tác dụng. Mỗi thao tác thuộc đúng một trong ba mức:
+
+| Mức | Khi nào | Cách làm | Ví dụ |
+|---|---|---|---|
+| Hỏi lại | Về tiền, không đảo lại được, hoặc ảnh hưởng người khác | `ConfirmDialog` nêu đối tượng và con số; nút xác nhận lặp lại động từ | Hoàn thành và thu tiền, Hoàn tiền, Hủy lịch, Đánh dấu không đến, Xóa, Duyệt nghỉ phép có lịch bị ảnh hưởng |
+| Làm ngay, cho hoàn tác | Hay làm, đảo lại được | Chạy ngay, `Toast` có "Hoàn tác" trong 5 giây | Check-in, kéo lịch sang giờ khác, đổi thợ, thêm dịch vụ |
+| Không hỏi | Không đổi dữ liệu | Không có gì thêm | Mở chi tiết, đổi ngày, đổi kiểu xem, lọc, chọn trên trang khách |
+
+- Thu tiền ghi bút toán vào sổ cái, sửa sai chỉ bằng bút toán đảo, nên luôn hỏi lại và hiện số tiền, tiền cọc đã trừ, hình thức thanh toán.
+- Xong một thao tác thì ẩn các nút không còn hợp lệ: lịch hoàn thành không còn Check-in, Đổi giờ, Thêm dịch vụ; lịch không đến không còn Thu tiền.
+- Trang khách không dùng hộp hỏi: bước Xác nhận đã là màn kiểm lại.
 
 ## Icon và logo
 
