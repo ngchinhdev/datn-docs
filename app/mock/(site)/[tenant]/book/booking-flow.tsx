@@ -6,6 +6,7 @@ import { useQueryState } from '@/components/mock/use-query-state';
 import { BottomBar } from '@/components/sapio/bottom-bar';
 import { Button } from '@/components/sapio/button';
 import { DateStrip } from '@/components/sapio/date-strip';
+import { Field } from '@/components/sapio/form';
 import { HoldBanner } from '@/components/sapio/hold-banner';
 import { PhoneField } from '@/components/sapio/phone-field';
 import { SegmentedTabs } from '@/components/sapio/segmented';
@@ -22,9 +23,18 @@ import { useToast } from '@/components/sapio/toast';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
 import { freeSlots, type FreeSlot } from '@/mock/availability';
+import { matchesAttributes } from '@/mock/fixtures/bookings';
 import { tenantFixtures, type ServedSubject, type ServiceVariant } from '@/mock/fixtures';
 import { formatMinutes, formatPhone, formatVnd, normalizePhone } from '@/mock/format';
 import { openingHours } from '@/mock/hours';
+import {
+  askedFields,
+  checkSubject,
+  describeSubject,
+  isRequired,
+  priceFactors,
+  type SubjectValues,
+} from '@/mock/subject-schema';
 import {
   addDays,
   addMinutes,
@@ -48,22 +58,15 @@ const PARTS: { value: Part; label: string; from: number; to: number }[] = [
   { value: 'afternoon', label: 'Chiều', from: 12, to: 17 },
   { value: 'evening', label: 'Tối', from: 17, to: 24 },
 ];
-/** Above this weight a dog takes the large variant. */
-const SMALL_DOG_MAX_KG = 10;
 
 const duration = (v: ServiceVariant) => Math.max(...v.segments.map((s) => s.endMinute));
 const matches = (v: ServiceVariant, subject: ServedSubject) =>
-  Object.entries(v.match).every(([key, value]) => subject.attributes[key] === value);
+  matchesAttributes(v.match, subject.attributes);
 const partOf = (slot: FreeSlot) => {
   const hour = Number(formatTime(slot.startAt).slice(0, 2));
   return PARTS.find((p) => hour >= p.from && hour < p.to)?.value ?? 'evening';
 };
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
-
-function subjectMeta(subject: ServedSubject) {
-  const { breed, weightKg } = subject.attributes;
-  return [breed, weightKg && `${weightKg} kg`].filter(Boolean).join(' · ');
-}
 
 const icsStamp = (iso: string) => iso.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 
@@ -90,35 +93,6 @@ function downloadIcs(o: { start: string; end: string; title: string; location: s
   URL.revokeObjectURL(url);
 }
 
-function Field({
-  id,
-  label,
-  children,
-  help,
-  error,
-}: {
-  id: string;
-  label: string;
-  children: ReactNode;
-  help?: string | undefined;
-  error?: string | null | undefined;
-}) {
-  const message = error ?? help;
-  return (
-    <div className={cn('sp-field', error && 'sp-field--error')}>
-      <label className="sp-field__label" htmlFor={id}>
-        {label}
-      </label>
-      <div className="sp-field__control">{children}</div>
-      {message && (
-        <span id={`${id}-help`} className="sp-field__help">
-          {message}
-        </span>
-      )}
-    </div>
-  );
-}
-
 interface Cta {
   title: string;
   subtitle?: string | undefined;
@@ -135,11 +109,13 @@ export function BookingFlow({
   newCustomer: boolean;
 }) {
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
-  const { tenant, services, staff, resources, resourceTypes } = fixture;
+  const { tenant, services, staff, resources } = fixture;
   const branch = fixture.branches[0]!;
   const toast = useToast();
-  const staffNoun = resourceTypes.find((t) => t.isStaff)?.name ?? 'Nhân viên';
-  const asksSubject = fixture.servedSubjects.some((s) => s.kind === 'other');
+  const { vocabulary, subjectSchema } = fixture.template;
+  const staffNoun = vocabulary.staff;
+  const subjectNoun = vocabulary.subject ?? '';
+  const asksSubject = vocabulary.subject !== null;
   const saved = newCustomer
     ? []
     : fixture.servedSubjects.filter((s) => s.customerId === RETURNING_CUSTOMER[tenant.id]);
@@ -153,9 +129,9 @@ export function BookingFlow({
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [variantId, setVariantId] = useState<string | null>(null);
   const [subjectId, setSubjectId] = useState<string | null>(newCustomer ? NEW_SUBJECT : null);
-  const [petName, setPetName] = useState('');
-  const [petSpecies, setPetSpecies] = useState<'dog' | 'cat' | null>(null);
-  const [petWeight, setPetWeight] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newValues, setNewValues] = useState<SubjectValues>({});
+  const [subjectTouched, setSubjectTouched] = useState<Set<string>>(new Set());
   const [date, setDate] = useState(today);
   const [part, setPart] = useState<Part | null>(null);
   const [staffChoice, setStaffChoice] = useState(ANY_STAFF);
@@ -172,22 +148,17 @@ export function BookingFlow({
   const [confirmed, setConfirmed] = useState(false);
 
   const service = services.find((s) => s.id === serviceId) ?? null;
-  const weightKg = Number(petWeight.replace(',', '.'));
+  // BR-71: the new subject only exists once its values follow the schema of the industry.
+  const subjectCheck = checkSubject(subjectSchema, subjectNoun, newName, newValues);
   const newSubject: ServedSubject | null =
-    petName.trim() && petSpecies && (petSpecies === 'cat' || weightKg > 0)
+    Object.keys(subjectCheck.errors).length === 0
       ? {
           id: NEW_SUBJECT,
           tenantId: tenant.id,
           customerId: '',
           kind: 'other',
-          name: petName.trim(),
-          attributes: {
-            species: petSpecies,
-            ...(petSpecies === 'dog'
-              ? { size: weightKg < SMALL_DOG_MAX_KG ? 'small' : 'large' }
-              : {}),
-            ...(weightKg > 0 ? { weightKg: String(weightKg) } : {}),
-          },
+          name: newName.trim(),
+          attributes: subjectCheck.attributes,
         }
       : null;
   const subject =
@@ -358,7 +329,7 @@ export function BookingFlow({
           return {
             id: s.id,
             name: s.name,
-            meta: 'Giá theo loài và cân nặng',
+            meta: `Giá theo ${priceFactors(subjectSchema, s)}`,
             price: `từ ${formatVnd(min)}`,
           };
         })}
@@ -402,7 +373,11 @@ export function BookingFlow({
   if (step === 'subject' && service) {
     const options = saved.filter((s) => service.variants.some((v) => matches(v, s)));
     const newVariant = newSubject && service.variants.find((v) => matches(v, newSubject));
-    title = 'Cho bé nào?';
+    const factors = priceFactors(subjectSchema, service);
+    const touch = (key: string) => setSubjectTouched((t) => new Set(t).add(key));
+    const error = (key: string) => (subjectTouched.has(key) ? subjectCheck.errors[key] : undefined);
+    const setValue = (key: string, value: string) => setNewValues((v) => ({ ...v, [key]: value }));
+    title = vocabulary.subjectQuestion ?? '';
     body = (
       <div className="sp-stack">
         <ServiceVariantList
@@ -418,84 +393,114 @@ export function BookingFlow({
               return {
                 id: s.id,
                 name: s.name,
-                meta: `${subjectMeta(s)} · ${v.name} · ${formatMinutes(duration(v))}`,
+                meta: `${describeSubject(subjectSchema, s)} · ${v.name} · ${formatMinutes(duration(v))}`,
                 price: formatVnd(v.priceVnd),
               };
             }),
             {
               id: NEW_SUBJECT,
-              name: 'Thêm bé',
+              name: vocabulary.addSubject ?? '',
               meta: newVariant
                 ? `${newSubject.name} · ${newVariant.name} · ${formatMinutes(duration(newVariant))}`
-                : 'Tên, loài và cân nặng',
+                : askedFields(fixture),
               price: newVariant ? formatVnd(newVariant.priceVnd) : '',
             },
           ]}
         />
         {subjectId === NEW_SUBJECT && (
           <div className="sp-stack rounded-(--radius-lg) bg-(--surface-raised) p-(--space-4) shadow-[0_0_0_1px_var(--line)]">
-            <Field id="pet-name" label="Tên bé">
+            <Field id="subject-name" label={`Tên ${subjectNoun}`} size="md" error={error('name')}>
               <input
-                id="pet-name"
-                placeholder="Ví dụ: Mochi"
-                value={petName}
-                onChange={(e) => setPetName(e.target.value)}
+                id="subject-name"
+                placeholder={
+                  vocabulary.subjectExample ? `Ví dụ: ${vocabulary.subjectExample}` : undefined
+                }
+                value={newName}
+                aria-invalid={error('name') ? true : undefined}
+                onChange={(e) => setNewName(e.target.value)}
+                onBlur={() => touch('name')}
               />
             </Field>
-            <div className="sp-field">
-              <span className="sp-field__label" id="pet-species-label">
-                Loài
-              </span>
-              <div
-                role="group"
-                aria-labelledby="pet-species-label"
-                className="sp-segmented sp-segmented--lg sp-segmented--block"
-              >
-                {(
-                  [
-                    ['dog', 'Chó'],
-                    ['cat', 'Mèo'],
-                  ] as const
-                ).map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className="sp-segmented__item"
-                    aria-pressed={petSpecies === value}
-                    onClick={() => setPetSpecies(value)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <Field id="pet-weight" label="Cân nặng (kg)">
-              <input
-                id="pet-weight"
-                inputMode="decimal"
-                placeholder="Ví dụ: 6"
-                value={petWeight}
-                onChange={(e) => setPetWeight(e.target.value.replace(/[^\d.,]/g, ''))}
-              />
-            </Field>
+            {subjectSchema.map((field) => {
+              const id = `subject-${field.key}`;
+              if (field.type === 'enum') {
+                return (
+                  <div key={field.key} className="sp-field">
+                    <span className="sp-field__label" id={`${id}-label`}>
+                      {field.label}
+                    </span>
+                    <div
+                      role="group"
+                      aria-labelledby={`${id}-label`}
+                      className="sp-segmented sp-segmented--lg sp-segmented--block"
+                    >
+                      {field.options.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          className="sp-segmented__item"
+                          aria-pressed={newValues[field.key] === option.value}
+                          onClick={() => {
+                            setValue(field.key, option.value);
+                            touch(field.key);
+                          }}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <Field
+                  key={field.key}
+                  id={id}
+                  size="md"
+                  label={field.label}
+                  optional={!isRequired(field, newValues)}
+                  error={error(field.key)}
+                >
+                  <input
+                    id={id}
+                    inputMode={field.type === 'number' ? 'decimal' : undefined}
+                    placeholder={field.example ? `Ví dụ: ${field.example}` : undefined}
+                    value={newValues[field.key] ?? ''}
+                    aria-invalid={error(field.key) ? true : undefined}
+                    onChange={(e) =>
+                      setValue(
+                        field.key,
+                        field.type === 'number'
+                          ? e.target.value.replace(/[^\d.,]/g, '')
+                          : e.target.value,
+                      )
+                    }
+                    onBlur={() => touch(field.key)}
+                  />
+                  {field.type === 'number' && field.unit && (
+                    <span className="sp-field__suffix">{field.unit}</span>
+                  )}
+                </Field>
+              );
+            })}
             <p className="body-sm m-0 text-(--ink-muted)" aria-live="polite">
               {newSubject
                 ? newVariant
                   ? `Giá cho ${newSubject.name}: ${newVariant.name}, ${formatVnd(newVariant.priceVnd)}.`
-                  : `${service.name} chưa nhận ${petSpecies === 'cat' ? 'mèo' : 'bé này'}. Chọn dịch vụ khác.`
-                : 'Giá theo loài và cân nặng, hiện ngay khi nhập.'}
+                  : `${service.name} chưa nhận ${subjectNoun} này. Chọn dịch vụ khác.`
+                : `Giá theo ${factors}, hiện ngay khi nhập.`}
             </p>
           </div>
         )}
         {subject && subjectId !== NEW_SUBJECT && (
           <p className="body-sm m-0 text-(--ink-muted)">
-            Giá theo loài và cân nặng của {subject.name}.
+            Giá theo {factors} của {subject.name}.
           </p>
         )}
       </div>
     );
     cta = {
-      title: subject && variant ? `${subject.name} · ${service.name}` : 'Chưa chọn bé',
+      title: subject && variant ? `${subject.name} · ${service.name}` : `Chưa chọn ${subjectNoun}`,
       subtitle: variant ? formatVnd(variant.priceVnd) : undefined,
       label: 'Tiếp tục',
       disabled: !variant,

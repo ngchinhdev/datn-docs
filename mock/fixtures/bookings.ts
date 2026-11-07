@@ -1,5 +1,6 @@
 import type {
   Appointment,
+  MatchValue,
   AppointmentItem,
   AppointmentStatus,
   Resource,
@@ -7,6 +8,22 @@ import type {
   Service,
   ServiceVariant,
 } from './types';
+
+/** BR-13: does a served subject's attributes select a variant? Ranges compare as numbers. */
+export function matchesAttributes(
+  match: Record<string, MatchValue>,
+  attributes: Record<string, string>,
+): boolean {
+  return Object.entries(match).every(([key, wanted]) => {
+    const actual = attributes[key];
+    if (typeof wanted === 'string') return actual === wanted;
+    const n = Number(actual);
+    if (actual === undefined || Number.isNaN(n)) return false;
+    return (
+      (wanted.min === undefined || n >= wanted.min) && (wanted.max === undefined || n < wanted.max)
+    );
+  });
+}
 
 export function findVariant(services: Service[], variantId: string): ServiceVariant {
   for (const service of services) {

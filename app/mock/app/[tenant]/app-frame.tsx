@@ -78,7 +78,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   };
 
   const accentOf = (slug: string) => `sp-tenant-${fixtureBySlug(slug)?.tenant.id ?? 'may'}`;
-  // The mark carries the brand word, which comes last in the names (Salon Tóc Mây, Spa … Pawpaw).
+  // The mark carries the brand word, which comes last in the names (Salon … Mây, Spa … Pawpaw).
   const initialOf = (name: string) => name.trim().split(/s+/).at(-1)?.charAt(0).toUpperCase() ?? '';
 
   return (

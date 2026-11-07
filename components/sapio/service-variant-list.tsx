@@ -1,7 +1,7 @@
 export interface VariantOption {
   id: string;
   name: string;
-  /** "Chó dưới 10 kg · 60 phút". */
+  /** "Dưới 10 kg · 60 phút". */
   meta: string;
   price: string;
 }

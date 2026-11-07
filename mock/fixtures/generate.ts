@@ -11,7 +11,7 @@
  * - Tóc Mây, Thứ Sáu 06/11: a cancelled appointment, a customer name over 30 characters, a long note.
  * - Pawpaw, Thứ Bảy 07/11: two pets booked together, a dog over 10 kg, dryers busy during the groomer's wait.
  */
-import { bookVariant, findVariant, type ItemSpec } from './bookings';
+import { bookVariant, findVariant, matchesAttributes, type ItemSpec } from './bookings';
 import type {
   Appointment,
   AppointmentStatus,
@@ -161,9 +161,7 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
       const subject = pick(cfg.subjects);
       const service = pick(cfg.services);
       // BR-13: the variant follows the served subject.
-      const variant = service.variants.find((v) =>
-        Object.entries(v.match).every(([k, val]) => subject.attributes[k] === val),
-      );
+      const variant = service.variants.find((v) => matchesAttributes(v.match, subject.attributes));
       if (!variant) continue;
       // BR-03: only staff with the skill.
       const staff = cfg.staff.filter(

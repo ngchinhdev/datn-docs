@@ -1,6 +1,7 @@
 import { appointmentBuilder } from './bookings';
 import { dateRange, generateWeek } from './generate';
 import { generatePeople, withVisitCounts } from './people';
+import { hairSalonTemplate } from './templates';
 import type {
   Appointment,
   Branch,
@@ -625,6 +626,7 @@ const appointments = [...history, ...saturday, ...handwritten, ...week, ...upcom
 
 export const salonTocMay: TenantFixture = {
   tenant: { id: tenantId, slug: 'toc-may', name: 'Salon Tóc Mây', industry: 'hair_salon' },
+  template: hairSalonTemplate,
   branches: [
     {
       id: branchId,

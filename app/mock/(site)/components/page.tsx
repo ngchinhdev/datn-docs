@@ -85,7 +85,7 @@ export default function ComponentsPage() {
           open={dialog}
           title="Thu 400.000 ₫ của chị Hà?"
           facts={[
-            { term: 'Nhuộm tóc · Tóc ngắn', value: '500.000 ₫' },
+            { term: 'Dịch vụ A · Biến thể 1', value: '500.000 ₫' },
             { term: 'Đã cọc', value: '−100.000 ₫' },
             { term: 'Còn phải thu', value: '400.000 ₫', total: true },
           ]}
@@ -113,6 +113,17 @@ export default function ComponentsPage() {
             }
           >
             Lỗi
+          </Button>
+          <Button
+            onClick={() =>
+              toast({
+                text: 'Mất kết nối. Thay đổi chưa được lưu.',
+                tone: 'danger',
+                persist: true,
+              })
+            }
+          >
+            Lỗi cần xử lý, có nút đóng
           </Button>
         </div>
       </Example>
@@ -158,7 +169,7 @@ export default function ComponentsPage() {
             <AppointmentBlock
               dayStart={at('09:00')}
               status="checked_in"
-              title="Chị Hà · Nhuộm ngắn"
+              title="Chị Hà · Dịch vụ A"
               meta="09:00–10:45 · Ghế 1"
               segments={[
                 { startAt: at('09:00'), endAt: at('09:30'), kind: 'work' },
@@ -170,7 +181,7 @@ export default function ComponentsPage() {
               dayStart={at('09:00')}
               status="completed"
               inset
-              title="Anh Tuấn · Cắt ngắn"
+              title="Anh Tuấn · Dịch vụ B"
               meta="09:30–10:15 · Ghế 2"
               segments={[{ startAt: at('09:30'), endAt: at('10:15'), kind: 'work' }]}
             />
@@ -191,12 +202,12 @@ export default function ComponentsPage() {
             {
               id: 'chair-1',
               name: 'Ghế 1',
-              kind: 'Ghế làm tóc',
+              kind: 'Ghế',
               blocks: [
                 {
                   id: 'ha',
                   status: 'checked_in',
-                  title: 'Chị Hà · Nhuộm ngắn',
+                  title: 'Chị Hà · Dịch vụ A',
                   meta: '09:00–10:45 · Mai',
                   segments: [{ startAt: at('09:00'), endAt: at('10:45'), kind: 'work' }],
                 },
@@ -205,7 +216,7 @@ export default function ComponentsPage() {
             {
               id: 'chair-2',
               name: 'Ghế 2',
-              kind: 'Ghế làm tóc',
+              kind: 'Ghế',
               blocks: [
                 {
                   id: 'hold',
@@ -257,24 +268,24 @@ export default function ComponentsPage() {
 
       <Example name="StaffPicker">
         <StaffPicker
-          noun="Thợ"
+          noun="Nhân viên"
           value={staff}
           onChange={setStaff}
-          context="Thợ làm được Nhuộm tóc · Thứ Bảy 07/11"
+          context="Nhân viên làm được Dịch vụ A · Thứ Bảy 07/11"
           anyEarliest="10:45"
           options={[
             {
               id: 'mai',
               displayName: 'Mai',
-              title: 'Thợ chính',
-              specialty: 'chuyên nhuộm',
+              title: 'Chức danh A',
+              specialty: 'mô tả ngắn',
               earliest: '12:00',
             },
             {
               id: 'hung',
               displayName: 'Hùng',
-              title: 'Thợ',
-              specialty: 'nhuộm, tạo kiểu',
+              title: 'Chức danh B',
+              specialty: 'mô tả ngắn',
               earliest: null,
               nextDay: 'Sớm nhất CN 08/11',
             },
@@ -284,12 +295,12 @@ export default function ComponentsPage() {
 
       <Example name="ServiceVariantList">
         <ServiceVariantList
-          name="Nhuộm tóc"
+          name="Dịch vụ A"
           selected={variant}
           onSelect={setVariant}
           variants={[
-            { id: 'short', name: 'Tóc ngắn', meta: '105 phút', price: '500.000 ₫' },
-            { id: 'long', name: 'Tóc dài', meta: '120 phút', price: '700.000 ₫' },
+            { id: 'short', name: 'Biến thể 1', meta: '105 phút', price: '500.000 ₫' },
+            { id: 'long', name: 'Biến thể 2', meta: '120 phút', price: '700.000 ₫' },
           ]}
         />
       </Example>
@@ -327,7 +338,7 @@ export default function ComponentsPage() {
       <Example name="BottomBar">
         <BottomBar
           title="09:45 · Thứ Bảy 07/11"
-          subtitle="Thợ được xếp tự động"
+          subtitle="Nhân viên được xếp tự động"
           action={
             <Button variant="accent" size="lg">
               Tiếp tục

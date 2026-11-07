@@ -5,7 +5,7 @@ import { AppointmentBlock, type AppointmentBlockProps } from './appointment-bloc
 export interface CalendarColumn {
   id: string;
   name: string;
-  /** Second header line, e.g. "Thợ · 3 lịch" or "Ghế làm tóc". */
+  /** Second header line, e.g. "Nhân viên · 3 lịch" or "Ghế 1". */
   kind: string;
   /** Read by screen readers, e.g. "Mai, Thợ chính, 3 lịch hẹn". Defaults to name and kind. */
   label?: string;

@@ -26,7 +26,7 @@ export interface StaffPickerProps {
   /** `ANY_STAFF` or a staff id. */
   value: string;
   onChange: (value: string) => void;
-  /** "Thợ làm được Nhuộm tóc · Thứ Bảy 07/11". */
+  /** "Nhân viên làm được Dịch vụ A · Thứ Bảy 07/11". */
   context: string;
   /** Earliest slot for "Bất kỳ ai". */
   anyEarliest: string | null;

@@ -95,6 +95,9 @@ export interface ServiceSegment {
   label?: string;
 }
 
+/** An exact value, or a number range: `min` included, `max` not (`{ max: 10 }` is "under 10"). */
+export type MatchValue = string | { min?: number; max?: number };
+
 export interface ServiceVariant {
   id: string;
   name: string;
@@ -105,7 +108,7 @@ export interface ServiceVariant {
   /** Integer VND paid online to confirm; absent = no deposit. */
   depositVnd?: bigint;
   /** Served-subject attributes that select this variant (BR-13). */
-  match: Record<string, string>;
+  match: Record<string, MatchValue>;
   segments: ServiceSegment[];
 }
 
@@ -193,8 +196,53 @@ export interface StaffTimeOff {
   note: string;
 }
 
+/** One field a customer fills in for the person or thing being served (BR-71). */
+export type SubjectField =
+  | {
+      key: string;
+      label: string;
+      type: 'enum';
+      options: { value: string; label: string }[];
+      required: boolean;
+    }
+  | {
+      key: string;
+      label: string;
+      type: 'number';
+      unit?: string;
+      /** Placeholder, e.g. "6". */
+      example?: string;
+      /** `true`, `false`, or the values of other fields that make it required. */
+      required: boolean | Record<string, string>;
+    }
+  | { key: string; label: string; type: 'text'; example?: string; required: boolean };
+
+/**
+ * What differs between industries, as data: the words shown to people and the fields of the
+ * served subject. Copied into a tenant when it is created (BR-70).
+ */
+export interface IndustryTemplate {
+  id: string;
+  name: string;
+  vocabulary: {
+    /** Plural-free noun for staff in this industry. */
+    staff: string;
+    /** The thing served when it is not the customer themself; `null` when it is. */
+    subject: string | null;
+    /** Booking step title asking which subject. */
+    subjectQuestion: string | null;
+    /** Button that adds one. */
+    addSubject: string | null;
+    /** Placeholder for the subject's name: "Mochi". */
+    subjectExample: string | null;
+  };
+  /** Empty when the customer is the only subject. */
+  subjectSchema: SubjectField[];
+}
+
 export interface TenantFixture {
   tenant: Tenant;
+  template: IndustryTemplate;
   branches: Branch[];
   resourceTypes: ResourceType[];
   resources: Resource[];

@@ -60,7 +60,7 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
   // A table fills the screen from tablet up; on phones the page scrolls as a whole.
   const fill = useMediaQuery('(min-width: 768px)');
 
-  const staffNoun = fixture.resourceTypes.find((t) => t.isStaff)?.name ?? 'Nhân viên';
+  const staffNoun = fixture.template.vocabulary.staff;
   const query = useMemo(() => parseCustomerQuery(searchParams), [searchParams]);
   const allRows = useMemo(() => customerRows(fixture, MOCK_NOW), [fixture]);
   const staffName = (id: string) =>

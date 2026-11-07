@@ -1,6 +1,7 @@
 import { appointmentBuilder } from './bookings';
 import { dateRange, generateWeek } from './generate';
 import { generatePeople, withVisitCounts } from './people';
+import { petSpaTemplate } from './templates';
 import type {
   Appointment,
   Branch,
@@ -34,7 +35,7 @@ const services: Service[] = [
         name: 'Chó dưới 10 kg',
         shortName: 'Tắm chó nhỏ',
         priceVnd: 150_000n,
-        match: { species: 'dog', size: 'small' },
+        match: { species: 'dog', weightKg: { max: 10 } },
         segments: [
           {
             startMinute: 0,
@@ -57,7 +58,7 @@ const services: Service[] = [
         name: 'Chó từ 10 kg',
         shortName: 'Tắm chó lớn',
         priceVnd: 250_000n,
-        match: { species: 'dog', size: 'large' },
+        match: { species: 'dog', weightKg: { min: 10 } },
         segments: [
           {
             startMinute: 0,
@@ -110,7 +111,7 @@ const services: Service[] = [
         name: 'Chó dưới 10 kg',
         shortName: 'Tỉa chó nhỏ',
         priceVnd: 250_000n,
-        match: { species: 'dog', size: 'small' },
+        match: { species: 'dog', weightKg: { max: 10 } },
         segments: [
           {
             startMinute: 0,
@@ -125,7 +126,7 @@ const services: Service[] = [
         name: 'Chó từ 10 kg',
         shortName: 'Tỉa chó lớn',
         priceVnd: 400_000n,
-        match: { species: 'dog', size: 'large' },
+        match: { species: 'dog', weightKg: { min: 10 } },
         segments: [
           {
             startMinute: 0,
@@ -207,7 +208,7 @@ const regularSubjects: ServedSubject[] = [
     customerId: 'paw-c-linh',
     kind: 'other',
     name: 'Mochi',
-    attributes: { species: 'dog', size: 'small', breed: 'Poodle', weightKg: '6' },
+    attributes: { species: 'dog', breed: 'Poodle', weightKg: '6' },
   },
   {
     id: 'paw-s-bong',
@@ -223,7 +224,7 @@ const regularSubjects: ServedSubject[] = [
     customerId: 'paw-c-duc',
     kind: 'other',
     name: 'Lucky',
-    attributes: { species: 'dog', size: 'large', breed: 'Golden Retriever', weightKg: '28' },
+    attributes: { species: 'dog', breed: 'Golden Retriever', weightKg: '28' },
   },
 ];
 
@@ -265,7 +266,6 @@ const others = (
       species,
       breed,
       weightKg: String(kg),
-      ...(species === 'dog' ? { size: kg < 10 ? 'small' : 'large' } : {}),
     },
   })),
 }));
@@ -336,7 +336,6 @@ const people = generatePeople({
           species,
           breed: breeds[Math.floor(rand() * breeds.length)]!,
           weightKg: String(kg),
-          ...(species === 'dog' ? { size: kg < 10 ? 'small' : 'large' } : {}),
         },
       };
     }),
@@ -490,6 +489,7 @@ const appointments = [...history, ...saturday, ...week, ...upcoming];
 
 export const spaThuCungPawpaw: TenantFixture = {
   tenant: { id: tenantId, slug: 'pawpaw', name: 'Spa thú cưng Pawpaw', industry: 'pet_spa' },
+  template: petSpaTemplate,
   branches: [
     {
       id: branchId,
