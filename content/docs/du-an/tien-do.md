@@ -7,6 +7,12 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 07/11/2026 (tối, sau đó): review PR #2 của mock
+- **Đã làm:** review [PR #2 của datn-docs](https://github.com/ngchinhdev/datn-docs/pull/2): đọc code và xem bản deploy trên trình duyệt ở 390px, 1024px, 1280px, 1440px, hai theme, đi hết luồng của cả hai cơ sở. Bản này sát canvas, code sạch (không màu viết cứng, không `Date.now()`). Cần sửa: OTP ghi "tin nhắn" trái với roadmap; Pawpaw thiếu "Thêm bé" nên khách mới bị kẹt; trang khách trên máy tính không có danh sách thợ ở cột trái và nút Tiếp tục bị đẩy khỏi màn hình; thu tiền chạy ngay không hỏi; bộ chọn vai trò không theo trang; `<div>` trong `<button>`, lưới ARIA thiếu dòng. Người dùng góp thêm: hộp xác nhận cho thao tác quan trọng, dữ liệu đa dạng hơn một ngày, nút sáng/tối.
+- **Chốt:** OTP gửi qua email, khách vẫn nhập số điện thoại ([D-13](./quyet-dinh.md#d-13-otp-của-khách-gửi-qua-email-không-qua-sms), BR-16, BR-17); ba mức xác nhận và giờ trống hiện theo buổi ([D-14](./quyet-dinh.md#d-14-mẫu-xác-nhận-thao-tác-và-cách-hiện-giờ-trống)). Sapio Design System thêm ConfirmDialog, Toast, Segmented và token `fill-selected`; bản sao trong `design/sapio/` và `app/sapio/` đã cập nhật.
+- **Ghi chú cho ERD:** ghép đối tượng được phục vụ của khách mới với hồ sơ cũ sau khi xác thực OTP (trùng email, trùng tên bé) chưa có quy tắc; quyết định khi thiết kế bảng `served_subjects`.
+- **Tiếp theo:** Claude Code làm [Bước 7 của kế hoạch](../ky-thuat/ke-hoach-ui-mock.md#bước-7-sửa-theo-review-pr-2) trên cùng nhánh; review lại rồi mới merge.
+
 ### 07/11/2026 (tối): code giao diện mock
 - **Đã làm:** 6 bước của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md) trên nhánh `feat/ui-mock`. Token Sapio và font Be Vietnam Pro cho cả `/docs` lẫn `/mock`; fixtures ngày 07/11 có đoạn chiếm dụng, `StaffProfile` hai lớp, `ServedSubject.kind` là `'self' | 'other'`; 11 component trong `components/sapio/` (ví dụ ở `/mock/components`); `/mock/dat-lich` cho hai cơ sở; `/mock/le-tan`, `/mock/le-tan/tai-nguyen`, `/mock/hom-nay`. Kiểm bằng Playwright headless: đi hết luồng khách chỉ bằng bàn phím ở 390px và 1280px; lịch lễ tân ở 1440px, 1024px, 390px không lỗi, không cuộn ngang.
 - **Vướng:** `pnpm dev` (Turbopack) giữ bản cũ của module phía server khi file đổi export, gây lỗi `is not a function` và lỗi hydration; khởi động lại dev server là hết. Class trong `components.css` không nằm trong `@layer`, nên muốn utility Tailwind đè lên `.sp-btn` phải thêm `!`.
