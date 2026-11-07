@@ -33,5 +33,10 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `LeTanTablet.dc.html` | Lễ tân · iPad ngang, bảng chi tiết dạng ngăn trượt | **Đã chọn** | `/mock/le-tan` ở 768–1199px |
 | `LeTanDienThoai.dc.html` | Lễ tân · điện thoại, lịch từng thợ | **Đã chọn** | `/mock/le-tan` ở < 768px |
 | `LeTanHangCho.dc.html` | Lễ tân · "Hôm nay" (hàng chờ) | **Đã chọn**, trang riêng | `/mock/hom-nay` |
+| `QuanTriKhachHang.dc.html` | MH-07 khung ứng dụng + MH-08 mẫu danh sách (Khách hàng), máy tính | Bản đầu, chờ chốt | `/mock/app/toc-may/customers` (Bước 8) |
+| `QuanTriThuGon.dc.html` | MH-07 thanh bên thu gọn, menu đổi cơ sở đang mở | Bản đầu, chờ chốt | như trên, trạng thái thu gọn |
+| `QuanTriNhanVien.dc.html` | MH-09 mẫu form (Cài đặt › Nhân sự › Mai) | Bản đầu, chờ chốt | `/mock/app/toc-may/settings/staff/[id]` (Bước 8) |
+| `QuanTriDienThoai.dc.html` | MH-07 + MH-08 trên điện thoại | Bản đầu, chờ chốt | `/mock/app/toc-may/customers` dưới 768px |
+| `QuanTriDienThoaiLoc.dc.html` | MH-08 bảng Bộ lọc trên điện thoại | Bản đầu, chờ chốt | như trên, bộ lọc mở |
 
 Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-13, BR-14, BR-15 trong `content/docs/nghiep-vu/quy-tac.md`.

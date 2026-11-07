@@ -68,6 +68,16 @@ Lịch là màn hình đặc trưng của Sapio; giữ đúng các quy tắc sau
 - Bước Xác nhận là màn kiểm lại: nút cuối "Xác nhận đặt lịch", không thêm hộp hỏi. Màn "Đã đặt lịch" không còn nút quay lại hay số bước, và có việc làm tiếp: thêm vào lịch điện thoại, xem hoặc đổi lịch, về trang cơ sở.
 - Chữ gợi ý trong ô nhập viết dạng "Ví dụ: …" để không trông như đã điền.
 
+## Khu quản trị
+
+- Mọi trang trong `/app/[tenant]` nằm trong `AppShell`: thanh bên 240px (1200px trở lên), dải icon 68px (768–1199px), thanh điều hướng dưới (dưới 768px). Mục đang mở nền `brand-soft`, chữ `brand`. Thanh bên chỉ hiện mục vai trò đó có quyền.
+- Hai mẫu trang dùng cho phần lớn màn cấu hình: **danh sách** (`DataTable`: tiêu đề, tìm kiếm, bộ lọc nhanh, bảng, phân trang; điện thoại đổi thành thẻ) và **form** (`FormSection`: nhóm trường có giải thích, thanh "Còn thay đổi chưa lưu"). Màn mới dựng từ hai mẫu này trước; chỉ vẽ riêng khi có tương tác đặc thù.
+- Ô nhập trong quản trị cao 40px, chữ 14px (`.sp-field--sm`); trang khách giữ 48px, 16px.
+- Bộ lọc đang bật, công tắc đang bật: `brand-soft` + `brand`. Hộp kiểm đã chọn: nền `primary`. Không có nền đen cho bất kỳ trạng thái nào.
+- Bảng: cột số căn phải; một nút ghost mỗi hàng; thao tác khác nằm trong trang chi tiết.
+- **Không cuộn ngang trên điện thoại** (dưới 768px), trừ lưới lịch. Hàng nút, bộ lọc, menu con quá dài thì gom vào bảng trượt lên (`.sp-sheet`), xuống dòng, hoặc thành trang danh sách riêng.
+- Nút chỉ có icon dùng `.sp-icon-btn` (36px, 44px trên điện thoại), luôn có `aria-label` và `.sp-tooltip`.
+
 ## Xác nhận và hoàn tác
 
 Hỏi lại quá nhiều thì người dùng bấm theo phản xạ và hộp hỏi mất tác dụng. Mỗi thao tác thuộc đúng một trong ba mức:

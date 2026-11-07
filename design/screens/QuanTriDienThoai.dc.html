@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Khách hàng · điện thoại</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="position: relative; width: 390px; height: 844px; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans);">
+  <header style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <button class="sp-switcher" type="button" aria-label="Đổi cơ sở hoặc chi nhánh: Salon Tóc Mây, Chi nhánh Quận 3" style="width: auto;">
+      <span class="sp-switcher__mark sp-tenant-may" style="background: var(--accent-soft); color: var(--accent);">M</span>
+      <span class="sp-switcher__text"><span class="sp-switcher__name">Tóc Mây</span><span class="sp-switcher__sub">Quận 3</span></span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+    </button>
+    <button type="button" class="sp-btn sp-btn--primary" style="height: 44px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Thêm khách</button>
+  </header>
+  <div style="display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 88px;">
+    <div>
+      <h1 class="sp-page-head__title">Khách hàng</h1>
+      <p class="sp-page-head__sub sp-num">1.284 khách</p>
+    </div>
+    <label class="sp-search" style="max-width: none; flex: none; height: 44px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input type="search" placeholder="Tên hoặc số điện thoại" aria-label="Tìm khách" style="font-size: 16px;"></label>
+    <div class="sp-chips">
+      <button type="button" class="sp-btn sp-btn--secondary" style="height: 32px;" aria-haspopup="dialog"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M7 12h10"></path><path d="M10 18h4"></path></svg>Bộ lọc <span class="sp-count">1</span></button>
+      <span class="sp-chip sp-chip--removable">Đến trong 30 ngày<button type="button" class="sp-chip__remove" aria-label="Bỏ lọc Đến trong 30 ngày"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></span>
+    </div>
+    <ul class="sp-cards">
+        <li><a class="sp-cards__item" href="#"><span class="sp-avatar">LH</span><span class="sp-cards__body"><span class="sp-cards__title">Lê Thu Hà</span><span class="sp-cards__meta">0934 567 890 · hôm nay 09:00</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a></li>
+        <li><a class="sp-cards__item" href="#"><span class="sp-avatar">NT</span><span class="sp-cards__body"><span class="sp-cards__title">Nguyễn Minh Tuấn</span><span class="sp-cards__meta">0918 223 344 · hôm nay 09:30</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a></li>
+        <li><a class="sp-cards__item" href="#"><span class="sp-avatar">PN</span><span class="sp-cards__body"><span class="sp-cards__title">Phạm Bảo Ngọc</span><span class="sp-cards__meta">0987 654 321 · lịch tới 11:00 hôm nay</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a></li>
+        <li><a class="sp-cards__item" href="#"><span class="sp-avatar">TP</span><span class="sp-cards__body"><span class="sp-cards__title">Trần Văn Phúc</span><span class="sp-cards__meta">0908 112 233 · không đến 2 lần</span></span><span class="sp-badge sp-badge--no-show">Bắt buộc cọc</span></a></li>
+        <li><a class="sp-cards__item" href="#"><span class="sp-avatar">HA</span><span class="sp-cards__body"><span class="sp-cards__title">Hoàng Bảo An</span><span class="sp-cards__meta">0937 445 566 · hôm nay 09:30</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a></li>
+        <li><a class="sp-cards__item" href="#"><span class="sp-avatar">VV</span><span class="sp-cards__body"><span class="sp-cards__title">Vũ Thanh Vân</span><span class="sp-cards__meta">0912 998 877 · lịch tới 11:30 hôm nay</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a></li>
+        <li><a class="sp-cards__item" href="#"><span class="sp-avatar">TL</span><span class="sp-cards__body"><span class="sp-cards__title">Trần Thị Bích Ngọc Hoàng Lan</span><span class="sp-cards__meta">0912 345 678 · khách mới</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a></li>
+    </ul>
+    <nav class="sp-pagination" aria-label="Phân trang" style="justify-content: center;">
+      <button type="button" class="sp-pagination__page sp-pagination__step" aria-label="Trang trước" disabled style="width: 44px; height: 44px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+      <span class="sp-num" style="padding: 0 8px; font-size: 14px; font-weight: 500;">Trang 1/65</span>
+      <a class="sp-pagination__page sp-pagination__step" href="#" aria-label="Trang sau" style="width: 44px; height: 44px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+    </nav>
+  </div>
+  <nav class="sp-tabbar" aria-label="Điều hướng chính" style="position: absolute; --tabs: 4;">
+    <a class="sp-tabbar__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path></svg>Hôm nay</a>
+    <a class="sp-tabbar__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg>Lịch</a>
+    <a class="sp-tabbar__item" href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Khách</a>
+    <a class="sp-tabbar__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>Thêm</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!-- @dsCard group="Admin" height=500 subtitle="Thanh bên theo vai trò, đổi cơ sở và chi nhánh, mục đang chọn màu ngọc." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>AppShell</title></head>
+<body>
+<div class="sp-pad sp-row" style="align-items: flex-start; gap: 24px;">
+  <nav class="sp-shell__side" aria-label="Điều hướng chính" style="height: 460px; border-radius: 12px;">
+    <div class="sp-brand"><span class="sp-brand__name">Sapio</span><button class="sp-icon-btn" type="button" aria-label="Thu gọn thanh bên" aria-expanded="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg></button></div>
+    <button class="sp-switcher" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Đổi cơ sở hoặc chi nhánh">
+      <span class="sp-switcher__mark sp-tenant-may" style="background: var(--accent-soft); color: var(--accent);">M</span>
+      <span class="sp-switcher__text"><span class="sp-switcher__name">Salon Tóc Mây</span><span class="sp-switcher__sub">Chi nhánh Quận 3</span></span>
+      <svg class="sp-switcher__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+    </button>
+    <div class="sp-nav">
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path></svg><span class="sp-nav__label">Hôm nay</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg><span class="sp-nav__label">Lịch</span></a>
+      <a class="sp-nav__item" href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span class="sp-nav__label">Khách hàng</span></a>
+      <div class="sp-nav__group">Nhân sự</div>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="sp-nav__label">Xếp ca</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="m14 14-4 4"></path><path d="m10 14 4 4"></path></svg><span class="sp-nav__label">Nghỉ phép</span><span class="sp-nav__badge">2</span></a>
+    </div>
+  </nav>
+  <div class="sp-menu" role="menu" aria-label="Đổi cơ sở hoặc chi nhánh" style="width: 260px;">
+    <div class="sp-menu__label">Chi nhánh của Salon Tóc Mây</div>
+    <button class="sp-menu__item" role="menuitemradio" aria-checked="true" type="button">Quận 3</button>
+    <button class="sp-menu__item" role="menuitemradio" aria-checked="false" type="button">Quận 1</button>
+    <div class="sp-menu__sep"></div>
+    <div class="sp-menu__label">Cơ sở khác</div>
+    <button class="sp-menu__item" role="menuitem" type="button"><span class="sp-switcher__mark sp-tenant-pawpaw" style="width: 24px; height: 24px; font-size: 12px; background: var(--accent-soft); color: var(--accent);">P</span>Spa thú cưng Pawpaw</button>
+    <div class="sp-menu__sep"></div>
+    <a class="sp-menu__item" role="menuitem" href="#">Đăng ký cơ sở mới</a>
+  </div>
+  <div style="position: relative; width: 360px; height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px var(--line);">
+    <nav class="sp-tabbar" aria-label="Điều hướng chính" style="position: absolute; --tabs: 4;">
+      <a class="sp-tabbar__item" href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path></svg>Hôm nay</a>
+      <a class="sp-tabbar__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg>Lịch</a>
+      <a class="sp-tabbar__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Khách</a>
+      <a class="sp-tabbar__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>Thêm</a>
+    </nav>
+  </div>
+</div>
+</body>
+</html>

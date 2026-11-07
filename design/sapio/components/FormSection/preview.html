@@ -1,0 +1,27 @@
+<!-- @dsCard group="Admin" height=520 subtitle="Mẫu trang form: nhóm trường hai cột, công tắc, thanh lưu thay đổi." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>FormSection</title></head>
+<body>
+<div class="sp-pad sp-form" style="max-width: 860px;">
+  <section class="sp-form-section" aria-labelledby="fs-public">
+    <div><h2 class="sp-form-section__title" id="fs-public">Hồ sơ công khai</h2><p class="sp-form-section__desc">Khách thấy phần này khi chọn thợ (BR-15).</p></div>
+    <div class="sp-form-section__fields">
+      <div class="sp-field sp-field--sm"><label class="sp-field__label" for="fs-dn">Tên hiển thị</label><div class="sp-field__control"><input id="fs-dn" value="Mai"></div></div>
+      <div class="sp-field sp-field--sm"><label class="sp-field__label" for="fs-title">Chức danh</label><div class="sp-field__control"><select id="fs-title"><option>Thợ chính</option><option>Thợ</option></select></div></div>
+      <div class="sp-field sp-field--sm sp-field--full"><label class="sp-field__label" for="fs-sp">Thế mạnh <span class="sp-field__optional">(không bắt buộc)</span></label><div class="sp-field__control"><input id="fs-sp" value="Chuyên nhuộm, phục hồi"></div><span class="sp-field__help">Tối đa 40 ký tự.</span></div>
+      <label class="sp-switch sp-field--full">Nhận đặt lịch online<input type="checkbox" checked></label>
+    </div>
+  </section>
+  <section class="sp-form-section" aria-labelledby="fs-skill">
+    <div><h2 class="sp-form-section__title" id="fs-skill">Kỹ năng</h2><p class="sp-form-section__desc">Chỉ được xếp cho dịch vụ có trong kỹ năng (BR-03).</p></div>
+    <div class="sp-form-section__fields">
+      <label class="sp-check"><input type="checkbox" checked><span>Cắt tóc</span></label>
+      <label class="sp-check"><input type="checkbox" checked><span>Nhuộm tóc<span class="sp-check__hint">Gồm cả đoạn chờ lên màu</span></span></label>
+      <label class="sp-check"><input type="checkbox"><span>Gội sấy</span></label>
+    </div>
+  </section>
+  <div class="sp-savebar" role="region" aria-label="Lưu thay đổi"><span>Còn 2 thay đổi chưa lưu</span><span class="sp-savebar__actions"><button class="sp-btn sp-btn--ghost" type="button">Bỏ thay đổi</button><button class="sp-btn sp-btn--primary" type="button">Lưu</button></span></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Bộ lọc khách hàng · điện thoại</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="position: relative; width: 390px; height: 844px; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans);">
+  <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+    <h1 class="sp-page-head__title">Khách hàng</h1>
+    <span class="sp-page-head__sub">1.284 khách</span>
+  </div>
+  <div class="sp-scrim" style="position: absolute;"></div>
+  <section class="sp-sheet" role="dialog" aria-modal="true" aria-labelledby="flt-title" style="position: absolute;">
+    <div class="sp-sheet__handle" aria-hidden="true"></div>
+    <div class="sp-sheet__head">
+      <h2 class="sp-sheet__title" id="flt-title">Bộ lọc</h2>
+      <button type="button" class="sp-icon-btn" aria-label="Đóng" style="width: 44px; height: 44px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+    </div>
+    <div class="sp-sheet__body">
+      <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px;">
+        <legend class="sp-menu__label" style="padding: 0 0 8px;">Lần đến</legend>
+        <label class="sp-check"><input type="radio" name="flt-visit" checked><span>Đến trong 30 ngày</span></label>
+        <label class="sp-check"><input type="radio" name="flt-visit"><span>Đến trong 90 ngày</span></label>
+        <label class="sp-check"><input type="radio" name="flt-visit"><span>Lâu chưa quay lại (trên 90 ngày)</span></label>
+        <label class="sp-check"><input type="radio" name="flt-visit"><span>Tất cả</span></label>
+      </fieldset>
+      <fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px;">
+        <legend class="sp-menu__label" style="padding: 0 0 8px;">Khác</legend>
+        <label class="sp-check"><input type="checkbox"><span>Có lịch sắp tới</span></label>
+        <label class="sp-check"><input type="checkbox"><span>Bắt buộc cọc</span></label>
+        <label class="sp-check"><input type="checkbox"><span>Có ghi chú nội bộ</span></label>
+      </fieldset>
+      <div class="sp-field">
+        <label class="sp-field__label" for="flt-staff">Thợ quen</label>
+        <div class="sp-field__control"><select id="flt-staff"><option>Tất cả</option><option>Mai</option><option>Lan</option><option>Hùng</option></select></div>
+      </div>
+    </div>
+    <div class="sp-sheet__foot">
+      <button type="button" class="sp-btn sp-btn--secondary">Đặt lại</button>
+      <button type="button" class="sp-btn sp-btn--primary">Xem 312 khách</button>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>
