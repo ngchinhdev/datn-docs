@@ -2,6 +2,8 @@
 
 import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useAppHref } from '@/components/mock/use-app-href';
+import { useQueryState } from '@/components/mock/use-query-state';
 import { Button } from '@/components/sapio/button';
 import { SegmentedNav } from '@/components/sapio/segmented';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
@@ -18,27 +20,22 @@ import {
   staffColumns,
 } from '@/mock/reception';
 import { addDays, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
-import { useAppointmentActions } from './actions';
-import { DetailPanel, PhoneNav, ViewTabs } from './parts';
-import { useReception } from './use-reception';
+import { useAppointmentActions } from '../_reception/actions';
+import { DetailPanel, PhoneNav, ViewTabs, type CalendarView } from '../_reception/parts';
+import { useReception } from '../_reception/use-reception';
 
 const WIDE_QUERY = '(min-width: 1200px)';
 
-export function ReceptionScreen({
-  tenantSlug,
-  view,
-  query,
-}: {
-  tenantSlug: string;
-  view: 'staff' | 'resource';
-  query: string;
-}) {
+export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
   const branch = fixture.branches[0]!;
   const L = lookups(fixture);
   const now = useMockNow();
   const today = localDate(MOCK_NOW);
-  const [date, setDate] = useState(today);
+  const appHref = useAppHref(tenantSlug);
+  const [date, setDate] = useQueryState('date', today);
+  const [viewParam] = useQueryState('view', 'staff');
+  const view: CalendarView = viewParam === 'resources' ? 'resources' : 'staff';
   const hours = dayHours(fixture, date);
 
   const { appointments, replace, notify } = useReception(fixture);
@@ -120,7 +117,7 @@ export function ReceptionScreen({
             {formatDay(date)}/{date.slice(0, 4)}
           </span>
         </div>
-        <ViewTabs view={view} query={query} />
+        <ViewTabs view={view} />
         <div className="ms-auto flex flex-wrap items-center gap-(--space-3)">
           <label className="hidden h-9 items-center gap-(--space-2) rounded-(--radius-sm) bg-(--fill-tonal) px-(--space-3) text-(--ink-muted) min-[1200px]:flex">
             <Search size={16} aria-hidden="true" />
@@ -160,11 +157,11 @@ export function ReceptionScreen({
           label="Danh sách hoặc lịch"
           block
           items={[
-            { href: `/mock/hom-nay${query}`, label: 'Danh sách', current: false },
-            { href: `/mock/le-tan${query}`, label: 'Lịch', current: true },
+            { href: appHref('today'), label: 'Danh sách', current: false },
+            { href: appHref('calendar'), label: 'Lịch', current: true },
           ]}
         />
-        <ViewTabs view={view} query={query} />
+        <ViewTabs view={view} />
         <div className="flex gap-(--space-2) overflow-x-auto" role="group" aria-label="Chọn cột">
           {columns.map((c) => (
             <button
@@ -198,7 +195,7 @@ export function ReceptionScreen({
           aria-label="Lịch"
           className="flex min-w-0 flex-[999_1_720px] flex-col gap-(--space-3)"
         >
-          {view === 'resource' && date === today && (
+          {view === 'resources' && date === today && (
             <p className="body-sm m-0 text-(--ink-muted)">
               Lúc {formatTime(now)} còn trống:{' '}
               {freeResourcesAt(fixture, day, now).join(', ') || 'không còn'}

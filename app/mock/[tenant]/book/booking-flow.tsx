@@ -2,6 +2,7 @@
 
 import { ArrowLeft } from 'lucide-react';
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useQueryState } from '@/components/mock/use-query-state';
 import { BottomBar } from '@/components/sapio/bottom-bar';
 import { Button } from '@/components/sapio/button';
 import { DateStrip } from '@/components/sapio/date-strip';
@@ -148,7 +149,7 @@ export function BookingFlow({
 
   const now = useMockNow();
   const today = localDate(MOCK_NOW);
-  const [step, setStep] = useState<Step>('service');
+  const [stepParam, setStepParam] = useQueryState('step', 'service');
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [variantId, setVariantId] = useState<string | null>(null);
   const [subjectId, setSubjectId] = useState<string | null>(newCustomer ? NEW_SUBJECT : null);
@@ -195,6 +196,16 @@ export function BookingFlow({
   const variant = asksSubject
     ? ((subject && service?.variants.find((v) => matches(v, subject))) ?? null)
     : (service?.variants.find((v) => v.id === variantId) ?? null);
+  // `?step=` is the source; a link to a step whose choices are missing falls back to the first step.
+  const reachable: Record<Step, boolean> = {
+    service: true,
+    subject: Boolean(service),
+    datetime: Boolean(variant),
+    info: Boolean(slot),
+    confirm: Boolean(slot),
+  };
+  const requested = steps.find((s) => s === stepParam);
+  const step: Step = requested && reachable[requested] ? requested : 'service';
   const stepIndex = steps.indexOf(step);
   const staffName = (id: string) => resources.find((r) => r.id === id)?.name ?? '';
 
@@ -255,12 +266,12 @@ export function BookingFlow({
     setHoldExpiresAt(null);
     setConfirmed(false);
     setNotice(RELEASED);
-    setStep('datetime');
-  }, []);
+    setStepParam('datetime');
+  }, [setStepParam]);
 
   const go = (next: Step) => {
     setNotice(null);
-    setStep(next);
+    setStepParam(next, 'push');
   };
   const back = () => {
     const prev = steps[stepIndex - 1];

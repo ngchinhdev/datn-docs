@@ -1,6 +1,7 @@
 'use client';
 
 import { CalendarDays, Ellipsis, Users, Wallet, X } from 'lucide-react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { SegmentedNav } from '@/components/sapio/segmented';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/sapio/button';
@@ -12,18 +13,25 @@ import { appointmentDetail, lookups } from '@/mock/reception';
 import type { AllowedActions } from './actions';
 import { formatTime } from '@/mock/time';
 
-/** Nhân viên / Tài nguyên: two routes, query string kept. */
-export function ViewTabs({ view, query }: { view: 'staff' | 'resource'; query: string }) {
+export type CalendarView = 'staff' | 'resources';
+
+/** Nhân viên / Tài nguyên: the same page with `?view=`, other query kept. */
+export function ViewTabs({ view }: { view: CalendarView }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const hrefFor = (next: CalendarView) => {
+    const params = new URLSearchParams(searchParams);
+    if (next === 'staff') params.delete('view');
+    else params.set('view', next);
+    const query = params.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  };
   return (
     <SegmentedNav
       label="Kiểu xem"
       items={[
-        { href: `/mock/le-tan${query}`, label: 'Nhân viên', current: view === 'staff' },
-        {
-          href: `/mock/le-tan/tai-nguyen${query}`,
-          label: 'Tài nguyên',
-          current: view === 'resource',
-        },
+        { href: hrefFor('staff'), label: 'Nhân viên', current: view === 'staff' },
+        { href: hrefFor('resources'), label: 'Tài nguyên', current: view === 'resources' },
       ]}
     />
   );

@@ -3,6 +3,7 @@
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
+import { useAppHref } from '@/components/mock/use-app-href';
 import { Button } from '@/components/sapio/button';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
 import { StatusBadge } from '@/components/sapio/status-badge';
@@ -20,9 +21,9 @@ import {
   staffColumns,
 } from '@/mock/reception';
 import { formatCountdown, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
-import { useAppointmentActions } from '../le-tan/actions';
-import { DetailPanel, PhoneNav } from '../le-tan/parts';
-import { useReception } from '../le-tan/use-reception';
+import { useAppointmentActions } from '../_reception/actions';
+import { DetailPanel, PhoneNav } from '../_reception/parts';
+import { useReception } from '../_reception/use-reception';
 
 function Row({
   a,
@@ -65,7 +66,8 @@ function Group({ label, count, children }: { label: string; count: number; child
   );
 }
 
-export function TodayScreen({ tenantSlug, query }: { tenantSlug: string; query: string }) {
+export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
+  const appHref = useAppHref(tenantSlug);
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
   const branch = fixture.branches[0]!;
   const L = lookups(fixture);
@@ -111,10 +113,7 @@ export function TodayScreen({ tenantSlug, query }: { tenantSlug: string; query: 
           <span aria-current="page" className="sp-btn sp-btn--sm bg-(--fill-tonal) text-(--ink)">
             Hôm nay
           </span>
-          <Link
-            href={`/mock/le-tan${query}`}
-            className="sp-btn sp-btn--ghost sp-btn--sm no-underline"
-          >
+          <Link href={appHref('calendar')} className="sp-btn sp-btn--ghost sp-btn--sm no-underline">
             Lịch
           </Link>
         </nav>
