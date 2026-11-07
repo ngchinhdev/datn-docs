@@ -23,6 +23,8 @@ export interface Tenant {
   slug: string;
   name: string;
   industry: string;
+  /** Letter on the tenant's mark in the app shell; not the first letter of the full name. */
+  monogram: string;
 }
 
 export interface Branch {

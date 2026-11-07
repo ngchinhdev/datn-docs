@@ -488,7 +488,13 @@ const upcoming = generateWeek({
 const appointments = [...history, ...saturday, ...week, ...upcoming];
 
 export const spaThuCungPawpaw: TenantFixture = {
-  tenant: { id: tenantId, slug: 'pawpaw', name: 'Spa thú cưng Pawpaw', industry: 'pet_spa' },
+  tenant: {
+    id: tenantId,
+    slug: 'pawpaw',
+    name: 'Spa thú cưng Pawpaw',
+    industry: 'pet_spa',
+    monogram: 'P',
+  },
   template: petSpaTemplate,
   branches: [
     {

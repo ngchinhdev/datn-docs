@@ -90,7 +90,10 @@ export function fold(text: string) {
 export function matchesSearch(row: CustomerRow, query: string) {
   const text = query.trim();
   if (!text) return true;
-  if (fold(row.name).includes(fold(text))) return true;
+  // Each typed word must start a word of the name: "ha" finds Hà and Hải, not Phan or Khánh.
+  const words = fold(row.name).split(/\s+/);
+  const typed = fold(text).split(/\s+/);
+  if (typed.every((t) => words.some((w) => w.startsWith(t)))) return true;
   if (/[^\d\s+().-]/.test(text)) return false;
   const digits = text.replace(/\D/g, '');
   if (digits.length < 3) return false;

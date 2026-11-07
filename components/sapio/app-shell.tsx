@@ -153,6 +153,7 @@ function Switcher({
         onKeyDown={menu.onTriggerKeyDown}
       >
         <Mark workspace={workspace} />
+        <span className="sp-sr-only">Đổi cơ sở hoặc chi nhánh:</span>
         <span className="sp-switcher__text">
           <span className="sp-switcher__name">{workspace.name}</span>{' '}
           <span className="sp-switcher__sub">{branchName}</span>
@@ -160,11 +161,10 @@ function Switcher({
         <ChevronsUpDown className="sp-switcher__chevron" aria-hidden="true" />
         {/* The name comes from the text on screen; in the rail the text is hidden, so it is repeated. */}
         {rail && (
-          <span className="sr-only">
+          <span className="sp-sr-only">
             {workspace.name} {branchName}
           </span>
         )}
-        <span className="sr-only">, đổi cơ sở hoặc chi nhánh</span>
       </button>
       {menu.open && (
         <div
@@ -434,12 +434,7 @@ export function AppShell(props: ShellProps) {
         !wide && overlay && 'sp-shell--expanded',
       )}
     >
-      <nav
-        ref={sideRef}
-        className="sp-shell__side sticky top-0 h-screen self-start"
-        id="app-sidebar"
-        aria-label="Điều hướng chính"
-      >
+      <nav ref={sideRef} className="sp-shell__side" id="app-sidebar" aria-label="Điều hướng chính">
         <div className="sp-brand">
           <span className="sp-brand__name">Sapio</span>
           <Tip label={toggleLabel} side={rail ? 'right' : 'bottom'}>

@@ -78,14 +78,11 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   };
 
   const accentOf = (slug: string) => `sp-tenant-${fixtureBySlug(slug)?.tenant.id ?? 'may'}`;
-  // The mark carries the brand word, which comes last in the names (Salon … Mây, Spa … Pawpaw).
-  const initialOf = (name: string) => name.trim().split(/s+/).at(-1)?.charAt(0).toUpperCase() ?? '';
-
   return (
     <AppShell
       workspace={{
         name: fixture.tenant.name,
-        initial: initialOf(fixture.tenant.name),
+        initial: fixture.tenant.monogram,
         accentClass: accentOf(tenantSlug),
       }}
       branchName={branch.name}
@@ -100,7 +97,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
         .filter((f) => f.tenant.slug !== tenantSlug)
         .map((f) => ({
           name: f.tenant.name,
-          initial: initialOf(f.tenant.name),
+          initial: f.tenant.monogram,
           accentClass: accentOf(f.tenant.slug),
           sub: `Vai trò: ${roleLabel(OTHER_TENANT_ROLE)}`,
           href: `/mock/app/${f.tenant.slug}/calendar?role=${OTHER_TENANT_ROLE}`,

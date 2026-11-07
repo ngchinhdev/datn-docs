@@ -625,7 +625,13 @@ const upcoming = generateWeek({
 const appointments = [...history, ...saturday, ...handwritten, ...week, ...upcoming];
 
 export const salonTocMay: TenantFixture = {
-  tenant: { id: tenantId, slug: 'toc-may', name: 'Salon Tóc Mây', industry: 'hair_salon' },
+  tenant: {
+    id: tenantId,
+    slug: 'toc-may',
+    name: 'Salon Tóc Mây',
+    industry: 'hair_salon',
+    monogram: 'M',
+  },
   template: hairSalonTemplate,
   branches: [
     {
