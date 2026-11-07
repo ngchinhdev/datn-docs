@@ -50,10 +50,25 @@ export interface Resource {
   name: string;
 }
 
+/** Two layers (BR-15): the customer page reads only the public fields. */
+export interface StaffProfile {
+  displayName: string;
+  title: string;
+  specialty: string;
+  avatarUrl?: string;
+  bookableOnline: boolean;
+  /** Admin only. */
+  fullName: string;
+  /** Admin only. */
+  employeeCode: string;
+  /** Admin only. E.164. */
+  phone: string;
+}
+
 /** A staff member is a resource whose type has `isStaff`; skills limit which services they do (BR-03). */
 export interface Staff {
   resourceId: string;
-  phone: string;
+  profile: StaffProfile;
   skillServiceIds: string[];
 }
 
@@ -91,18 +106,22 @@ export interface Customer {
   name: string;
   /** E.164, normalized (BR-61). */
   phone: string;
+  /** Visits so far, including today. */
+  visitCount?: number;
 }
 
 export interface ServedSubject {
   id: string;
   tenantId: string;
   customerId: string;
-  kind: 'self' | 'pet';
+  /** The customer themself, or someone/something else they book for; details live in `attributes`. */
+  kind: 'self' | 'other';
   name: string;
   attributes: Record<string, string>;
 }
 
-export type AppointmentStatus = 'confirmed' | 'checked_in' | 'completed' | 'cancelled' | 'no_show';
+export type AppointmentStatus =
+  'held' | 'confirmed' | 'checked_in' | 'completed' | 'cancelled' | 'no_show';
 
 export interface AppointmentItem {
   serviceVariantId: string;
@@ -112,15 +131,33 @@ export interface AppointmentItem {
   priceVnd: bigint;
 }
 
+/** One occupied interval of one resource, half-open `[startAt, endAt)`, ISO 8601 UTC. */
+export interface ResourceBooking {
+  resourceId: string;
+  startAt: string;
+  endAt: string;
+  kind: 'work' | 'wait';
+}
+
 export interface Appointment {
   id: string;
   tenantId: string;
   branchId: string;
-  customerId: string;
+  /** `null` while an online hold has no contact details yet. */
+  customerId: string | null;
   /** ISO 8601, UTC. */
   startAt: string;
   status: AppointmentStatus;
+  channel: 'online' | 'walk_in' | 'phone';
   items: AppointmentItem[];
+  bookings: ResourceBooking[];
+  /** Status `held` only (BR-07). ISO 8601, UTC. */
+  holdExpiresAt?: string;
+  /** ISO 8601, UTC. */
+  checkedInAt?: string;
+  /** Integer VND. */
+  depositVnd?: bigint;
+  note?: string;
 }
 
 export interface TenantFixture {
