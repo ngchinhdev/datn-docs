@@ -64,7 +64,7 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 | BR-64 | Khách đồng ý xử lý dữ liệu cá nhân khi đặt lịch lần đầu; đồng ý nhận quảng cáo là lựa chọn riêng |
 | BR-70 | Gói cấu hình ngành chỉ được nạp khi tạo tenant; sau đó mọi chỉnh sửa thuộc về tenant, không ảnh hưởng gói gốc |
 | BR-71 | Thuộc tính của đối tượng được phục vụ phải hợp lệ theo schema của ngành trước khi lưu |
-| BR-72 | Slug của cơ sở: chữ thường không dấu, số, gạch ngang, 3–40 ký tự, duy nhất trên nền tảng, không trùng từ dành riêng (`app`, `admin`, `api`, `signup`, `login`, `logout`, `invite`, `verify-email`, `forgot-password`, `reset-password`, `select-workspace`, `docs`, `mock`, `help`, `about`, `terms`, `privacy`, `static`, `assets`). Đổi slug thì link cũ chuyển hướng sang slug mới trong 90 ngày |
+| BR-72 | Slug của cơ sở: chữ thường không dấu, số, gạch ngang, 3–40 ký tự, duy nhất trên nền tảng, không trùng từ dành riêng (`app`, `admin`, `api`, `signup`, `login`, `logout`, `invite`, `verify-email`, `forgot-password`, `reset-password`, `select-workspace`, `docs`, `mock`, `help`, `about`, `terms`, `privacy`, `static`, `assets`). Đổi slug thì link cũ tự chuyển sang slug mới |
 
 ---
 
