@@ -1,0 +1,108 @@
+/* Copied from design/sapio, do not edit here */
+/* Sapio — generated from tokens.json */
+:root, [data-theme="light"] {
+  --surface: #f7f9f8;
+  --surface-raised: #ffffff;
+  --surface-sunken: #eef2f1;
+  --fill-tonal: #eef2f1;
+  --surface-hover: #e3e9e7;
+  --line: #e0e6e4;
+  --line-strong: #87938f;
+  --ink: #121817;
+  --ink-muted: #56625f;
+  --primary: #1a6650;
+  --on-primary: #ffffff;
+  --brand: #1a6650;
+  --brand-soft: #e1f0ea;
+  --on-brand: #ffffff;
+  --focus-ring: #1a6650;
+  --status-confirmed: #1d4ea8;
+  --status-confirmed-soft: #e6edfb;
+  --status-checked-in: #1a6650;
+  --status-checked-in-soft: #dcefe7;
+  --status-completed: #47524f;
+  --status-completed-soft: #eceff0;
+  --status-no-show: #9a430a;
+  --status-no-show-soft: #fbeadb;
+  --danger: #b0202b;
+  --danger-soft: #fbe8e9;
+  --tenant-may: #a63d57;
+  --tenant-may-soft: #f8e5ea;
+  --on-tenant-may: #ffffff;
+  --tenant-pawpaw: #c2410c;
+  --tenant-pawpaw-soft: #fdeee4;
+  --on-tenant-pawpaw: #ffffff;
+  --shadow-xs: 0 1px 2px rgba(18,24,23,0.06);
+  --shadow-card: 0 1px 2px rgba(18,24,23,0.04), 0 4px 16px rgba(18,24,23,0.06);
+  --shadow-popover: 0 2px 6px rgba(18,24,23,0.06), 0 12px 32px rgba(18,24,23,0.12);
+  --shadow-drag: 0 8px 20px rgba(18,24,23,0.18);
+}
+
+[data-theme="dark"] {
+  --surface: #0f1413;
+  --surface-raised: #161c1b;
+  --surface-sunken: #0a0e0d;
+  --fill-tonal: #1d2524;
+  --surface-hover: #27312f;
+  --line: #242d2b;
+  --line-strong: #66736f;
+  --ink: #edf2f0;
+  --ink-muted: #a2aeaa;
+  --primary: #5cc3a1;
+  --on-primary: #0f1413;
+  --brand: #5cc3a1;
+  --brand-soft: #12302a;
+  --on-brand: #0f1413;
+  --focus-ring: #5cc3a1;
+  --status-confirmed: #94b4ff;
+  --status-confirmed-soft: #17233f;
+  --status-checked-in: #5cc3a1;
+  --status-checked-in-soft: #12302a;
+  --status-completed: #b5bfbc;
+  --status-completed-soft: #1d2524;
+  --status-no-show: #f2a466;
+  --status-no-show-soft: #3a2210;
+  --danger: #ff8f95;
+  --danger-soft: #3b1518;
+  --tenant-may: #e991a6;
+  --tenant-may-soft: #3a1922;
+  --on-tenant-may: #0f1413;
+  --tenant-pawpaw: #fb923c;
+  --tenant-pawpaw-soft: #3b1f10;
+  --on-tenant-pawpaw: #0f1413;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.45);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.40), 0 4px 16px rgba(0,0,0,0.35);
+  --shadow-popover: 0 2px 6px rgba(0,0,0,0.45), 0 12px 32px rgba(0,0,0,0.55);
+  --shadow-drag: 0 8px 20px rgba(0,0,0,0.60);
+}
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --slot-height: 16px;
+  --ruler-width: 56px;
+  --column-min-width: 144px;
+  --hatch-step: 4px;
+  --font-sans: "Be Vietnam Pro", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.display { font-family: var(--font-sans); font-size: 40px; line-height: 44px; font-weight: 700; letter-spacing: -0.02em; }
+.title { font-family: var(--font-sans); font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.02em; }
+.heading { font-family: var(--font-sans); font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.body { font-family: var(--font-sans); font-size: 15px; line-height: 22px; font-weight: 400; }
+.body-sm { font-family: var(--font-sans); font-size: 13px; line-height: 18px; font-weight: 400; }
+.label { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.01em; }
+.time { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 500; }
+.appt-title { font-family: var(--font-sans); font-size: 13px; line-height: 16px; font-weight: 600; }
+.appt-meta { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 400; }

@@ -1,11 +1,17 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
+import { Be_Vietnam_Pro } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import './global.css';
+import './sapio/tokens.css';
+import './sapio/components.css';
 
-const geist = Geist({ subsets: ['latin', 'vietnamese'], variable: '--font-sans' });
+const beVietnam = Be_Vietnam_Pro({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin', 'vietnamese'],
+  variable: '--font-be-vietnam',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -16,9 +22,10 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="vi" suppressHydrationWarning className={cn('font-sans', geist.variable)}>
+    <html lang="vi" suppressHydrationWarning className={cn('font-sans', beVietnam.variable)}>
       <body className="flex min-h-screen flex-col">
-        <RootProvider>{children}</RootProvider>
+        {/* tokens.css switches theme on [data-theme], shadcn and Fumadocs on .dark. */}
+        <RootProvider theme={{ attribute: ['class', 'data-theme'] }}>{children}</RootProvider>
       </body>
     </html>
   );
