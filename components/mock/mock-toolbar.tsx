@@ -1,24 +1,55 @@
 'use client';
 
+import { useTheme } from 'fumadocs-ui/provider/base';
+import { ChevronDown, Monitor, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { tenantFixtures } from '@/mock/fixtures';
-import { parseSelection, roles } from '@/mock/selection';
+import { parseSelection, roles, type Role } from '@/mock/selection';
+
+/** The role a route belongs to; `/mock` itself follows `?role=`. */
+function roleOf(pathname: string, queryRole: Role): Role {
+  if (pathname.startsWith('/mock/dat-lich')) return 'customer';
+  if (pathname.startsWith('/mock/le-tan') || pathname.startsWith('/mock/hom-nay')) {
+    return 'receptionist';
+  }
+  return queryRole;
+}
+
+/** Main page of each role; the owner has no screen yet, so it stays on the index. */
+const roleHome: Record<Role, string> = {
+  customer: '/mock/dat-lich',
+  receptionist: '/mock/le-tan',
+  owner: '/mock',
+};
 
 export function MockToolbar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { fixture, role } = parseSelection(searchParams.get('tenant'), searchParams.get('role'));
+  const selection = parseSelection(searchParams.get('tenant'), searchParams.get('role'));
+  const { fixture } = selection;
+  const role = roleOf(pathname, selection.role);
+  const [open, setOpen] = useState(false);
+  const isBooking = pathname.startsWith('/mock/dat-lich');
+  const newCustomer = searchParams.get('khach') === 'moi';
 
-  const hrefWith = (key: 'tenant' | 'role' | 'khach', value: string) => {
+  const hrefWith = (key: 'tenant' | 'khach', value: string) => {
     const params = new URLSearchParams(searchParams);
     params.set(key, value);
     return `${pathname}?${params}`;
   };
+  const roleHref = (r: Role) => {
+    const params = new URLSearchParams({ tenant: fixture.tenant.slug });
+    if (r === 'owner') params.set('role', r);
+    return `${roleHome[r]}?${params}`;
+  };
+  const roleLabel = roles.find((r) => r.id === role)?.label ?? '';
 
-  return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+  const pickers = (
+    <>
       <Picker
         label="Cơ sở"
         options={tenantFixtures.map((f) => ({ value: f.tenant.slug, label: f.tenant.name }))}
@@ -29,17 +60,87 @@ export function MockToolbar() {
         label="Vai trò"
         options={roles.map((r) => ({ value: r.id, label: r.label }))}
         selected={role}
-        hrefFor={(value) => hrefWith('role', value)}
+        hrefFor={(value) => roleHref(value as Role)}
       />
-      <Picker
-        label="Khách"
-        options={[
-          { value: 'cu', label: 'Khách cũ' },
-          { value: 'moi', label: 'Khách mới' },
-        ]}
-        selected={searchParams.get('khach') === 'moi' ? 'moi' : 'cu'}
-        hrefFor={(value) => hrefWith('khach', value)}
-      />
+      {isBooking && (
+        <Picker
+          label="Khách"
+          options={[
+            { value: 'cu', label: 'Khách cũ' },
+            { value: 'moi', label: 'Khách mới' },
+          ]}
+          selected={newCustomer ? 'moi' : 'cu'}
+          hrefFor={(value) => hrefWith('khach', value)}
+        />
+      )}
+    </>
+  );
+
+  return (
+    <div className="flex min-w-0 grow flex-wrap items-center gap-x-6 gap-y-2">
+      {/* Phone: one line, the pickers open below on demand. */}
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls="mock-pickers"
+        onClick={() => setOpen((v) => !v)}
+        className="flex min-w-0 items-center gap-1 text-sm md:hidden"
+      >
+        <span className="truncate">
+          {fixture.tenant.name} · {roleLabel}
+          {isBooking && ` · ${newCustomer ? 'Khách mới' : 'Khách cũ'}`}
+        </span>
+        <ChevronDown
+          size={16}
+          aria-hidden="true"
+          className={cn('flex-none transition-transform', open && 'rotate-180')}
+        />
+        <span className="sr-only">Đổi lựa chọn</span>
+      </button>
+      <div
+        id="mock-pickers"
+        className={cn(
+          'w-full flex-col gap-2 md:flex md:w-auto md:flex-row md:flex-wrap md:items-center md:gap-x-6',
+          open ? 'flex' : 'hidden',
+        )}
+      >
+        {pickers}
+      </div>
+      <ThemeSwitch />
+    </div>
+  );
+}
+
+const THEMES = [
+  { value: 'light', label: 'Sáng', icon: Sun },
+  { value: 'dark', label: 'Tối', icon: Moon },
+  { value: 'system', label: 'Theo máy', icon: Monitor },
+] as const;
+
+/** Same provider as `/docs`, so switching here switches both. */
+function ThemeSwitch() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  return (
+    <div role="group" aria-label="Giao diện" className="ms-auto flex items-center gap-0.5">
+      {THEMES.map(({ value, label, icon: Icon }) => (
+        <button
+          key={value}
+          type="button"
+          aria-pressed={mounted ? theme === value : undefined}
+          aria-label={label}
+          title={label}
+          onClick={() => setTheme(value)}
+          className={buttonVariants({
+            variant: mounted && theme === value ? 'secondary' : 'ghost',
+            size: 'icon-sm',
+          })}
+        >
+          <Icon size={16} aria-hidden="true" />
+        </button>
+      ))}
     </div>
   );
 }
@@ -53,7 +154,7 @@ interface PickerProps {
 
 function Picker({ label, options, selected, hrefFor }: PickerProps) {
   return (
-    <div role="group" aria-label={label} className="flex items-center gap-1">
+    <div role="group" aria-label={label} className="flex flex-wrap items-center gap-1">
       <span className="me-1 text-sm text-muted-foreground">{label}:</span>
       {options.map((option) => {
         const isSelected = option.value === selected;

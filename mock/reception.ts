@@ -48,10 +48,17 @@ export function holdSecondsLeft(appt: Appointment, now: string) {
 export const isLive = (appt: Appointment, now: string) =>
   appt.status !== 'held' || holdSecondsLeft(appt, now) > 0;
 
-function otherResources(appt: Appointment, L: Lookups) {
-  return unique(appt.bookings.filter((b) => !L.isStaff(b.resourceId)).map((b) => b.resourceId)).map(
-    L.name,
-  );
+/** Items this staff member does; all items when `staffId` is omitted. */
+const itemsOf = (appt: Appointment, staffId?: string) =>
+  appt.items.flatMap((item, i) => (!staffId || item.staffResourceId === staffId ? [i] : []));
+
+function otherResources(appt: Appointment, L: Lookups, staffId?: string) {
+  const mine = itemsOf(appt, staffId);
+  return unique(
+    appt.bookings
+      .filter((b) => !L.isStaff(b.resourceId) && mine.includes(b.itemIndex))
+      .map((b) => b.resourceId),
+  ).map(L.name);
 }
 
 /** Staff view: the staff's work segments, gaps between them drawn as waits (BR-05). */
@@ -104,12 +111,17 @@ export function staffColumns(
       const inset = mine.some((o) => o.id !== appt.id && within(segments, segs.get(o.id) ?? []));
       const covered = mine.some((o) => o.id !== appt.id && within(segs.get(o.id) ?? [], segments));
       const staffName = L.name(s.resourceId);
-      const others = otherResources(appt, L).join(', ');
+      const others = otherResources(appt, L, s.resourceId).join(', ');
       const start = segments[0]?.startAt ?? appt.startAt;
       const end = segments.at(-1)?.endAt ?? appt.startAt;
       const short = Date.parse(end) - Date.parse(start) <= 30 * 60_000;
       const range = formatRange(start, end);
-      let title = `${L.who(appt)} · ${L.services(appt)}`;
+      const mineItems = itemsOf(appt, s.resourceId);
+      const services = appt.items
+        .filter((_, i) => mineItems.includes(i))
+        .map((i) => L.variant(i.serviceVariantId)?.shortName ?? '')
+        .join(', ');
+      let title = `${L.who(appt)} · ${services}`;
       let meta: string | undefined = `${range} · ${others}`;
       if (appt.status === 'held') {
         title = 'Đang giữ chỗ · đặt online';
