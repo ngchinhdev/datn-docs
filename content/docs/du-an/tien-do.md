@@ -7,6 +7,11 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 07/11/2026: review Phần B
+- **Đã làm:** review app docs + mock. CI (thêm qua [PR #1 của datn-docs](https://github.com/ngchinhdev/datn-docs/pull/1)) xanh: Prettier, typecheck, build 16 trang (`/docs` tĩnh, `/mock` động, `/api/search`), lockfile 584 gói qua kiểm tra chuỗi cung ứng của pnpm. Không gói nào nằm trong danh sách bị chiếm quyền (Shai-Hulud, `keyv`/`cacheable`, `chalk`/`debug`, các gói độc tháng 10–11/2026). `pnpm audit`: 0 high/critical; 1 moderate (`minimatch`) + 1 low (`deepmerge`), cùng hai lỗ hổng đã biết từ `datn-saas`, đến từ CLI `shadcn`, không chạy khi xem trang.
+- **Ghi chú cho ERD (giai đoạn 1):** `ServedSubject.kind` trong fixtures là `'self' | 'pet'`, tức là từ khóa ngành nằm trong kiểu dữ liệu. Khi thiết kế bảng thật, loại đối tượng được phục vụ nên do `industryTemplate` khai báo (dữ liệu), lõi chỉ phân biệt "chính khách hàng" hay "đối tượng khác" (quy tắc 5).
+- **Tiếp theo:** merge PR #1 của `datn-docs`; B3 (Vercel); giai đoạn 0: dùng thử SimplyBook.me và một phần mềm Việt Nam.
+
 ### 05/11/2026 (tối): app docs + mock `datn-docs`
 - **Đã làm:** Phần B, bước B1 và B2 của [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base.md). B1: Next.js 16.4.5 + Fumadocs 16.17 (cài thủ công, API `fumadocs-mdx/macro`), tài liệu ở `/docs`, tìm kiếm tiếng Việt chạy được, đọc thẳng file `.md`; pnpm 11.28.11 với `minimumReleaseAge` và `allowBuilds` giống `datn-saas` (`esbuild: false`). Link tải đề cương `.docx` ở trang Đề cương. B2: shadcn `base-nova` cùng `components.json` với `apps/web`, Fumadocs dùng preset `shadcn.css` nên tài liệu và mock chung một theme; `/mock` có bộ chọn tenant và vai trò trên query string (`/mock?tenant=pawpaw&role=receptionist`), danh sách 4 màn hình của roadmap, fixtures cho Salon Tóc Mây và Spa thú cưng Pawpaw.
 - **Phát hiện:** Fumadocs chỉ đổi link sang URL khi link trỏ tới file có đuôi `.md`; link không đuôi làm gãy các link ở trang `/docs`. Đã đổi mọi link tương đối sang dạng `./trang.md` và ghi quy ước vào `CLAUDE.md`. Mục lục roadmap có một anchor sai (`#7-quy-tắc-nghiệp-vụ-ban-đầu`), đã sửa. `minimumReleaseAge` chặn bản Fumadocs vừa ra trong ngày, pnpm tự chọn bản trước đó.
