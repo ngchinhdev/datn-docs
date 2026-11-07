@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import type { Appointment, TenantFixture } from '@/mock/fixtures';
 import { formatPhone, formatVnd } from '@/mock/format';
 import { appointmentDetail, lookups } from '@/mock/reception';
+import type { AllowedActions } from './actions';
 import { formatTime } from '@/mock/time';
 
 /** Nhân viên / Tài nguyên: two routes, query string kept. */
@@ -62,8 +63,11 @@ export function PhoneNav({ notify }: { notify: (m: string) => void }) {
 }
 
 export interface DetailActions {
+  allowed: AllowedActions;
   onCheckIn: () => void;
-  onComplete: () => void;
+  onCollect: () => void;
+  onNoShow: () => void;
+  onCancel: () => void;
   onReschedule: () => void;
   onAddService: () => void;
   onClose: () => void;
@@ -93,7 +97,7 @@ export function DetailPanel({
     <>
       <div
         aria-hidden="true"
-        className="fixed inset-0 z-40 bg-(--surface) opacity-60 min-[1200px]:hidden"
+        className="sp-scrim z-40 min-[1200px]:hidden"
         onClick={actions.onClose}
       />
       <aside
@@ -166,22 +170,38 @@ export function DetailPanel({
             <span className="body-sm">{appt.note}</span>
           </div>
         )}
-        {appt.status !== 'held' && appt.status !== 'no_show' && (
+        {Object.values(actions.allowed).some(Boolean) && (
           <div className="mt-(--space-1) flex flex-col gap-(--space-2)">
-            {appt.status === 'confirmed' && (
+            {actions.allowed.checkIn && (
               <Button variant="primary" onClick={actions.onCheckIn}>
                 Check-in
               </Button>
             )}
-            {(appt.status === 'checked_in' || (appt.status === 'completed' && d.due > 0n)) && (
-              <Button variant="primary" onClick={actions.onComplete}>
+            {actions.allowed.collect && (
+              <Button variant="primary" onClick={actions.onCollect}>
                 {appt.status === 'completed' ? 'Thu tiền' : 'Hoàn thành và thu tiền'}
               </Button>
             )}
-            <div className="grid grid-cols-2 gap-(--space-2)">
-              <Button onClick={actions.onReschedule}>Đổi giờ</Button>
-              <Button onClick={actions.onAddService}>Thêm dịch vụ</Button>
-            </div>
+            {actions.allowed.edit && (
+              <div className="grid grid-cols-2 gap-(--space-2)">
+                <Button onClick={actions.onReschedule}>Đổi giờ</Button>
+                <Button onClick={actions.onAddService}>Thêm dịch vụ</Button>
+              </div>
+            )}
+            {(actions.allowed.noShow || actions.allowed.cancel) && (
+              <div className="grid grid-cols-2 gap-(--space-2)">
+                {actions.allowed.noShow && (
+                  <Button variant="danger" onClick={actions.onNoShow}>
+                    Đánh dấu không đến
+                  </Button>
+                )}
+                {actions.allowed.cancel && (
+                  <Button variant="danger" onClick={actions.onCancel}>
+                    Hủy lịch
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </aside>

@@ -7,11 +7,9 @@ import { SegmentedNav } from '@/components/sapio/segmented';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
 import { StatusBadge } from '@/components/sapio/status-badge';
 import { useMockNow } from '@/components/sapio/use-mock-now';
-import { openingHours } from '@/mock/hours';
+import { dayHours } from '@/mock/hours';
 import { tenantFixtures } from '@/mock/fixtures';
-import { formatVnd } from '@/mock/format';
 import {
-  appointmentDetail,
   dayAppointments,
   freeResourcesAt,
   isLive,
@@ -19,11 +17,12 @@ import {
   resourceColumns,
   staffColumns,
 } from '@/mock/reception';
-import { formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
+import { addDays, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
+import { useAppointmentActions } from './actions';
 import { DetailPanel, PhoneNav, ViewTabs } from './parts';
 import { useReception } from './use-reception';
 
-const PHONE_QUERY = '(max-width: 767px)';
+const WIDE_QUERY = '(min-width: 1200px)';
 
 export function ReceptionScreen({
   tenantSlug,
@@ -38,22 +37,30 @@ export function ReceptionScreen({
   const branch = fixture.branches[0]!;
   const L = lookups(fixture);
   const now = useMockNow();
-  const date = localDate(MOCK_NOW);
-  const hours = openingHours(fixture, date) ?? { open: '08:00', close: '18:00' };
-  const from = `${hours.open.slice(0, 2)}:00`;
-  const to = `${String(Math.ceil(Number(hours.close.slice(0, 2)) + Number(hours.close.slice(3)) / 60)).padStart(2, '0')}:00`;
+  const today = localDate(MOCK_NOW);
+  const [date, setDate] = useState(today);
+  const hours = dayHours(fixture, date);
 
-  const { appointments, setStatus, notify } = useReception(fixture);
+  const { appointments, replace, notify } = useReception(fixture);
+  const actions = useAppointmentActions(fixture, appointments, replace, now);
   const day = dayAppointments(appointments, date);
-  const [selectedId, setSelectedId] = useState<string | null>(
-    () => day.find((a) => a.status === 'checked_in')?.id ?? null,
-  );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = day.find((a) => a.id === selectedId && isLive(a, now)) ?? null;
 
-  // The canvas opens Hà's detail on desktop and tablet; on a phone the calendar comes first.
+  // Only the wide layout opens a detail at load; below 1200px the drawer would cover the calendar.
   useEffect(() => {
-    if (window.matchMedia(PHONE_QUERY).matches) setSelectedId(null);
-  }, []);
+    if (window.matchMedia(WIDE_QUERY).matches) {
+      setSelectedId(
+        dayAppointments(fixture.appointments, today).find((a) => a.status === 'checked_in')?.id ??
+          null,
+      );
+    }
+  }, [fixture, today]);
+
+  const goTo = (d: string) => {
+    setDate(d);
+    setSelectedId(null);
+  };
 
   const columns = (view === 'staff' ? staffColumns : resourceColumns)(
     fixture,
@@ -74,7 +81,6 @@ export function ReceptionScreen({
     : undefined;
 
   const calendarLabel = `Lịch ${view === 'staff' ? 'nhân viên' : 'tài nguyên'} ${branch.name}, ${formatDay(date)}`;
-  const notToday = () => notify('Mock chỉ có dữ liệu ngày 07/11.');
 
   return (
     <div className="flex flex-col">
@@ -86,11 +92,23 @@ export function ReceptionScreen({
           <span className="body-sm">{branch.name}</span>
         </div>
         <div className="flex items-center gap-(--space-1)">
-          <Button variant="ghost" aria-label="Ngày trước" className="w-9! p-0!" onClick={notToday}>
+          <Button
+            variant="ghost"
+            aria-label="Ngày trước"
+            className="w-9! p-0!"
+            onClick={() => goTo(addDays(date, -1))}
+          >
             <ChevronLeft size={16} aria-hidden="true" />
           </Button>
-          <Button size="sm">Hôm nay</Button>
-          <Button variant="ghost" aria-label="Ngày sau" className="w-9! p-0!" onClick={notToday}>
+          <Button size="sm" aria-pressed={date === today} onClick={() => goTo(today)}>
+            Hôm nay
+          </Button>
+          <Button
+            variant="ghost"
+            aria-label="Ngày sau"
+            className="w-9! p-0!"
+            onClick={() => goTo(addDays(date, 1))}
+          >
             <ChevronRight size={16} aria-hidden="true" />
           </Button>
           <span className="body sp-num ms-(--space-2) font-semibold">
@@ -163,13 +181,7 @@ export function ReceptionScreen({
                 {formatTime(next.startAt)} · {L.who(next)} · {L.services(next)}
               </span>
             </div>
-            <Button
-              className="h-11!"
-              onClick={() => {
-                setStatus(next.id, 'checked_in', { checkedInAt: now });
-                notify(`Đã check-in ${L.who(next)}.`);
-              }}
-            >
+            <Button className="h-11!" onClick={() => actions.checkIn(next)}>
               Check-in
             </Button>
           </div>
@@ -181,7 +193,7 @@ export function ReceptionScreen({
           aria-label="Lịch"
           className="flex min-w-0 flex-[999_1_720px] flex-col gap-(--space-3)"
         >
-          {view === 'resource' && (
+          {view === 'resource' && date === today && (
             <p className="body-sm m-0 text-(--ink-muted)">
               Lúc {formatTime(now)} còn trống:{' '}
               {freeResourcesAt(fixture, day, now).join(', ') || 'không còn'}
@@ -192,10 +204,11 @@ export function ReceptionScreen({
               label={calendarLabel}
               columns={columns}
               date={date}
-              from={from}
-              to={to}
+              from={hours.from}
+              to={hours.to}
               open={hours.open}
               close={hours.close}
+              {...(hours.closedLabel ? { closedLabel: hours.closedLabel } : {})}
               now={now}
             />
           </div>
@@ -205,10 +218,11 @@ export function ReceptionScreen({
                 label={`Lịch của ${phoneCol.name}`}
                 columns={[phoneCol]}
                 date={date}
-                from={from}
-                to={to}
+                from={hours.from}
+                to={hours.to}
                 open={hours.open}
                 close={hours.close}
+                {...(hours.closedLabel ? { closedLabel: hours.closedLabel } : {})}
                 now={now}
               />
             )}
@@ -229,27 +243,31 @@ export function ReceptionScreen({
           </div>
         </section>
 
-        {selected && (
+        {selected ? (
           <DetailPanel
             fixture={fixture}
             appt={selected}
             actions={{
+              allowed: actions.allowed(selected),
               onClose: () => setSelectedId(null),
-              onCheckIn: () => {
-                setStatus(selected.id, 'checked_in', { checkedInAt: now });
-                notify(`Đã check-in ${L.who(selected)}.`);
-              },
-              onComplete: () => {
-                const due = appointmentDetail(fixture, selected).due;
-                setStatus(selected.id, 'completed', { settled: true });
-                notify(`Đã thu ${formatVnd(due)}. Lịch hẹn hoàn thành.`);
-              },
+              onCheckIn: () => actions.checkIn(selected),
+              onCollect: () => actions.collect(selected),
+              onNoShow: () => actions.noShow(selected),
+              onCancel: () => actions.cancel(selected),
               onReschedule: () =>
                 notify('Kéo khối lịch hẹn sang giờ mới để đổi giờ (chưa có trong mock).'),
               onAddService: () => notify('Thêm dịch vụ: chưa có trong mock.'),
             }}
           />
+        ) : (
+          <aside
+            aria-label="Chi tiết lịch hẹn"
+            className="hidden max-w-[400px] flex-[1_1_320px] min-[1200px]:block"
+          >
+            <p className="sp-empty m-0">Chọn một lịch hẹn để xem chi tiết.</p>
+          </aside>
         )}
+        {actions.dialog}
       </main>
 
       <PhoneNav notify={notify} />

@@ -59,6 +59,9 @@ export function ConfirmDialog({
     }
   }, [open]);
 
+  // Unmounting while open (parent stops rendering it) still returns focus to the opener.
+  useEffect(() => () => openerRef.current?.focus(), []);
+
   async function confirm() {
     setPending(true);
     try {

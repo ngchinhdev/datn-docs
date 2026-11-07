@@ -14,11 +14,15 @@ export function useReception(fixture: TenantFixture) {
     setAppointments((list) => list.map((a) => (a.id === id ? { ...a, ...patch } : a)));
   }, []);
 
+  const replace = useCallback((appt: Appointment) => {
+    setAppointments((list) => list.map((a) => (a.id === appt.id ? appt : a)));
+  }, []);
+
   const setStatus = useCallback(
     (id: string, status: AppointmentStatus, extra: Partial<Appointment> = {}) =>
       update(id, { status, ...extra }),
     [update],
   );
 
-  return { appointments, setStatus, update, notify, show };
+  return { appointments, setStatus, update, replace, notify, show };
 }

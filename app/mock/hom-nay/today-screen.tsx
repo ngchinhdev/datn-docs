@@ -20,6 +20,7 @@ import {
   staffColumns,
 } from '@/mock/reception';
 import { formatCountdown, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
+import { useAppointmentActions } from '../le-tan/actions';
 import { DetailPanel, PhoneNav } from '../le-tan/parts';
 import { useReception } from '../le-tan/use-reception';
 
@@ -71,7 +72,8 @@ export function TodayScreen({ tenantSlug, query }: { tenantSlug: string; query: 
   const now = useMockNow();
   const date = localDate(MOCK_NOW);
   const hours = openingHours(fixture, date) ?? { open: '08:00', close: '18:00' };
-  const { appointments, setStatus, notify } = useReception(fixture);
+  const { appointments, replace, notify } = useReception(fixture);
+  const actions = useAppointmentActions(fixture, appointments, replace, now);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const day = dayAppointments(appointments, date).filter((a) => isLive(a, now));
@@ -98,15 +100,8 @@ export function TodayScreen({ tenantSlug, query }: { tenantSlug: string; query: 
       ? `${staffOf(a)} · ${wait.label ?? 'chờ'} đến ${formatTime(wait.endAt)}`
       : `${staffOf(a)} · ${others(a)} · xong lúc ${formatTime(appointmentEnd(a))}`;
   };
-  const checkIn = (a: Appointment) => {
-    setStatus(a.id, 'checked_in', { checkedInAt: now });
-    notify(`Đã check-in ${L.who(a)}.`);
-  };
-  const collect = (a: Appointment) => {
-    const due = appointmentDetail(fixture, a).due;
-    setStatus(a.id, 'completed', { settled: true });
-    notify(`Đã thu ${formatVnd(due)}.`);
-  };
+  const checkIn = actions.checkIn;
+  const collect = actions.collect;
 
   return (
     <div className="flex flex-col gap-(--space-4) pb-24 md:pb-0">
@@ -231,14 +226,18 @@ export function TodayScreen({ tenantSlug, query }: { tenantSlug: string; query: 
             fixture={fixture}
             appt={selected}
             actions={{
+              allowed: actions.allowed(selected),
               onClose: () => setSelectedId(null),
               onCheckIn: () => checkIn(selected),
-              onComplete: () => collect(selected),
+              onCollect: () => collect(selected),
+              onNoShow: () => actions.noShow(selected),
+              onCancel: () => actions.cancel(selected),
               onReschedule: () => notify('Đổi giờ: chưa có trong mock.'),
               onAddService: () => notify('Thêm dịch vụ: chưa có trong mock.'),
             }}
           />
         )}
+        {actions.dialog}
       </main>
       <PhoneNav notify={notify} />
     </div>
