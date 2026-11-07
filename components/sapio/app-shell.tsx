@@ -26,6 +26,7 @@ import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { Sheet } from './sheet';
 import { Tip } from './tooltip';
+import { useMediaQuery } from './use-media-query';
 import { useMenu } from './use-menu';
 
 export interface ShellNavItem {
@@ -100,17 +101,7 @@ function useSidebarSetting() {
   return useSyncExternalStore(subscribeSidebar, readSidebar, () => 'expanded' as const);
 }
 
-function useWide() {
-  return useSyncExternalStore(
-    (callback) => {
-      const query = window.matchMedia('(min-width: 1200px)');
-      query.addEventListener('change', callback);
-      return () => query.removeEventListener('change', callback);
-    },
-    () => window.matchMedia('(min-width: 1200px)').matches,
-    () => true,
-  );
-}
+const useWide = () => useMediaQuery('(min-width: 1200px)');
 
 const PhoneSlot = createContext<HTMLElement | null>(null);
 

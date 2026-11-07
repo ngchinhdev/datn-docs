@@ -63,12 +63,22 @@ export interface StaffProfile {
   employeeCode: string;
   /** Admin only. E.164. */
   phone: string;
+  /** Admin only. Sign-in address. */
+  email: string;
+  /** Admin only. `YYYY-MM`. */
+  joinedAt: string;
 }
+
+/** What a member of staff may do in the admin area. */
+export type StaffRoleId = 'owner' | 'manager' | 'receptionist' | 'technician';
 
 /** A staff member is a resource whose type has `isStaff`; skills limit which services they do (BR-03). */
 export interface Staff {
   resourceId: string;
   profile: StaffProfile;
+  role: StaffRoleId;
+  /** 1-based index into `TenantFixture.staffLevels`; services with a price per level use it. */
+  level: number;
   skillServiceIds: string[];
 }
 
@@ -116,6 +126,8 @@ export interface Customer {
   callName: string;
   /** Visits so far, including today. */
   visitCount?: number;
+  /** Internal note; never shown to the customer (BR-62). */
+  note?: string;
 }
 
 export interface ServedSubject {
@@ -187,6 +199,10 @@ export interface TenantFixture {
   resourceTypes: ResourceType[];
   resources: Resource[];
   staff: Staff[];
+  /** Public titles a profile can carry, e.g. "Thợ chính". */
+  staffTitles: string[];
+  /** Pay levels, lowest first, e.g. "Thợ", "Thợ chính", "Thợ cả". */
+  staffLevels: string[];
   staffTimeOff: StaffTimeOff[];
   services: Service[];
   customers: Customer[];

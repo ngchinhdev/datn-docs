@@ -63,7 +63,9 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
     setSelectedId(null);
   };
 
-  const columns = (view === 'staff' ? staffColumns : resourceColumns)(
+  // `?staff=` narrows the staff view to one person (the "Xem lịch" button of the staff list).
+  const [staffOnly, setStaffOnly] = useQueryState('staff', '');
+  const allColumns = (view === 'staff' ? staffColumns : resourceColumns)(
     fixture,
     day,
     now,
@@ -71,6 +73,8 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
     setSelectedId,
     date,
   );
+  const only = view === 'staff' ? allColumns.find((c) => c.id === staffOnly) : undefined;
+  const columns = only ? [only] : allColumns;
   const [phoneColumn, setPhoneColumn] = useState(columns[0]?.id ?? '');
   const phoneCol = columns.find((c) => c.id === phoneColumn) ?? columns[0];
   const next = phoneCol
@@ -190,6 +194,14 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
           aria-label="Lịch"
           className="flex min-w-0 flex-[999_1_720px] flex-col gap-(--space-3)"
         >
+          {only && (
+            <p className="body-sm m-0 flex flex-wrap items-center gap-(--space-2) text-(--ink-muted)">
+              Chỉ xem lịch của {only.name}.
+              <Button size="sm" onClick={() => setStaffOnly('')}>
+                Xem tất cả
+              </Button>
+            </p>
+          )}
           {view === 'resources' && date === today && (
             <p className="body-sm m-0 text-(--ink-muted)">
               Lúc {formatTime(now)} còn trống:{' '}

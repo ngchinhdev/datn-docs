@@ -102,3 +102,25 @@ export function tabIds(role: StaffRole): string[] {
   if (role === 'technician') return ['my-schedule', 'my-time-off', 'my-commission'];
   return ['today', 'calendar', 'customers'];
 }
+
+export interface SettingsEntry {
+  id: string;
+  label: string;
+  /** Path under `/mock/app/[tenant]`. */
+  path: string;
+}
+
+/** Entries of the settings menu (FormSection README). */
+export const settingsEntries: SettingsEntry[] = [
+  { id: 'branches', label: 'Chi nhánh', path: 'settings/branches' },
+  { id: 'services', label: 'Dịch vụ', path: 'settings/services' },
+  { id: 'resources', label: 'Tài nguyên', path: 'settings/resources' },
+  { id: 'staff', label: 'Nhân sự', path: 'settings/staff' },
+  { id: 'packages', label: 'Gói liệu trình', path: 'settings/packages' },
+  { id: 'policies', label: 'Chính sách', path: 'settings/policies' },
+  { id: 'branding', label: 'Thương hiệu', path: 'settings/branding' },
+  { id: 'payments', label: 'Thanh toán', path: 'settings/payments' },
+  { id: 'notifications', label: 'Thông báo', path: 'settings/notifications' },
+  { id: 'chatbot', label: 'Chatbot', path: 'settings/chatbot' },
+  { id: 'audit-log', label: 'Nhật ký thao tác', path: 'audit-log' },
+];
