@@ -86,7 +86,7 @@ Quyết định kỹ thuật chi tiết nằm ở [Quyết định kỹ thuật]
 - **Hệ thống thiết kế** làm bằng Claude Design (loại Design System) trên claude.ai, tên "Sapio Design System", là nguồn sự thật cho màu, chữ, khoảng cách, góc và component. Gồm:
   - Theme sáng và tối, đạt tương phản WCAG AA.
   - Font Be Vietnam Pro.
-  - Màu thương hiệu ngọc bích (`brand`), nút chính màu mực (`primary`).
+  - Màu thương hiệu ngọc bích (`brand`); nút chính khu quản trị cũng màu ngọc (`primary`), đổi từ màu mực ngày 07/11 vì màu đen quá lạnh cho ngành dịch vụ và làm khu quản trị mất màu riêng.
   - 4 màu trạng thái lịch hẹn kèm bản nền nhạt.
   - Màu riêng từng cơ sở (`tenant-may`, `tenant-pawpaw`), gán qua `--accent`.
   - Token lịch: 16px mỗi 15 phút.
@@ -108,4 +108,5 @@ Vẽ trên canvas Claude Design "Sapio · Màn hình đầu tiên" (07/11/2026),
   - iPad ngang: bảng chi tiết thành ngăn trượt đè lên lịch.
   - Điện thoại: lịch từng nhân viên (đổi bằng tab) cùng thẻ "tiếp theo" và thanh điều hướng dưới.
   - Phương án B (hàng chờ "Hôm nay": đang làm, chờ thanh toán, sắp đến) làm trang riêng của khu quản trị.
+- **Chọn nhân viên trên điện thoại:** một dòng hiện lựa chọn hiện tại ("Bất kỳ ai · Đổi"), bấm vào mở bảng trượt từ dưới lên với danh sách dọc (BR-14, BR-15); không dùng hàng thẻ cuộn ngang. Trên máy tính là danh sách dọc ở cột trái.
 - **Lý do:** khách mở link đặt lịch chủ yếu từ Zalo, Facebook, Google Maps trên điện thoại; lễ tân làm việc ở quầy với máy tính hoặc iPad. Lịch nhiều cột là nơi thể hiện rõ nhất bài toán đa tài nguyên khi bảo vệ.
