@@ -435,6 +435,9 @@ dialog.sp-dialog::backdrop,
 .sp-shell__main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
 .sp-shell__content { width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5); }
 .sp-shell__content--wide { max-width: none; }
+/* Page whose list fills the rest of the screen: header and toolbar stay, the table scrolls inside its card. */
+.sp-shell__content--fill { height: 100%; max-height: 100vh; min-height: 0; }
+.sp-shell__main:has(> .sp-shell__content--fill) { height: 100vh; }
 /* Rail: icons only. Automatic at 768-1199px, or chosen with the collapse button (.sp-shell--collapsed). */
 .sp-shell--collapsed .sp-shell__side { width: 68px; padding: var(--space-3) var(--space-2); }
 .sp-shell--collapsed .sp-nav__label, .sp-shell--collapsed .sp-nav__group, .sp-shell--collapsed .sp-switcher__text,
@@ -645,7 +648,7 @@ dialog.sp-dialog::backdrop,
 .sp-pagination__page:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .sp-pagination__gap { min-width: 24px; text-align: center; color: var(--ink-muted); }
 .sp-pagination__compact { display: none; padding: 0 var(--space-2); font: 500 14px/20px var(--font-sans); font-variant-numeric: tabular-nums; }
-.sp-table-foot__right { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.sp-table-foot__right { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
 .sp-page-size { display: inline-flex; align-items: center; gap: var(--space-2); font: 400 13px/18px var(--font-sans); color: var(--ink-muted); white-space: nowrap; }
 /* Small select that matches the inputs: border, chevron, no browser chrome. */
 .sp-select { position: relative; display: inline-flex; align-items: center; }
@@ -752,20 +755,26 @@ dialog.sp-dialog::backdrop,
 
 /* ---------- Data table ---------- */
 .sp-table-wrap { overflow-x: auto; border-radius: var(--radius-md); background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line), var(--shadow-card); }
-.sp-table { width: 100%; border-collapse: collapse; font: 400 14px/20px var(--font-sans); }
+.sp-table { width: 100%; border-collapse: separate; border-spacing: 0; font: 400 14px/20px var(--font-sans); }
+/* Card that holds a scrolling table and its footer: column headers and pagination stay put. */
+.sp-table-card { flex: 1 1 auto; min-height: 280px; display: flex; flex-direction: column; overflow: hidden; border-radius: var(--radius-md); background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line), var(--shadow-card); }
+.sp-table-card > .sp-table-wrap { flex: 1 1 auto; min-height: 0; overflow: auto; border-radius: 0; background: transparent; box-shadow: none; }
+.sp-table-card > .sp-table-wrap:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.sp-table-card > .sp-table-foot { flex: none; padding: 8px var(--space-4); background: var(--surface-raised); box-shadow: 0 -1px 0 var(--line); }
 .sp-table th {
   position: sticky;
   top: 0;
   padding: 10px var(--space-4);
+  z-index: 1;
   background: var(--surface-raised);
-  border-bottom: 1px solid var(--line);
+  box-shadow: inset 0 -1px 0 var(--line);
   color: var(--ink-muted);
   font: 500 12px/16px var(--font-sans);
   text-align: left;
   white-space: nowrap;
 }
 .sp-table th[aria-sort] { color: var(--ink); }
-.sp-table td { padding: 10px var(--space-4); border-bottom: 1px solid var(--line); vertical-align: middle; }
+.sp-table td { height: 56px; box-sizing: border-box; padding: 8px var(--space-4); border-bottom: 1px solid var(--line); vertical-align: middle; }
 .sp-table tbody tr:last-child td { border-bottom: 0; }
 .sp-table tbody tr:hover td { background: var(--fill-tonal); }
 .sp-table .sp-num, .sp-table__num, .sp-table th.sp-table__num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }

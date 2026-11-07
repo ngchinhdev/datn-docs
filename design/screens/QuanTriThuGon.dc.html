@@ -16,7 +16,7 @@ body{margin:0}
 a{color:var(--brand)}a:hover{color:var(--ink)}
 </style>
 </helmet>
-<div data-theme="{{theme}}" class="sp-shell sp-shell--collapsed" style="position: relative; min-height: 900px; font-family: var(--font-sans);">
+<div data-theme="{{theme}}" class="sp-shell sp-shell--collapsed" style="position: relative; height: 900px; min-height: 0; font-family: var(--font-sans);">
   <nav class="sp-shell__side" id="app-sidebar" aria-label="Điều hướng chính">
     <div class="sp-brand">
       <span class="sp-brand__name">Sapio</span>
@@ -61,7 +61,7 @@ a{color:var(--brand)}a:hover{color:var(--ink)}
   </div>
   <span class="sp-tooltip" role="tooltip" style="left: 76px; top: 390px;">Xếp ca</span>
   <main class="sp-shell__main">
-    <div class="sp-shell__content">
+    <div class="sp-shell__content sp-shell__content--fill">
       <div class="sp-page-head">
         <div>
           <h1 class="sp-page-head__title">Khách hàng</h1>
@@ -79,7 +79,8 @@ a{color:var(--brand)}a:hover{color:var(--ink)}
         <button type="button" class="sp-chip" aria-pressed="false">Bắt buộc cọc</button>
         <button type="button" class="sp-chip" aria-pressed="false">Thợ quen <span class="sp-chip__value">Tất cả</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
       </div>
-      <div class="sp-table-wrap">
+      <div class="sp-table-card">
+      <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Danh sách khách hàng, cuộn được">
         <table class="sp-table">
           <thead>
             <tr>
@@ -165,24 +166,133 @@ a{color:var(--brand)}a:hover{color:var(--ink)}
             <td class="sp-table__num">0</td>
             <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
           </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">NL</span><span style="min-width: 0;"><a href="#">Phan Ngọc Lam</a><span class="sp-table__secondary">Thợ quen: Lan</span></span></div></td>
+            <td class="sp-num">0909 121 343</td>
+            <td class="sp-num">05/11, 15:00</td>
+            <td class="sp-num"><span class="sp-muted">Không có</span></td>
+            <td class="sp-table__num">7</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">TK</span><span style="min-width: 0;"><a href="#">Trịnh Quốc Khánh</a></span></div></td>
+            <td class="sp-num">0938 765 432</td>
+            <td class="sp-num">04/11, 10:30</td>
+            <td class="sp-num">21/11, 10:30</td>
+            <td class="sp-table__num">2</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">LM</span><span style="min-width: 0;"><a href="#">Lý Minh Châu</a><span class="sp-table__secondary">Có ghi chú</span></span></div></td>
+            <td class="sp-num">0916 555 210</td>
+            <td class="sp-num">03/11, 17:15</td>
+            <td class="sp-num"><span class="sp-muted">Không có</span></td>
+            <td class="sp-table__num">9</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">BH</span><span style="min-width: 0;"><a href="#">Bùi Gia Hân</a></span></div></td>
+            <td class="sp-num">0977 302 118</td>
+            <td class="sp-num">02/11, 09:00</td>
+            <td class="sp-num">Hôm nay, 14:00</td>
+            <td class="sp-table__num">1</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">ĐK</span><span style="min-width: 0;"><a href="#">Đặng Hoàng Kha</a><span class="sp-table__secondary">Thợ quen: Hùng</span></span></div></td>
+            <td class="sp-num">0903 889 664</td>
+            <td class="sp-num">01/11, 18:30</td>
+            <td class="sp-num"><span class="sp-muted">Không có</span></td>
+            <td class="sp-table__num">12</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">NQ</span><span style="min-width: 0;"><a href="#">Ngô Thị Quyên</a></span></div></td>
+            <td class="sp-num">0935 420 617</td>
+            <td class="sp-num">31/10, 11:00</td>
+            <td class="sp-num"><span class="sp-muted">Không có</span></td>
+            <td class="sp-table__num">3</td>
+            <td class="sp-table__num">1</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">VS</span><span style="min-width: 0;"><a href="#">Võ Minh Sang</a><span class="sp-table__secondary">Lần sau bắt buộc cọc</span></span></div></td>
+            <td class="sp-num">0989 015 742</td>
+            <td class="sp-num">30/10, 16:45</td>
+            <td class="sp-num"><span class="sp-muted">Không có</span></td>
+            <td class="sp-table__num">4</td>
+            <td class="sp-table__num"><span class="sp-badge sp-badge--no-show">2</span></td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">HT</span><span style="min-width: 0;"><a href="#">Hồ Thanh Tâm</a><span class="sp-table__secondary">Thợ quen: Mai</span></span></div></td>
+            <td class="sp-num">0918 640 291</td>
+            <td class="sp-num">29/10, 13:30</td>
+            <td class="sp-num">12/11, 13:30</td>
+            <td class="sp-table__num">15</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">PD</span><span style="min-width: 0;"><a href="#">Phạm Quốc Duy</a></span></div></td>
+            <td class="sp-num">0907 233 558</td>
+            <td class="sp-num">28/10, 08:30</td>
+            <td class="sp-num"><span class="sp-muted">Không có</span></td>
+            <td class="sp-table__num">1</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">TN</span><span style="min-width: 0;"><a href="#">Tạ Bảo Ngân</a><span class="sp-table__secondary">Có ghi chú</span></span></div></td>
+            <td class="sp-num">0932 118 905</td>
+            <td class="sp-num">27/10, 19:00</td>
+            <td class="sp-num"><span class="sp-muted">Không có</span></td>
+            <td class="sp-table__num">6</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">LV</span><span style="min-width: 0;"><a href="#">Lâm Gia Vĩ</a></span></div></td>
+            <td class="sp-num">0961 774 320</td>
+            <td class="sp-num">26/10, 10:00</td>
+            <td class="sp-num"><span class="sp-muted">Không có</span></td>
+            <td class="sp-table__num">2</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
+          <tr>
+            <td><div class="sp-table__primary"><span class="sp-avatar sp-avatar--sm">DH</span><span style="min-width: 0;"><a href="#">Dương Thu Hằng</a><span class="sp-table__secondary">Thợ quen: Lan</span></span></div></td>
+            <td class="sp-num">0914 902 476</td>
+            <td class="sp-num">25/10, 15:30</td>
+            <td class="sp-num">14/11, 15:30</td>
+            <td class="sp-table__num">8</td>
+            <td class="sp-table__num">0</td>
+            <td class="sp-table__actions"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đặt lịch</button></td>
+          </tr>
           </tbody>
         </table>
       </div>
-      <div class="sp-table-foot">
-        <span class="sp-num">Hiển thị 1–20 trong 1.284 khách</span>
-        <div class="sp-table-foot__right">
-        <label class="sp-page-size">Số dòng mỗi trang<span class="sp-select"><select><option selected>20</option><option>50</option><option>100</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></label>
-        <nav class="sp-pagination" aria-label="Phân trang">
-          <button type="button" class="sp-pagination__page sp-pagination__step" aria-label="Trang trước" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
-          <a class="sp-pagination__page" href="#" aria-current="page">1</a>
-          <a class="sp-pagination__page" href="#">2</a>
-          <a class="sp-pagination__page" href="#">3</a>
-          <a class="sp-pagination__page" href="#">4</a>
-          <a class="sp-pagination__page" href="#">5</a>
-          <span class="sp-pagination__gap" aria-hidden="true">…</span>
-          <a class="sp-pagination__page" href="#" aria-label="Trang 65, trang cuối">65</a>
-          <a class="sp-pagination__page sp-pagination__step" href="#" aria-label="Trang sau"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
-        </nav>
+        <div class="sp-table-foot">
+          <span class="sp-num">Hiển thị 1–20 trong 1.284 khách</span>
+          <div class="sp-table-foot__right">
+            <nav class="sp-pagination" aria-label="Phân trang">
+              <button type="button" class="sp-pagination__page sp-pagination__step" aria-label="Trang trước" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+              <a class="sp-pagination__page" href="#" aria-current="page">1</a>
+              <a class="sp-pagination__page" href="#">2</a>
+              <a class="sp-pagination__page" href="#">3</a>
+              <a class="sp-pagination__page" href="#">4</a>
+              <a class="sp-pagination__page" href="#">5</a>
+              <span class="sp-pagination__gap" aria-hidden="true">…</span>
+              <a class="sp-pagination__page" href="#" aria-label="Trang 65, trang cuối">65</a>
+              <a class="sp-pagination__page sp-pagination__step" href="#" aria-label="Trang sau"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+            </nav>
+            <span class="sp-select sp-page-size"><select aria-label="Số dòng mỗi trang"><option selected>20 / trang</option><option>50 / trang</option><option>100 / trang</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+          </div>
         </div>
       </div>
     </div>
