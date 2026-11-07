@@ -93,3 +93,19 @@ Quyết định kỹ thuật chi tiết nằm ở [Quyết định kỹ thuật]
   - 8 component: Button, StatusBadge, AppointmentBlock, ResourceCalendar, ServiceCard, SlotPicker, HoldBanner, PhoneField.
 - **Chi tiết nhận diện:** đoạn chờ vẽ vạch chéo; lịch hẹn khác đặt vào khe chờ của nhân viên thì vẽ thụt vào.
 - **Trong code:** gán biến CSS của shadcn (`--background`, `--primary`, `--ring`...) từ token Sapio theo bảng trong README của hệ thống thiết kế; không để theme shadcn mặc định (`neutral` + Geist).
+
+## D-12. Hướng giao diện hai màn hình đầu
+
+Vẽ trên canvas Claude Design "Sapio · Màn hình đầu tiên" (07/11/2026), dùng Sapio Design System.
+
+- **Trang khách: ưu tiên điện thoại, chọn phương án A "Từng bước".**
+  - Mỗi bước một quyết định: dịch vụ → (đối tượng được phục vụ) → thợ, ngày giờ → thông tin, xác nhận. Có thanh tiến độ và thanh tóm tắt cố định ở dưới.
+  - Mượn từ phương án B: bước chọn đối tượng được phục vụ (thú cưng) và giá biến thể tự lọc theo thuộc tính của đối tượng (BR-13).
+  - Bỏ phương án C (lịch tháng kiểu Cal.com).
+  - Trên máy tính: cùng luồng, bố cục hai cột (tóm tắt bên trái, chọn ngày giờ bên phải).
+- **Lịch lễ tân: ưu tiên máy tính và tablet, chọn phương án A "Lịch + chi tiết".**
+  - Lịch nhiều cột đặt nhân viên và tài nguyên (ghế) cạnh nhau, để thấy đoạn chờ và ghế bận cùng lúc. Bấm một lịch hẹn mở bảng chi tiết.
+  - iPad ngang: bảng chi tiết thành ngăn trượt đè lên lịch.
+  - Điện thoại: lịch từng nhân viên (đổi bằng tab) cùng thẻ "tiếp theo" và thanh điều hướng dưới.
+  - Phương án B (hàng chờ "Hôm nay": đang làm, chờ thanh toán, sắp đến) làm trang riêng của khu quản trị.
+- **Lý do:** khách mở link đặt lịch chủ yếu từ Zalo, Facebook, Google Maps trên điện thoại; lễ tân làm việc ở quầy với máy tính hoặc iPad. Lịch nhiều cột là nơi thể hiện rõ nhất bài toán đa tài nguyên khi bảo vệ.
