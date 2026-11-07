@@ -11,6 +11,8 @@ export interface Column<T> {
   sortable?: boolean;
   /** Header text only for screen readers, e.g. the action column. */
   labelHidden?: boolean;
+  /** Fixed width (px, or a share like "15%"); one column without it takes the rest. Keeps columns from moving when the rows change. */
+  width?: number | string;
   cell: (row: T) => ReactNode;
 }
 
@@ -55,7 +57,12 @@ export function DataTable<T>({
           role="region"
           aria-label={`${label}, cuộn được`}
         >
-          <table className="sp-table">
+          <table className="sp-table min-w-[860px] table-fixed">
+            <colgroup>
+              {columns.map((col) => (
+                <col key={col.key} style={col.width ? { width: col.width } : undefined} />
+              ))}
+            </colgroup>
             <thead>
               <tr>
                 {columns.map((col) => {
@@ -70,14 +77,14 @@ export function DataTable<T>({
                       key={col.key}
                       scope="col"
                       aria-sort={ariaSort ?? (col.sortable ? 'none' : undefined)}
-                      className={cn(col.numeric && 'sp-table__num')}
+                      className={cn('uppercase', col.numeric && 'sp-table__num')}
                     >
                       {col.labelHidden ? (
                         <span className="sr-only">{col.label}</span>
                       ) : col.sortable ? (
                         <button
                           type="button"
-                          className="inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 font-[inherit] text-[inherit] hover:text-(--ink)"
+                          className="inline-flex cursor-pointer items-center uppercase gap-1 border-0 bg-transparent p-0 font-[inherit] text-[inherit] hover:text-(--ink)"
                           onClick={() => onSort?.(col.key)}
                         >
                           {col.label}

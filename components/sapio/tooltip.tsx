@@ -1,16 +1,36 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
-const TIP_POSITION = {
-  bottom: 'top-[calc(100%+6px)] left-1/2 -translate-x-1/2',
-  right: 'top-1/2 left-[calc(100%+8px)] -translate-y-1/2',
-  'top-end': 'bottom-[calc(100%+6px)] right-0',
-  'bottom-end': 'top-[calc(100%+6px)] right-0',
-} as const;
+type Side = 'bottom' | 'right' | 'top-end' | 'bottom-end';
 
-/** `.sp-tooltip` for an icon-only control; the control keeps its own `aria-label`. */
+/** Fixed position next to the control, so a scrolling or clipping parent (the sidebar) cannot cut it or grow a scrollbar. */
+function place(rect: DOMRect, side: Side): CSSProperties {
+  switch (side) {
+    case 'bottom':
+      return {
+        left: rect.left + rect.width / 2,
+        top: rect.bottom + 6,
+        transform: 'translateX(-50%)',
+      };
+    case 'right':
+      return {
+        left: rect.right + 8,
+        top: rect.top + rect.height / 2,
+        transform: 'translateY(-50%)',
+      };
+    case 'top-end':
+      return { right: window.innerWidth - rect.right, bottom: window.innerHeight - rect.top + 6 };
+    case 'bottom-end':
+      return { right: window.innerWidth - rect.right, top: rect.bottom + 6 };
+  }
+}
+
+/**
+ * `.sp-tooltip` for an icon-only control; the control keeps its own `aria-label`.
+ * The `-end` sides line the tooltip up with the control's right edge.
+ */
 export function Tip({
   label,
   side = 'bottom',
@@ -18,28 +38,38 @@ export function Tip({
   children,
 }: {
   label: string;
-  /** The `-end` sides line the tooltip up with the right edge, for controls at the edge of a box that clips. */
-  side?: 'bottom' | 'right' | 'top-end' | 'bottom-end';
+  side?: Side;
   /** Off when the label is already visible, e.g. a full sidebar. */
   enabled?: boolean;
   children: ReactNode;
 }) {
-  const [shown, setShown] = useState(false);
+  const [style, setStyle] = useState<CSSProperties | null>(null);
+  const ref = useRef<HTMLSpanElement>(null);
+  const show = () => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (rect) setStyle(place(rect, side));
+  };
+  const hide = () => setStyle(null);
+
   return (
     <span
+      ref={ref}
       className="relative inline-flex"
-      onMouseEnter={() => setShown(true)}
-      onMouseLeave={() => setShown(false)}
-      onFocus={() => setShown(true)}
-      onBlur={() => setShown(false)}
-      onKeyDown={(e) => e.key === 'Escape' && setShown(false)}
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+      onKeyDown={(e) => e.key === 'Escape' && hide()}
     >
       {children}
-      {enabled && shown && (
-        <span aria-hidden="true" className={cn('sp-tooltip', TIP_POSITION[side])}>
-          {label}
-        </span>
-      )}
+      {enabled &&
+        style &&
+        createPortal(
+          <span aria-hidden="true" className="sp-tooltip fixed" style={style}>
+            {label}
+          </span>,
+          document.body,
+        )}
     </span>
   );
 }

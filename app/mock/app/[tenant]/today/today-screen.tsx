@@ -105,7 +105,7 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
   const collect = actions.collect;
 
   return (
-    <div className="sp-shell__content">
+    <div className="sp-shell__content sp-shell__content--wide">
       <header className="sp-page-head">
         <div>
           <h1 className="sp-page-head__title">Hôm nay</h1>

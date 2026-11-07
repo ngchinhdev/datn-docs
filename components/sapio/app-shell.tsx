@@ -166,67 +166,67 @@ function Switcher({
           </span>
         )}
       </button>
-      {menu.open && (
-        <div
-          ref={menu.menuRef}
-          className={cn(
-            'sp-menu absolute z-60 w-70',
-            rail ? 'top-0 left-[calc(100%+8px)]' : 'top-[calc(100%+4px)] left-0',
-          )}
-          role="menu"
-          aria-label="Đổi cơ sở hoặc chi nhánh"
-          onKeyDown={menu.onKeyDown}
-        >
-          <div className="sp-menu__label">Chi nhánh của {workspace.name}</div>
-          {branches.map((b) => (
+      {menu.open &&
+        createPortal(
+          <div
+            ref={menu.menuRef}
+            className="sp-menu fixed z-60 w-70"
+            style={menu.fixedStyle('below', rail)}
+            role="menu"
+            aria-label="Đổi cơ sở hoặc chi nhánh"
+            onKeyDown={menu.onKeyDown}
+          >
+            <div className="sp-menu__label">Chi nhánh của {workspace.name}</div>
+            {branches.map((b) => (
+              <Link
+                key={b.id}
+                href={b.href}
+                scroll={false}
+                role="menuitemradio"
+                aria-checked={b.current}
+                className="sp-menu__item"
+                onClick={() => menu.close(false)}
+              >
+                <span className="sp-menu__text">
+                  {b.name}
+                  <span className="sp-menu__sub">{b.address}</span>
+                </span>
+              </Link>
+            ))}
+            {otherWorkspaces.length > 0 && (
+              <>
+                <div className="sp-menu__sep" />
+                <div className="sp-menu__label">Cơ sở khác của bạn</div>
+                {otherWorkspaces.map((w) => (
+                  <Link
+                    key={w.name}
+                    href={w.href}
+                    role="menuitem"
+                    className="sp-menu__item"
+                    onClick={() => menu.close(false)}
+                  >
+                    <Mark workspace={w} small />
+                    <span className="sp-menu__text">
+                      {w.name}
+                      <span className="sp-menu__sub">{w.sub}</span>
+                    </span>
+                  </Link>
+                ))}
+              </>
+            )}
+            <div className="sp-menu__sep" />
             <Link
-              key={b.id}
-              href={b.href}
-              scroll={false}
-              role="menuitemradio"
-              aria-checked={b.current}
+              href={newWorkspaceHref}
+              role="menuitem"
               className="sp-menu__item"
               onClick={() => menu.close(false)}
             >
-              <span className="sp-menu__text">
-                {b.name}
-                <span className="sp-menu__sub">{b.address}</span>
-              </span>
+              <Plus size={16} aria-hidden="true" />
+              Đăng ký cơ sở mới
             </Link>
-          ))}
-          {otherWorkspaces.length > 0 && (
-            <>
-              <div className="sp-menu__sep" />
-              <div className="sp-menu__label">Cơ sở khác của bạn</div>
-              {otherWorkspaces.map((w) => (
-                <Link
-                  key={w.name}
-                  href={w.href}
-                  role="menuitem"
-                  className="sp-menu__item"
-                  onClick={() => menu.close(false)}
-                >
-                  <Mark workspace={w} small />
-                  <span className="sp-menu__text">
-                    {w.name}
-                    <span className="sp-menu__sub">{w.sub}</span>
-                  </span>
-                </Link>
-              ))}
-            </>
-          )}
-          <div className="sp-menu__sep" />
-          <Link
-            href={newWorkspaceHref}
-            role="menuitem"
-            className="sp-menu__item"
-            onClick={() => menu.close(false)}
-          >
-            <Plus size={16} aria-hidden="true" />
-            Đăng ký cơ sở mới
-          </Link>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
@@ -287,47 +287,47 @@ function Account({
         <span className="sr-only">, menu tài khoản</span>
       </button>
       <ThemeButton rail={rail} />
-      {menu.open && (
-        <div
-          ref={menu.menuRef}
-          className={cn(
-            'sp-menu absolute z-60 w-65',
-            rail ? 'bottom-0 left-[calc(100%+8px)]' : 'bottom-[calc(100%+4px)] left-0',
-          )}
-          role="menu"
-          aria-label="Tài khoản"
-          onKeyDown={menu.onKeyDown}
-        >
-          <button
-            type="button"
-            role="menuitem"
-            className="sp-menu__item"
-            onClick={() => {
-              menu.close();
-              onProfile();
-            }}
+      {menu.open &&
+        createPortal(
+          <div
+            ref={menu.menuRef}
+            className="sp-menu fixed z-60 w-65"
+            style={menu.fixedStyle('above', rail)}
+            role="menu"
+            aria-label="Tài khoản"
+            onKeyDown={menu.onKeyDown}
           >
-            Hồ sơ
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            className="sp-menu__item"
-            onClick={() => {
-              menu.close();
-              onSignOut();
-            }}
-          >
-            Đăng xuất
-          </button>
-          {accountExtra && (
-            <>
-              <div className="sp-menu__sep" />
-              {accountExtra('menu')}
-            </>
-          )}
-        </div>
-      )}
+            <button
+              type="button"
+              role="menuitem"
+              className="sp-menu__item"
+              onClick={() => {
+                menu.close();
+                onProfile();
+              }}
+            >
+              Hồ sơ
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className="sp-menu__item"
+              onClick={() => {
+                menu.close();
+                onSignOut();
+              }}
+            >
+              Đăng xuất
+            </button>
+            {accountExtra && (
+              <>
+                <div className="sp-menu__sep" />
+                {accountExtra('menu')}
+              </>
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

@@ -1,6 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from 'react';
 
 const ITEMS = '[role^="menuitem"]';
 
@@ -63,5 +70,17 @@ export function useMenu() {
     }
   };
 
-  return { open, setOpen, close, triggerRef, menuRef, onKeyDown, onTriggerKeyDown };
+  /**
+   * Position of a menu drawn with fixed positioning in document.body, so a container that
+   * scrolls or clips (the sidebar) cannot cut it. `side` puts it beside the trigger.
+   */
+  const fixedStyle = (placement: 'below' | 'above', side = false): CSSProperties => {
+    const r = triggerRef.current?.getBoundingClientRect();
+    if (!r) return {};
+    const left = side ? r.right + 8 : r.left;
+    if (placement === 'below') return { left, top: side ? r.top : r.bottom + 4 };
+    return { left, bottom: window.innerHeight - (side ? r.bottom : r.top + 4) };
+  };
+
+  return { open, setOpen, close, triggerRef, menuRef, onKeyDown, onTriggerKeyDown, fixedStyle };
 }

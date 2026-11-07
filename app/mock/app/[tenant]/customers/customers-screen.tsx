@@ -144,6 +144,7 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
   const columns: Column<CustomerRow>[] = [
     {
       key: 'name',
+      width: '28%',
       label: 'Khách',
       sortable: true,
       cell: (row) => (
@@ -158,12 +159,16 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
     },
     {
       key: 'phone',
+      width: '15%',
+
       label: 'Số điện thoại',
       sortable: true,
       cell: (row) => <span className="sp-num">{formatPhone(row.phone)}</span>,
     },
     {
       key: 'last',
+      width: '16%',
+
       label: 'Lần gần nhất',
       sortable: true,
       cell: (row) =>
@@ -175,6 +180,8 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
     },
     {
       key: 'next',
+      width: '16%',
+
       label: 'Lịch sắp tới',
       sortable: true,
       cell: (row) =>
@@ -184,9 +191,19 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
           <span className="sp-muted">Không có</span>
         ),
     },
-    { key: 'visits', label: 'Số lần', numeric: true, sortable: true, cell: (row) => row.visits },
+    {
+      key: 'visits',
+      width: '8%',
+
+      label: 'Số lần',
+      numeric: true,
+      sortable: true,
+      cell: (row) => row.visits,
+    },
     {
       key: 'noShows',
+      width: '9%',
+
       label: 'Không đến',
       numeric: true,
       sortable: true,
@@ -199,6 +216,8 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
     },
     {
       key: 'actions',
+      width: '8%',
+
       label: 'Thao tác',
       labelHidden: true,
       cell: (row) => (
@@ -227,7 +246,9 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
   const addCustomer = () => toast({ text: 'Thêm khách: chưa có trong mock.' });
 
   return (
-    <div className={cn('sp-shell__content', fill && 'sp-shell__content--fill')}>
+    <div
+      className={cn('sp-shell__content sp-shell__content--wide', fill && 'sp-shell__content--fill')}
+    >
       <PageHeader
         title="Khách hàng"
         sub={`${fixture.customers.length.toLocaleString('vi-VN')} khách · ${branch.name}`}

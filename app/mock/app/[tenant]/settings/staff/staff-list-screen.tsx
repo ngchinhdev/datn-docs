@@ -68,6 +68,7 @@ export function StaffListScreen({ tenantSlug }: { tenantSlug: string }) {
   const columns: Column<Staff>[] = [
     {
       key: 'name',
+      width: '30%',
       label: 'Nhân viên',
       cell: (s) => (
         <div className="sp-table__primary">
@@ -79,16 +80,20 @@ export function StaffListScreen({ tenantSlug }: { tenantSlug: string }) {
         </div>
       ),
     },
-    { key: 'role', label: 'Vai trò', cell: (s) => roleLabel(s.role) },
-    { key: 'branch', label: 'Chi nhánh', cell: () => branch.name },
+    { key: 'role', width: '17%', label: 'Vai trò', cell: (s) => roleLabel(s.role) },
+    { key: 'branch', width: '19%', label: 'Chi nhánh', cell: () => branch.name },
     {
       key: 'online',
+      width: '15%',
+
       label: 'Nhận đặt online',
       cell: (s) => (s.profile.bookableOnline ? 'Có' : <span className="sp-muted">Không</span>),
     },
-    { key: 'skills', label: 'Kỹ năng', numeric: true, cell: skillCount },
+    { key: 'skills', width: '8%', label: 'Kỹ năng', numeric: true, cell: skillCount },
     {
       key: 'actions',
+      width: '11%',
+
       label: 'Thao tác',
       labelHidden: true,
       cell: (s) => (
