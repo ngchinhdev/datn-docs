@@ -35,6 +35,7 @@ Mở VS Code và Claude Code tại `datn/` để thấy cả hai repo.
 | Cách viết test | `content/docs/ky-thuat/chien-luoc-kiem-thu.md` |
 | Dựng base source từng bước | `content/docs/ky-thuat/ke-hoach-dung-base.md` |
 | Code giao diện mock từng bước | `content/docs/ky-thuat/ke-hoach-ui-mock.md` |
+| Toàn bộ màn hình (MH-xx), route, đợt làm mock | `content/docs/thiet-ke/man-hinh.md` |
 | Thiết kế: màu, chữ, component, màn hình đã chốt | `design/README.md`, `design/sapio/README.md` |
 
 `content/docs/nghiep-vu/phan-tich-goc.md` là bản phân tích ban đầu, **rộng hơn phạm vi đồ án**: chỉ tham khảo, không làm theo.

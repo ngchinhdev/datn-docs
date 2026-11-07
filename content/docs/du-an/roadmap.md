@@ -334,7 +334,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 ### Giai đoạn 2 — Nền tảng (Tuần 6–8: 07/12 – 27/12)
 
 - [ ] Đăng ký khách thuê, chọn ngành, nạp gói cấu hình, xác thực email, slug
-- [ ] Đăng nhập JWT, `memberships`, guard theo (tenant, role)
+- [ ] Đăng nhập bằng session token trong cookie httpOnly ([T-08](../ky-thuat/quyet-dinh-ky-thuat.md#t-08-xác-thực-tự-xây-bằng-phiên-trong-cookie)), `memberships`, guard theo (tenant, role)
 - [ ] **RLS** trên mọi bảng nghiệp vụ + bộ test truy cập chéo tenant (BT6)
 - [ ] CRUD chi nhánh, giờ mở cửa, ngày đặc biệt, loại tài nguyên, tài nguyên, dịch vụ (biến thể, đoạn, yêu cầu tài nguyên), nhân sự, kỹ năng, ca làm
 - [ ] Đối tượng được phục vụ với thuộc tính kiểm tra theo JSON Schema
