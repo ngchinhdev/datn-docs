@@ -248,6 +248,7 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
             actions={{
               allowed: actions.allowed(selected),
               onClose: () => setSelectedId(null),
+              pageHref: appHref(`appointments/${selected.id}`),
               onCheckIn: () => checkIn(selected),
               onCollect: () => collect(selected),
               onNoShow: () => actions.noShow(selected),

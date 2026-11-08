@@ -7,7 +7,6 @@ import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { useQueryState } from '@/components/mock/use-query-state';
 import { Button } from '@/components/sapio/button';
-import { ConfirmDialog } from '@/components/sapio/confirm-dialog';
 import { useToast } from '@/components/sapio/toast';
 import { SegmentedNav } from '@/components/sapio/segmented';
 import { ResourceCalendar, type CalendarTarget } from '@/components/sapio/resource-calendar';
@@ -17,8 +16,7 @@ import { dayHours } from '@/mock/hours';
 import { fixtureBySlug } from '@/mock/selection';
 import { ANY_STAFF } from '@/mock/availability';
 import type { Appointment } from '@/mock/fixtures';
-import { formatVnd } from '@/mock/format';
-import { itemArrival, staffOf } from '@/mock/move';
+import { itemArrival } from '@/mock/move';
 import { firstFreeMinute } from '@/mock/placement';
 import { isoOf, localMinutes, minutesOf } from '@/mock/shifts';
 import {
@@ -32,18 +30,12 @@ import {
 import { addDays, formatDay, formatRange, formatTime, localDate, MOCK_NOW } from '@/mock/time';
 import { useAppointmentActions } from '../_reception/actions';
 import { CreatePanel } from '../_reception/create-panel';
-import { MoveDialog } from '../_reception/move-dialog';
 import { DetailPanel, ViewTabs, type CalendarView } from '../_reception/parts';
 import { useReception } from '../_reception/use-reception';
 import { useCalendarDrag, type DragTarget } from '../_reception/use-calendar-drag';
+import { endOf, useMoveFlow } from '../_reception/use-move-flow';
 
 const WIDE_QUERY = '(min-width: 1200px)';
-
-/** When the customer is done with an appointment (the end of its last work or wait part). */
-const endOf = (appt: Appointment) =>
-  appt.bookings
-    .filter((b) => b.kind === 'work' || b.kind === 'wait')
-    .reduce((end, b) => (b.endAt > end ? b.endAt : end), appt.startAt);
 
 const minuteText = (minute: number) =>
   `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
@@ -70,11 +62,6 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
     customerId: string | null;
   } | null>(null);
   const [targets, setTargets] = useState<CalendarTarget[]>([]);
-  /** A carried block dropped on another person while the customer named one (BR-32). */
-  const [swap, setSwap] = useState<{ appt: Appointment; target: DragTarget } | null>(null);
-  const [sendEmail, setSendEmail] = useState(true);
-  /** The keyboard way to move one: "Dời giờ, đổi người". */
-  const [moving, setMoving] = useState<Appointment | null>(null);
   const toast = useToast();
   const cancelled = appointments.filter(
     (a) => a.status === 'cancelled' && localDate(a.startAt) === date,
@@ -150,6 +137,20 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createParam]);
 
+  // `?select=` (from the page of an appointment, on a wide screen) opens its panel.
+  const selectParam = searchParams.get('select');
+  useEffect(() => {
+    if (!selectParam) return;
+    setCreating(null);
+    setSelectedId(selectParam);
+    const params = new URLSearchParams(searchParams);
+    params.delete('select');
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    // Runs when the link brings the parameter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectParam]);
+
   /** An empty part of a column was pressed: its time, and its person in the staff view. */
   function onEmptyPress(columnId: string, startAt: string) {
     const time = formatTime(startAt);
@@ -160,46 +161,13 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
   }
 
   const staffName = (id: string) => L.name(id);
-  const nameInSentence = (appt: Appointment) => {
-    const who = L.who(appt);
-    return who.charAt(0).toLowerCase() + who.slice(1);
-  };
-
-  /** Puts the moved appointment on the calendar and offers to take it back for 5 seconds. */
-  function commitMove(appt: Appointment, moved: Appointment, text: string) {
-    replace(moved);
-    toast({ text, undo: () => replace(appt) });
-  }
-
-  /** Dropped on a valid place: "Bất kỳ ai" changes at once, a named person is asked about (BR-32). */
-  function handleDrop(appt: Appointment, target: DragTarget) {
-    const moved = target.moved;
-    if (!moved) return;
-    const person = target.columnId;
-    const changesPerson = person !== appt.items[0]?.staffResourceId;
-    if (changesPerson && appt.items.some((i) => i.staffChoice === 'chosen')) {
-      setSendEmail(true);
-      setSwap({ appt, target });
-      return;
-    }
-    commitMove(
-      appt,
-      moved,
-      `Đã dời ${L.who(appt)} sang ${formatTime(moved.startAt)}, ${staffName(person)}.`,
-    );
-  }
-
-  function confirmSwap() {
-    const moved = swap?.target.moved;
-    if (!swap || !moved) return;
-    const { appt, target } = swap;
-    commitMove(
-      appt,
-      { ...moved, items: moved.items.map((i) => ({ ...i, swapUnconfirmed: true })) },
-      `Đã đổi ${L.who(appt)} sang ${staffName(target.columnId)}.${sendEmail ? ' Đã gửi email báo khách.' : ''} Lịch mang dấu "Chưa xác nhận đổi người".`,
-    );
-    setSwap(null);
-  }
+  const flow = useMoveFlow({
+    fixture,
+    date: () => date,
+    now,
+    replace,
+    notify,
+  });
 
   const drag = useCalendarDrag({
     enabled: view === 'staff' && hours.open !== null,
@@ -208,7 +176,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
     now,
     from: hours.from,
     to: hours.to,
-    onDrop: handleDrop,
+    onDrop: flow.handleDrop,
     onRejected: (reason) => toast({ text: reason, tone: 'danger' }),
   });
 
@@ -503,14 +471,12 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
             actions={{
               allowed: actions.allowed(selected),
               onClose: () => setSelectedId(null),
+              pageHref: appHref(`appointments/${selected.id}`),
               onCheckIn: () => actions.checkIn(selected),
               onCollect: () => actions.collect(selected),
               onNoShow: () => actions.noShow(selected),
               onCancel: () => actions.cancel(selected),
-              onReschedule: () =>
-                staffOf(selected).length > 1
-                  ? notify('Lịch có nhiều người làm: đổi từng mục chưa có trong mock.')
-                  : setMoving(selected),
+              onReschedule: () => flow.openMove(selected),
               onSwapConfirmed: () => {
                 const done: Appointment = {
                   ...selected,
@@ -518,7 +484,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
                 };
                 replace(done);
                 toast({
-                  text: `Đã ghi nhận ${nameInSentence(selected)} đồng ý đổi người.`,
+                  text: `Đã ghi nhận ${flow.inSentence(selected)} đồng ý đổi người.`,
                   undo: () => replace(selected),
                 });
               },
@@ -534,64 +500,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
           </aside>
         )}
         {actions.dialog}
-        {moving && (
-          <MoveDialog
-            fixture={fixture}
-            appt={moving}
-            date={date}
-            now={now}
-            onClose={() => setMoving(null)}
-            onApply={(t) => {
-              const appt = moving;
-              setMoving(null);
-              handleDrop(appt, t);
-            }}
-          />
-        )}
-        {swap && swap.target.moved && (
-          <ConfirmDialog
-            open
-            title={`Đổi ${nameInSentence(swap.appt)} sang ${staffName(swap.target.columnId)}?`}
-            body={`${L.who(swap.appt)} chọn đích danh ${staffName(swap.appt.items[0]?.staffResourceId ?? '')} khi đặt. Đổi người thì cần báo khách (BR-11).`}
-            facts={[
-              {
-                term: 'Giờ',
-                value: `${formatRange(swap.appt.startAt, endOf(swap.appt))} → ${formatRange(swap.target.moved.startAt, endOf(swap.target.moved))}`,
-              },
-              {
-                term: 'Thợ',
-                value: `${staffName(swap.appt.items[0]?.staffResourceId ?? '')} → ${staffName(swap.target.columnId)}`,
-              },
-              {
-                term: 'Tài nguyên',
-                value: `${swap.target.resourcesBefore.join(', ')} → ${swap.target.resourcesAfter.join(', ')}`,
-              },
-              {
-                term: 'Giá',
-                value: `Giữ ${formatVnd(swap.appt.items.reduce((sum, i) => sum + i.priceVnd, 0n))} (BR-12)`,
-              },
-            ]}
-            backLabel="Giữ như cũ"
-            confirmLabel={`Đổi sang ${staffName(swap.target.columnId)}`}
-            onClose={() => setSwap(null)}
-            onConfirm={confirmSwap}
-          >
-            <label className="sp-check">
-              <input
-                type="checkbox"
-                checked={sendEmail}
-                onChange={(e) => setSendEmail(e.target.checked)}
-              />
-              <span>
-                Gửi email báo {nameInSentence(swap.appt)}
-                <span className="sp-check__hint">
-                  Email có nút &quot;Đồng ý&quot; và &quot;Chọn lại giờ&quot;. Chưa trả lời thì lịch
-                  vẫn đổi; lễ tân thấy dấu &quot;Chưa xác nhận đổi người&quot;.
-                </span>
-              </span>
-            </label>
-          </ConfirmDialog>
-        )}
+        {flow.dialogs}
       </main>
       {drag.active?.target && carried && (
         <div

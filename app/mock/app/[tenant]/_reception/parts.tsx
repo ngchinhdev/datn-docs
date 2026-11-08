@@ -1,9 +1,9 @@
 'use client';
 
 import { X } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { SegmentedNav } from '@/components/sapio/segmented';
-import type { ReactNode } from 'react';
 import { Button } from '@/components/sapio/button';
 import { StatusBadge, statusLabel } from '@/components/sapio/status-badge';
 import { cn } from '@/lib/utils';
@@ -48,6 +48,8 @@ export interface DetailActions {
   /** The customer agreed to the change of person (BR-32); clears the mark. */
   onSwapConfirmed: () => void;
   onClose: () => void;
+  /** Address of the page for phones (MH-28); the panel offers it below 768px. */
+  pageHref?: string;
 }
 
 /** Right column ≥ 1200px, drawer 768–1199px, bottom sheet < 768px. */
@@ -87,6 +89,14 @@ export function DetailPanel({
       >
         <div className="flex items-center justify-between gap-(--space-2)">
           <StatusBadge status={appt.status} {...(badge ? { label: badge } : {})} />
+          {actions.pageHref && (
+            <Link
+              href={actions.pageHref}
+              className="sp-btn sp-btn--ghost sp-btn--sm ms-auto no-underline md:hidden"
+            >
+              Mở trang riêng
+            </Link>
+          )}
           <Button
             variant="ghost"
             aria-label="Đóng"
