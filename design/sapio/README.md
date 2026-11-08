@@ -76,6 +76,7 @@ Lịch là màn hình đặc trưng của Sapio; giữ đúng các quy tắc sau
 - Bộ lọc đang bật, công tắc đang bật: `brand-soft` + `brand`. Hộp kiểm đã chọn: nền `primary`. Không có nền đen cho bất kỳ trạng thái nào.
 - Bảng: cột số căn phải; một nút ghost mỗi hàng; thao tác khác nằm trong trang chi tiết.
 - **Không cuộn ngang trên điện thoại** (dưới 768px), trừ lưới lịch. Hàng nút, bộ lọc, menu con quá dài thì gom vào bảng trượt lên (`.sp-sheet`), xuống dòng, hoặc thành trang danh sách riêng.
+- Trạng thái tài khoản (dùng thử, sắp hết hạn) hiện bằng `Banner` trên cùng vùng nội dung. Tính năng ngoài gói hiện ổ khóa `.sp-lock` và trang giải thích kèm nút nâng cấp (`Plan`), không ẩn hẳn.
 - Nút chỉ có icon dùng `.sp-icon-btn` (36px, 44px trên điện thoại), luôn có `aria-label` và `.sp-tooltip`.
 
 ## Xác nhận và hoàn tác

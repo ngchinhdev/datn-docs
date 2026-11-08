@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Gói đã hết hạn</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-auth" style="font-family: var(--font-sans);">
+  <header class="sp-auth__top" style="background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <span style="display: flex; align-items: center; gap: 12px;"><span class="sp-brand__name">Sapio</span><span style="color: var(--ink-muted);" aria-hidden="true">/</span><span style="font: 600 14px/20px var(--font-sans);">Salon Tóc Mây</span></span>
+    <span style="display: flex; align-items: center; gap: 8px;"><span class="sp-avatar sp-avatar--sm">CN</span><a href="#" style="font: 500 14px/20px var(--font-sans); text-decoration: none;">Đăng xuất</a></span>
+  </header>
+  <main class="sp-auth__main" style="max-width: 880px;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 12px;"><span style="flex: none; display: flex; color: var(--status-no-show);"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg></span><h1 class="sp-auth__title">Gói của Salon Tóc Mây đã hết hạn</h1></div>
+      <p class="sp-auth__lead" style="margin: 0;">Gói Chuyên nghiệp hết hạn lúc 23:59 ngày 30/11/2026. Trang đặt lịch đã ngừng nhận khách, khu quản trị tạm khóa. Dữ liệu vẫn được giữ nguyên; thanh toán xong là dùng tiếp ngay.</p>
+    </div>
+      <section aria-labelledby="ex-plans" style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+          <h2 id="ex-plans" style="margin: 0; font: 600 18px/26px var(--font-sans);">Gia hạn để dùng tiếp</h2>
+          <div class="sp-segmented" role="radiogroup" aria-label="Thời hạn">
+            <button type="button" class="sp-segmented__item" role="radio" aria-checked="true" aria-pressed="true">1 tháng</button>
+            <button type="button" class="sp-segmented__item" role="radio" aria-checked="false">3 tháng <span class="sp-segmented__count" style="color: var(--brand); font-weight: 600;">−10%</span></button>
+            <button type="button" class="sp-segmented__item" role="radio" aria-checked="false">12 tháng <span class="sp-segmented__count" style="color: var(--brand); font-weight: 600;">−20%</span></button>
+          </div>
+        </div>
+        <div class="sp-plans">
+          <section class="sp-plan" aria-labelledby="ex-plans-b">
+            <div class="sp-plan__head"><h3 class="sp-plan__name" id="ex-plans-b">Cơ bản</h3></div>
+            <div><span class="sp-plan__price">199.000 ₫</span><span class="sp-plan__unit"> / tháng</span><div class="sp-plan__note">1 chi nhánh</div></div>
+            <ul class="sp-plan__features"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Đặt lịch online trên trang riêng của cơ sở</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Lịch nhân viên và tài nguyên, kéo thả đổi giờ</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Thu tiền, cọc online, nhắc lịch qua email</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Không giới hạn nhân viên và lịch hẹn</li><li data-off=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg><span><span class="sp-sr-only">Không có: </span>Nhiều chi nhánh</span></li><li data-off=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg><span><span class="sp-sr-only">Không có: </span>Gói liệu trình, ví trả trước</span></li><li data-off=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg><span><span class="sp-sr-only">Không có: </span>Hoa hồng nhân viên, báo cáo đầy đủ</span></li><li data-off=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg><span><span class="sp-sr-only">Không có: </span>Chatbot đặt lịch</span></li></ul>
+            <button type="button" class="sp-btn sp-btn--secondary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-3a2 2 0 0 0-2 2v3"></path><path d="M21 21v.01"></path><path d="M12 7v3a2 2 0 0 1-2 2H7"></path><path d="M3 12h.01"></path><path d="M12 3h.01"></path><path d="M12 16v.01"></path><path d="M16 12h1"></path><path d="M21 12v.01"></path><path d="M12 21v-1"></path></svg>Gia hạn Cơ bản</button>
+          </section>
+          <section class="sp-plan sp-plan--current" aria-labelledby="ex-plans-p">
+            <div class="sp-plan__head"><h3 class="sp-plan__name" id="ex-plans-p">Chuyên nghiệp</h3><span class="sp-badge sp-badge--pending">Gói trước đây</span></div>
+            <div><span class="sp-plan__price">399.000 ₫</span><span class="sp-plan__unit"> / tháng</span><div class="sp-plan__note">Không giới hạn chi nhánh</div></div>
+            <ul class="sp-plan__features"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Đặt lịch online trên trang riêng của cơ sở</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Lịch nhân viên và tài nguyên, kéo thả đổi giờ</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Thu tiền, cọc online, nhắc lịch qua email</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Không giới hạn nhân viên và lịch hẹn</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Nhiều chi nhánh</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Gói liệu trình, ví trả trước</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Hoa hồng nhân viên, báo cáo đầy đủ</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Chatbot đặt lịch</li></ul>
+            <button type="button" class="sp-btn sp-btn--primary"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="5" height="5" x="3" y="3" rx="1"></rect><rect width="5" height="5" x="16" y="3" rx="1"></rect><rect width="5" height="5" x="3" y="16" rx="1"></rect><path d="M21 16h-3a2 2 0 0 0-2 2v3"></path><path d="M21 21v.01"></path><path d="M12 7v3a2 2 0 0 1-2 2H7"></path><path d="M3 12h.01"></path><path d="M12 3h.01"></path><path d="M12 16v.01"></path><path d="M16 12h1"></path><path d="M21 12v.01"></path><path d="M12 21v-1"></path></svg>Gia hạn Chuyên nghiệp</button>
+          </section>
+        </div>
+        <p class="sp-plan__note" style="margin: 0;">Mua 3 tháng giảm 10%, 12 tháng giảm 20%. Thanh toán bằng QR. Nâng gói có hiệu lực ngay, chỉ trả phần chênh cho số ngày còn lại của kỳ; hạ gói có hiệu lực từ kỳ sau.</p>
+      </section>
+    <section aria-labelledby="ex-list" style="display: flex; flex-direction: column; gap: 8px;">
+      <div>
+        <h2 id="ex-list" style="margin: 0; font: 600 16px/24px var(--font-sans);">3 lịch hẹn đã đặt sau ngày hết hạn</h2>
+        <p class="sp-field__help" style="margin: 2px 0 0;">Chỉ để xem. Gọi báo khách nếu chưa gia hạn kịp; khách vẫn tự xem và hủy được lịch của mình.</p>
+      </div>
+      <div class="sp-table-wrap">
+        <table class="sp-table">
+          <thead><tr><th scope="col">Giờ hẹn</th><th scope="col">Khách</th><th scope="col">Số điện thoại</th><th scope="col">Dịch vụ</th><th scope="col">Thợ</th></tr></thead>
+          <tbody>
+            <tr><td class="sp-num">02/12, 09:00</td><td><strong style="font-weight: 600;">Lê Thu Hà</strong></td><td class="sp-num">0934 567 890</td><td>Nhuộm tóc · Tóc ngắn</td><td>Mai</td></tr>
+            <tr><td class="sp-num">02/12, 14:30</td><td><strong style="font-weight: 600;">Phạm Bảo Ngọc</strong></td><td class="sp-num">0987 654 321</td><td>Cắt tóc · Tóc dài</td><td>Lan</td></tr>
+            <tr><td class="sp-num">04/12, 10:00</td><td><strong style="font-weight: 600;">Hoàng Bảo An</strong></td><td class="sp-num">0937 445 566</td><td>Gội sấy, Cắt tóc · Tóc ngắn</td><td>Hùng</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1280,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

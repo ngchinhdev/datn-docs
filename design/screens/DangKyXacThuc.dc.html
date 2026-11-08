@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Đăng ký · xác thực email</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-auth" style="width: 390px; height: 844px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <header class="sp-auth__top">
+    <span class="sp-brand__name">Sapio</span>
+    <a href="#" style="font: 600 14px/20px var(--font-sans); text-decoration: none;">Đăng xuất</a>
+  </header>
+  <main class="sp-auth__main" style="padding-top: 0;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="sp-steps__caption">Bước 2/5 · Xác thực</span>
+      <ol class="sp-steps" aria-label="Các bước đăng ký">
+      <li class="sp-steps__item" data-state="done"><span class="sp-steps__label">1. Tài khoản</span></li>
+      <li class="sp-steps__item" aria-current="step"><span class="sp-steps__label">2. Xác thực</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">3. Ngành</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">4. Cơ sở</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">5. Xong</span></li>
+      </ol>
+    </div>
+    <div>
+      <h1 class="sp-auth__title">Nhập mã trong email</h1>
+      <p class="sp-auth__lead">Đã gửi mã 6 số tới <strong style="color: var(--ink); font-weight: 600;">chinh@tocmay.vn</strong>. <a href="#">Sửa email</a></p>
+    </div>
+    <form style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="sp-field"><label class="sp-field__label" for="su-otp">Mã xác nhận</label><div class="sp-otp"><span class="sp-otp__slot">4</span><span class="sp-otp__slot">8</span><span class="sp-otp__slot">2</span><span class="sp-otp__slot">1</span><span class="sp-otp__slot" data-active=""></span><span class="sp-otp__slot"></span><input class="sp-otp__input" id="su-otp" value="4821" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" aria-describedby="su-otp-help"></div><span class="sp-field__help" id="su-otp-help">Gõ đủ 6 số là tự xác nhận. Không thấy email? Xem trong thư rác.</span></div>
+        <button type="submit" class="sp-btn sp-btn--primary" style="height: 48px;" disabled>Xác nhận</button>
+        <button type="button" class="sp-btn sp-btn--ghost" style="height: 44px;" disabled>Gửi lại mã sau 0:42</button>
+    </form>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

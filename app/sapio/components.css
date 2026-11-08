@@ -81,6 +81,8 @@ body {
 .sp-badge--no-show { color: var(--status-no-show); background: var(--status-no-show-soft); }
 .sp-badge--cancelled { color: var(--ink-muted); background: var(--surface-sunken); text-decoration: line-through; }
 .sp-badge--cancelled::before { background: var(--ink-muted); }
+/* Waiting on someone else (tenant approval, refund approval): warm, not an error. */
+.sp-badge--pending { color: var(--status-no-show); background: var(--status-no-show-soft); }
 .sp-badge--hold { color: var(--brand); background: transparent; box-shadow: inset 0 0 0 1px var(--brand); }
 
 /* ---------- Appointment block ---------- */
@@ -780,7 +782,9 @@ dialog.sp-dialog::backdrop,
   background: var(--surface-raised);
   box-shadow: inset 0 -1px 0 var(--line);
   color: var(--ink-muted);
-  font: 500 12px/16px var(--font-sans);
+  font: 600 11px/16px var(--font-sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   text-align: left;
   white-space: nowrap;
 }
@@ -913,7 +917,145 @@ dialog.sp-dialog::backdrop,
 /* Below 900px the settings index page lists the sections instead (one section per page). */
 @media (max-width: 900px) { .sp-subnav { display: none; } }
 
+/* ======================================================================
+   Public multi-step flows (signup)
+   ====================================================================== */
+.sp-auth { min-height: 100vh; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); }
+.sp-auth__top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-6); }
+.sp-auth__main { flex: 1 1 auto; width: 100%; max-width: 560px; box-sizing: border-box; margin: 0 auto; padding: var(--space-4) var(--space-4) var(--space-12); display: flex; flex-direction: column; gap: var(--space-6); }
+.sp-auth__main--wide { max-width: 1080px; }
+.sp-auth__title { margin: 0; font: 700 28px/36px var(--font-sans); letter-spacing: -0.02em; }
+.sp-auth__lead { margin: 6px 0 0; font: 400 15px/22px var(--font-sans); color: var(--ink-muted); }
+.sp-auth__card { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line), var(--shadow-card); }
+.sp-auth__actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); }
+.sp-auth__actions .sp-btn { height: 48px; }
+@media (max-width: 767px) {
+  .sp-auth__top { padding: var(--space-3) var(--space-4); }
+  .sp-auth__title { font-size: 24px; line-height: 32px; }
+  .sp-auth__card { padding: var(--space-4); }
+  .sp-auth__actions .sp-btn--primary { flex: 1 1 auto; }
+}
+
+/* Steps: one bar per step; done and current filled with brand. */
+.sp-steps { display: flex; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.sp-steps__item { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; color: var(--ink-muted); font: 500 13px/18px var(--font-sans); }
+.sp-steps__item::before { content: ""; height: 4px; border-radius: var(--radius-pill); background: var(--line); }
+.sp-steps__item[data-state="done"] { color: var(--ink); }
+.sp-steps__item[data-state="done"]::before, .sp-steps__item[aria-current="step"]::before { background: var(--brand); }
+.sp-steps__item[aria-current="step"] { color: var(--ink); font-weight: 600; }
+.sp-steps__caption { display: none; font: 600 13px/18px var(--font-sans); color: var(--ink-muted); }
+@media (max-width: 767px) {
+  .sp-steps__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sp-steps__caption { display: block; }
+}
+
+/* Choice card: a large radio with icon, title and description. */
+.sp-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+@media (max-width: 767px) { .sp-choices { grid-template-columns: minmax(0, 1fr); } }
+.sp-choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  cursor: pointer;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+.sp-choice:hover { background: var(--fill-tonal); }
+.sp-choice input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.sp-choice:has(input:checked) { background: var(--brand-soft); box-shadow: inset 0 0 0 1.5px var(--brand); }
+.sp-choice:has(input:focus-visible) { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.sp-choice__icon { width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; background: var(--fill-tonal); color: var(--ink); }
+.sp-choice__icon svg { width: 22px; height: 22px; }
+.sp-choice:has(input:checked) .sp-choice__icon { background: var(--surface-raised); color: var(--brand); }
+.sp-choice__title { font: 600 16px/24px var(--font-sans); }
+.sp-choice__desc { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.sp-choice__mark { position: absolute; top: var(--space-3); right: var(--space-3); width: 22px; height: 22px; border-radius: 50%; display: none; align-items: center; justify-content: center; background: var(--brand); color: var(--on-brand); }
+.sp-choice__mark svg { width: 14px; height: 14px; }
+.sp-choice:has(input:checked) .sp-choice__mark { display: flex; }
+
+/* Quantity: minus, number, plus. */
+.sp-qty { display: inline-flex; align-items: center; height: 40px; border-radius: var(--radius-sm); background: var(--surface-raised); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.sp-qty button { appearance: none; border: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--ink); border-radius: var(--radius-sm); cursor: pointer; }
+.sp-qty button:hover { background: var(--fill-tonal); }
+.sp-qty button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.sp-qty button[disabled] { opacity: 0.4; cursor: not-allowed; }
+.sp-qty button svg { width: 16px; height: 16px; }
+.sp-qty input { width: 40px; height: 100%; padding: 0; border: 0; background: transparent; color: var(--ink); font: 600 15px/22px var(--font-sans); font-variant-numeric: tabular-nums; text-align: center; }
+
+/* Positive check under a field (slug available). */
+.sp-field--ok .sp-field__help { color: var(--status-checked-in); font-weight: 500; }
+
+/* ---------- One-time code: six boxes over one real input ---------- */
+/* Render with a single <input autocomplete="one-time-code" inputmode="numeric" maxlength="6"> so paste and autofill work;
+   the boxes only draw its characters. */
+.sp-otp { position: relative; display: flex; gap: var(--space-2); }
+.sp-otp__slot {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 56px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  color: var(--ink);
+  font: 600 24px/32px var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+.sp-otp__slot[data-active] { box-shadow: inset 0 0 0 2px var(--accent, var(--brand)); }
+.sp-otp__slot[data-active]:empty::after { content: ""; width: 2px; height: 24px; background: var(--ink); animation: sp-caret 1s steps(1) infinite; }
+.sp-otp--error .sp-otp__slot { box-shadow: inset 0 0 0 1.5px var(--danger); }
+.sp-otp__input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; font-size: 16px; caret-color: transparent; }
+.sp-otp:focus-within { outline: none; }
+@keyframes sp-caret { 50% { opacity: 0; } }
+@media (max-width: 380px) { .sp-otp__slot { width: 44px; height: 52px; } }
+
+/* ---------- Banner: account-wide notice at the top of the app (trial, renewal) ---------- */
+.sp-banner { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); padding: 10px var(--space-6); background: var(--brand-soft); color: var(--ink); box-shadow: 0 1px 0 var(--line); font: 500 14px/20px var(--font-sans); }
+.sp-banner__text { flex: 1 1 320px; min-width: 0; }
+.sp-banner__text strong { font-weight: 600; }
+.sp-banner--warning { background: var(--status-no-show-soft); }
+.sp-banner .sp-btn { height: 36px; }
+@media (max-width: 767px) { .sp-banner { padding: 10px var(--space-4); } }
+
+/* ---------- Checklist: setup steps with done state ---------- */
+.sp-checklist { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.sp-checklist__item { display: flex; align-items: center; gap: var(--space-3); min-height: 48px; padding: 0 var(--space-2); border-radius: var(--radius-sm); color: var(--ink); font: 500 14px/20px var(--font-sans); text-decoration: none; }
+a.sp-checklist__item:hover { background: var(--fill-tonal); }
+.sp-checklist__mark { flex: none; width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line-strong); display: flex; align-items: center; justify-content: center; }
+.sp-checklist__mark svg { width: 14px; height: 14px; }
+.sp-checklist__item[data-done] .sp-checklist__mark { background: var(--brand); box-shadow: none; color: var(--on-brand); }
+.sp-checklist__item[data-done] .sp-checklist__label { color: var(--ink-muted); }
+.sp-checklist__meta { margin-left: auto; color: var(--ink-muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+/* ---------- Plans: side-by-side plan cards ---------- */
+.sp-plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+@media (max-width: 767px) { .sp-plans { grid-template-columns: minmax(0, 1fr); } }
+.sp-plan { position: relative; display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line), var(--shadow-card); }
+.sp-plan--current { box-shadow: 0 0 0 2px var(--brand), var(--shadow-card); }
+.sp-plan__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.sp-plan__name { margin: 0; font: 600 18px/26px var(--font-sans); }
+.sp-plan__price { font: 700 28px/36px var(--font-sans); font-variant-numeric: tabular-nums; }
+.sp-plan__unit { font: 400 14px/20px var(--font-sans); color: var(--ink-muted); }
+.sp-plan__note { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.sp-plan__features { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font: 400 14px/20px var(--font-sans); }
+.sp-plan__features li { display: flex; gap: 8px; align-items: flex-start; }
+.sp-plan__features svg { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--brand); }
+.sp-plan__features li[data-off] { color: var(--ink-muted); }
+.sp-plan__features li[data-off] svg { color: var(--ink-muted); }
+.sp-plan .sp-btn { margin-top: auto; height: 48px; }
+
+/* Small lock next to a nav item or title: feature not in the current plan. */
+.sp-lock { flex: none; width: 14px; height: 14px; color: var(--ink-muted); }
+
 @media (prefers-reduced-motion: reduce) {
-  .sp-btn, .sp-appt, .sp-date, .sp-slot, .sp-variant, .sp-field__control, .sp-segmented__item, .sp-nav__item, .sp-switch input, .sp-switch input::after { transition: none; }
+  .sp-btn, .sp-appt, .sp-date, .sp-slot, .sp-variant, .sp-field__control, .sp-segmented__item, .sp-nav__item, .sp-switch input, .sp-switch input::after, .sp-choice { transition: none; }
+  .sp-otp__slot[data-active]:empty::after { animation: none; }
   .sp-btn:active:not([disabled]) { transform: none; }
 }

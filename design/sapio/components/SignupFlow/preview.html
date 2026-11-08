@@ -1,0 +1,21 @@
+<!-- @dsCard group="Forms" height=280 subtitle="Các bước của luồng đăng ký, ô địa chỉ, chọn số lượng." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>SignupFlow</title></head>
+<body>
+<div class="sp-pad sp-stack" style="max-width: 560px; gap: 20px;">
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <span class="sp-steps__caption">Bước 3/5 · Ngành</span>
+    <ol class="sp-steps" aria-label="Các bước đăng ký">
+      <li class="sp-steps__item" data-state="done"><span class="sp-steps__label">1. Tài khoản</span></li>
+      <li class="sp-steps__item" data-state="done"><span class="sp-steps__label">2. Xác thực</span></li>
+      <li class="sp-steps__item" aria-current="step"><span class="sp-steps__label">3. Ngành</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">4. Cơ sở</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">5. Xong</span></li>
+    </ol>
+  </div>
+  <div class="sp-field sp-field--ok"><label class="sp-field__label" for="pv-slug">Địa chỉ trang đặt lịch</label><div class="sp-field__control"><input id="pv-slug" value="toc-may"><span class="sp-field__suffix" style="align-self: stretch; display: flex; align-items: center; border-left: 1px solid var(--line);">.sapio.vn</span></div><span class="sp-field__help">toc-may.sapio.vn còn trống</span></div>
+  <div style="display: flex; align-items: center; justify-content: space-between;"><label for="pv-q" style="font: 500 14px/20px var(--font-sans);">Ghế cắt</label><span class="sp-qty"><button type="button" aria-label="Bớt một ghế cắt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button><input id="pv-q" value="3" inputmode="numeric"><button type="button" aria-label="Thêm một ghế cắt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></button></span></div>
+</div>
+</body>
+</html>

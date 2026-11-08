@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Đăng ký · tài khoản</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-auth" style="width: 390px; height: 844px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <header class="sp-auth__top">
+    <span class="sp-brand__name">Sapio</span>
+    <a href="#" style="font: 600 14px/20px var(--font-sans); text-decoration: none;">Đăng nhập</a>
+  </header>
+  <main class="sp-auth__main" style="padding-top: 0;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="sp-steps__caption">Bước 1/5 · Tài khoản</span>
+      <ol class="sp-steps" aria-label="Các bước đăng ký">
+      <li class="sp-steps__item" aria-current="step"><span class="sp-steps__label">1. Tài khoản</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">2. Xác thực</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">3. Ngành</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">4. Cơ sở</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">5. Xong</span></li>
+      </ol>
+    </div>
+    <div>
+      <h1 class="sp-auth__title">Tạo tài khoản chủ cơ sở</h1>
+      <p class="sp-auth__lead">Dùng tài khoản này để quản lý lịch, nhân viên và thu tiền.</p>
+    </div>
+    <form style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="sp-field "><label class="sp-field__label" for="su-name">Họ và tên</label><div class="sp-field__control"><input id="su-name" type="text" placeholder="Ví dụ: Nguyễn Văn An" autocomplete="name"></div></div>
+        <div class="sp-field "><label class="sp-field__label" for="su-mail">Email</label><div class="sp-field__control"><input id="su-mail" type="email" placeholder="Ví dụ: an@tiemcuaban.vn" autocomplete="email" aria-describedby="su-mail-help"></div><span class="sp-field__help" id="su-mail-help">Mã xác nhận sẽ gửi tới email này.</span></div>
+        <div class="sp-field "><label class="sp-field__label" for="su-pass">Mật khẩu</label><div class="sp-field__control"><input id="su-pass" type="password" autocomplete="new-password" aria-describedby="su-pass-help"><button type="button" class="sp-icon-btn" aria-label="Hiện mật khẩu" aria-pressed="false" style="margin-right: 4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div><span class="sp-field__help" id="su-pass-help">Ít nhất 15 ký tự. Một câu dễ nhớ là đủ, ví dụ <em>tiem toc may mo cua 8 gio</em>.</span></div>
+        <label class="sp-check"><input type="checkbox"><span>Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và <a href="#">Chính sách quyền riêng tư</a> của Sapio.</span></label>
+        <button type="submit" class="sp-btn sp-btn--primary" style="height: 48px;">Tạo tài khoản</button>
+    </form>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

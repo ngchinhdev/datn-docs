@@ -38,5 +38,15 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `QuanTriNhanVien.dc.html` | MH-09 mẫu form (Cài đặt › Nhân sự › Mai) | **Đã chọn** | `/mock/app/[tenant]/settings/staff/[id]` |
 | `QuanTriDienThoai.dc.html` | MH-07 + MH-08 trên điện thoại | **Đã chọn** | `/mock/app/[tenant]/customers` dưới 768px |
 | `QuanTriDienThoaiLoc.dc.html` | MH-08 bảng Bộ lọc trên điện thoại | **Đã chọn** | như trên, bộ lọc mở |
+| `DangKyTaiKhoan.dc.html` | MH-02 bước 1, tài khoản (điện thoại) | **Đã chọn** | `/mock/signup?step=account` (Bước 9) |
+| `DangKyXacThuc.dc.html` | MH-02 bước 2, mã 6 số qua email | **Đã chọn** | `/mock/signup?step=verify` |
+| `DangKyNganh.dc.html` | MH-02 bước 3, chọn ngành, xem trước gói ngành | **Đã chọn** | `/mock/signup?step=industry` |
+| `DangKyNganhDienThoai.dc.html` | MH-02 bước 3 trên điện thoại (Spa thú cưng) | **Đã chọn** | như trên, dưới 768px |
+| `DangKyCoSo.dc.html` | MH-02 bước 4, thông tin cơ sở, địa chỉ `toc-may.sapio.vn` | **Đã chọn** | `/mock/signup?step=business` |
+| `DangKyXong.dc.html` | MH-02 bước 5, đã tạo, dùng thử 7 ngày | **Đã chọn** | `/mock/signup?step=done` |
+| `GoiDungThu.dc.html` | Lịch khi đang dùng thử: dải báo, việc cần chuẩn bị | **Đã chọn** | `/mock/app/toc-may/calendar?plan=trial` |
+| `GoiSapio.dc.html` | MH-61 Cài đặt › Gói Sapio, hai gói | **Đã chọn** | `/mock/app/toc-may/settings/plan` |
+| `GoiHetHan.dc.html` | MH-61 khi hết hạn: chỉ còn trang gia hạn | **Đã chọn** | `/mock/app/toc-may/...?plan=expired` |
+| `GoiKhoaTinhNang.dc.html` | Gói Cơ bản: tính năng bị khóa, nâng gói giữa kỳ | **Đã chọn** | `/mock/app/pawpaw/settings/chatbot` |
 
 Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-13, BR-14, BR-15 trong `content/docs/nghiep-vu/quy-tac.md`.

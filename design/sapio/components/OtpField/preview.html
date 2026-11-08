@@ -1,0 +1,21 @@
+<!-- @dsCard group="Forms" height=230 subtitle="Mã xác nhận 6 số: sáu ô vuông vẽ trên một ô nhập thật." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>OtpField</title></head>
+<body>
+<div class="sp-pad sp-stack" style="max-width: 420px;">
+  <div class="sp-field">
+    <label class="sp-field__label" for="otp-demo">Mã xác nhận</label>
+    <div class="sp-otp">
+      <span class="sp-otp__slot">4</span><span class="sp-otp__slot">8</span><span class="sp-otp__slot">2</span><span class="sp-otp__slot">1</span><span class="sp-otp__slot" data-active></span><span class="sp-otp__slot"></span>
+      <input class="sp-otp__input" id="otp-demo" value="4821" autocomplete="one-time-code" inputmode="numeric" maxlength="6" pattern="[0-9]*">
+    </div>
+  </div>
+  <div class="sp-field sp-field--error sp-tenant-may">
+    <span class="sp-field__label">Mã xác nhận (sai)</span>
+    <div class="sp-otp sp-otp--error"><span class="sp-otp__slot">1</span><span class="sp-otp__slot">2</span><span class="sp-otp__slot">3</span><span class="sp-otp__slot">4</span><span class="sp-otp__slot">5</span><span class="sp-otp__slot">6</span></div>
+    <span class="sp-field__help">Mã chưa đúng. Còn 2 lần thử.</span>
+  </div>
+</div>
+</body>
+</html>

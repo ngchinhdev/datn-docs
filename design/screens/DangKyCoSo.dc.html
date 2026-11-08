@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Đăng ký · thông tin cơ sở</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-auth" style="font-family: var(--font-sans);">
+  <header class="sp-auth__top">
+    <span class="sp-brand__name">Sapio</span>
+    <button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Lưu và làm tiếp sau</button>
+  </header>
+  <main class="sp-auth__main" style="max-width: 720px; padding-top: 0;">
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <span class="sp-steps__caption">Bước 4/5 · Cơ sở</span>
+      <ol class="sp-steps" aria-label="Các bước đăng ký">
+      <li class="sp-steps__item" data-state="done"><span class="sp-steps__label">1. Tài khoản</span></li>
+      <li class="sp-steps__item" data-state="done"><span class="sp-steps__label">2. Xác thực</span></li>
+      <li class="sp-steps__item" data-state="done"><span class="sp-steps__label">3. Ngành</span></li>
+      <li class="sp-steps__item" aria-current="step"><span class="sp-steps__label">4. Cơ sở</span></li>
+      <li class="sp-steps__item"><span class="sp-steps__label">5. Xong</span></li>
+      </ol>
+    </div>
+    <div>
+      <h1 class="sp-auth__title">Thông tin cơ sở</h1>
+      <p class="sp-auth__lead">Salon tóc · đổi ngành ở bước trước nếu chọn nhầm.</p>
+    </div>
+      <section class="sp-auth__card" aria-label="Tên và địa chỉ trang đặt lịch">
+        <div><h2 style="margin: 0; font: 600 16px/24px var(--font-sans);">Tên và địa chỉ trang đặt lịch</h2><p class="sp-field__help" style="margin: 2px 0 0;">Khách vào địa chỉ này để đặt lịch. Đổi được sau trong Cài đặt › Thương hiệu, địa chỉ cũ tự chuyển sang địa chỉ mới.</p></div>
+        <div class="sp-field "><label class="sp-field__label" for="bz-name">Tên cơ sở</label><div class="sp-field__control"><input id="bz-name" type="text" value="Salon Tóc Mây"></div></div>
+        <div class="sp-field sp-field--ok"><label class="sp-field__label" for="bz-slug">Địa chỉ trang đặt lịch</label><div class="sp-field__control"><input id="bz-slug" value="toc-may" aria-describedby="bz-slug-help" autocapitalize="none" spellcheck="false"><span class="sp-field__suffix" style="align-self: stretch; display: flex; align-items: center; border-left: 1px solid var(--line);">.sapio.vn</span></div><span class="sp-field__help" id="bz-slug-help"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg> toc-may.sapio.vn còn trống</span></div>
+      </section>
+      <section class="sp-auth__card" aria-label="Chi nhánh đầu tiên">
+        <div><h2 style="margin: 0; font: 600 16px/24px var(--font-sans);">Chi nhánh đầu tiên</h2><p class="sp-field__help" style="margin: 2px 0 0;">Thêm chi nhánh khác sau trong Cài đặt.</p></div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;">
+        <div class="sp-field "><label class="sp-field__label" for="bz-branch">Tên chi nhánh</label><div class="sp-field__control"><input id="bz-branch" type="text" value="Quận 3"></div></div>
+        <div class="sp-field "><label class="sp-field__label" for="bz-phone">Số điện thoại</label><div class="sp-field__control"><input id="bz-phone" type="tel" value="028 3930 1234"></div></div>
+        </div>
+        <div class="sp-field "><label class="sp-field__label" for="bz-addr">Địa chỉ</label><div class="sp-field__control"><input id="bz-addr" type="text" value="120 Võ Văn Tần, Phường Bàn Cờ, TP. Hồ Chí Minh"></div></div>
+      </section>
+      <section class="sp-auth__card" aria-label="Giờ mở cửa">
+        <div><h2 style="margin: 0; font: 600 16px/24px var(--font-sans);">Giờ mở cửa</h2><p class="sp-field__help" style="margin: 2px 0 0;">Giờ Việt Nam. Nghỉ trưa, nhiều khung một ngày và ngày lễ chỉnh trong Cài đặt › Chi nhánh.</p></div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="display: grid; grid-template-columns: 110px 56px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 40px;">
+            <span style="font: 500 14px/20px var(--font-sans);">Thứ Hai</span>
+            <label class="sp-switch" style="justify-content: flex-start;"><span class="sp-sr-only">Mở cửa Thứ Hai</span><input type="checkbox" checked></label>
+            <span style="display: flex; align-items: center; gap: 8px;"><span class="sp-select"><select id="h0a" aria-label="Thứ Hai, mở cửa lúc"><option>07:00</option><option selected>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span><span aria-hidden="true" style="color: var(--ink-muted);">–</span><span class="sp-select"><select id="h0b" aria-label="Thứ Hai, đóng cửa lúc"><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option selected>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 110px 56px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 40px;">
+            <span style="font: 500 14px/20px var(--font-sans);">Thứ Ba</span>
+            <label class="sp-switch" style="justify-content: flex-start;"><span class="sp-sr-only">Mở cửa Thứ Ba</span><input type="checkbox" checked></label>
+            <span style="display: flex; align-items: center; gap: 8px;"><span class="sp-select"><select id="h1a" aria-label="Thứ Ba, mở cửa lúc"><option>07:00</option><option selected>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span><span aria-hidden="true" style="color: var(--ink-muted);">–</span><span class="sp-select"><select id="h1b" aria-label="Thứ Ba, đóng cửa lúc"><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option selected>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 110px 56px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 40px;">
+            <span style="font: 500 14px/20px var(--font-sans);">Thứ Tư</span>
+            <label class="sp-switch" style="justify-content: flex-start;"><span class="sp-sr-only">Mở cửa Thứ Tư</span><input type="checkbox" checked></label>
+            <span style="display: flex; align-items: center; gap: 8px;"><span class="sp-select"><select id="h2a" aria-label="Thứ Tư, mở cửa lúc"><option>07:00</option><option selected>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span><span aria-hidden="true" style="color: var(--ink-muted);">–</span><span class="sp-select"><select id="h2b" aria-label="Thứ Tư, đóng cửa lúc"><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option selected>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 110px 56px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 40px;">
+            <span style="font: 500 14px/20px var(--font-sans);">Thứ Năm</span>
+            <label class="sp-switch" style="justify-content: flex-start;"><span class="sp-sr-only">Mở cửa Thứ Năm</span><input type="checkbox" checked></label>
+            <span style="display: flex; align-items: center; gap: 8px;"><span class="sp-select"><select id="h3a" aria-label="Thứ Năm, mở cửa lúc"><option>07:00</option><option selected>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span><span aria-hidden="true" style="color: var(--ink-muted);">–</span><span class="sp-select"><select id="h3b" aria-label="Thứ Năm, đóng cửa lúc"><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option selected>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 110px 56px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 40px;">
+            <span style="font: 500 14px/20px var(--font-sans);">Thứ Sáu</span>
+            <label class="sp-switch" style="justify-content: flex-start;"><span class="sp-sr-only">Mở cửa Thứ Sáu</span><input type="checkbox" checked></label>
+            <span style="display: flex; align-items: center; gap: 8px;"><span class="sp-select"><select id="h4a" aria-label="Thứ Sáu, mở cửa lúc"><option>07:00</option><option selected>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span><span aria-hidden="true" style="color: var(--ink-muted);">–</span><span class="sp-select"><select id="h4b" aria-label="Thứ Sáu, đóng cửa lúc"><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option selected>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 110px 56px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 40px;">
+            <span style="font: 500 14px/20px var(--font-sans);">Thứ Bảy</span>
+            <label class="sp-switch" style="justify-content: flex-start;"><span class="sp-sr-only">Mở cửa Thứ Bảy</span><input type="checkbox" checked></label>
+            <span style="display: flex; align-items: center; gap: 8px;"><span class="sp-select"><select id="h5a" aria-label="Thứ Bảy, mở cửa lúc"><option>07:00</option><option selected>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span><span aria-hidden="true" style="color: var(--ink-muted);">–</span><span class="sp-select"><select id="h5b" aria-label="Thứ Bảy, đóng cửa lúc"><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option selected>20:00</option><option>21:00</option></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 110px 56px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 40px;">
+            <span style="font: 500 14px/20px var(--font-sans);">Chủ Nhật</span>
+            <label class="sp-switch" style="justify-content: flex-start;"><span class="sp-sr-only">Mở cửa Chủ Nhật</span><input type="checkbox"></label>
+            <span style="display: flex; align-items: center; gap: 8px;"><span style="font: 400 14px/20px var(--font-sans); color: var(--ink-muted);">Nghỉ</span></span>
+          </div>
+        </div>
+      </section>
+      <section class="sp-auth__card" aria-label="Tài nguyên ban đầu">
+        <div><h2 style="margin: 0; font: 600 16px/24px var(--font-sans);">Tài nguyên ban đầu</h2><p class="sp-field__help" style="margin: 2px 0 0;">Số lượng ở chi nhánh này. Đặt tên từng cái sau trong Cài đặt › Tài nguyên.</p></div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <span style="display: flex; flex-direction: column;"><label for="bz-chair" style="font: 500 14px/20px var(--font-sans);">Ghế cắt</label><span class="sp-field__help">Mỗi ghế phục vụ một khách một lúc</span></span>
+            <span class="sp-qty"><button type="button" aria-label="Bớt một ghế cắt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button><input id="bz-chair" inputmode="numeric" value="3"><button type="button" aria-label="Thêm một ghế cắt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></button></span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <span style="display: flex; flex-direction: column;"><label for="bz-bed" style="font: 500 14px/20px var(--font-sans);">Giường gội</label><span class="sp-field__help">Dùng cho gội và gội sấy</span></span>
+            <span class="sp-qty"><button type="button" aria-label="Bớt một giường gội"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button><input id="bz-bed" inputmode="numeric" value="1"><button type="button" aria-label="Thêm một giường gội"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></button></span>
+          </div>
+      </section>
+    <div class="sp-auth__actions">
+      <button type="button" class="sp-btn sp-btn--secondary">Quay lại</button>
+      <button type="button" class="sp-btn sp-btn--primary">Tạo cơ sở</button>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1280,"height":1560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>
