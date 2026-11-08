@@ -4,6 +4,7 @@ import { ChevronRight, Download, Plus, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { PhoneHeaderAction } from '@/components/sapio/app-shell';
 import { Button } from '@/components/sapio/button';
@@ -56,6 +57,7 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
   const searchParams = useSearchParams();
   const appHref = useAppHref(tenantSlug);
   const toast = useToast();
+  const { canBook } = useSubscription();
   const [sheetOpen, setSheetOpen] = useState(false);
   // A table fills the screen from tablet up; on phones the page scrolls as a whole.
   const fill = useMediaQuery('(min-width: 768px)');
@@ -224,7 +226,10 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
         <Button
           variant="ghost"
           size="sm"
-          aria-label={`Đặt lịch cho ${row.name}`}
+          disabled={!canBook}
+          aria-label={
+            canBook ? `Đặt lịch cho ${row.name}` : `Đặt lịch cho ${row.name}, mở khi kích hoạt gói`
+          }
           onClick={() => toast({ text: 'Tạo lịch hẹn: chưa có trong mock.' })}
         >
           Đặt lịch

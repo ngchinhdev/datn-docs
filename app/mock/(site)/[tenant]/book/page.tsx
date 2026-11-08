@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { tenantFixtures } from '@/mock/fixtures';
 import { fixtureBySlug } from '@/mock/selection';
-import { BookingFlow } from './booking-flow';
+import { BookingGate } from './booking-gate';
 
 export const dynamicParams = false;
 
@@ -22,7 +22,7 @@ export default async function BookingPage({
   // Keyed so switching tenant or customer restarts the flow.
   return (
     <Suspense fallback={null}>
-      <BookingFlow
+      <BookingGate
         key={`${fixture.tenant.slug}-${newCustomer}`}
         tenantSlug={fixture.tenant.slug}
         newCustomer={newCustomer}

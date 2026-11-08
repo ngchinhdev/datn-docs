@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { tenantFixtures } from '@/mock/fixtures';
+import { PLAN_OVERRIDES, planOverrideOf } from '@/mock/subscription';
 import {
   fixtureBySlug,
   roleLabel,
@@ -54,11 +55,30 @@ export function MockToolbar() {
     params.set('khach', value);
     return `${pathname}?${params}`;
   };
+  /** The plan being tried goes along when the role changes. */
+  const carried = () => {
+    const params = new URLSearchParams();
+    for (const key of ['plan', 'periodEnd', 'branches']) {
+      const value = searchParams.get(key);
+      if (value) params.set(key, value);
+    }
+    return params;
+  };
   const roleHref = (r: Role) => {
     if (!slug) return pathname;
-    if (r === 'customer') return `/mock/${slug}/book`;
-    const params = r === 'owner' ? '' : `?role=${r}`;
-    return `/mock/app/${slug}/${staffHome[r]}${params}`;
+    const params = carried();
+    if (r !== 'customer' && r !== 'owner') params.set('role', r);
+    const query = params.toString();
+    const path = r === 'customer' ? `/mock/${slug}/book` : `/mock/app/${slug}/${staffHome[r]}`;
+    return query ? `${path}?${query}` : path;
+  };
+  const planValue = planOverrideOf(searchParams.get('plan')) ?? 'default';
+  const planHref = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value === 'default') params.delete('plan');
+    else params.set('plan', value);
+    const query = params.toString();
+    return query ? `${pathname}?${query}` : pathname;
   };
 
   const pickers = fixture && role && (
@@ -74,6 +94,12 @@ export function MockToolbar() {
         options={roles.map((r) => ({ value: r.id, label: r.label }))}
         selected={role}
         hrefFor={(value) => roleHref(value as Role)}
+      />
+      <Picker
+        label="Gói"
+        options={[{ value: 'default', label: 'Mặc định' }, ...PLAN_OVERRIDES]}
+        selected={planValue}
+        hrefFor={planHref}
       />
       {isBooking && (
         <Picker

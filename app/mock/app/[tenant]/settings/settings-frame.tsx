@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { settingsEntries } from '@/components/mock/app-nav';
+import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { SettingsNav } from '@/components/sapio/settings-nav';
 
@@ -21,6 +22,7 @@ export function SettingsFrame({
 }) {
   const pathname = usePathname();
   const appHref = useAppHref(tenantSlug);
+  const { can } = useSubscription();
   const base = `/mock/app/${tenantSlug}`;
   const isRoot = pathname === `${base}/settings`;
 
@@ -32,6 +34,7 @@ export function SettingsFrame({
             id: entry.id,
             label: entry.label,
             href: appHref(entry.path),
+            locked: entry.feature ? !can(entry.feature) : false,
             current:
               pathname === `${base}/${entry.path}` || pathname.startsWith(`${base}/${entry.path}/`),
           }))}
