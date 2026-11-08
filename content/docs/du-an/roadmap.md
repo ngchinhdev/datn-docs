@@ -250,6 +250,8 @@ Bảng quy tắc nghiệp vụ (BR-xx) là tài liệu sống, nằm ở trang [
 
 ### 8.1. Các thực thể chính
 
+Bản chi tiết (cột, khóa, ràng buộc, RLS, trạng thái) ở [Mô hình dữ liệu](../thiet-ke/erd.md). Ở đó giữ chỗ là lịch hẹn trạng thái `held`, không có bảng `holds` riêng.
+
 - **Nền tảng:** `tenants`, `users`, `memberships` (user × tenant × role), `industry_templates`
 - **Cấu hình:** `branches`, `opening_hours`, `special_days`, `resource_types`, `services`, `service_variants`, `service_segments`, `service_resource_requirements`, `service_prices`, `terminology`
 - **Nhân sự, tài nguyên:** `staff`, `staff_skills`, `shifts`, `leave_requests`, `resources`
@@ -325,9 +327,9 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 - [ ] Use case theo 6 vai trò; đặc tả các luồng chính
 - [ ] Hoàn thiện danh sách BR (mục 7)
 - [ ] **Thiết kế gói cấu hình ngành:** định dạng file, danh sách thành phần; viết sẵn gói salon và gói spa thú cưng ở dạng tài liệu
-- [ ] ERD đầy đủ (có `industry_templates`, `served_subjects`); sơ đồ trạng thái; sequence cho: đặt lịch online có cọc, webhook thanh toán, hoàn thành lịch → outbox
+- [ ] ERD đầy đủ (có `industry_templates`, `served_subjects`); sơ đồ trạng thái; sequence cho: đặt lịch online có cọc, webhook thanh toán, hoàn thành lịch → outbox. Bản 1 của ERD và bảng trạng thái: 08/11, [ERD](../thiet-ke/erd.md); còn sequence
 - [ ] Mock UI và prototype click được: trang đặt lịch của khách (cả hai ngành), lịch lễ tân, cấu hình dịch vụ, thu tiền
-- [ ] Thiết kế thuật toán tính giờ trống bằng mã giả, kèm 10 ví dụ tính tay (có ví dụ ngành thú cưng)
+- [x] Thiết kế thuật toán tính giờ trống bằng mã giả, kèm 10 ví dụ tính tay (có ví dụ ngành thú cưng) (08/11, [trang thuật toán](../ky-thuat/thuat-toan-gio-trong.md))
 
 **Tiêu chí:** đi hết luồng đặt lịch → thanh toán → hoàn thành trên prototype; mọi BR có chỗ đứng trong ERD; hai gói cấu hình viết xong mà không cần thêm bảng riêng cho ngành nào.
 

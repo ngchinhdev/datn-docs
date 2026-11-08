@@ -27,9 +27,15 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   Các ý trên ghi thành BR-50 đến BR-59. BR-12, BR-14, BR-70 sửa theo; gói ngành có bản nháp và xuất bản.
   - [T-05](../ky-thuat/quyet-dinh-ky-thuat.md#t-05-packagesscheduling-core-thuật-toán-thuần) đổi sang phút từ mốc Unix (UTC).
 - **Vướng:** dữ liệu mẫu Tóc Mây cho Hùng làm nhuộm, Lan thì không. Thiết kế giữ cả ba thợ làm được nhuộm (thêm kỹ năng cho Lan) để "Bất kỳ ai" có giá 500.000 ₫.
+- **Sau đó:** viết bản 1 của [Mô hình dữ liệu](../thiet-ke/erd.md).
+  - Gồm khoảng 50 bảng theo phân hệ, khóa ngoại kèm `tenant_id`, exclusion constraint, trigger chỉ thêm, bảng trạng thái lịch hẹn, và bảng "mỗi BR nằm ở đâu". Không có bảng riêng cho ngành nào.
+  - Giữ chỗ là lịch hẹn trạng thái `held`, không có bảng `holds`.
+  - Trạng thái lịch hẹn thêm `awaiting_deposit`, `in_service`, `expired` so với fixtures của mock; mock đổi theo khi làm tới thu tiền.
+  - 5 câu hỏi mở có đề xuất ở mục 13 của ERD.
 - **Tiếp theo:**
   - Claude Code làm [Bước 10](../ky-thuat/ke-hoach-ui-mock.md#bước-10-cấu-hình-dịch-vụ-mh-44-mh-45-gói-cấu-hình-ngành-mh-59-và-thanh-cuộn).
-  - Phiên claude.ai làm ERD (giai đoạn 1).
+  - Chốt 5 câu hỏi của ERD.
+  - Viết sequence cho đặt lịch có cọc, webhook thanh toán, hoàn thành lịch → outbox.
 
 ### 07/11/2026 (đêm khuya): mock Bước 8, khung ứng dụng, danh sách và form
 - **Đã làm:** Bước 8 (8a–8f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-8-route-tiếng-anh-khung-ứng-dụng-mẫu-danh-sách-và-form), mỗi mục một commit trên nhánh `feat/mock-app-shell`.

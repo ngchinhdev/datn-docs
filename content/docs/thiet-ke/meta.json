@@ -1,4 +1,7 @@
 {
   "title": "Thiết kế",
-  "pages": ["man-hinh"]
+  "pages": [
+    "man-hinh",
+    "erd"
+  ]
 }

@@ -137,6 +137,7 @@ Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-h
 
 Ghi các điểm chưa rõ ở đây; chốt xong thì chuyển thành BR.
 
-- Giữ chỗ 10 phút có áp dụng cho lễ tân đặt tại quầy không, hay chỉ cho trang công khai?
+- Giữ chỗ 10 phút có áp dụng cho lễ tân đặt tại quầy không, hay chỉ cho trang công khai? (Đề xuất ở [ERD](../thiet-ke/erd.md#13-câu-hỏi-còn-mở): không giữ chỗ, tạo thẳng lịch đã xác nhận.)
+- Gộp đối tượng trùng sau OTP; email và số điện thoại trỏ tới hai khách khác nhau; bỏ kỹ năng khi còn lịch sắp tới; dịch vụ cần hai nhân viên. Đề xuất ở [ERD](../thiet-ke/erd.md#13-câu-hỏi-còn-mở).
 - Khi khách chọn "bất kỳ ai", có cho lễ tân đổi người sau khi đã xác nhận mà không báo khách không?
 - Hoa hồng của dịch vụ trả bằng buổi trong gói tính trên giá một buổi của gói hay giá lẻ hiện hành? (Phân tích gốc: giá một buổi của gói.)
