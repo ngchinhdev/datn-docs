@@ -98,7 +98,7 @@ export function DetailPanel({
           <h2 className="heading m-0">{customer?.name ?? 'Khách đang đặt online'}</h2>
           {customer && (
             <span className="body-sm sp-num text-(--ink-muted)">
-              {formatPhone(customer.phone)}
+              {customer.phone ? formatPhone(customer.phone) : 'Không có số điện thoại'}
               {customer.visitCount ? ` · khách lần thứ ${customer.visitCount}` : ''}
             </span>
           )}

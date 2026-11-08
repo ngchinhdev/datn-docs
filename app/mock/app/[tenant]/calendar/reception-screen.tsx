@@ -1,16 +1,21 @@
 'use client';
 
 import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { useQueryState } from '@/components/mock/use-query-state';
 import { Button } from '@/components/sapio/button';
 import { SegmentedNav } from '@/components/sapio/segmented';
-import { ResourceCalendar } from '@/components/sapio/resource-calendar';
+import { ResourceCalendar, type CalendarTarget } from '@/components/sapio/resource-calendar';
 import { StatusBadge } from '@/components/sapio/status-badge';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { dayHours } from '@/mock/hours';
-import { tenantFixtures } from '@/mock/fixtures';
+import { fixtureBySlug } from '@/mock/selection';
+import { ANY_STAFF } from '@/mock/availability';
+import { firstFreeMinute } from '@/mock/placement';
+import { localMinutes } from '@/mock/shifts';
 import {
   dayAppointments,
   freeResourcesAt,
@@ -21,13 +26,14 @@ import {
 } from '@/mock/reception';
 import { addDays, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
 import { useAppointmentActions } from '../_reception/actions';
+import { CreatePanel } from '../_reception/create-panel';
 import { DetailPanel, ViewTabs, type CalendarView } from '../_reception/parts';
 import { useReception } from '../_reception/use-reception';
 
 const WIDE_QUERY = '(min-width: 1200px)';
 
 export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
-  const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
+  const fixture = useLiveFixture(tenantSlug);
   const branch = fixture.branches[0]!;
   const L = lookups(fixture);
   const now = useMockNow();
@@ -42,26 +48,94 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
   const actions = useAppointmentActions(fixture, appointments, replace, now);
   const day = dayAppointments(appointments, date);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [creating, setCreating] = useState<{
+    minute: number;
+    staffResourceId: string;
+    customerId: string | null;
+  } | null>(null);
+  const [targets, setTargets] = useState<CalendarTarget[]>([]);
   const cancelled = appointments.filter(
     (a) => a.status === 'cancelled' && localDate(a.startAt) === date,
   );
   const selected =
     [...day, ...cancelled].find((a) => a.id === selectedId && isLive(a, now)) ?? null;
+  const selectAppointment = (id: string) => {
+    setCreating(null);
+    setSelectedId(id);
+  };
 
   // Only the wide layout opens a detail at load; below 1200px the drawer would cover the calendar.
+  const sample = fixtureBySlug(tenantSlug);
   useEffect(() => {
-    if (window.matchMedia(WIDE_QUERY).matches) {
+    if (sample && window.matchMedia(WIDE_QUERY).matches) {
       setSelectedId(
-        dayAppointments(fixture.appointments, today).find((a) => a.status === 'checked_in')?.id ??
+        dayAppointments(sample.appointments, today).find((a) => a.status === 'checked_in')?.id ??
           null,
       );
     }
-  }, [fixture, today]);
+  }, [sample, today]);
 
   const goTo = (d: string) => {
     setDate(d);
     setSelectedId(null);
+    setCreating(null);
   };
+
+  /** The panel opens on a time and a person; without them, the nearest free quarter hour (BR-30). */
+  function openCreate(
+    at?: { minute: number; staffResourceId: string },
+    customerId: string | null = null,
+  ) {
+    const first = fixture.services[0];
+    const variant = first?.variants[0];
+    let minute = at?.minute;
+    if (minute === undefined && first && variant) {
+      const startOfDay = localMinutes(date, '00:00');
+      const afterNow =
+        date === today ? Math.ceil((Date.parse(now) / 60_000 - startOfDay) / 15) * 15 : 0;
+      minute =
+        firstFreeMinute(
+          { fixture, service: first, variant, date, minute: 0, staffResourceId: ANY_STAFF, now },
+          afterNow,
+        ) ?? undefined;
+    }
+    const open = hours.open
+      ? Number(hours.open.slice(0, 2)) * 60 + Number(hours.open.slice(3))
+      : 9 * 60;
+    setSelectedId(null);
+    setCreating({
+      minute: minute ?? open,
+      staffResourceId: at?.staffResourceId ?? ANY_STAFF,
+      customerId,
+    });
+  }
+
+  // `?create=1` (from Hôm nay or Khách hàng) opens the panel once, with `?customer=` chosen.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const createParam = searchParams.get('create');
+  const customerParam = searchParams.get('customer');
+  useEffect(() => {
+    if (createParam !== '1') return;
+    openCreate(undefined, customerParam);
+    const params = new URLSearchParams(searchParams);
+    params.delete('create');
+    params.delete('customer');
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    // Runs when the link brings the parameter, not when the form below changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createParam]);
+
+  /** An empty part of a column was pressed: its time, and its person in the staff view. */
+  function onEmptyPress(columnId: string, startAt: string) {
+    const time = formatTime(startAt);
+    openCreate({
+      minute: Number(time.slice(0, 2)) * 60 + Number(time.slice(3)),
+      staffResourceId: view === 'staff' ? columnId : ANY_STAFF,
+    });
+  }
 
   // `?staff=` narrows the staff view to one person (the "Xem lịch" button of the staff list).
   const [staffOnly, setStaffOnly] = useQueryState('staff', '');
@@ -70,7 +144,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
     day,
     now,
     selectedId,
-    setSelectedId,
+    selectAppointment,
     date,
   );
   const only = view === 'staff' ? allColumns.find((c) => c.id === staffOnly) : undefined;
@@ -127,7 +201,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
               className="body-sm w-56 border-0 bg-transparent text-(--ink) outline-none"
             />
           </label>
-          <Button variant="primary" onClick={() => notify('Tạo lịch hẹn: chưa có trong mock.')}>
+          <Button variant="primary" onClick={() => openCreate()}>
             <Plus size={16} aria-hidden="true" />
             Tạo lịch hẹn
           </Button>
@@ -147,7 +221,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
             variant="primary"
             aria-label="Tạo lịch hẹn"
             className="size-11! rounded-(--radius-pill)! p-0!"
-            onClick={() => notify('Tạo lịch hẹn: chưa có trong mock.')}
+            onClick={() => openCreate()}
           >
             <Plus size={20} aria-hidden="true" />
           </Button>
@@ -219,6 +293,8 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
               close={hours.close}
               {...(hours.closedLabel ? { closedLabel: hours.closedLabel } : {})}
               now={now}
+              onEmptyPress={onEmptyPress}
+              targets={targets}
             />
           </div>
           <div className="md:hidden">
@@ -233,6 +309,8 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
                 close={hours.close}
                 {...(hours.closedLabel ? { closedLabel: hours.closedLabel } : {})}
                 now={now}
+                onEmptyPress={onEmptyPress}
+                targets={targets}
               />
             )}
           </div>
@@ -244,7 +322,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
                   key={a.id}
                   type="button"
                   className="sp-badge sp-badge--cancelled cursor-pointer border-0"
-                  onClick={() => setSelectedId(a.id)}
+                  onClick={() => selectAppointment(a.id)}
                 >
                   {formatTime(a.startAt)} {L.who(a)} · {L.services(a)}
                 </button>
@@ -267,7 +345,21 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
           </div>
         </section>
 
-        {selected ? (
+        {creating ? (
+          <CreatePanel
+            fixture={fixture}
+            date={date}
+            now={now}
+            initial={creating}
+            presetCustomerId={creating.customerId}
+            onClose={() => setCreating(null)}
+            onTargets={setTargets}
+            onCreated={(id) => {
+              setCreating(null);
+              setSelectedId(id);
+            }}
+          />
+        ) : selected ? (
           <DetailPanel
             fixture={fixture}
             appt={selected}

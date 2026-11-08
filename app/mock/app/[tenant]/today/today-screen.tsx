@@ -3,6 +3,7 @@
 import { Plus } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { Button } from '@/components/sapio/button';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
@@ -68,6 +69,7 @@ function Group({ label, count, children }: { label: string; count: number; child
 
 export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
   const appHref = useAppHref(tenantSlug);
+  const router = useRouter();
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
   const branch = fixture.branches[0]!;
   const L = lookups(fixture);
@@ -117,7 +119,7 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
           <Button
             disabled={!bookingOpen}
             aria-describedby={bookingOpen ? undefined : 'trial-note'}
-            onClick={() => notify('Khách vãng lai: chưa có trong mock.')}
+            onClick={() => router.push(appHref('calendar', { create: '1', customer: 'walkin' }))}
           >
             Khách vãng lai
           </Button>
@@ -125,7 +127,7 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
             variant="primary"
             disabled={!bookingOpen}
             aria-describedby={bookingOpen ? undefined : 'trial-note'}
-            onClick={() => notify('Tạo lịch hẹn: chưa có trong mock.')}
+            onClick={() => router.push(appHref('calendar', { create: '1' }))}
           >
             <Plus size={16} aria-hidden="true" />
             Tạo lịch hẹn

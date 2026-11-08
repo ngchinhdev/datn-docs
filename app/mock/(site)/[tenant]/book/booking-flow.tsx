@@ -12,6 +12,7 @@ import { HoldBanner } from '@/components/sapio/hold-banner';
 import { OtpField } from '@/components/sapio/otp-field';
 import { PhoneField } from '@/components/sapio/phone-field';
 import { SegmentedTabs } from '@/components/sapio/segmented';
+import { SubjectFields } from '@/components/sapio/subject-fields';
 import { ServiceVariantList } from '@/components/sapio/service-variant-list';
 import { SlotGrid } from '@/components/sapio/slot-grid';
 import {
@@ -33,7 +34,6 @@ import {
   askedFields,
   checkSubject,
   describeSubject,
-  isRequired,
   priceFactors,
   type SubjectValues,
 } from '@/mock/subject-schema';
@@ -429,80 +429,18 @@ export function BookingFlow({
         />
         {subjectId === NEW_SUBJECT && (
           <div className="sp-stack rounded-(--radius-lg) bg-(--surface-raised) p-(--space-4) shadow-[0_0_0_1px_var(--line)]">
-            <Field id="subject-name" label={`Tên ${subjectNoun}`} size="md" error={error('name')}>
-              <input
-                id="subject-name"
-                placeholder={
-                  vocabulary.subjectExample ? `Ví dụ: ${vocabulary.subjectExample}` : undefined
-                }
-                value={newName}
-                aria-invalid={error('name') ? true : undefined}
-                onChange={(e) => setNewName(e.target.value)}
-                onBlur={() => touch('name')}
-              />
-            </Field>
-            {subjectSchema.map((field) => {
-              const id = `subject-${field.key}`;
-              if (field.type === 'enum') {
-                return (
-                  <div key={field.key} className="sp-field">
-                    <span className="sp-field__label" id={`${id}-label`}>
-                      {field.label}
-                    </span>
-                    <div
-                      role="group"
-                      aria-labelledby={`${id}-label`}
-                      className="sp-segmented sp-segmented--lg sp-segmented--block"
-                    >
-                      {field.options.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          className="sp-segmented__item"
-                          aria-pressed={newValues[field.key] === option.value}
-                          onClick={() => {
-                            setValue(field.key, option.value);
-                            touch(field.key);
-                          }}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-              return (
-                <Field
-                  key={field.key}
-                  id={id}
-                  size="md"
-                  label={field.label}
-                  optional={!isRequired(field, newValues)}
-                  error={error(field.key)}
-                >
-                  <input
-                    id={id}
-                    inputMode={field.type === 'number' ? 'decimal' : undefined}
-                    placeholder={field.example ? `Ví dụ: ${field.example}` : undefined}
-                    value={newValues[field.key] ?? ''}
-                    aria-invalid={error(field.key) ? true : undefined}
-                    onChange={(e) =>
-                      setValue(
-                        field.key,
-                        field.type === 'number'
-                          ? e.target.value.replace(/[^\d.,]/g, '')
-                          : e.target.value,
-                      )
-                    }
-                    onBlur={() => touch(field.key)}
-                  />
-                  {field.type === 'number' && field.unit && (
-                    <span className="sp-field__suffix">{field.unit}</span>
-                  )}
-                </Field>
-              );
-            })}
+            <SubjectFields
+              idPrefix="subject"
+              schema={subjectSchema}
+              noun={subjectNoun}
+              nameExample={vocabulary.subjectExample}
+              name={newName}
+              values={newValues}
+              onName={setNewName}
+              onValue={setValue}
+              error={error}
+              touch={touch}
+            />
             <p className="body-sm m-0 text-(--ink-muted)" aria-live="polite">
               {newSubject
                 ? newVariant

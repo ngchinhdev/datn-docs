@@ -230,7 +230,7 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
           aria-label={
             canBook ? `Đặt lịch cho ${row.name}` : `Đặt lịch cho ${row.name}, mở khi kích hoạt gói`
           }
-          onClick={() => toast({ text: 'Tạo lịch hẹn: chưa có trong mock.' })}
+          onClick={() => router.push(appHref('calendar', { create: '1', customer: row.id }))}
         >
           Đặt lịch
         </Button>

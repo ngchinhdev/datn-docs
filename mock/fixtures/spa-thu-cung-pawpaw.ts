@@ -239,18 +239,11 @@ const at = (hhmm: string) => new Date(`2026-11-07T${hhmm}:00+07:00`).toISOString
 // Saturday 07/11/2026 at Pawpaw: now is 10:20. Lucky (12 kg, Tắm sấy) cannot start at 11:00 with
 // Vy; the nearest times are 10:00 Vy, 12:00 Khoa and 12:30 Vy (design/screens/LichTaoPawpaw.dc.html).
 const saturday: Appointment[] = [
-  appointment('paw-a-kem', 'paw-c-phat', at('08:00'), 'no_show', [
-    {
-      variantId: 'paw-bath-small',
-      subjectId: 'paw-s-phat-1',
-      resourceIds: ['paw-khoa', 'paw-bath-1', 'paw-dryer-3'],
-    },
-  ]),
   // Two pets of one customer booked together (group booking).
   appointment(
     'paw-a-group',
     'paw-c-quynh',
-    at('08:30'),
+    at('08:00'),
     'completed',
     [
       {
@@ -262,7 +255,7 @@ const saturday: Appointment[] = [
         variantId: 'paw-bath-small',
         subjectId: 'paw-s-quynh-2',
         resourceIds: ['paw-vy', 'paw-bath-2', 'paw-dryer-2'],
-        startAt: at('08:30'),
+        startAt: at('08:00'),
       },
     ],
     { settled: true },

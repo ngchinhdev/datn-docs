@@ -1,7 +1,12 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import { tenantFixtures, type Appointment } from '@/mock/fixtures';
+import {
+  tenantFixtures,
+  type Appointment,
+  type Customer,
+  type ServedSubject,
+} from '@/mock/fixtures';
 
 interface ScheduleStore {
   appointments: Appointment[];
@@ -10,6 +15,13 @@ interface ScheduleStore {
   /** Adds an appointment, or takes it away again (undo of a create). */
   addAppointment: (appt: Appointment) => void;
   removeAppointment: (id: string) => void;
+  customers: Customer[];
+  servedSubjects: ServedSubject[];
+  /** A customer or pet made while creating an appointment; `remove*` is the undo. */
+  addCustomer: (customer: Customer) => void;
+  removeCustomer: (id: string) => void;
+  addSubject: (subject: ServedSubject) => void;
+  removeSubject: (id: string) => void;
   /** Technicians see customers' phone numbers (BR-36). */
   staffSeesCustomerPhone: boolean;
   setStaffSeesCustomerPhone: (value: boolean) => void;
@@ -30,6 +42,8 @@ export function ScheduleStoreProvider({
 }) {
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
   const [appointments, setAppointments] = useState<Appointment[]>(fixture.appointments);
+  const [customers, setCustomers] = useState<Customer[]>(fixture.customers);
+  const [servedSubjects, setSubjects] = useState<ServedSubject[]>(fixture.servedSubjects);
   const [staffSeesCustomerPhone, setStaffSeesCustomerPhone] = useState(
     fixture.staffSeesCustomerPhone,
   );
@@ -43,6 +57,18 @@ export function ScheduleStoreProvider({
   const removeAppointment = useCallback((id: string) => {
     setAppointments((list) => list.filter((a) => a.id !== id));
   }, []);
+  const addCustomer = useCallback((customer: Customer) => {
+    setCustomers((list) => [...list, customer]);
+  }, []);
+  const removeCustomer = useCallback((id: string) => {
+    setCustomers((list) => list.filter((c) => c.id !== id));
+  }, []);
+  const addSubject = useCallback((subject: ServedSubject) => {
+    setSubjects((list) => [...list, subject]);
+  }, []);
+  const removeSubject = useCallback((id: string) => {
+    setSubjects((list) => list.filter((s) => s.id !== id));
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -50,10 +76,28 @@ export function ScheduleStoreProvider({
       replaceAppointment,
       addAppointment,
       removeAppointment,
+      customers,
+      servedSubjects,
+      addCustomer,
+      removeCustomer,
+      addSubject,
+      removeSubject,
       staffSeesCustomerPhone,
       setStaffSeesCustomerPhone,
     }),
-    [appointments, replaceAppointment, addAppointment, removeAppointment, staffSeesCustomerPhone],
+    [
+      appointments,
+      replaceAppointment,
+      addAppointment,
+      removeAppointment,
+      customers,
+      servedSubjects,
+      addCustomer,
+      removeCustomer,
+      addSubject,
+      removeSubject,
+      staffSeesCustomerPhone,
+    ],
   );
   return <ScheduleContext.Provider value={value}>{children}</ScheduleContext.Provider>;
 }
