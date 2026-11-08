@@ -7,6 +7,29 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 08/11/2026 (tối): chốt đợt A, nghiệp vụ lịch
+- **Đã làm:**
+  - Review và người dùng merge PR #5 (Bước 10). Sau review chỉ còn hai chỗ sửa: bảng vừa khung ở 1280–1600px, và trên điện thoại chỉ giữ nút quay lại.
+  - Thống nhất lộ trình: vẽ đủ mọi màn theo đợt A–H (kể cả quản trị nền tảng) trước, người dùng rà một lượt rồi mới làm DB.
+  - Vẽ và chốt đợt A (10 bảng):
+    - MH-26 tạo lịch hẹn, cả hai cơ sở;
+    - MH-27 kéo thả, hỏi lại khi khách chọn đích danh;
+    - MH-28 chi tiết lịch hẹn trên điện thoại;
+    - MH-35, MH-36 kỹ thuật viên;
+    - MH-38 xếp ca;
+    - MH-39, MH-40 nghỉ phép.
+  - Sapio thêm `SidePanel`, `ShiftGrid`, `AffectedList`, kéo thả trên `ResourceCalendar`. Trong quản trị, màu chọn là `brand`; màu cơ sở chỉ ở ô chữ cái.
+  - Quy tắc mới BR-30 đến BR-36; BR-11 trỏ sang BR-34.
+- **Ghi chú cho ERD** (gom lại khi làm DB):
+  - `appointment_items` cần cờ "chưa xác nhận đổi người" (BR-32).
+  - Cần bảng hỏi ý khách (`customer_requests`: loại, lịch, hạn trả lời, kết quả) cho BR-33.
+  - `booking_policies.staff_sees_customer_phone` (BR-36).
+  - Danh sách "Cần xếp lại" sau khi bớt ca dùng chung cấu trúc với lịch bị ảnh hưởng của đơn nghỉ.
+  - `leave_requests` có giờ bắt đầu và kết thúc (nghỉ vài giờ).
+- **Tiếp theo:**
+  - Claude Code làm [Bước 11](../ky-thuat/ke-hoach-ui-mock.md#bước-11-đợt-a-nghiệp-vụ-lịch-mh-26-mh-27-mh-28-mh-35-mh-36-mh-38-mh-39-mh-40).
+  - Phiên claude.ai vẽ đợt B (phía khách: MH-11, MH-13 đến MH-21, MH-23).
+
 ### 08/11/2026 (đêm): mock Bước 10, cấu hình dịch vụ và gói cấu hình ngành
 - **Đã làm:** Bước 10 (10a–10f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-10-cấu-hình-dịch-vụ-mh-44-mh-45-gói-cấu-hình-ngành-mh-59-và-thanh-cuộn) trên nhánh `feat/mock-services`.
   - Dữ liệu và hàm thuần: đoạn `prep`, `work`, `wait`, dọn dẹp theo từng loại tài nguyên, giá theo cấp, `variantSelection` theo dịch vụ. `mock/occupation.ts` (mẫu chiếm dụng, khoảng khách thấy, phút bận, giá, kiểm phủ đủ không trùng) và `mock/availability.ts` (phép vừa theo mục 3 của trang thuật toán) là mẫu để chép sang `scheduling-core`.

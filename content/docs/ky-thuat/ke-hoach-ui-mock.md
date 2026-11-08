@@ -526,6 +526,107 @@ Thêm `nail_salon` và `beauty_spa` ở trạng thái `soon`. Bước chọn ng�
 - **Gói ngành:** `/mock/admin/templates` có 4 dòng. Xuất bản Spa thú cưng thì hỏi lại, rồi thành bản 3.
 - **Điện thoại:** ở 390px, MH-44, MH-45 và MH-59 không cuộn ngang.
 
+## Bước 11. Đợt A: nghiệp vụ lịch (MH-26, MH-27, MH-28, MH-35, MH-36, MH-38, MH-39, MH-40)
+
+Sau khi PR #5 merge. Căn cứ:
+- Màn đã chốt: `design/screens/LichTao*.dc.html`, `LichKeoTha`, `LichDoiNguoi`, `LichChiTietDienThoai`, `KtvLich`, `KtvXinNghi`, `XepCa`, `NghiPhep*` (bảng ở `design/README.md`).
+- README của `SidePanel`, `ShiftGrid`, `AffectedList`, `ResourceCalendar` trong `design/sapio/components/`, và mục "Khu quản trị" của `design/sapio/README.md`.
+- Quy tắc BR-11, BR-30 đến BR-36.
+- Hàm `findSlots` và `pick` đã có ở `mock/availability.ts`.
+
+Bản chép `app/sapio/components.css` đã cập nhật sẵn. Làm trên nhánh `feat/mock-scheduling-ops`, mỗi mục 11a–11g một commit, mở PR mới, không merge.
+
+### 11a. Dữ liệu và màu chọn trong quản trị
+
+**Dữ liệu mẫu:**
+- `AppointmentItem` thêm `staffChoice: 'any' | 'chosen'` (BR-31). Sinh lại dữ liệu sao cho mỗi cơ sở có cả hai loại. Riêng Chị Ngọc (Tóc Mây, 11:00) là đích danh Mai.
+- Thêm ca làm `Shift` (nhiều khung mỗi ngày) cho tuần 09/11–15/11, đúng `XepCa.dc.html`. Ca Mai bắt đầu 08:45 để kịp pha thuốc trước 09:00.
+- `StaffTimeOff` thêm `status` (`pending`, `approved`, `rejected`), `reason`, `sentAt`, giờ bắt đầu và kết thúc (nghỉ vài giờ), và cách xử lý từng lịch bị ảnh hưởng. Dữ liệu đúng `NghiPhepDanhSach.dc.html`.
+- `findSlots` đọc ca làm thay cho "nhân viên làm trong giờ mở cửa".
+- `pnpm check:availability` vẫn phải đạt.
+
+**Chính sách:** thêm cài đặt "Kỹ thuật viên thấy số điện thoại khách", mặc định tắt (BR-36).
+
+**Màu chọn:** trong `/mock/app` và màn kỹ thuật viên, ngày, biến thể, ô giờ đang chọn dùng `brand`. Lớp `.sp-shell` và `.sp-admin` đã lo việc này; kiểm không còn chỗ nào trong quản trị dùng màu của cơ sở, trừ ô chữ cái.
+
+### 11b. Tạo lịch hẹn (MH-26)
+
+- Bấm một ô trống trên lịch thì hiện `.sp-cal__target` và mở `SidePanel` bên phải, giờ và người điền sẵn. Nút "Tạo lịch hẹn" ở đầu trang mở panel với giờ trống gần nhất.
+- **Tìm khách:**
+  - Theo số đã chuẩn hóa (BR-61) hoặc tên.
+  - Luôn có "Khách mới với số …" và "Khách vãng lai".
+  - Pawpaw: chọn khách rồi chọn bé, hoặc "Thêm bé". Biến thể tự chọn theo thông tin của bé (BR-55).
+- **Kiểm ngay** bằng `findSlots` mỗi lần đổi dịch vụ, người hoặc giờ:
+  - Hợp lệ: `.sp-fit--ok` "Trống: Lan, Ghế 2. Xong lúc 14:45."
+  - Không hợp lệ: `.sp-fit--bad` nói rõ vướng gì, kèm 3 giờ gần nhất dạng chip; bấm chip là điền giờ đó. Nút Tạo tắt.
+- Giờ lệch lưới (14:05) gõ được (BR-30, BR-58). Không áp đặt trước 2 giờ.
+- Hộp "Khách yêu cầu đích danh" mặc định tắt (BR-31). Bật thì giá theo cấp người đó (BR-56).
+- Tạo xong thì lịch hiện trên lưới ở trạng thái Đã xác nhận, kèm toast "Đã tạo lịch cho Lê Thu Hà lúc 14:00." có Hoàn tác.
+- Dưới 768px, panel mở thành `.sp-sheet`.
+
+### 11c. Kéo thả (MH-27)
+
+- Kéo một khối trên lịch (chuột và cảm ứng). Trong lúc kéo:
+  - Tính vùng thả được cho từng cột bằng `findSlots` với chính lịch đó bỏ ra. Vẽ `.sp-cal__drop` và `--blocked`.
+  - Nhãn `.sp-drag-label` ghi giờ mới, người, tài nguyên; chỗ cũ mờ đi.
+  - Esc để hủy.
+- **Thả:**
+  - Lịch "Bất kỳ ai": đổi ngay, toast "Đã dời Chị Vân sang 11:30, Lan." có Hoàn tác 5 giây.
+  - Lịch đích danh sang người khác: `ConfirmDialog` đúng `LichDoiNguoi.dc.html`. Có hộp "Gửi email báo …" mặc định bật. Đổi xong thì khối mang dấu "Chưa xác nhận đổi người" (BR-32).
+- Giá giữ nguyên. Ghế cũ bận ở giờ mới thì tự chọn ghế khác, và dòng meta của khối đổi theo.
+- Bàn phím: chọn khối, Enter mở menu "Dời giờ, đổi người" thay cho kéo. Kéo thả không là cách duy nhất.
+
+### 11d. Chi tiết lịch hẹn trên điện thoại (MH-28)
+
+- `/mock/app/[tenant]/appointments/[id]` đúng `LichChiTietDienThoai.dc.html`. Từ 768px trở lên vẫn là panel cạnh lịch như hiện có.
+- Các nút theo trạng thái như trên máy tính.
+
+### 11e. Màn kỹ thuật viên (MH-35, MH-36)
+
+- Chọn vai trò Kỹ thuật viên ở `/mock` thì vào `/mock/app/[tenant]/my/schedule` (mặc định Mai), với thanh dưới riêng: Lịch của tôi, Xin nghỉ, Hoa hồng, Tài khoản.
+- **Lịch của tôi:**
+  - Có Ngày và Tuần.
+  - Lịch đang chờ quay lại (hết đoạn chờ) đứng đầu, viền `brand`. Nút "Bắt đầu phần tiếp" hoặc "Bắt đầu" và "Xong" đổi trạng thái của mục (BR-36).
+  - Không hiện số điện thoại khách khi cài đặt tắt, kèm câu giải thích.
+- **Xin nghỉ:**
+  - Chọn ngày, Cả ngày hoặc Vài giờ, lý do.
+  - Danh sách lịch của mình trong khoảng đó, đánh dấu lịch khách chọn mình.
+  - Gửi thì tạo đơn `pending`, toast, và đơn hiện ở MH-39.
+
+### 11f. Xếp ca và nghỉ phép (MH-38, MH-39, MH-40)
+
+- **Xếp ca (MH-38):** `ShiftGrid` đúng `XepCa.dc.html`.
+  - Bấm ô thì sửa ở `SidePanel`: nhiều khung, "Thêm khung trong ngày", "Áp cho mọi Thứ … từ nay".
+  - Bớt ca mà còn lịch thì cảnh báo, nút thành "Lưu và xếp lại N lịch". Lưu xong các lịch vào danh sách "Cần xếp lại" (BR-35), mở được bằng màn MH-40.
+  - Có "Chép tuần trước". Hàng "Mở cửa" cảnh báo giờ không ai trực.
+- **Đơn nghỉ phép (MH-39):** mẫu danh sách (MH-08) đúng `NghiPhepDanhSach.dc.html`. Mục "Nghỉ phép" trên thanh bên đếm số đơn chờ duyệt.
+- **Xử lý (MH-40):** `AffectedList` đúng `NghiPhepXuLy.dc.html`.
+  - Mỗi lịch có gợi ý tính bằng `findSlots`: người khác cùng giờ, hoặc giờ gần nhất.
+  - Các nút: "Đổi sang …", "Gửi email hỏi ý", "Ghi nhận khách đồng ý", "Dời sang …", "Hủy và báo khách" (hoàn cọc 100%, BR-24), "Hoàn tác".
+  - Hạn trả lời tính theo BR-33. Quá hạn thì dòng đổi thành "Quá hạn trả lời. Gọi khách." kèm nút Gọi.
+  - "Duyệt nghỉ" chỉ bật khi mọi lịch đã xử lý (BR-11, BR-34). "Từ chối đơn" mở `ConfirmDialog` có ô lý do.
+  - Duyệt xong thì lưới ca hiện "Nghỉ phép" ở ngày đó.
+
+### 11g. Kiểm tra và hoàn tất
+
+- `mock/screens.ts`: 8 màn của đợt A thành "Đang làm".
+- Chạy axe trên mọi màn và trạng thái mới, ở hai theme, 1440px và 390px. Không có lỗi serious hoặc critical.
+- `pnpm check:availability`, `pnpm build`, `pnpm typecheck`, `prettier --check` đều xanh.
+- Mở PR mới: mô tả theo 11a–11g, mục "Tự quyết", ảnh. Ghi một mục Tiến độ.
+
+**Xong khi:**
+- **Tạo lịch (Tóc Mây):** bấm ô 14:00 ở cột Lan, tìm "0934 5", chọn Lê Thu Hà, Cắt tóc Tóc ngắn. Panel báo "Trống: Lan, Ghế 2. Xong lúc 14:45.", tạo xong thì khối hiện ở 14:00–14:45.
+- **Tạo lịch (Pawpaw):** chọn Phạm Khánh Linh, bé Lucky, Tắm sấy, Vy, 11:00. Panel báo không đặt được và gợi ý 10:00 Vy, 12:00 Khoa, 12:30 Vy.
+- **Kéo thả:**
+  - Kéo Chị Vân (Hùng 11:30) sang Lan 11:30 thì đổi ngay, có Hoàn tác.
+  - Kéo Chị Ngọc (đích danh Mai) sang Lan thì hỏi lại.
+  - Kéo vào vùng gạch chéo thì không thả được.
+- **Bàn phím:** dời được một lịch mà không dùng chuột.
+- **Kỹ thuật viên:** vai trò Kỹ thuật viên chỉ thấy lịch của Mai, không thấy số điện thoại khách. Bật cài đặt ở Chính sách thì số hiện.
+- **Xếp ca:** sửa ca Hùng Thứ Sáu thành 10:00–15:00 thì cảnh báo 2 lịch; lưu xong 2 lịch nằm trong "Cần xếp lại".
+- **Nghỉ phép:** ở đơn của Lan, "Duyệt nghỉ" tắt cho tới khi xử lý xong cả 4 lịch.
+- **Điện thoại:** ở 390px, mọi màn mới không cuộn ngang, trừ lưới lịch và lưới ca.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -589,4 +690,16 @@ datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 10a đến 10f, mỗi
 Bố cục và chữ lấy theo design/screens/DichVu*.dc.html và GoiNganh*.dc.html. Kiểm "Xong khi"
 trước khi báo xong, mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với
 quy tắc nghiệp vụ hoặc với 10 ví dụ của trang thuật toán.
+```
+
+Bước 11:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-scheduling-ops.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, BR-11 và BR-30 đến
+BR-36 trong quy-tac.md, design/README.md, mục "Khu quản trị" của design/sapio/README.md và README
+của SidePanel, ShiftGrid, AffectedList, ResourceCalendar. Làm Bước 11 trong
+datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 11a đến 11g, mỗi mục một commit.
+Bố cục và chữ lấy theo các bảng của đợt A trong design/screens/. Kiểm "Xong khi" trước khi báo
+xong, mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
 ```

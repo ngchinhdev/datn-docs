@@ -91,9 +91,9 @@ Route trong bảng là đường dẫn trên tên miền con của cơ sở (ví
 |---|---|---|---|---|---|---|
 | MH-24 | Lịch | `/app/[tenant]/calendar?view=staff\|resources&date=` | LT, QL, CCS | 1 | Vẽ | **Đang làm**. Hai kiểu xem, bảng chi tiết (D-12) |
 | MH-25 | Hôm nay | `/app/[tenant]/today` | LT | 1 | Vẽ | **Đang làm**. Đang làm, chờ thanh toán, sắp đến |
-| MH-26 | Tạo lịch hẹn | ngăn trượt trên MH-24; `/app/[tenant]/appointments/new` trên điện thoại | LT | 1 | Vẽ | Tìm hoặc tạo khách theo số điện thoại (BR-61), khách vãng lai, dịch vụ, thợ, giờ trống; bấm ô trống trên lịch thì điền sẵn giờ và cột |
-| MH-27 | Kéo thả đổi giờ, đổi người | trong MH-24 | LT | 1 | Vẽ | Kiểm ràng buộc khi đang kéo (ô không hợp lệ tô `danger-soft`), thả xong có Hoàn tác (D-14); lịch "bất kỳ ai" và lịch chọn đích danh xử lý khác nhau |
-| MH-28 | Chi tiết lịch hẹn | `/app/[tenant]/appointments/[id]` | LT, KTV | 1 | Nhẹ | Trang riêng cho điện thoại; nội dung như bảng chi tiết của MH-24 |
+| MH-26 | Tạo lịch hẹn | ngăn trượt trên MH-24; `/app/[tenant]/appointments/new` trên điện thoại | LT | 1 | Vẽ | **Đã chọn.** Tìm hoặc tạo khách theo số điện thoại (BR-61), khách vãng lai, dịch vụ, thợ, giờ trống; bấm ô trống trên lịch thì điền sẵn giờ và cột |
+| MH-27 | Kéo thả đổi giờ, đổi người | trong MH-24 | LT | 1 | Vẽ | **Đã chọn.** Kiểm ràng buộc khi đang kéo (ô không hợp lệ tô `danger-soft`), thả xong có Hoàn tác (D-14); lịch "bất kỳ ai" và lịch chọn đích danh xử lý khác nhau |
+| MH-28 | Chi tiết lịch hẹn | `/app/[tenant]/appointments/[id]` | LT, KTV | 1 | Nhẹ | **Đã chọn.** Trang riêng cho điện thoại; nội dung như bảng chi tiết của MH-24 |
 | MH-29 | Thu tiền | `/app/[tenant]/checkout/[appointmentId]` | LT | 2 | Vẽ | Hóa đơn từ lịch hẹn, thêm bán lẻ, trừ cọc, trừ buổi gói, dùng ví, giảm giá (BR-22), nhiều phương thức, QR; bấm hai lần chỉ ghi một lần (BR-21) |
 | MH-30 | Bán gói, nạp ví | `/app/[tenant]/sales/new?type=package\|wallet` | LT | 2 | Form | Chọn khách, gói hoặc số tiền nạp, tiền tặng kèm; qua MH-29 để thu |
 | MH-31 | Hóa đơn | `/app/[tenant]/invoices`, `/invoices/[id]` | LT, CCS | 2 | DS | Cột: số, giờ, khách, tổng, phương thức, trạng thái; chi tiết có in và "Yêu cầu hoàn tiền" |
@@ -105,17 +105,17 @@ Route trong bảng là đường dẫn trên tên miền con của cơ sở (ví
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-35 | Lịch của tôi | `/app/[tenant]/my/schedule` | KTV | 1 | Vẽ | Chỉ lịch của mình, theo ngày và tuần; cập nhật trạng thái dịch vụ; ghi chú về khách (không thấy số điện thoại nếu cơ sở tắt) |
-| MH-36 | Xin nghỉ | `/app/[tenant]/my/time-off` | KTV | 1 | Form | Chọn ngày, cả ngày hay vài giờ, lý do; thấy trước số lịch bị ảnh hưởng |
+| MH-35 | Lịch của tôi | `/app/[tenant]/my/schedule` | KTV | 1 | Vẽ | **Đã chọn.** Chỉ lịch của mình, theo ngày và tuần; cập nhật trạng thái dịch vụ; ghi chú về khách (không thấy số điện thoại nếu cơ sở tắt) |
+| MH-36 | Xin nghỉ | `/app/[tenant]/my/time-off` | KTV | 1 | Form | **Đã chọn.** Chọn ngày, cả ngày hay vài giờ, lý do; thấy trước số lịch bị ảnh hưởng |
 | MH-37 | Hoa hồng tạm tính | `/app/[tenant]/my/commission` | KTV | 3 | Nhẹ | Kỳ đang mở, từng dịch vụ, khoản bị thu hồi |
 
 ## F. Quản lý chi nhánh
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-38 | Xếp ca | `/app/[tenant]/shifts?week=` | QL, CCS | 1 | Vẽ | Lưới tuần × nhân viên, nhiều khung mỗi ngày, chép tuần trước; bớt ca mà còn lịch thì cảnh báo |
-| MH-39 | Đơn nghỉ phép | `/app/[tenant]/time-off` | QL, CCS | 1 | DS | Cột: nhân viên, thời gian, số lịch bị ảnh hưởng, trạng thái |
-| MH-40 | Xử lý lịch bị ảnh hưởng | `/app/[tenant]/time-off/[id]` | QL, CCS | 1 | Vẽ | BR-11: từng lịch bị ảnh hưởng, gợi ý người thay còn trống, khách chọn đích danh thì gửi hỏi ý; chỉ duyệt được khi mọi lịch đã xử lý |
+| MH-38 | Xếp ca | `/app/[tenant]/shifts?week=` | QL, CCS | 1 | Vẽ | **Đã chọn.** Lưới tuần × nhân viên, nhiều khung mỗi ngày, chép tuần trước; bớt ca mà còn lịch thì cảnh báo |
+| MH-39 | Đơn nghỉ phép | `/app/[tenant]/time-off` | QL, CCS | 1 | DS | **Đã chọn.** Cột: nhân viên, thời gian, số lịch bị ảnh hưởng, trạng thái |
+| MH-40 | Xử lý lịch bị ảnh hưởng | `/app/[tenant]/time-off/[id]` | QL, CCS | 1 | Vẽ | **Đã chọn.** BR-11: từng lịch bị ảnh hưởng, gợi ý người thay còn trống, khách chọn đích danh thì gửi hỏi ý; chỉ duyệt được khi mọi lịch đã xử lý |
 
 Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 

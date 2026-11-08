@@ -24,13 +24,25 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 | BR-08 | Khách tự đổi/hủy phải trước tối thiểu X giờ; tự đổi tối đa N lần mỗi lịch |
 | BR-09 | Quá giờ hẹn M phút mà chưa check-in thì đánh dấu "không đến" |
 | BR-10 | Không đến K lần trong 6 tháng thì lần sau bắt buộc đặt cọc |
-| BR-11 | Duyệt nghỉ phép phải xử lý xong mọi lịch bị ảnh hưởng; khách chọn đích danh phải được hỏi ý trước khi đổi người |
+| BR-11 | Duyệt nghỉ phép phải xử lý xong mọi lịch bị ảnh hưởng; khách chọn đích danh phải được hỏi ý trước khi đổi người. Cách xử lý từng lịch: BR-34 |
 | BR-12 | Lịch đã đặt giữ giá tại thời điểm đặt dù sau đó giá dịch vụ thay đổi (thời lượng cũng vậy, xem BR-59) |
 | BR-13 | Biến thể dịch vụ (giá, thời lượng) được chọn theo thuộc tính của đối tượng được phục vụ |
 | BR-14 | Khi khách chọn nhân viên: "Bất kỳ ai" đứng đầu và được chọn sẵn (hệ thống xếp người theo BR-57); chỉ liệt kê nhân viên nhận đặt online và có kỹ năng làm dịch vụ đã chọn (BR-03); người kín lịch trong ngày đang xem vẫn hiện nhưng làm mờ, ghi "Hết giờ ngày này"; chọn một người thì giờ trống lọc theo lịch người đó |
 | BR-15 | Trang khách chỉ hiện hồ sơ công khai của nhân viên: tên hiển thị, ảnh (không có thì chữ cái đầu), chức danh, thế mạnh, giờ trống sớm nhất. Họ tên đầy đủ, mã nhân viên, số điện thoại chỉ hiện trong khu quản trị |
 | BR-16 | Khách xác nhận lịch bằng mã 6 số gửi qua **email**. Số điện thoại vẫn bắt buộc, làm thông tin liên hệ cho cơ sở, không dùng để xác thực. Mã hết hạn sau X phút; nhập sai N lần thì phải gửi mã mới (cấu hình) |
 | BR-17 | Đối tượng được phục vụ đã lưu (ví dụ thú cưng) chỉ hiện khi khách đã có phiên, tức đã xác thực OTP tại cơ sở đó trước đây. Chưa có phiên thì khách khai đối tượng mới ngay trong luồng đặt lịch |
+
+## Vận hành lịch: lễ tân, ca, nghỉ phép
+
+| Mã | Quy tắc |
+|---|---|
+| BR-30 | Lễ tân tạo lịch tại quầy hoặc qua điện thoại: không giữ chỗ, lịch xác nhận ngay. Không áp BR-06 (đặt trước X giờ, xa nhất Y ngày), vẫn áp mọi ràng buộc tài nguyên (BR-01 đến BR-05, BR-50 đến BR-54). Được đặt giờ lệch lưới (BR-58). Khách vãng lai không cần số điện thoại, ghi tên "Khách lẻ" |
+| BR-31 | Mỗi mục lịch hẹn ghi khách **chọn đích danh** hay **"Bất kỳ ai"**. Trên trang khách, chọn một người ở bước chọn thợ là đích danh. Lễ tân tạo lịch thì mặc định "Bất kỳ ai", kể cả khi bấm từ cột của một người; tick "Khách yêu cầu đích danh" mới tính là đích danh |
+| BR-32 | Đổi giờ, đổi người bằng kéo thả: lịch "Bất kỳ ai" đổi ngay, có Hoàn tác 5 giây. Lịch đích danh mà đổi sang người khác thì hỏi lại; mặc định gửi email báo khách kèm nút "Đồng ý" và "Chọn lại giờ". Khách chưa trả lời thì lịch vẫn đổi và mang dấu "Chưa xác nhận đổi người". Giá giữ nguyên (BR-12). Tài nguyên cũ bận ở giờ mới thì hệ thống chọn tài nguyên khác cùng loại |
+| BR-33 | Khi phải hỏi ý khách (đổi người, nghỉ phép), hạn trả lời là 24 giờ sau khi gửi nhưng không muộn hơn 2 giờ trước giờ hẹn. Quá hạn thì lễ tân gọi điện; hệ thống không tự hủy lịch |
+| BR-34 | Lịch bị ảnh hưởng (nghỉ phép, bớt ca) xử lý theo cách khách đã chọn: "Bất kỳ ai" thì đổi sang người khác cùng giờ; đích danh thì hỏi ý (BR-33); không ai trống thì dời giờ hoặc hủy và báo khách, cơ sở hủy thì hoàn cọc 100% (BR-24). Đơn nghỉ hay ca mới chỉ lưu được khi mọi lịch đã có cách xử lý |
+| BR-35 | Ca làm có thể có nhiều khung trong một ngày và được bắt đầu trước giờ mở cửa (để chuẩn bị, BR-54). Bớt ca mà còn lịch thì các lịch đó vào danh sách "Cần xếp lại" và xử lý theo BR-34. Khoảng giờ mở cửa không có ai trực thì màn Xếp ca cảnh báo |
+| BR-36 | Kỹ thuật viên chỉ thấy lịch của mình, kể cả đoạn chuẩn bị, và tự cập nhật Bắt đầu, Xong. Số điện thoại khách ẩn với kỹ thuật viên, trừ khi cơ sở bật "Kỹ thuật viên thấy số điện thoại khách" ở Chính sách (mặc định tắt) |
 
 ## Cấu hình dịch vụ và giờ trống
 
@@ -132,6 +144,11 @@ Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-h
 | Giữ chỗ đã hết hạn nhưng job dọn chưa chạy | Giờ đó vẫn hiện là trống (VD9) | BR-07 |
 | Sửa thời lượng nhuộm khi đã có 6 lịch đặt trước | 6 lịch giữ thời lượng và giá cũ | BR-59 |
 | Hai biến thể Tắm sấy cùng khớp chó 10 kg | Không cho lưu, báo biến thể nào trùng | BR-55 |
+| Lễ tân đặt lịch cho khách đang đứng ở quầy, giờ bắt đầu là 5 phút nữa | Được, không vướng "đặt trước ít nhất 2 giờ" | BR-30 |
+| Lễ tân bấm ô ở cột Lan để tạo lịch, không tick "đích danh" | Lịch là "Bất kỳ ai"; sau này Lan nghỉ thì đổi người không cần hỏi | BR-31, BR-34 |
+| Kéo lịch khách chọn Mai sang cột Lan | Hỏi lại, gửi email báo khách; giá không đổi | BR-32, BR-12 |
+| Khách không trả lời email hỏi ý, còn 2 giờ tới giờ hẹn | Lễ tân thấy cần gọi; lịch không tự hủy | BR-33 |
+| Bớt ca Hùng thành 10:00–15:00 khi còn lịch 16:00 | Lưu thì lịch 16:00 vào "Cần xếp lại" | BR-35, BR-34 |
 
 ## Câu hỏi nghiệp vụ còn mở
 
