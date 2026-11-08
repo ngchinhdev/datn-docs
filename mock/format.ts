@@ -18,3 +18,10 @@ export function formatPhone(e164: string) {
   const national = e164.replace(/^\+84/, '0');
   return `${national.slice(0, 4)} ${national.slice(4, 7)} ${national.slice(7)}`;
 }
+
+/** `1 giờ 45`, `2 giờ`, `45 phút`: how long a customer stays. */
+export const formatDuration = (minutes: number) => {
+  if (minutes < 60) return `${minutes} phút`;
+  const rest = minutes % 60;
+  return `${Math.floor(minutes / 60)} giờ${rest ? ` ${rest}` : ''}`;
+};
