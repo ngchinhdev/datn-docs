@@ -274,6 +274,23 @@ export interface StaffTimeOff {
   rejectReason?: string;
 }
 
+/**
+ * Appointments left without their person after a shift was cut short (BR-35): dealt with like the
+ * ones a leave request touches, then the entry goes.
+ */
+export interface Requeue {
+  id: string;
+  resourceId: string;
+  /** Local date `YYYY-MM-DD` of the shortened shift. */
+  date: string;
+  /** What changed, e.g. "Còn làm 10:00–15:00". */
+  reason: string;
+  /** ISO 8601, UTC. */
+  createdAt: string;
+  appointmentIds: string[];
+  handling: Record<string, LeaveHandling>;
+}
+
 /** One field a customer fills in for the person or thing being served (BR-71). */
 export type SubjectField =
   | {

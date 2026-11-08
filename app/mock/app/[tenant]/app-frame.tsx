@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 import { navByRole, tabIds } from '@/components/mock/app-nav';
 import { ExpiredScreen } from '@/components/mock/expired-screen';
+import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useStaffStore } from '@/components/mock/staff-store';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
@@ -46,6 +47,9 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   const toast = useToast();
   const router = useRouter();
   const { staff } = useStaffStore();
+  const { leaves, requeues } = useScheduleStore();
+  /** Requests waiting for a decision, and shifts cut short that left appointments to place. */
+  const waiting = leaves.filter((l) => l.status === 'pending').length + requeues.length;
   const { entitlements: plan, daysLeft, can } = useSubscription();
   const role = staffRoleOf(searchParams.get('role'));
   const branch =
@@ -70,7 +74,9 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
     href: appHref(entry.path),
     icon: entry.icon,
     ...(entry.group ? { group: entry.group } : {}),
-    ...(entry.badge ? { badge: entry.badge } : {}),
+    ...((entry.id === 'time-off' ? waiting : entry.badge)
+      ? { badge: entry.id === 'time-off' ? waiting : entry.badge! }
+      : {}),
     ...(entry.feature && !can(entry.feature) ? { locked: true } : {}),
     current: isCurrent(entry.path),
   }));

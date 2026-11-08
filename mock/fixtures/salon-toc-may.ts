@@ -690,6 +690,13 @@ const ahead: Appointment[] = [
   appointment('may-a-lam2', 'may-c-lam', at('2026-11-10', '17:30'), 'confirmed', [
     { variantId: 'may-wash-std', subjectId: 'may-s-lam', resourceIds: ['may-lan', 'may-wash-1'] },
   ]),
+  // Mai is busier than Hùng that day, so Hùng is the one BR-57 would pick for Anh Kha.
+  appointment('may-a-son-tue', 'may-c-son', at('2026-11-10', '10:00'), 'confirmed', [
+    { variantId: 'may-cut-long', subjectId: 'may-s-son', resourceIds: ['may-mai', 'may-chair-1'] },
+  ]),
+  appointment('may-a-tam-tue', 'may-c-tam', at('2026-11-10', '16:00'), 'confirmed', [
+    { variantId: 'may-cut-short', subjectId: 'may-s-tam', resourceIds: ['may-mai', 'may-chair-3'] },
+  ]),
   appointment('may-a-hanh', 'may-c-hanh', at('2026-11-10', '17:00'), 'confirmed', [
     {
       variantId: 'may-cut-long',

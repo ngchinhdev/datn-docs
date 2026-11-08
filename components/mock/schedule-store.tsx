@@ -5,6 +5,7 @@ import {
   tenantFixtures,
   type Appointment,
   type Customer,
+  type Requeue,
   type ServedSubject,
   type Shift,
   type StaffTimeOff,
@@ -30,6 +31,11 @@ interface ScheduleStore {
   leaves: StaffTimeOff[];
   addLeaves: (leaves: StaffTimeOff[]) => void;
   replaceLeave: (leave: StaffTimeOff) => void;
+  /** Appointments waiting for a new person after a shift was cut (BR-35). */
+  requeues: Requeue[];
+  addRequeues: (requeues: Requeue[]) => void;
+  replaceRequeue: (requeue: Requeue) => void;
+  removeRequeue: (id: string) => void;
   /** Technicians see customers' phone numbers (BR-36). */
   staffSeesCustomerPhone: boolean;
   setStaffSeesCustomerPhone: (value: boolean) => void;
@@ -54,6 +60,7 @@ export function ScheduleStoreProvider({
   const [servedSubjects, setSubjects] = useState<ServedSubject[]>(fixture.servedSubjects);
   const [shifts, setShifts] = useState<Shift[]>(fixture.shifts);
   const [leaves, setLeaves] = useState<StaffTimeOff[]>(fixture.staffTimeOff);
+  const [requeues, setRequeues] = useState<Requeue[]>([]);
   const [staffSeesCustomerPhone, setStaffSeesCustomerPhone] = useState(
     fixture.staffSeesCustomerPhone,
   );
@@ -72,6 +79,15 @@ export function ScheduleStoreProvider({
   }, []);
   const replaceLeave = useCallback((leave: StaffTimeOff) => {
     setLeaves((list) => list.map((l) => (l.id === leave.id ? leave : l)));
+  }, []);
+  const addRequeues = useCallback((added: Requeue[]) => {
+    setRequeues((list) => [...list, ...added]);
+  }, []);
+  const replaceRequeue = useCallback((requeue: Requeue) => {
+    setRequeues((list) => list.map((r) => (r.id === requeue.id ? requeue : r)));
+  }, []);
+  const removeRequeue = useCallback((id: string) => {
+    setRequeues((list) => list.filter((r) => r.id !== id));
   }, []);
   const addCustomer = useCallback((customer: Customer) => {
     setCustomers((list) => [...list, customer]);
@@ -103,6 +119,10 @@ export function ScheduleStoreProvider({
       leaves,
       addLeaves,
       replaceLeave,
+      requeues,
+      addRequeues,
+      replaceRequeue,
+      removeRequeue,
       staffSeesCustomerPhone,
       setStaffSeesCustomerPhone,
     }),
@@ -121,6 +141,10 @@ export function ScheduleStoreProvider({
       leaves,
       addLeaves,
       replaceLeave,
+      requeues,
+      addRequeues,
+      replaceRequeue,
+      removeRequeue,
       staffSeesCustomerPhone,
     ],
   );
