@@ -11,6 +11,7 @@ import {
   PLAN_CODES,
   daysLeft,
   downgradeBlock,
+  monthlyEquivalent,
   periodEnd,
   periodPrice,
   planFeatureList,
@@ -181,7 +182,7 @@ export function PlanPurchase({ heading, headingId }: { heading: string; headingI
     const shared = {
       id: code,
       name: plan.name,
-      price: formatVnd(total / BigInt(months)),
+      price: months === 1 ? formatVnd(total) : `≈ ${formatVnd(monthlyEquivalent(plan, months))}`,
       unit: ' / tháng',
       note:
         months === 1

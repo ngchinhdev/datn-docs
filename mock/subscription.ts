@@ -151,6 +151,10 @@ export function periodPrice(plan: Plan, months: PeriodMonths): bigint {
   return roundToThousand((plan.monthlyPriceVnd * BigInt(months) * (100n - discount)) / 100n);
 }
 
+/** What a month costs on average in a period, to the nearest thousand: 3.830.000 over 12 months is 319.000. */
+export const monthlyEquivalent = (plan: Plan, months: PeriodMonths) =>
+  roundToThousand(periodPrice(plan, months) / BigInt(months));
+
 /**
  * BR-85: moving up in the middle of a period costs the difference of the monthly prices for the
  * days left, over 30, rounded up to a thousand. The end of the period does not move.
