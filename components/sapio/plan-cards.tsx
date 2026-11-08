@@ -54,8 +54,10 @@ export function PlanCards({ plans }: { plans: PlanCardData[] }) {
               {plan.badge && <span className="sp-badge sp-badge--pending">{plan.badge}</span>}
             </div>
             <div>
-              <span className="sp-plan__price">{plan.price}</span>
-              <span className="sp-plan__unit">{plan.unit}</span>
+              <span className="whitespace-nowrap">
+                <span className="sp-plan__price">{plan.price}</span>
+                <span className="sp-plan__unit">{plan.unit}</span>
+              </span>
               <div className="sp-plan__note">{plan.note}</div>
             </div>
             <ul className="sp-plan__features">

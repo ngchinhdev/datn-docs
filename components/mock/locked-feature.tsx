@@ -12,7 +12,7 @@ import { formatVnd } from '@/mock/format';
 import { screenForAppPath } from '@/mock/screens';
 import { fixtureBySlug } from '@/mock/selection';
 import { featureInfo, plans, upgradeCharge, type FeatureCode } from '@/mock/subscription';
-import { formatFullDate } from '@/mock/time';
+import { addDays, formatFullDate } from '@/mock/time';
 
 /** The page of a feature the plan does not have: what it does, what upgrading costs today (BR-85, BR-87). */
 function LockedFeature({
@@ -64,10 +64,13 @@ function LockedFeature({
             <dl className="sp-dialog__facts">
               <dt>Gói hiện tại</dt>
               <dd>
-                {current.name} · {formatVnd(current.monthlyPriceVnd)}/tháng
+                {current.name} ·{' '}
+                <span className="whitespace-nowrap">
+                  {formatVnd(current.monthlyPriceVnd)}/tháng
+                </span>
               </dd>
               <dt>Gói {target.name}</dt>
-              <dd>{formatVnd(target.monthlyPriceVnd)}/tháng</dd>
+              <dd className="whitespace-nowrap">{formatVnd(target.monthlyPriceVnd)}/tháng</dd>
               <dt>Còn lại của kỳ này</dt>
               <dd>
                 {left} ngày (đến {formatFullDate(end).slice(0, 5)})
@@ -77,17 +80,21 @@ function LockedFeature({
             </dl>
             <p className="sp-plan__note m-0">
               Phần chênh {formatVnd(target.monthlyPriceVnd - current.monthlyPriceVnd)}/tháng ×{' '}
-              {left}/30 ngày, làm tròn lên tới nghìn đồng. Từ {formatFullDate(end).slice(0, 5)} gia
-              hạn theo giá gói {target.name}.
+              {left}/30 ngày, làm tròn lên tới nghìn đồng. Từ{' '}
+              {formatFullDate(addDays(end, 1)).slice(0, 5)} gia hạn theo giá gói {target.name}.
             </p>
-            <div className="flex flex-wrap justify-end gap-(--space-2)">
+            <div className="flex flex-col gap-(--space-2) sm:flex-row sm:justify-end">
               <Link
                 href={appHref('settings/plan')}
-                className="sp-btn sp-btn--secondary no-underline"
+                className="sp-btn sp-btn--secondary no-underline max-sm:w-full!"
               >
                 So sánh hai gói
               </Link>
-              <Button variant="primary" onClick={() => ask({ kind: 'upgrade', planCode: 'pro' })}>
+              <Button
+                variant="primary"
+                className="max-sm:w-full!"
+                onClick={() => ask({ kind: 'upgrade', planCode: 'pro' })}
+              >
                 Nâng cấp, trả {formatVnd(charge)}
               </Button>
             </div>
