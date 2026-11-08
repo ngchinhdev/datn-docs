@@ -233,7 +233,7 @@ export function SegmentTable({
                 </td>
                 <td>
                   <div
-                    className="sp-segtable__uses"
+                    className="sp-segtable__uses min-w-0!"
                     role="group"
                     aria-label={`Đoạn ${n} chiếm`}
                     aria-describedby={e.uses ? `seg-${i}-uses-err` : undefined}

@@ -1,12 +1,13 @@
 'use client';
 
-import { Plus } from 'lucide-react';
+import { Copy, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/sapio/button';
 import { CheckRow, Field, FormSection } from '@/components/sapio/form';
 import { SegmentTable } from '@/components/sapio/segment-table';
 import { SegmentTimeline, TimelineLegend } from '@/components/sapio/segment-timeline';
+import { Tip } from '@/components/sapio/tooltip';
 import { cn } from '@/lib/utils';
 import { formatVnd } from '@/mock/format';
 import { matchRange, describeMatch, setMatchEnum, setMatchRange } from '@/mock/service-edit';
@@ -211,7 +212,7 @@ export function VariantsSection({ ed }: { ed: ServiceEditor }) {
               return (
                 <tr key={v.id} aria-selected={current}>
                   <td>
-                    <span className="sp-table__primary whitespace-nowrap">
+                    <span className="sp-table__primary">
                       <Link
                         href={`${pathname}?variant=${v.id}`}
                         replace
@@ -225,11 +226,7 @@ export function VariantsSection({ ed }: { ed: ServiceEditor }) {
                         {v.name || 'Chưa đặt tên'}
                       </Link>
                     </span>
-                    {current && (
-                      <span className="sp-table__secondary whitespace-nowrap">
-                        Đang sửa bên dưới
-                      </span>
-                    )}
+                    {current && <span className="sp-table__secondary">Đang sửa bên dưới</span>}
                   </td>
                   <td>
                     {bySubject ? (
@@ -250,19 +247,30 @@ export function VariantsSection({ ed }: { ed: ServiceEditor }) {
                   <td className="sp-table__num">
                     <span className="sp-num whitespace-nowrap">{priceText(v, capable)}</span>
                   </td>
-                  <td className="sp-table__actions whitespace-nowrap">
-                    <Button variant="ghost" size="sm" onClick={() => ed.addVariant(v)}>
-                      Nhân bản
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={draft.variants.length === 1}
-                      aria-label={`Xóa biến thể ${v.name}`}
-                      onClick={() => ed.removeVariant(v.id)}
-                    >
-                      Xóa
-                    </Button>
+                  <td className="sp-table__actions">
+                    <span className="inline-flex items-center gap-1">
+                      <Tip label="Nhân bản" side="bottom-end">
+                        <button
+                          type="button"
+                          className="sp-icon-btn"
+                          aria-label={`Nhân bản biến thể ${v.name}`}
+                          onClick={() => ed.addVariant(v)}
+                        >
+                          <Copy size={16} aria-hidden="true" />
+                        </button>
+                      </Tip>
+                      <Tip label="Xóa" side="bottom-end">
+                        <button
+                          type="button"
+                          className="sp-icon-btn"
+                          aria-label={`Xóa biến thể ${v.name}`}
+                          disabled={draft.variants.length === 1}
+                          onClick={() => ed.removeVariant(v.id)}
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
+                      </Tip>
+                    </span>
                   </td>
                 </tr>
               );

@@ -64,7 +64,7 @@ export function ServiceListScreen({ tenantSlug }: { tenantSlug: string }) {
   const columns: Column<Service>[] = [
     {
       key: 'name',
-      width: '25%',
+      width: '24%',
       label: 'Dịch vụ',
       cell: (s) => (
         <>
@@ -77,7 +77,7 @@ export function ServiceListScreen({ tenantSlug }: { tenantSlug: string }) {
     },
     {
       key: 'variants',
-      width: '9%',
+      width: '10%',
       label: 'Biến thể',
       numeric: true,
       cell: (s) => s.variants.length,
@@ -90,7 +90,7 @@ export function ServiceListScreen({ tenantSlug }: { tenantSlug: string }) {
     },
     {
       key: 'price',
-      width: '15%',
+      width: '14%',
       label: 'Giá từ',
       numeric: true,
       cell: (s) => (
@@ -99,14 +99,14 @@ export function ServiceListScreen({ tenantSlug }: { tenantSlug: string }) {
     },
     {
       key: 'staff',
-      width: '17%',
+      width: '16%',
       label: 'Người làm được',
       numeric: true,
       cell: (s) => capableStaff(s, staff).length,
     },
     {
       key: 'online',
-      width: '16%',
+      width: '18%',
       label: 'Nhận đặt online',
       cell: (s) => (
         <label className="sp-switch justify-start!">
@@ -159,6 +159,7 @@ export function ServiceListScreen({ tenantSlug }: { tenantSlug: string }) {
       ) : (
         <DataTable
           label="Danh sách dịch vụ"
+          minWidth={0}
           columns={columns}
           rows={rows}
           rowKey={(s) => s.id}
