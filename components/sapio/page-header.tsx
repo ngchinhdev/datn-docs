@@ -14,6 +14,7 @@ export function PageHeader({
   crumbs,
   actions,
   hideActionsOnPhone = false,
+  hideCrumbsOnPhone = false,
 }: {
   title: string;
   sub?: ReactNode;
@@ -22,12 +23,14 @@ export function PageHeader({
   actions?: ReactNode;
   /** The action moves to the phone header (`PhoneHeaderAction`). */
   hideActionsOnPhone?: boolean;
+  /** The page already has a way back on phones (a "‹ Dịch vụ" button), so the crumbs go. */
+  hideCrumbsOnPhone?: boolean;
 }) {
   return (
     <div className="sp-page-head">
       <div className="min-w-0">
         {crumbs && (
-          <nav aria-label="Vị trí">
+          <nav aria-label="Vị trí" className={cn(hideCrumbsOnPhone && 'max-md:hidden')}>
             <ol className="sp-breadcrumb">
               {crumbs.map((crumb, i) => {
                 const last = i === crumbs.length - 1;

@@ -66,6 +66,7 @@ export function ServiceDetailScreen({
   return (
     <>
       <PageHeader
+        hideCrumbsOnPhone
         crumbs={[
           { label: 'Cài đặt', href: appHref('settings') },
           { label: 'Dịch vụ', href: appHref('settings/services') },
