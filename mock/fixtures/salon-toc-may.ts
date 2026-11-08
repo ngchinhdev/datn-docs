@@ -529,7 +529,7 @@ export const salonTocMay: TenantFixture = {
   ],
   resourceTypes: [
     { id: 'may-rt-stylist', tenantId, name: 'Thợ', isStaff: true },
-    { id: 'may-rt-chair', tenantId, name: 'Ghế làm tóc', isStaff: false },
+    { id: 'may-rt-chair', tenantId, name: 'Ghế cắt', isStaff: false },
     { id: 'may-rt-wash', tenantId, name: 'Giường gội', isStaff: false },
   ],
   resources,

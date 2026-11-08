@@ -29,6 +29,8 @@ export interface ResourceCalendarProps {
   /** ISO 8601, UTC. */
   now: string;
   label: string;
+  /** Narrow ruler and columns, for a preview in a side column. */
+  compact?: boolean;
 }
 
 const SLOT_MINUTES = 15;
@@ -53,6 +55,7 @@ export function ResourceCalendar({
   closedLabel,
   now,
   label,
+  compact = false,
 }: ResourceCalendarProps) {
   const dayStart = localToUtc(date, from);
   const dayEnd = localToUtc(date, to);
@@ -69,7 +72,12 @@ export function ResourceCalendar({
       className="sp-cal"
       aria-label={label}
       role="region"
-      style={{ '--cols': columns.length } as CSSProperties}
+      style={
+        {
+          '--cols': columns.length,
+          ...(compact ? { '--ruler-width': '44px', '--column-min-width': '72px' } : {}),
+        } as CSSProperties
+      }
     >
       <div className="sp-cal__head" style={{ gridRow: 1, gridColumn: 1 }} />
       <div

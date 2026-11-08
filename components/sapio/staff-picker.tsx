@@ -15,6 +15,8 @@ export interface StaffOption {
   displayName: string;
   title: string;
   specialty: string;
+  /** What this person charges for the chosen service (BR-56), e.g. "550.000 ₫". */
+  price?: string | undefined;
   /** "Sớm nhất 09:45"; `null` when fully booked on the day being viewed. */
   earliest: string | null;
   /** Shown under "Hết giờ ngày này", e.g. "Sớm nhất CN 08/11". */
@@ -30,6 +32,8 @@ export interface StaffPickerProps {
   context: string;
   /** Earliest slot for "Bất kỳ ai". */
   anyEarliest: string | null;
+  /** What "Bất kỳ ai" charges: the lowest price among the people who can do it (BR-56). */
+  anyPrice?: string | undefined;
   /** Word for staff in this tenant, e.g. "Thợ". */
   noun: string;
 }
@@ -64,18 +68,27 @@ export function StaffOptionList({
   value,
   onChange,
   anyEarliest,
+  anyPrice,
   noun,
   compact = false,
-}: Pick<StaffPickerProps, 'options' | 'value' | 'onChange' | 'anyEarliest' | 'noun'> & {
+}: Pick<
+  StaffPickerProps,
+  'options' | 'value' | 'onChange' | 'anyEarliest' | 'anyPrice' | 'noun'
+> & {
   compact?: boolean;
 }) {
   const rows = [
     {
       id: ANY_STAFF,
       name: 'Bất kỳ ai',
-      sub: compact
-        ? `Xếp ${noun.toLowerCase()} trống sớm nhất`
-        : `Xếp ${noun.toLowerCase()} trống sớm nhất, nhiều giờ để chọn nhất`,
+      sub: [
+        compact
+          ? `Xếp ${noun.toLowerCase()} trống sớm nhất`
+          : `Xếp ${noun.toLowerCase()} trống sớm nhất, nhiều giờ để chọn nhất`,
+        anyPrice,
+      ]
+        .filter(Boolean)
+        .join(' · '),
       right: anyEarliest,
       full: false,
       nextDay: undefined as string | undefined,
@@ -83,7 +96,7 @@ export function StaffOptionList({
     ...options.map((o) => ({
       id: o.id,
       name: o.displayName,
-      sub: `${o.title} · ${o.specialty}`,
+      sub: [o.title, o.specialty, o.price].filter(Boolean).join(' · '),
       right: o.earliest,
       full: o.earliest === null,
       nextDay: o.nextDay,
@@ -161,6 +174,7 @@ export function StaffPicker({
   onChange,
   context,
   anyEarliest,
+  anyPrice,
   noun,
 }: StaffPickerProps) {
   const [open, setOpen] = useState(false);
@@ -212,8 +226,8 @@ export function StaffPicker({
           <span className="body font-semibold">{chosen ? chosen.displayName : 'Bất kỳ ai'}</span>
           <span className="body-sm text-(--ink-muted)">
             {chosen
-              ? `${chosen.title} · ${chosen.specialty}`
-              : `Xếp ${noun.toLowerCase()} trống sớm nhất`}
+              ? [chosen.title, chosen.specialty, chosen.price].filter(Boolean).join(' · ')
+              : [`Xếp ${noun.toLowerCase()} trống sớm nhất`, anyPrice].filter(Boolean).join(' · ')}
           </span>
         </span>
         <span className="body-sm flex items-center gap-0.5 font-semibold text-(--accent)">
@@ -252,6 +266,7 @@ export function StaffPicker({
               value={draft}
               onChange={setDraft}
               anyEarliest={anyEarliest}
+              anyPrice={anyPrice}
               noun={noun}
             />
             <Button

@@ -25,28 +25,36 @@ export function SettingsFrame({
   const { can } = useSubscription();
   const base = `/mock/app/${tenantSlug}`;
   const isRoot = pathname === `${base}/settings`;
+  // A page inside a section ("Dịch vụ › Nhuộm tóc") goes back to the section, not to the menu.
+  const section = settingsEntries.find((entry) => pathname.startsWith(`${base}/${entry.path}/`));
+
+  // A detail page with a preview (DetailPage) has no menu; its breadcrumb takes that place.
+  const detail = pathname.startsWith(`${base}/settings/services/`);
 
   return (
     <div className="sp-shell__content">
       <div className="flex flex-wrap items-start gap-(--space-6)">
-        <SettingsNav
-          items={settingsEntries.map((entry) => ({
-            id: entry.id,
-            label: entry.label,
-            href: appHref(entry.path),
-            locked: entry.feature ? !can(entry.feature) : false,
-            current:
-              pathname === `${base}/${entry.path}` || pathname.startsWith(`${base}/${entry.path}/`),
-          }))}
-        />
+        {!detail && (
+          <SettingsNav
+            items={settingsEntries.map((entry) => ({
+              id: entry.id,
+              label: entry.label,
+              href: appHref(entry.path),
+              locked: entry.feature ? !can(entry.feature) : false,
+              current:
+                pathname === `${base}/${entry.path}` ||
+                pathname.startsWith(`${base}/${entry.path}/`),
+            }))}
+          />
+        )}
         <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-(--space-5)">
           {!isRoot && (
             <Link
-              href={appHref('settings')}
+              href={appHref(section ? section.path : 'settings')}
               className="sp-btn sp-btn--ghost -ms-(--space-3) self-start no-underline min-[901px]:hidden!"
             >
               <ChevronLeft size={16} aria-hidden="true" />
-              Cài đặt
+              {section ? section.label : 'Cài đặt'}
             </Link>
           )}
           {children}
