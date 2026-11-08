@@ -7,6 +7,8 @@ import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { useQueryState } from '@/components/mock/use-query-state';
 import { Button } from '@/components/sapio/button';
+import { ConfirmDialog } from '@/components/sapio/confirm-dialog';
+import { useToast } from '@/components/sapio/toast';
 import { SegmentedNav } from '@/components/sapio/segmented';
 import { ResourceCalendar, type CalendarTarget } from '@/components/sapio/resource-calendar';
 import { StatusBadge } from '@/components/sapio/status-badge';
@@ -14,8 +16,11 @@ import { useMockNow } from '@/components/sapio/use-mock-now';
 import { dayHours } from '@/mock/hours';
 import { fixtureBySlug } from '@/mock/selection';
 import { ANY_STAFF } from '@/mock/availability';
+import type { Appointment } from '@/mock/fixtures';
+import { formatVnd } from '@/mock/format';
+import { itemArrival, staffOf } from '@/mock/move';
 import { firstFreeMinute } from '@/mock/placement';
-import { localMinutes } from '@/mock/shifts';
+import { isoOf, localMinutes, minutesOf } from '@/mock/shifts';
 import {
   dayAppointments,
   freeResourcesAt,
@@ -24,13 +29,24 @@ import {
   resourceColumns,
   staffColumns,
 } from '@/mock/reception';
-import { addDays, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
+import { addDays, formatDay, formatRange, formatTime, localDate, MOCK_NOW } from '@/mock/time';
 import { useAppointmentActions } from '../_reception/actions';
 import { CreatePanel } from '../_reception/create-panel';
+import { MoveDialog } from '../_reception/move-dialog';
 import { DetailPanel, ViewTabs, type CalendarView } from '../_reception/parts';
 import { useReception } from '../_reception/use-reception';
+import { useCalendarDrag, type DragTarget } from '../_reception/use-calendar-drag';
 
 const WIDE_QUERY = '(min-width: 1200px)';
+
+/** When the customer is done with an appointment (the end of its last work or wait part). */
+const endOf = (appt: Appointment) =>
+  appt.bookings
+    .filter((b) => b.kind === 'work' || b.kind === 'wait')
+    .reduce((end, b) => (b.endAt > end ? b.endAt : end), appt.startAt);
+
+const minuteText = (minute: number) =>
+  `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
 
 export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
   const fixture = useLiveFixture(tenantSlug);
@@ -54,6 +70,12 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
     customerId: string | null;
   } | null>(null);
   const [targets, setTargets] = useState<CalendarTarget[]>([]);
+  /** A carried block dropped on another person while the customer named one (BR-32). */
+  const [swap, setSwap] = useState<{ appt: Appointment; target: DragTarget } | null>(null);
+  const [sendEmail, setSendEmail] = useState(true);
+  /** The keyboard way to move one: "Dời giờ, đổi người". */
+  const [moving, setMoving] = useState<Appointment | null>(null);
+  const toast = useToast();
   const cancelled = appointments.filter(
     (a) => a.status === 'cancelled' && localDate(a.startAt) === date,
   );
@@ -137,16 +159,95 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
     });
   }
 
+  const staffName = (id: string) => L.name(id);
+  const nameInSentence = (appt: Appointment) => {
+    const who = L.who(appt);
+    return who.charAt(0).toLowerCase() + who.slice(1);
+  };
+
+  /** Puts the moved appointment on the calendar and offers to take it back for 5 seconds. */
+  function commitMove(appt: Appointment, moved: Appointment, text: string) {
+    replace(moved);
+    toast({ text, undo: () => replace(appt) });
+  }
+
+  /** Dropped on a valid place: "Bất kỳ ai" changes at once, a named person is asked about (BR-32). */
+  function handleDrop(appt: Appointment, target: DragTarget) {
+    const moved = target.moved;
+    if (!moved) return;
+    const person = target.columnId;
+    const changesPerson = person !== appt.items[0]?.staffResourceId;
+    if (changesPerson && appt.items.some((i) => i.staffChoice === 'chosen')) {
+      setSendEmail(true);
+      setSwap({ appt, target });
+      return;
+    }
+    commitMove(
+      appt,
+      moved,
+      `Đã dời ${L.who(appt)} sang ${formatTime(moved.startAt)}, ${staffName(person)}.`,
+    );
+  }
+
+  function confirmSwap() {
+    const moved = swap?.target.moved;
+    if (!swap || !moved) return;
+    const { appt, target } = swap;
+    commitMove(
+      appt,
+      { ...moved, items: moved.items.map((i) => ({ ...i, swapUnconfirmed: true })) },
+      `Đã đổi ${L.who(appt)} sang ${staffName(target.columnId)}.${sendEmail ? ' Đã gửi email báo khách.' : ''} Lịch mang dấu "Chưa xác nhận đổi người".`,
+    );
+    setSwap(null);
+  }
+
+  const drag = useCalendarDrag({
+    enabled: view === 'staff' && hours.open !== null,
+    fixture,
+    date,
+    now,
+    from: hours.from,
+    to: hours.to,
+    onDrop: handleDrop,
+    onRejected: (reason) => toast({ text: reason, tone: 'danger' }),
+  });
+
   // `?staff=` narrows the staff view to one person (the "Xem lịch" button of the staff list).
   const [staffOnly, setStaffOnly] = useQueryState('staff', '');
-  const allColumns = (view === 'staff' ? staffColumns : resourceColumns)(
+  const pressBlock = (id: string) => {
+    if (drag.consumeClick()) return;
+    selectAppointment(id);
+  };
+  const baseColumns = (view === 'staff' ? staffColumns : resourceColumns)(
     fixture,
     day,
     now,
     selectedId,
-    selectAppointment,
+    pressBlock,
     date,
   );
+  // While a block is carried: it fades where it was and a copy follows the pointer.
+  const carried = drag.active ? day.find((a) => a.id === drag.active!.apptId) : undefined;
+  const target = drag.active?.target ?? null;
+  const allColumns = baseColumns.map((column) => {
+    const preview =
+      carried && target && target.columnId === column.id
+        ? previewBlock(baseColumns, carried, target)
+        : null;
+    return {
+      ...column,
+      blocks: [
+        ...column.blocks.map((block) => ({
+          ...block,
+          ...(view === 'staff' && block.draggable
+            ? { onPointerDown: drag.onBlockPointerDown(block.id) }
+            : {}),
+          ...(carried && block.id === carried.id ? { ghost: true } : {}),
+        })),
+        ...(preview ? [preview] : []),
+      ],
+    };
+  });
   const only = view === 'staff' ? allColumns.find((c) => c.id === staffOnly) : undefined;
   const columns = only ? [only] : allColumns;
   const [phoneColumn, setPhoneColumn] = useState(columns[0]?.id ?? '');
@@ -159,6 +260,31 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
           a.bookings.some((b) => b.resourceId === phoneCol.id),
       )
     : undefined;
+
+  /** The carried block as it would sit at the target: its segments moved, its line rewritten. */
+  function previewBlock(columns: typeof baseColumns, appt: Appointment, at: DragTarget) {
+    const original = columns.flatMap((c) => c.blocks).find((b) => b.id === appt.id);
+    if (!original) return null;
+    const delta = localMinutes(date, '00:00') + at.minute - minutesOf(itemArrival(appt, 0));
+    const shift = (iso: string) => isoOf(minutesOf(iso) + delta);
+    const segments = original.segments.map((seg) => ({
+      ...seg,
+      startAt: shift(seg.startAt),
+      endAt: shift(seg.endAt),
+    }));
+    const seen = segments.filter((seg) => seg.kind !== 'buffer');
+    const range = formatRange(seen[0]?.startAt ?? '', seen.at(-1)?.endAt ?? '');
+    const where = at.resourcesAfter.length ? ` · ${at.resourcesAfter.join(', ')}` : '';
+    return {
+      ...original,
+      id: `${appt.id}-carried`,
+      selected: false,
+      inset: false,
+      dragging: true,
+      segments,
+      ...(original.meta ? { meta: `${range}${where}` } : {}),
+    };
+  }
 
   const calendarLabel = `Lịch ${view === 'staff' ? 'nhân viên' : 'tài nguyên'} ${branch.name}, ${formatDay(date)}`;
 
@@ -295,6 +421,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
               now={now}
               onEmptyPress={onEmptyPress}
               targets={targets}
+              drops={drag.zones}
             />
           </div>
           <div className="md:hidden">
@@ -311,6 +438,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
                 now={now}
                 onEmptyPress={onEmptyPress}
                 targets={targets}
+                drops={drag.zones}
               />
             )}
           </div>
@@ -333,6 +461,15 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
             {(['held', 'confirmed', 'checked_in', 'completed', 'no_show'] as const).map((s) => (
               <StatusBadge key={s} status={s} />
             ))}
+            {view === 'staff' && (
+              <span className="body-sm flex items-center gap-(--space-2) text-(--ink-muted)">
+                <span
+                  aria-hidden="true"
+                  className="h-3.5 w-6 rounded-(--radius-xs) bg-[color-mix(in_oklab,var(--brand-soft)_70%,transparent)] shadow-[0_0_0_1px_var(--line)]"
+                />
+                Kéo khối sang giờ hoặc cột khác; vùng gạch chéo không thả được. Esc để hủy.
+              </span>
+            )}
             {view === 'staff' && (
               <span className="body-sm flex items-center gap-(--space-2) text-(--ink-muted)">
                 <span
@@ -371,7 +508,20 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
               onNoShow: () => actions.noShow(selected),
               onCancel: () => actions.cancel(selected),
               onReschedule: () =>
-                notify('Kéo khối lịch hẹn sang giờ mới để đổi giờ (chưa có trong mock).'),
+                staffOf(selected).length > 1
+                  ? notify('Lịch có nhiều người làm: đổi từng mục chưa có trong mock.')
+                  : setMoving(selected),
+              onSwapConfirmed: () => {
+                const done: Appointment = {
+                  ...selected,
+                  items: selected.items.map((i) => ({ ...i, swapUnconfirmed: false })),
+                };
+                replace(done);
+                toast({
+                  text: `Đã ghi nhận ${nameInSentence(selected)} đồng ý đổi người.`,
+                  undo: () => replace(selected),
+                });
+              },
               onAddService: () => notify('Thêm dịch vụ: chưa có trong mock.'),
             }}
           />
@@ -384,7 +534,101 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
           </aside>
         )}
         {actions.dialog}
+        {moving && (
+          <MoveDialog
+            fixture={fixture}
+            appt={moving}
+            date={date}
+            now={now}
+            onClose={() => setMoving(null)}
+            onApply={(t) => {
+              const appt = moving;
+              setMoving(null);
+              handleDrop(appt, t);
+            }}
+          />
+        )}
+        {swap && swap.target.moved && (
+          <ConfirmDialog
+            open
+            title={`Đổi ${nameInSentence(swap.appt)} sang ${staffName(swap.target.columnId)}?`}
+            body={`${L.who(swap.appt)} chọn đích danh ${staffName(swap.appt.items[0]?.staffResourceId ?? '')} khi đặt. Đổi người thì cần báo khách (BR-11).`}
+            facts={[
+              {
+                term: 'Giờ',
+                value: `${formatRange(swap.appt.startAt, endOf(swap.appt))} → ${formatRange(swap.target.moved.startAt, endOf(swap.target.moved))}`,
+              },
+              {
+                term: 'Thợ',
+                value: `${staffName(swap.appt.items[0]?.staffResourceId ?? '')} → ${staffName(swap.target.columnId)}`,
+              },
+              {
+                term: 'Tài nguyên',
+                value: `${swap.target.resourcesBefore.join(', ')} → ${swap.target.resourcesAfter.join(', ')}`,
+              },
+              {
+                term: 'Giá',
+                value: `Giữ ${formatVnd(swap.appt.items.reduce((sum, i) => sum + i.priceVnd, 0n))} (BR-12)`,
+              },
+            ]}
+            backLabel="Giữ như cũ"
+            confirmLabel={`Đổi sang ${staffName(swap.target.columnId)}`}
+            onClose={() => setSwap(null)}
+            onConfirm={confirmSwap}
+          >
+            <label className="sp-check">
+              <input
+                type="checkbox"
+                checked={sendEmail}
+                onChange={(e) => setSendEmail(e.target.checked)}
+              />
+              <span>
+                Gửi email báo {nameInSentence(swap.appt)}
+                <span className="sp-check__hint">
+                  Email có nút &quot;Đồng ý&quot; và &quot;Chọn lại giờ&quot;. Chưa trả lời thì lịch
+                  vẫn đổi; lễ tân thấy dấu &quot;Chưa xác nhận đổi người&quot;.
+                </span>
+              </span>
+            </label>
+          </ConfirmDialog>
+        )}
       </main>
+      {drag.active?.target && carried && (
+        <div
+          className={`sp-drag-label${drag.active.target.ok ? '' : ' sp-drag-label--blocked'}`}
+          style={{
+            position: 'fixed',
+            left: drag.active.x + 14,
+            top: drag.active.y + 14,
+            pointerEvents: 'none',
+            whiteSpace: 'normal',
+            maxWidth: 320,
+          }}
+        >
+          {drag.active.target.ok && drag.active.target.moved ? (
+            <>
+              {formatRange(drag.active.target.moved.startAt, endOf(drag.active.target.moved))} ·{' '}
+              {[staffName(drag.active.target.columnId), ...drag.active.target.resourcesAfter].join(
+                ' · ',
+              )}
+              {carried.items.some((i) => i.staffChoice === 'chosen') &&
+              drag.active.target.columnId !== carried.items[0]?.staffResourceId ? (
+                <small>
+                  Khách chọn đích danh {staffName(carried.items[0]?.staffResourceId ?? '')}: đổi
+                  người phải hỏi ý khách
+                </small>
+              ) : drag.active.target.columnId !== carried.items[0]?.staffResourceId ? (
+                <small>Khách để &quot;Bất kỳ ai&quot;: đổi người không cần hỏi</small>
+              ) : null}
+            </>
+          ) : (
+            <>
+              {minuteText(drag.active.target.minute)} · {staffName(drag.active.target.columnId)}
+              <small>{drag.active.target.reason}</small>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

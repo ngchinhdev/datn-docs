@@ -23,6 +23,10 @@ export interface ConfirmDialogProps {
   /** Shown while `onConfirm` runs: "Đang thu…". */
   pendingLabel?: string;
   tone?: 'primary' | 'danger';
+  /** Label of the button that leaves things as they were; "Quay lại" by default. */
+  backLabel?: string;
+  /** The main button is off until the controls in `children` are valid. */
+  confirmDisabled?: boolean;
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
 }
@@ -37,6 +41,8 @@ export function ConfirmDialog({
   confirmLabel,
   pendingLabel,
   tone = 'primary',
+  backLabel = 'Quay lại',
+  confirmDisabled = false,
   onConfirm,
   onClose,
 }: ConfirmDialogProps) {
@@ -105,9 +111,9 @@ export function ConfirmDialog({
       {children}
       <div className="sp-dialog__actions">
         <Button ref={backRef} variant="secondary" disabled={pending} onClick={onClose}>
-          Quay lại
+          {backLabel}
         </Button>
-        <Button variant={tone} disabled={pending} onClick={confirm}>
+        <Button variant={tone} disabled={pending || confirmDisabled} onClick={confirm}>
           {pending ? (pendingLabel ?? confirmLabel) : confirmLabel}
         </Button>
       </div>

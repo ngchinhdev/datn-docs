@@ -252,7 +252,12 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
               onCollect: () => collect(selected),
               onNoShow: () => actions.noShow(selected),
               onCancel: () => actions.cancel(selected),
-              onReschedule: () => notify('Đổi giờ: chưa có trong mock.'),
+              onReschedule: () => router.push(appHref('calendar')),
+              onSwapConfirmed: () =>
+                replace({
+                  ...selected,
+                  items: selected.items.map((i) => ({ ...i, swapUnconfirmed: false })),
+                }),
               onAddService: () => notify('Thêm dịch vụ: chưa có trong mock.'),
             }}
           />

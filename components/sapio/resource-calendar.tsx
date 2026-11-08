@@ -26,6 +26,14 @@ export interface CalendarTarget {
   bad?: boolean;
 }
 
+/** Where a carried block may land (`ok`) or may not, in one column (MH-27). */
+export interface CalendarDropZone {
+  /** ISO 8601, UTC. */
+  startAt: string;
+  endAt: string;
+  ok: boolean;
+}
+
 export interface ResourceCalendarProps {
   columns: CalendarColumn[];
   /** Local date `YYYY-MM-DD`. */
@@ -49,6 +57,8 @@ export interface ResourceCalendarProps {
    */
   onEmptyPress?: (columnId: string, startAt: string) => void;
   targets?: CalendarTarget[];
+  /** While a block is carried: the zones to draw in each column, by column id. */
+  drops?: Record<string, CalendarDropZone[]>;
 }
 
 const SLOT_MINUTES = 15;
@@ -76,6 +86,7 @@ export function ResourceCalendar({
   compact = false,
   onEmptyPress,
   targets = [],
+  drops,
 }: ResourceCalendarProps) {
   const dayStart = localToUtc(date, from);
   const dayEnd = localToUtc(date, to);
@@ -133,6 +144,7 @@ export function ResourceCalendar({
             <div className="sp-cal__kind">{column.kind}</div>
           </div>
           <div
+            data-column-id={column.id}
             className={cn(
               'sp-cal__col',
               onEmptyPress && !closedAllDay && !column.offLabel && 'cursor-cell',
@@ -157,6 +169,17 @@ export function ResourceCalendar({
                     style={{ bottom: 0, height: slots(closedAfter) }}
                   />
                 )}
+                {(drops?.[column.id] ?? []).map((zone) => (
+                  <div
+                    key={`${zone.startAt}${zone.ok}`}
+                    aria-hidden="true"
+                    className={cn('sp-cal__drop', !zone.ok && 'sp-cal__drop--blocked')}
+                    style={{
+                      top: slots(minutesBetween(dayStart, zone.startAt)),
+                      height: slots(minutesBetween(zone.startAt, zone.endAt)),
+                    }}
+                  />
+                ))}
                 {column.blocks.map(({ id, ...block }) => (
                   <AppointmentBlock key={id} dayStart={dayStart} {...block} />
                 ))}

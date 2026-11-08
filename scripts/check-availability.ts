@@ -24,6 +24,7 @@ import {
   visibleRange,
 } from '../mock/occupation.ts';
 import { openingHours } from '../mock/hours.ts';
+import { moveAppointment, validStarts } from '../mock/move.ts';
 import { localMinutes, staffWindows } from '../mock/shifts.ts';
 
 let failures = 0;
@@ -443,6 +444,52 @@ report(
   lucky === '10:00 vy, 12:00 khoa, 12:30 vy',
   'Pawpaw 07/11: ba giờ đầu còn trống là 10:00 Vy, 12:00 Khoa, 12:30 Vy',
   lucky,
+);
+
+// ---- Moving by drag (MH-27) on the same day ----
+
+const NOW = `${DAY}T03:20:00Z`;
+const apptOf = (id: string) => may.appointments.find((a) => a.id === id)!;
+const moveTo = (id: string, who: string, hhmm: string) => {
+  const [h = 0, m = 0] = hhmm.split(':').map(Number);
+  return moveAppointment({
+    fixture: may,
+    appt: apptOf(id),
+    date: DAY,
+    minute: h * 60 + m,
+    staffResourceId: who,
+    now: NOW,
+  });
+};
+report(
+  moveTo('may-a-van', 'may-lan', '11:30').ok,
+  'Kéo Chị Vân (Hùng 11:30) sang Lan 11:30: thả được',
+);
+report(
+  !moveTo('may-a-ngoc', 'may-lan', '11:00').ok,
+  'Kéo Chị Ngọc sang Lan 11:00: giữ chỗ của Lan chặn',
+);
+const ngoc = moveTo('may-a-ngoc', 'may-lan', '11:15');
+report(
+  ngoc.ok &&
+    ngoc.appt.items[0]?.priceVnd === 200_000n &&
+    ngoc.appt.items[0]?.staffChoice === 'chosen',
+  'Kéo Chị Ngọc sang Lan 11:15: thả được, giá giữ 200.000 ₫, vẫn ghi đích danh (BR-12, BR-32)',
+);
+const laneStarts = validStarts({
+  fixture: may,
+  appt: apptOf('may-a-van'),
+  date: DAY,
+  staffResourceId: 'may-lan',
+  now: NOW,
+})
+  .slice(2, 7)
+  .map((m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`)
+  .join(' ');
+report(
+  laneStarts === '11:15 11:30 11:45 12:00 12:15',
+  'Vùng thả của Chị Vân ở cột Lan: 11:15 đến 12:15',
+  laneStarts,
 );
 
 // ---- BR-01 and BR-54 over the sample appointments ----

@@ -3,6 +3,7 @@ import type { CalendarColumn } from '@/components/sapio/resource-calendar';
 import type { BlockSegment } from '@/components/sapio/appointment-block';
 import type { Appointment, ResourceBooking, TenantFixture } from './fixtures';
 import { formatVnd } from './format';
+import { staffOf } from './move';
 import { formatCountdown, formatRange, localDate } from './time';
 
 type Block = CalendarColumn['blocks'][number];
@@ -144,6 +145,10 @@ export function staffColumns(
         .join(', ');
       let title = `${L.who(appt)} · ${services}`;
       let meta: string | undefined = `${range} · ${others}`;
+      // BR-32: the person was changed and the customer has not answered.
+      const unconfirmed = appt.items.some(
+        (i) => i.staffResourceId === s.resourceId && i.swapUnconfirmed,
+      );
       if (appt.status === 'held') {
         title = 'Đang giữ chỗ · đặt online';
         meta = `${range} · ${others} · còn ${formatCountdown(holdSecondsLeft(appt, now))}`;
@@ -153,8 +158,14 @@ export function staffColumns(
         title = `${title} · ${others}`;
         meta = undefined;
       }
+      if (unconfirmed) {
+        if (meta) meta = `${meta} · Chưa xác nhận đổi người`;
+        else title = `${title} · Chưa xác nhận đổi người`;
+      }
       return {
         id: appt.id,
+        appointmentId: appt.id,
+        draggable: appt.status === 'confirmed' && staffOf(appt).length === 1,
         status: appt.status,
         title,
         ...(meta ? { meta } : {}),
