@@ -62,6 +62,12 @@ export interface ScreenLink {
 const app = (path: string) => (slug: string) => `/mock/app/${slug}/${path}`;
 const firstStaffId = (slug: string) => fixtureBySlug(slug)?.staff[0]?.resourceId ?? '';
 
+/** The service with a waiting segment: Nhuộm tóc at Tóc Mây, Tắm sấy at Pawpaw. */
+const waitingServiceId = (slug: string) =>
+  fixtureBySlug(slug)?.services.find((s) =>
+    s.variants.some((v) => v.segments.some((segment) => segment.kind === 'wait')),
+  )?.id ?? '';
+
 /** Screens that have a mock page, with the links that open them. Everything else is not built. */
 const built: Record<string, ScreenLink[]> = {
   'MH-02': [{ label: 'Đăng ký cơ sở', href: () => '/mock/signup', platform: true }],
@@ -77,7 +83,22 @@ const built: Record<string, ScreenLink[]> = {
   ],
   'MH-25': [{ label: 'Hôm nay', href: app('today') }],
   'MH-32': [{ label: 'Khách hàng', href: app('customers') }],
+  'MH-44': [{ label: 'Dịch vụ', href: app('settings/services') }],
+  'MH-45': [
+    {
+      label: 'Chi tiết dịch vụ',
+      href: (slug) => app(`settings/services/${waitingServiceId(slug)}`)(slug),
+    },
+  ],
   'MH-47': [{ label: 'Nhân sự', href: app('settings/staff') }],
+  'MH-59': [
+    { label: 'Gói cấu hình ngành', href: () => '/mock/admin/templates', platform: true },
+    {
+      label: 'Spa thú cưng (bản nháp)',
+      href: () => '/mock/admin/templates/pet_spa',
+      platform: true,
+    },
+  ],
   'MH-61': [
     { label: 'Gói Sapio', href: app('settings/plan') },
     { label: 'Dùng thử', href: app('calendar?plan=trial') },
