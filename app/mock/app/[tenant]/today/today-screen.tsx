@@ -74,7 +74,7 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
   const now = useMockNow();
   const date = localDate(MOCK_NOW);
   const hours = openingHours(fixture, date) ?? { open: '08:00', close: '18:00' };
-  const { appointments, replace, notify } = useReception(fixture);
+  const { appointments, replace, notify } = useReception();
   const actions = useAppointmentActions(fixture, appointments, replace, now);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 

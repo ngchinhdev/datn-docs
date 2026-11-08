@@ -119,7 +119,9 @@ export function staffColumns(
 ): CalendarColumn[] {
   const L = lookups(fixture);
   return fixture.staff.map((s) => {
-    const off = fixture.staffTimeOff.find((t) => t.resourceId === s.resourceId && t.date === date);
+    const off = fixture.staffTimeOff.find(
+      (t) => t.resourceId === s.resourceId && t.date === date && t.status === 'approved' && !t.from,
+    );
     const mine = appts.filter(
       (a) => isLive(a, now) && a.bookings.some((b) => b.resourceId === s.resourceId),
     );
@@ -173,7 +175,7 @@ export function staffColumns(
       name: s.profile.displayName,
       kind: `${s.profile.title} · ${mine.length} lịch`,
       label: `${s.profile.displayName}, ${s.profile.title}, ${off ? 'nghỉ' : `${mine.length} lịch hẹn`}`,
-      ...(off ? { offLabel: `Nghỉ · ${off.note}` } : {}),
+      ...(off ? { offLabel: `Nghỉ · ${off.reason}` } : {}),
       blocks,
     };
   });

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { tenantFixtures } from '@/mock/fixtures';
 import { fixtureBySlug } from '@/mock/selection';
+import { ScheduleStoreProvider } from '@/components/mock/schedule-store';
 import { ServiceStoreProvider } from '@/components/mock/service-store';
 import { StaffStoreProvider } from '@/components/mock/staff-store';
 import { SubscriptionProvider } from '@/components/mock/subscription-store';
@@ -20,9 +21,11 @@ export default async function AppLayout({ children, params }: LayoutProps<'/mock
     <Suspense fallback={null}>
       <StaffStoreProvider tenantSlug={tenant}>
         <ServiceStoreProvider tenantSlug={tenant}>
-          <SubscriptionProvider tenantSlug={tenant}>
-            <AppFrame tenantSlug={tenant}>{children}</AppFrame>
-          </SubscriptionProvider>
+          <ScheduleStoreProvider tenantSlug={tenant}>
+            <SubscriptionProvider tenantSlug={tenant}>
+              <AppFrame tenantSlug={tenant}>{children}</AppFrame>
+            </SubscriptionProvider>
+          </ScheduleStoreProvider>
         </ServiceStoreProvider>
       </StaffStoreProvider>
     </Suspense>

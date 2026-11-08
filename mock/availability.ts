@@ -16,7 +16,14 @@ import {
   type Interval,
 } from './intervals.ts';
 import { ANY_STAFF, occupation, prepMinutes, resourceTypesOf, visibleRange } from './occupation.ts';
-import type { Appointment, ServiceVariant, TenantFixture } from './fixtures/types.ts';
+import { isoOf, localMinutes, minutesOf, staffWindows } from './shifts.ts';
+import type {
+  Appointment,
+  ServiceVariant,
+  Shift,
+  StaffTimeOff,
+  TenantFixture,
+} from './fixtures/types.ts';
 
 export { ANY_STAFF };
 
@@ -47,6 +54,8 @@ export interface FindSlotsInput {
   /** Earliest and latest time the customer may start (BR-06). */
   notBefore: number;
   notAfter: number;
+  /** Resources to keep when several fit, e.g. the chair an appointment already has. */
+  prefer?: ReadonlySet<string>;
 }
 
 export interface Slot {
@@ -96,14 +105,19 @@ export function findSlots(input: FindSlotsInput): Slot[] {
   // 3. Booking policy, as origins: arrive at T means origin T - prep.
   origins = intersect(origins, [[input.notBefore - prep, input.notAfter - prep + 1]]);
 
-  // 4. Local grid.
+  // 4. Local grid. Times outside the policy window were cut above, so the loop starts inside it.
   const slots: Slot[] = [];
-  for (let t = input.dayStart; t < input.dayEnd; t += input.step) {
+  const first = Math.max(input.dayStart, input.notBefore);
+  const last = Math.min(input.dayEnd - 1, input.notAfter);
+  const startAt = input.dayStart + Math.ceil((first - input.dayStart) / input.step) * input.step;
+  for (let t = startAt; t <= last; t += input.step) {
     const origin = t - prep;
     if (!contains(origins, origin)) continue;
     const assignment: Record<string, string> = {};
     for (const [typeId, ofType] of candidates) {
-      const chosen = pick(ofType.filter((r) => contains(fits.get(r.id) ?? [], origin)));
+      const fitting = ofType.filter((r) => contains(fits.get(r.id) ?? [], origin));
+      const kept = fitting.filter((r) => input.prefer?.has(r.id));
+      const chosen = pick(kept.length > 0 ? kept : fitting);
       if (chosen) assignment[typeId] = chosen.id;
     }
     slots.push({ start: t, assignment });
@@ -134,22 +148,34 @@ export interface AvailabilityQuery {
   notAfter?: string;
   /** Holds that ran out by this instant do not block (BR-07); defaults to `notBefore`. */
   now?: string;
+  /** What to read instead of the fixture, e.g. the state of a screen after edits. */
+  state?: {
+    appointments?: readonly Appointment[];
+    shifts?: readonly Shift[];
+    staffTimeOff?: readonly StaffTimeOff[];
+  };
+  /** Appointments left out of the busy times, e.g. the one being moved. */
+  ignore?: ReadonlySet<string>;
+  /** People who cannot be assigned, e.g. the one on leave. */
+  exclude?: ReadonlySet<string>;
+  /** Resources to keep when several fit (a move keeps the chair it has). */
+  prefer?: ReadonlySet<string>;
+  /** Grid step in minutes; 15 by default, 1 to test a time off the grid (BR-58). */
+  step?: number;
+  /**
+   * `online`: only people who take online bookings (the customer page); `staff`: anybody with
+   * the skill (a receptionist booking at the desk, BR-30).
+   */
+  channel?: 'online' | 'staff';
 }
 
 const STEP_MINUTES = 15;
 const BLOCKING: Appointment['status'][] = ['held', 'confirmed', 'checked_in', 'completed'];
-/** Fixed offset is enough for Asia/Ho_Chi_Minh, which has no DST. */
-const BRANCH_UTC_OFFSET_MINUTES = 7 * 60;
-
-const minutesOf = (iso: string) => Date.parse(iso) / 60_000;
-const isoOf = (minutes: number) => new Date(minutes * 60_000).toISOString();
-const localMinutes = (date: string, time: string) =>
-  minutesOf(`${date}T${time}:00Z`) - BRANCH_UTC_OFFSET_MINUTES;
 
 /**
- * Free start times for one item on one day. Staff work during opening hours (the fixtures have no
- * shifts); a person on leave that day is out. With `ANY_STAFF`, each time carries the person
- * `pick` chooses.
+ * Free start times for one item on one day. Staff work their shifts, or the opening hours on a
+ * day without a rota; a person on leave is out for that time. With `ANY_STAFF`, each time carries
+ * the person `pick` chooses.
  */
 export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
   const { fixture, variant, date } = query;
@@ -162,7 +188,11 @@ export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
   const now = minutesOf(query.now ?? query.notBefore ?? isoOf(0));
 
   const busy = new Map<string, Interval[]>();
-  for (const appt of fixture.appointments) {
+  const state = query.state ?? {};
+  const shifts = state.shifts ?? fixture.shifts;
+  const timeOff = state.staffTimeOff ?? fixture.staffTimeOff;
+  for (const appt of state.appointments ?? fixture.appointments) {
+    if (query.ignore?.has(appt.id)) continue;
     if (!BLOCKING.includes(appt.status)) continue;
     if (appt.status === 'held' && appt.holdExpiresAt && minutesOf(appt.holdExpiresAt) <= now) {
       continue;
@@ -184,19 +214,22 @@ export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
     if (isStaff) {
       const ok =
         member &&
-        member.profile.bookableOnline &&
+        (query.channel === 'staff' || member.profile.bookableOnline) &&
         member.skillServiceIds.includes(query.serviceId) &&
-        !fixture.staffTimeOff.some((t) => t.resourceId === r.id && t.date === date) &&
+        !query.exclude?.has(r.id) &&
         (query.staffResourceId === ANY_STAFF || r.id === query.staffResourceId);
       if (!ok) continue;
     }
     const mine = normalize(busy.get(r.id) ?? []);
+    const working = isStaff
+      ? staffWindows({ shifts, timeOff, resourceId: r.id, date, open })
+      : open;
     resources.push({
       id: r.id,
       typeId: r.resourceTypeId,
       isStaff,
       level: member?.level ?? 1,
-      free: subtract(open, mine),
+      free: subtract(working, mine),
       busyToday: length(intersect(mine, [[dayStart, dayEnd]])),
     });
   }
@@ -208,7 +241,8 @@ export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
     resources,
     dayStart,
     dayEnd,
-    step: STEP_MINUTES,
+    step: query.step ?? STEP_MINUTES,
+    ...(query.prefer ? { prefer: query.prefer } : {}),
     notBefore: query.notBefore ? minutesOf(query.notBefore) : -Infinity,
     notAfter: query.notAfter ? minutesOf(query.notAfter) : Infinity,
   }).map((slot) => ({

@@ -38,7 +38,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
   const view: CalendarView = viewParam === 'resources' ? 'resources' : 'staff';
   const hours = dayHours(fixture, date);
 
-  const { appointments, replace, notify } = useReception(fixture);
+  const { appointments, replace, notify } = useReception();
   const actions = useAppointmentActions(fixture, appointments, replace, now);
   const day = dayAppointments(appointments, date);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -166,7 +166,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
             <button
               key={c.id}
               type="button"
-              className="sp-slot flex-none px-(--space-4)! [--accent:var(--primary)] [--on-accent:var(--on-primary)]"
+              className="sp-slot flex-none px-(--space-4)!"
               aria-pressed={c.id === phoneCol?.id}
               onClick={() => setPhoneColumn(c.id)}
             >

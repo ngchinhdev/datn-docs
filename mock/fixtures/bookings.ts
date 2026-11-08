@@ -1,4 +1,5 @@
 import {
+  ANY_STAFF,
   matchesAttributes,
   occupation,
   prepMinutes,
@@ -15,6 +16,7 @@ import type {
   Service,
   ServiceVariant,
   Staff,
+  StaffChoice,
 } from './types.ts';
 
 export { matchesAttributes };
@@ -88,6 +90,8 @@ export interface ItemSpec {
   subjectId: string | null;
   /** One resource per resource type of the variant, staff first. */
   resourceIds: string[];
+  /** Default `any`: the system picked the person (BR-31). */
+  staffChoice?: StaffChoice;
   /** Starts here instead of after the previous item (two pets served side by side). */
   startAt?: string;
 }
@@ -105,7 +109,13 @@ export function appointmentBuilder(ctx: {
   staff: Staff[];
 }) {
   const typeOf = new Map(ctx.resources.map((r) => [r.id, r.resourceTypeId]));
-  const levels = ctx.staff.map((s) => ({ resourceId: s.resourceId, level: s.level }));
+  const serviceOf = (variantId: string) =>
+    ctx.services.find((s) => s.variants.some((v) => v.id === variantId));
+  /** The people who can do the service, with the level their price follows (BR-56). */
+  const levelsFor = (variantId: string) =>
+    ctx.staff
+      .filter((s) => s.skillServiceIds.includes(serviceOf(variantId)?.id ?? ''))
+      .map((s) => ({ resourceId: s.resourceId, level: s.level }));
   return (
     id: string,
     customerId: string | null,
@@ -124,11 +134,18 @@ export function appointmentBuilder(ctx: {
       bookings.push(...bookVariant(cursor, variant, assign, itemIndex));
       cursor = variantEnd(cursor, variant);
       const staffResourceId = item.resourceIds[0] ?? '';
+      const staffChoice = item.staffChoice ?? 'any';
       return {
         serviceVariantId: variant.id,
         servedSubjectId: item.subjectId ?? '',
         staffResourceId,
-        priceVnd: priceFor(variant, staffResourceId, levels),
+        staffChoice,
+        // BR-56: a named person charges their level; "Bất kỳ ai" charges the lowest.
+        priceVnd: priceFor(
+          variant,
+          staffChoice === 'chosen' ? staffResourceId : ANY_STAFF,
+          levelsFor(variant.id),
+        ),
       };
     });
     return {
