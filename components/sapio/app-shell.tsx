@@ -10,6 +10,7 @@ import {
   PanelLeftOpen,
   Plus,
   Sun,
+  UserRound,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -71,6 +72,8 @@ export interface ShellProps {
   items: ShellNavItem[];
   /** The three items on the phone tab bar; "Thêm" holds the rest. */
   tabs: ShellNavItem[];
+  /** Name of the last tab, which opens the account and the other entries; "Thêm" by default. */
+  moreLabel?: string;
   account: { name: string; initials: string; roleLabel: string };
   /** Extra account entries (role switch in the mock); `kind` tells menu rows from sheet rows. */
   accountExtra?: ((kind: 'menu' | 'list') => ReactNode) | undefined;
@@ -474,6 +477,8 @@ export function AppShell(props: ShellProps) {
   };
   const tabIds = new Set(tabs.map((t) => t.id));
   const rest = items.filter((i) => !tabIds.has(i.id));
+  const moreLabel = props.moreLabel ?? 'Thêm';
+  const MoreIcon = props.moreLabel ? UserRound : Ellipsis;
   const moreCurrent = rest.some((i) => i.current);
 
   return (
@@ -570,12 +575,12 @@ export function AppShell(props: ShellProps) {
           aria-current={moreCurrent ? 'page' : undefined}
           onClick={() => setMore(true)}
         >
-          <Ellipsis aria-hidden="true" />
-          Thêm
+          <MoreIcon aria-hidden="true" />
+          {moreLabel}
         </button>
       </nav>
 
-      <Sheet open={more} title="Thêm" onClose={() => setMore(false)}>
+      <Sheet open={more} title={moreLabel} onClose={() => setMore(false)}>
         <div className="flex flex-col gap-(--space-5)">
           {rest.length > 0 && (
             <nav aria-label="Các mục khác" className="flex flex-col">

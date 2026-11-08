@@ -84,7 +84,10 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
     });
 
   const person =
-    role === 'technician' ? (staff[0]?.profile.displayName ?? 'Kỹ thuật viên') : PEOPLE[role];
+    role === 'technician'
+      ? ((staff.find((s) => s.resourceId === searchParams.get('me')) ?? staff[0])?.profile
+          .displayName ?? 'Kỹ thuật viên')
+      : PEOPLE[role];
 
   const withQuery = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -151,6 +154,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
       banner={banner}
       items={items}
       tabs={tabs}
+      {...(role === 'technician' ? { moreLabel: 'Tài khoản' } : {})}
       account={{ name: person, initials: initialsOf(person), roleLabel: roleLabel(role) }}
       onProfile={() => toast({ text: 'Hồ sơ cá nhân: chưa có trong mock.' })}
       onSignOut={() => toast({ text: 'Đăng xuất: chưa có trong mock.' })}

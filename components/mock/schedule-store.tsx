@@ -6,6 +6,8 @@ import {
   type Appointment,
   type Customer,
   type ServedSubject,
+  type Shift,
+  type StaffTimeOff,
 } from '@/mock/fixtures';
 
 interface ScheduleStore {
@@ -22,6 +24,12 @@ interface ScheduleStore {
   removeCustomer: (id: string) => void;
   addSubject: (subject: ServedSubject) => void;
   removeSubject: (id: string) => void;
+  shifts: Shift[];
+  setShifts: (shifts: Shift[]) => void;
+  /** Leave requests; a technician's new one is pending until a manager decides (BR-11). */
+  leaves: StaffTimeOff[];
+  addLeaves: (leaves: StaffTimeOff[]) => void;
+  replaceLeave: (leave: StaffTimeOff) => void;
   /** Technicians see customers' phone numbers (BR-36). */
   staffSeesCustomerPhone: boolean;
   setStaffSeesCustomerPhone: (value: boolean) => void;
@@ -44,6 +52,8 @@ export function ScheduleStoreProvider({
   const [appointments, setAppointments] = useState<Appointment[]>(fixture.appointments);
   const [customers, setCustomers] = useState<Customer[]>(fixture.customers);
   const [servedSubjects, setSubjects] = useState<ServedSubject[]>(fixture.servedSubjects);
+  const [shifts, setShifts] = useState<Shift[]>(fixture.shifts);
+  const [leaves, setLeaves] = useState<StaffTimeOff[]>(fixture.staffTimeOff);
   const [staffSeesCustomerPhone, setStaffSeesCustomerPhone] = useState(
     fixture.staffSeesCustomerPhone,
   );
@@ -56,6 +66,12 @@ export function ScheduleStoreProvider({
   }, []);
   const removeAppointment = useCallback((id: string) => {
     setAppointments((list) => list.filter((a) => a.id !== id));
+  }, []);
+  const addLeaves = useCallback((added: StaffTimeOff[]) => {
+    setLeaves((list) => [...list, ...added]);
+  }, []);
+  const replaceLeave = useCallback((leave: StaffTimeOff) => {
+    setLeaves((list) => list.map((l) => (l.id === leave.id ? leave : l)));
   }, []);
   const addCustomer = useCallback((customer: Customer) => {
     setCustomers((list) => [...list, customer]);
@@ -82,6 +98,11 @@ export function ScheduleStoreProvider({
       removeCustomer,
       addSubject,
       removeSubject,
+      shifts,
+      setShifts,
+      leaves,
+      addLeaves,
+      replaceLeave,
       staffSeesCustomerPhone,
       setStaffSeesCustomerPhone,
     }),
@@ -96,6 +117,10 @@ export function ScheduleStoreProvider({
       removeCustomer,
       addSubject,
       removeSubject,
+      shifts,
+      leaves,
+      addLeaves,
+      replaceLeave,
       staffSeesCustomerPhone,
     ],
   );

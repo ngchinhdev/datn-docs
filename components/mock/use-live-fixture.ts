@@ -14,7 +14,8 @@ export function useLiveFixture(tenantSlug: string): TenantFixture {
   const base = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
   const { staff } = useStaffStore();
   const { services } = useServiceStore();
-  const { appointments, customers, servedSubjects, staffSeesCustomerPhone } = useScheduleStore();
+  const { appointments, customers, servedSubjects, shifts, leaves, staffSeesCustomerPhone } =
+    useScheduleStore();
   return useMemo(
     () => ({
       ...base,
@@ -23,8 +24,20 @@ export function useLiveFixture(tenantSlug: string): TenantFixture {
       appointments,
       customers,
       servedSubjects,
+      shifts,
+      staffTimeOff: leaves,
       staffSeesCustomerPhone,
     }),
-    [base, staff, services, appointments, customers, servedSubjects, staffSeesCustomerPhone],
+    [
+      base,
+      staff,
+      services,
+      appointments,
+      customers,
+      servedSubjects,
+      shifts,
+      leaves,
+      staffSeesCustomerPhone,
+    ],
   );
 }

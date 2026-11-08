@@ -2,17 +2,22 @@
 
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
+import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useLiveFixture } from '@/components/mock/use-live-fixture';
+import { useTechnician } from '@/components/mock/use-technician';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { Button } from '@/components/sapio/button';
 import { StatusBadge, statusLabel } from '@/components/sapio/status-badge';
+import { useToast } from '@/components/sapio/toast';
 import { useMediaQuery } from '@/components/sapio/use-media-query';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
 import { formatPhone, formatVnd } from '@/mock/format';
 import { appointmentDetail, appointmentEnd, lookups } from '@/mock/reception';
+import { staffRoleOf } from '@/mock/selection';
+import { advanceItem, itemPhase, nextPartText } from '@/mock/technician';
 import { formatDay, formatRange, formatTime, localDate } from '@/mock/time';
 import { useAppointmentActions } from '../../_reception/actions';
 import { useReception } from '../../_reception/use-reception';
@@ -29,6 +34,10 @@ export function AppointmentScreen({ tenantSlug, id }: { tenantSlug: string; id: 
   const now = useMockNow();
   const wide = useMediaQuery('(min-width: 768px)', false);
   const { appointments, replace, notify } = useReception();
+  const toast = useToast();
+  const { staffSeesCustomerPhone } = useScheduleStore();
+  const me = useTechnician();
+  const isTech = staffRoleOf(useSearchParams().get('role')) === 'technician';
   const L = lookups(fixture);
   const appt = appointments.find((a) => a.id === id);
   const actions = useAppointmentActions(fixture, appointments, replace, now);
@@ -43,17 +52,25 @@ export function AppointmentScreen({ tenantSlug, id }: { tenantSlug: string; id: 
   const date = appt ? localDate(appt.startAt) : '';
   const apptId = appt?.id;
   useEffect(() => {
-    if (wide && apptId) router.replace(appHref('calendar', { date, select: apptId }));
-  }, [wide, apptId, date, router, appHref]);
+    if (wide && apptId && !isTech) {
+      router.replace(appHref('calendar', { date, select: apptId }));
+    }
+  }, [wide, apptId, date, isTech, router, appHref]);
 
-  const back = appHref('calendar', date ? { date } : {});
-  if (!appt) {
+  const back = isTech
+    ? appHref('my/schedule', date ? { date } : {})
+    : appHref('calendar', date ? { date } : {});
+  // A technician sees only appointments they do part of (BR-36).
+  const mine = appt
+    ? appt.items.flatMap((item, i) => (item.staffResourceId === me.resourceId ? [i] : []))
+    : [];
+  if (!appt || (isTech && mine.length === 0)) {
     return (
       <div className="sp-shell__content">
         <p className="sp-empty m-0">
-          Không tìm thấy lịch hẹn này.{' '}
+          {appt ? 'Lịch hẹn này không phải của bạn.' : 'Không tìm thấy lịch hẹn này.'}{' '}
           <Link href={back} className="font-medium">
-            Về lịch
+            {isTech ? 'Về lịch của tôi' : 'Về lịch'}
           </Link>
         </p>
       </div>
@@ -71,6 +88,20 @@ export function AppointmentScreen({ tenantSlug, id }: { tenantSlug: string; id: 
         ? 'Hoàn thành · chờ thanh toán'
         : undefined;
   const named = appt.items.filter((i) => i.staffChoice === 'chosen');
+  const showPhone = !isTech || staffSeesCustomerPhone;
+  const phases = mine.map((i) => itemPhase(appt, i, now));
+  const nextStep = isTech
+    ? (['back', 'working', 'due'] as const).find((p) => phases.includes(p))
+    : undefined;
+  const step = nextStep ? mine[phases.indexOf(nextStep)] : undefined;
+  const press = (action: 'start' | 'resume' | 'finish') => {
+    if (step === undefined) return;
+    replace(advanceItem(appt, step, action, now));
+    toast({
+      text: `${{ start: 'Đã bắt đầu', resume: 'Đã bắt đầu phần tiếp của', finish: 'Đã xong' }[action]} ${L.who(appt)}.`,
+      undo: () => replace(appt),
+    });
+  };
 
   return (
     <div className="sp-shell__content flex flex-col gap-(--space-4)">
@@ -97,7 +128,9 @@ export function AppointmentScreen({ tenantSlug, id }: { tenantSlug: string; id: 
         </h1>
         {customer && (
           <span className="body-sm">
-            {customer.phone ? (
+            {!showPhone ? (
+              <span className="text-(--ink-muted)">Số điện thoại ẩn</span>
+            ) : customer.phone ? (
               <a
                 href={`tel:${customer.phone}`}
                 className="sp-num text-[15px] leading-[22px] font-medium"
@@ -114,36 +147,44 @@ export function AppointmentScreen({ tenantSlug, id }: { tenantSlug: string; id: 
         )}
       </div>
 
-      {d.items.map((item, index) => (
-        <section key={item.title} className="sp-panel" aria-labelledby={`ap-item-${index}`}>
-          <div className="flex justify-between gap-(--space-2)">
-            <h2 className="sp-panel__title" id={`ap-item-${index}`}>
-              {item.title}
-            </h2>
-            <span className="sp-num font-semibold">{item.price}</span>
-          </div>
-          {item.lines.map((line) => (
-            <div key={line.range} className="body-sm flex items-center gap-(--space-3)">
-              <span
-                aria-hidden="true"
-                className={cn(
-                  'sp-kind',
-                  line.buffer ? 'sp-kind--buffer' : line.wait ? 'sp-kind--wait' : 'sp-kind--work',
-                )}
-              />
-              <span className="sp-num w-24 flex-none text-(--ink-muted)">{line.range}</span>
-              <span>{line.text}</span>
+      {d.items.map((item, index) =>
+        isTech && !mine.includes(index) ? null : (
+          <section key={item.title} className="sp-panel" aria-labelledby={`ap-item-${index}`}>
+            <div className="flex justify-between gap-(--space-2)">
+              <h2 className="sp-panel__title" id={`ap-item-${index}`}>
+                {item.title}
+              </h2>
+              <span className="sp-num font-semibold">{item.price}</span>
             </div>
-          ))}
-          {named.some((n) => n.serviceVariantId === appt.items[index]?.serviceVariantId) && (
-            <p className="sp-panel__note">
-              {L.name(appt.items[index]?.staffResourceId ?? '')} do khách chọn đích danh.
-            </p>
-          )}
-        </section>
-      ))}
+            {item.lines.map((line) => (
+              <div key={line.range} className="body-sm flex items-center gap-(--space-3)">
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'sp-kind',
+                    line.buffer ? 'sp-kind--buffer' : line.wait ? 'sp-kind--wait' : 'sp-kind--work',
+                  )}
+                />
+                <span className="sp-num w-24 flex-none text-(--ink-muted)">{line.range}</span>
+                <span>{line.text}</span>
+              </div>
+            ))}
+            {named.some((n) => n.serviceVariantId === appt.items[index]?.serviceVariantId) && (
+              <p className="sp-panel__note">
+                {L.name(appt.items[index]?.staffResourceId ?? '')} do khách chọn đích danh.
+              </p>
+            )}
+          </section>
+        ),
+      )}
 
-      {appt.items.some((i) => i.swapUnconfirmed) && (
+      {isTech && !staffSeesCustomerPhone && (
+        <p className="sp-panel__note">
+          Số điện thoại khách ẩn theo cài đặt của cơ sở. Cần liên hệ thì nhờ lễ tân.
+        </p>
+      )}
+
+      {!isTech && appt.items.some((i) => i.swapUnconfirmed) && (
         <div className="flex flex-col items-start gap-(--space-2) rounded-(--radius-md) bg-(--status-no-show-soft) p-(--space-3)">
           <span className="body-sm font-semibold">Chưa xác nhận đổi người</span>
           <span className="body-sm">
@@ -163,18 +204,20 @@ export function AppointmentScreen({ tenantSlug, id }: { tenantSlug: string; id: 
         </div>
       )}
 
-      <dl className="sp-kv text-sm leading-5">
-        {d.deposit > 0n && (
-          <>
-            <dt>Đã cọc</dt>
-            <dd>{formatVnd(d.deposit)}</dd>
-          </>
-        )}
-        <dt>Còn phải thu</dt>
-        <dd>{formatVnd(d.due)}</dd>
-        <dt>Đặt qua</dt>
-        <dd>{d.channel}</dd>
-      </dl>
+      {!isTech && (
+        <dl className="sp-kv text-sm leading-5">
+          {d.deposit > 0n && (
+            <>
+              <dt>Đã cọc</dt>
+              <dd>{formatVnd(d.deposit)}</dd>
+            </>
+          )}
+          <dt>Còn phải thu</dt>
+          <dd>{formatVnd(d.due)}</dd>
+          <dt>Đặt qua</dt>
+          <dd>{d.channel}</dd>
+        </dl>
+      )}
 
       {appt.note && (
         <section aria-labelledby="ap-note" className="flex flex-col gap-1">
@@ -185,7 +228,22 @@ export function AppointmentScreen({ tenantSlug, id }: { tenantSlug: string; id: 
         </section>
       )}
 
-      {Object.values(allowed).some(Boolean) && (
+      {isTech && step !== undefined && nextStep && (
+        <Button
+          variant="primary"
+          block
+          className="h-12!"
+          onClick={() =>
+            press(nextStep === 'due' ? 'start' : nextStep === 'back' ? 'resume' : 'finish')
+          }
+        >
+          {nextStep === 'due' ? 'Bắt đầu' : nextStep === 'back' ? 'Bắt đầu phần tiếp' : 'Xong'}
+        </Button>
+      )}
+      {isTech && nextStep === 'back' && step !== undefined && (
+        <p className="sp-panel__note">Đến giờ quay lại: {nextPartText(fixture, appt, step)}.</p>
+      )}
+      {!isTech && Object.values(allowed).some(Boolean) && (
         <div className="flex flex-col gap-(--space-2)">
           {allowed.checkIn && (
             <Button variant="primary" block className="h-12!" onClick={() => actions.checkIn(appt)}>

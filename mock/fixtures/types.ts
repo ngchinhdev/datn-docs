@@ -179,6 +179,11 @@ export interface AppointmentItem {
   staffChoice: StaffChoice;
   /** The person was changed by a drag and the customer has not answered yet (BR-32). */
   swapUnconfirmed?: boolean;
+  /**
+   * How far the technician has taken the item (BR-36): started, started the part after the wait,
+   * or done. Absent until they press a button.
+   */
+  stage?: 'started' | 'resumed' | 'done';
   /** Price at booking time (BR-12). */
   priceVnd: bigint;
 }
