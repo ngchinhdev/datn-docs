@@ -13,6 +13,7 @@ import {
   previewLines,
   type IndustryId,
   type SignupDraft,
+  placedResourceTypes,
 } from '@/mock/signup';
 
 const ICONS: Record<IndustryId, ReactNode> = {
@@ -52,7 +53,9 @@ function Preview({ template }: { template: IndustryTemplate }) {
       <div className="flex flex-col gap-1">
         <span className="sp-menu__label p-0!">Tài nguyên</span>
         <span className="text-sm leading-5">
-          {template.resourceTypes.map((r) => r.name).join(', ')}
+          {placedResourceTypes(template)
+            .map((r) => r.name)
+            .join(', ')}
         </span>
       </div>
       <div className="flex flex-col gap-1">

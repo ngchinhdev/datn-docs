@@ -1,29 +1,23 @@
+import {
+  matchesAttributes,
+  occupation,
+  prepMinutes,
+  priceFor,
+  resourceTypesOf,
+  visibleMinutes,
+} from '../occupation.ts';
 import type {
   Appointment,
-  MatchValue,
   AppointmentItem,
   AppointmentStatus,
   Resource,
   ResourceBooking,
   Service,
   ServiceVariant,
-} from './types';
+  Staff,
+} from './types.ts';
 
-/** BR-13: does a served subject's attributes select a variant? Ranges compare as numbers. */
-export function matchesAttributes(
-  match: Record<string, MatchValue>,
-  attributes: Record<string, string>,
-): boolean {
-  return Object.entries(match).every(([key, wanted]) => {
-    const actual = attributes[key];
-    if (typeof wanted === 'string') return actual === wanted;
-    const n = Number(actual);
-    if (actual === undefined || Number.isNaN(n)) return false;
-    return (
-      (wanted.min === undefined || n >= wanted.min) && (wanted.max === undefined || n < wanted.max)
-    );
-  });
-}
+export { matchesAttributes };
 
 export function findVariant(services: Service[], variantId: string): ServiceVariant {
   for (const service of services) {
@@ -36,9 +30,12 @@ export function findVariant(services: Service[], variantId: string): ServiceVari
 const addMinutes = (iso: string, minutes: number) =>
   new Date(Date.parse(iso) + minutes * 60_000).toISOString().replace('.000Z', 'Z');
 
+const lowerFirst = (text: string) => text.charAt(0).toLowerCase() + text.slice(1);
+
 /**
- * Expands a variant's segments into resource bookings starting at `startAt` (UTC).
- * `assign` maps each resource type of the variant to the concrete resource.
+ * Expands a variant into resource bookings for a customer arriving at `startAt` (UTC): the
+ * segments, with `prep` before that time (BR-51), and the cleanup of each resource type after its
+ * last segment (BR-52). `assign` maps each resource type of the variant to the concrete resource.
  */
 export function bookVariant(
   startAt: string,
@@ -46,25 +43,44 @@ export function bookVariant(
   assign: Record<string, string>,
   itemIndex = 0,
 ): ResourceBooking[] {
-  return variant.segments.flatMap((segment) =>
-    segment.resourceTypeIds.map((typeId) => {
-      const resourceId = assign[typeId];
-      if (!resourceId) throw new Error(`${variant.id}: no resource for type ${typeId}`);
-      return {
-        resourceId,
-        startAt: addMinutes(startAt, segment.startMinute),
-        endAt: addMinutes(startAt, segment.endMinute),
-        kind: segment.kind,
-        itemIndex,
-        ...(segment.label ? { label: segment.label } : {}),
-      };
-    }),
+  const origin = addMinutes(startAt, -prepMinutes(variant));
+  const resourceFor = (typeId: string) => {
+    const resourceId = assign[typeId];
+    if (!resourceId) throw new Error(`${variant.id}: no resource for type ${typeId}`);
+    return resourceId;
+  };
+  const segments = variant.segments.flatMap((segment) =>
+    segment.resourceTypeIds.map((typeId): ResourceBooking => ({
+      resourceId: resourceFor(typeId),
+      startAt: addMinutes(origin, segment.startMinute),
+      endAt: addMinutes(origin, segment.endMinute),
+      kind: segment.kind,
+      itemIndex,
+      label: lowerFirst(segment.name),
+    })),
   );
+  const cleanups = resourceTypesOf(variant).flatMap((typeId): ResourceBooking[] => {
+    const minutes = variant.cleanupMinutes[typeId] ?? 0;
+    if (minutes <= 0) return [];
+    const [last] = occupation(variant, typeId).slice(-1);
+    if (!last) return [];
+    return [
+      {
+        resourceId: resourceFor(typeId),
+        startAt: addMinutes(origin, last[1] - minutes),
+        endAt: addMinutes(origin, last[1]),
+        kind: 'cleanup',
+        itemIndex,
+        label: 'dọn',
+      },
+    ];
+  });
+  return [...segments, ...cleanups];
 }
 
-/** End of the last segment, for chaining items of one appointment. */
+/** When the customer is done with the item: the end of its last `work` segment (BR-51). */
 export const variantEnd = (startAt: string, variant: ServiceVariant) =>
-  addMinutes(startAt, Math.max(...variant.segments.map((s) => s.endMinute)));
+  addMinutes(startAt, visibleMinutes(variant));
 
 export interface ItemSpec {
   variantId: string;
@@ -76,14 +92,20 @@ export interface ItemSpec {
   startAt?: string;
 }
 
-/** Builds appointments whose items run back to back, with bookings expanded from the segments. */
+/**
+ * Builds appointments whose items run back to back, with bookings expanded from the segments.
+ * An item that needs preparation starts one preparation later than the item before it, so the
+ * person who prepares is not busy twice.
+ */
 export function appointmentBuilder(ctx: {
   tenantId: string;
   branchId: string;
   services: Service[];
   resources: Resource[];
+  staff: Staff[];
 }) {
   const typeOf = new Map(ctx.resources.map((r) => [r.id, r.resourceTypeId]));
+  const levels = ctx.staff.map((s) => ({ resourceId: s.resourceId, level: s.level }));
   return (
     id: string,
     customerId: string | null,
@@ -97,14 +119,16 @@ export function appointmentBuilder(ctx: {
     const appointmentItems: AppointmentItem[] = items.map((item, itemIndex) => {
       const variant = findVariant(ctx.services, item.variantId);
       if (item.startAt) cursor = item.startAt;
+      else if (itemIndex > 0) cursor = addMinutes(cursor, prepMinutes(variant));
       const assign = Object.fromEntries(item.resourceIds.map((r) => [typeOf.get(r) ?? '', r]));
       bookings.push(...bookVariant(cursor, variant, assign, itemIndex));
       cursor = variantEnd(cursor, variant);
+      const staffResourceId = item.resourceIds[0] ?? '';
       return {
         serviceVariantId: variant.id,
         servedSubjectId: item.subjectId ?? '',
-        staffResourceId: item.resourceIds[0] ?? '',
-        priceVnd: variant.priceVnd,
+        staffResourceId,
+        priceVnd: priceFor(variant, staffResourceId, levels),
       };
     });
     return {

@@ -172,6 +172,13 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
               {roleLabel(r)}
             </Link>
           ))}
+          <Link
+            href="/mock/admin/templates"
+            className={cn('sp-menu__item', kind === 'list' && 'min-h-11')}
+            {...(kind === 'menu' ? { role: 'menuitem' } : {})}
+          >
+            Quản trị nền tảng
+          </Link>
           <div className={kind === 'menu' ? 'sp-menu__label' : 'sp-menu__label mt-(--space-2)'}>
             Xem mock với gói
           </div>

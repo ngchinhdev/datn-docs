@@ -84,17 +84,20 @@ export interface Staff {
   skillServiceIds: string[];
 }
 
+export type SegmentKind = 'prep' | 'work' | 'wait';
+
 /**
- * Minutes from the start of the service, half-open `[startMinute, endMinute)`.
- * A `wait` segment frees the staff but keeps the other resources (BR-05).
+ * Minutes from the start of the first segment, half-open `[startMinute, endMinute)` (BR-50).
+ * `prep` stands only at the start; the customer does not see it (BR-51). A `wait` segment frees
+ * the staff but keeps the other resources (BR-05).
  */
 export interface ServiceSegment {
   startMinute: number;
   endMinute: number;
-  kind: 'work' | 'wait';
+  kind: SegmentKind;
+  /** Name on the calendar, e.g. "Pha thuốc", "Chờ lên màu". */
+  name: string;
   resourceTypeIds: string[];
-  /** What happens during a wait, e.g. "chờ lên màu". */
-  label?: string;
 }
 
 /** An exact value, or a number range: `min` included, `max` not (`{ max: 10 }` is "under 10"). */
@@ -112,12 +115,29 @@ export interface ServiceVariant {
   /** Served-subject attributes that select this variant (BR-13). */
   match: Record<string, MatchValue>;
   segments: ServiceSegment[];
+  /**
+   * Minutes to clean each resource type after its last segment ends (BR-52); a missing type
+   * needs none.
+   */
+  cleanupMinutes: Record<string, number>;
+  /** Price per staff level, in the order of `TenantFixture.staffLevels` (BR-56); `priceVnd` is the lowest. */
+  pricesByLevel?: bigint[];
 }
+
+/** Who picks the variant: the customer, or the attributes of the served subject (BR-55). */
+export type VariantSelection = 'customer' | 'subject';
 
 export interface Service {
   id: string;
   tenantId: string;
   name: string;
+  /** One of `IndustryTemplate.serviceGroups`. */
+  group: string;
+  /** Shown to the customer under the name. */
+  description?: string;
+  variantSelection: VariantSelection;
+  /** Off hides the service on the customer page. */
+  bookableOnline: boolean;
   variants: ServiceVariant[];
 }
 
@@ -161,9 +181,11 @@ export interface ResourceBooking {
   resourceId: string;
   startAt: string;
   endAt: string;
-  kind: 'work' | 'wait';
+  /** `cleanup` is the time after the last segment that uses the resource (BR-52). */
+  kind: SegmentKind | 'cleanup';
   /** Index into `Appointment.items`. */
   itemIndex: number;
+  /** Segment name in lower case, e.g. "chờ lên màu". */
   label?: string;
 }
 
@@ -223,9 +245,51 @@ export type SubjectField =
  * What differs between industries, as data: the words shown to people and the fields of the
  * served subject. Copied into a tenant when it is created (BR-70).
  */
+/** `open`: a tenant can pick it at sign-up; `soon`: the card shows but cannot be picked; `hidden`: no card. */
+export type TemplateStatus = 'open' | 'soon' | 'hidden';
+
+/** Starting values of a new tenant's booking policies (BR-06, BR-08, BR-09, BR-10). */
+export interface TemplatePolicies {
+  /** Earliest booking, hours from now. */
+  minNoticeHours: number;
+  /** Latest booking, days from now. */
+  maxAdvanceDays: number;
+  /** A customer changes or cancels at least this many hours before. */
+  cancelBeforeHours: number;
+  /** Times a customer may reschedule one appointment. */
+  maxReschedules: number;
+  /** Minutes after the start time at which a missed appointment is a no-show. */
+  noShowAfterMinutes: number;
+  /** No-shows in 6 months after which a deposit is required. */
+  depositAfterNoShows: number;
+}
+
+/** The part of a template an administrator edits; a draft remembers it as it was when it began. */
+export interface TemplateContent {
+  name: string;
+  status: TemplateStatus;
+  cardDescription: string;
+  previewNote: string;
+  vocabulary: IndustryTemplate['vocabulary'];
+  defaultPolicies: TemplatePolicies;
+  sampleServices: SampleService[];
+}
+
+/** An industry template (BR-70): published versions are copied into a tenant when it is created. */
 export interface IndustryTemplate {
+  /** The code, e.g. `hair_salon`. */
   id: string;
   name: string;
+  status: TemplateStatus;
+  /** Text on the industry card at sign-up. */
+  cardDescription: string;
+  /** The version new tenants receive; `null` before the first publication. */
+  publishedVersion: { number: number; publishedAt: string; tenantsCreated: number } | null;
+  /** Changes waiting to be published; `base` is the content they started from. */
+  draft: { number: number; changes: string[]; base: Partial<TemplateContent> } | null;
+  defaultPolicies: TemplatePolicies;
+  /** Local date of the last edit, `YYYY-MM-DD`. */
+  updatedAt: string;
   vocabulary: {
     /** Plural-free noun for staff in this industry. */
     staff: string;
@@ -242,6 +306,8 @@ export interface IndustryTemplate {
   subjectSchema: SubjectField[];
   /** Resources other than staff that a new tenant starts with. */
   resourceTypes: TemplateResourceType[];
+  /** Groups a service can belong to. */
+  serviceGroups: string[];
   /** Services created with the tenant; the sign-up preview lists them. */
   sampleServices: SampleService[];
   /** Who the customer books for, in the sign-up preview: "chính mình", "thú cưng". */
@@ -252,19 +318,30 @@ export interface IndustryTemplate {
 
 export interface TemplateResourceType {
   name: string;
+  /** The staff type: made with the owner's account, not counted at sign-up. */
+  isStaff: boolean;
   /** One line under the name when the owner sets the count. */
   hint: string;
   /** Count suggested for the first branch. */
   defaultCount: number;
 }
 
+/** One segment of a sample service; `types` are names from `IndustryTemplate.resourceTypes`. */
+export interface SampleSegment {
+  name: string;
+  kind: SegmentKind;
+  minutes: number;
+  types: string[];
+}
+
 export interface SampleServiceVariant {
   name: string;
-  minutes: number;
   /** Integer VND. */
   priceVnd: bigint;
-  /** Has a wait segment: the staff is free, the other resources stay busy (BR-05). */
-  hasWait?: boolean;
+  /** In order; a `wait` segment frees the staff and keeps the other resources (BR-05). */
+  segments: SampleSegment[];
+  /** Minutes to clean each resource type after use, by type name (BR-52). */
+  cleanup?: Record<string, number>;
 }
 
 export interface SampleService {

@@ -164,16 +164,30 @@ export function CheckRow({
 }
 
 /** Appears only when something changed; says how many, and offers to drop or keep them. */
-export function SaveBar({ count, onDiscard }: { count: number; onDiscard: () => void }) {
+export function SaveBar({
+  count,
+  onDiscard,
+  note,
+  saveDisabled = false,
+}: {
+  count: number;
+  onDiscard: () => void;
+  /** After the count: what saving does not touch, e.g. appointments already booked. */
+  note?: ReactNode;
+  /** The form still has errors: the button is off and says why through `note`. */
+  saveDisabled?: boolean;
+}) {
   if (count === 0) return null;
   return (
     <div className="sp-savebar max-md:bottom-22!" role="region" aria-label="Lưu thay đổi">
-      <span aria-live="polite">Còn {count} thay đổi chưa lưu</span>
+      <span aria-live="polite">
+        Còn {count} thay đổi chưa lưu{note && <> · {note}</>}
+      </span>
       <span className="sp-savebar__actions">
         <Button variant="ghost" onClick={onDiscard}>
           Bỏ thay đổi
         </Button>
-        <Button type="submit" variant="primary">
+        <Button type="submit" variant="primary" disabled={saveDisabled}>
           Lưu
         </Button>
       </span>

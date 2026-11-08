@@ -22,6 +22,7 @@ import {
   slugFromName,
   slugTaken,
   type SignupDraft,
+  placedResourceTypes,
 } from '@/mock/signup';
 
 type SlugCheck = 'idle' | 'checking' | 'free' | 'taken';
@@ -337,7 +338,7 @@ export function BusinessStep({
           title="Tài nguyên ban đầu"
           hint="Số lượng ở chi nhánh này. Đặt tên từng cái sau trong Cài đặt › Tài nguyên."
         >
-          {template.resourceTypes.map((type, i) => (
+          {placedResourceTypes(template).map((type, i) => (
             <div key={type.name} className="flex items-center justify-between gap-(--space-3)">
               <span className="flex flex-col">
                 <label htmlFor={`bz-res-${i}`} className="text-sm leading-5 font-medium">

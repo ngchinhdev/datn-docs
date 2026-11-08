@@ -10,6 +10,9 @@ import { Checklist } from '@/components/sapio/checklist';
 import { ChoiceCards } from '@/components/sapio/choice-cards';
 import { ConfirmDialog } from '@/components/sapio/confirm-dialog';
 import { SegmentedNav, SegmentedTabs } from '@/components/sapio/segmented';
+import { KeyValueList, Panel } from '@/components/sapio/detail-layout';
+import { SegmentTable } from '@/components/sapio/segment-table';
+import { SegmentTimeline, TimelineLegend } from '@/components/sapio/segment-timeline';
 import { useToast } from '@/components/sapio/toast';
 import { DateStrip } from '@/components/sapio/date-strip';
 import { HoldBanner } from '@/components/sapio/hold-banner';
@@ -26,6 +29,10 @@ import { ANY_STAFF, StaffPicker } from '@/components/sapio/staff-picker';
 import { StatusBadge } from '@/components/sapio/status-badge';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import type { AppointmentStatus } from '@/mock/fixtures';
+import { salonServices } from '@/mock/fixtures/salon-services';
+import { visibleRange } from '@/mock/occupation';
+import { layout, type DraftSegment } from '@/mock/service-edit';
+import { timelineOf } from '@/mock/service-preview';
 import { normalizePhone } from '@/mock/format';
 import { addDays, addMinutes, localToUtc, MOCK_NOW } from '@/mock/time';
 
@@ -40,6 +47,13 @@ function Example({ name, children }: { name: string; children: ReactNode }) {
     </section>
   );
 }
+
+const DYE = salonServices.find((s) => s.id === 'may-dye')!.variants[0]!;
+const DYE_TYPES = [
+  { id: 'may-rt-stylist', name: 'Thợ', isStaff: true },
+  { id: 'may-rt-chair', name: 'Ghế cắt', isStaff: false },
+  { id: 'may-rt-wash', name: 'Giường gội', isStaff: false },
+];
 
 export default function ComponentsPage() {
   const now = useMockNow();
@@ -57,6 +71,15 @@ export default function ComponentsPage() {
   const [otp, setOtp] = useState('');
   const [months, setMonths] = useState('1');
   const [holdUntil, setHoldUntil] = useState(addMinutes(MOCK_NOW, 10));
+  const [dyeSegments, setDyeSegments] = useState<DraftSegment[]>(() =>
+    DYE.segments.map((s) => ({ ...s })),
+  );
+  const [picked, setPicked] = useState<number | null>(2);
+  const dye = timelineOf({ segments: dyeSegments }, [
+    { id: 'may-rt-stylist', tenantId: 'may', name: 'Thợ', isStaff: true },
+    { id: 'may-rt-chair', tenantId: 'may', name: 'Ghế cắt', isStaff: false },
+    { id: 'may-rt-wash', tenantId: 'may', name: 'Giường gội', isStaff: false },
+  ]);
   const statuses: AppointmentStatus[] = [
     'held',
     'confirmed',
@@ -471,6 +494,77 @@ export default function ComponentsPage() {
             },
           ]}
         />
+      </Example>
+
+      <Example name="SegmentTimeline">
+        <div className="sp-panel">
+          <SegmentTimeline
+            segments={dye.segments}
+            types={dye.types}
+            cleanup={DYE.cleanupMinutes}
+            visible={visibleRange({ segments: dyeSegments })}
+            exampleStart="09:00"
+            selected={picked}
+            onSelect={setPicked}
+            label="Trục thời gian của Nhuộm ngắn, ví dụ hẹn lúc 09:00"
+          />
+          <TimelineLegend />
+        </div>
+        <div className="sp-panel max-w-[390px]">
+          <SegmentTimeline
+            mini
+            segments={dye.segments}
+            types={dye.types.map(({ small: _small, ...type }) => type)}
+            cleanup={DYE.cleanupMinutes}
+            visible={visibleRange({ segments: dyeSegments })}
+            exampleStart="09:00"
+            labelWidth={44}
+            label="Trục thời gian thu nhỏ, Nhuộm ngắn"
+          />
+        </div>
+      </Example>
+
+      <Example name="SegmentTable">
+        <SegmentTable
+          caption="Các đoạn của Nhuộm ngắn"
+          segments={dyeSegments}
+          types={DYE_TYPES}
+          selected={picked}
+          onSelect={setPicked}
+          errors={{}}
+          onPatch={(i, patch) =>
+            setDyeSegments((list) =>
+              list.map((segment, index) =>
+                index === i && patch.name !== undefined
+                  ? { ...segment, name: patch.name }
+                  : segment,
+              ),
+            )
+          }
+          onMove={(from, to) =>
+            setDyeSegments((list) => {
+              const next = [...list];
+              const [moved] = next.splice(from, 1);
+              if (moved) next.splice(to, 0, moved);
+              return layout(next);
+            })
+          }
+          onRemove={(i) => setDyeSegments((list) => layout(list.filter((_, index) => index !== i)))}
+        />
+      </Example>
+
+      <Example name="DetailLayout: Panel, KeyValueList">
+        <div className="max-w-[380px]">
+          <Panel title="Tóm tắt" titleId="ex-panel" note="Số liệu của biến thể đang sửa.">
+            <KeyValueList
+              items={[
+                ['Thợ bận', '1 giờ 15 (rảnh 45′ giữa chừng)'],
+                ['Ghế cắt bận', '1 giờ 40 (gồm dọn 10′)'],
+                ['Giường gội bận', '15 phút'],
+              ]}
+            />
+          </Panel>
+        </div>
       </Example>
 
       <Example name="LockIcon">

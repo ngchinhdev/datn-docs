@@ -52,8 +52,17 @@ export interface ShellWorkspace {
   accentClass: string;
 }
 
+/** The platform administration has no tenant to switch: the switcher shows a fixed name. */
+export interface ShellPlatform {
+  name: string;
+  sub: string;
+  initial: string;
+}
+
 export interface ShellProps {
   workspace: ShellWorkspace;
+  /** Set for the administration area: the switcher is a label, not a menu. */
+  platform?: ShellPlatform | undefined;
   /** Branch being viewed. */
   branchName: string;
   branches: { id: string; name: string; address: string; current: boolean; href: string }[];
@@ -138,13 +147,39 @@ function Switcher({
   branches,
   otherWorkspaces,
   newWorkspaceHref,
+  platform,
   rail,
   compact,
 }: Pick<
   ShellProps,
-  'workspace' | 'branchName' | 'branches' | 'otherWorkspaces' | 'newWorkspaceHref'
+  'workspace' | 'branchName' | 'branches' | 'otherWorkspaces' | 'newWorkspaceHref' | 'platform'
 > & { rail: boolean; compact: boolean }) {
   const menu = useMenu();
+  if (platform) {
+    return (
+      <div
+        className="sp-switcher"
+        style={{ cursor: 'default', ...(compact ? { width: 'auto' } : {}) }}
+      >
+        <span
+          aria-hidden="true"
+          className="sp-switcher__mark"
+          style={{ background: 'var(--brand-soft)', color: 'var(--brand)' }}
+        >
+          {platform.initial}
+        </span>
+        <span className="sp-switcher__text">
+          <span className="sp-switcher__name">{platform.name}</span>{' '}
+          <span className="sp-switcher__sub">{platform.sub}</span>
+        </span>
+        {rail && (
+          <span className="sp-sr-only">
+            {platform.name} {platform.sub}
+          </span>
+        )}
+      </div>
+    );
+  }
   return (
     <div className={cn('relative', compact && 'min-w-0')}>
       <button
@@ -472,6 +507,7 @@ export function AppShell(props: ShellProps) {
           branches={props.branches}
           otherWorkspaces={props.otherWorkspaces}
           newWorkspaceHref={props.newWorkspaceHref}
+          platform={props.platform}
           rail={rail}
           compact={false}
         />
@@ -494,6 +530,7 @@ export function AppShell(props: ShellProps) {
             branches={props.branches}
             otherWorkspaces={props.otherWorkspaces}
             newWorkspaceHref={props.newWorkspaceHref}
+            platform={props.platform}
             rail={false}
             compact
           />

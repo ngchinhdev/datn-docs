@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowLeft } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { useQueryState } from '@/components/mock/use-query-state';
 import { BottomBar } from '@/components/sapio/bottom-bar';
@@ -24,7 +25,7 @@ import { useToast } from '@/components/sapio/toast';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
 import { freeSlots, type FreeSlot } from '@/mock/availability';
-import { matchesAttributes } from '@/mock/fixtures/bookings';
+import { matchesAttributes, priceFor, visibleMinutes } from '@/mock/occupation';
 import { tenantFixtures, type ServedSubject, type ServiceVariant } from '@/mock/fixtures';
 import { formatMinutes, formatPhone, formatVnd, normalizePhone } from '@/mock/format';
 import { openingHours } from '@/mock/hours';
@@ -60,7 +61,7 @@ const PARTS: { value: Part; label: string; from: number; to: number }[] = [
   { value: 'evening', label: 'Tối', from: 17, to: 24 },
 ];
 
-const duration = (v: ServiceVariant) => Math.max(...v.segments.map((s) => s.endMinute));
+const duration = visibleMinutes;
 const matches = (v: ServiceVariant, subject: ServedSubject) =>
   matchesAttributes(v.match, subject.attributes);
 const partOf = (slot: FreeSlot) => {
@@ -118,6 +119,13 @@ export function BookingFlow({
   const toast = useToast();
   const { vocabulary, subjectSchema } = fixture.template;
   const staffNoun = vocabulary.staff;
+  /** BR-56: who is asked decides the price; people who can do the service, online only (BR-14). */
+  const pricedStaff = (forService: string) =>
+    staff
+      .filter((s) => s.profile.bookableOnline && s.skillServiceIds.includes(forService))
+      .map((s) => ({ resourceId: s.resourceId, level: s.level }));
+  const priceOf = (v: ServiceVariant, forService: string, who: string = ANY_STAFF) =>
+    priceFor(v, who, pricedStaff(forService));
   const subjectNoun = vocabulary.subject ?? '';
   const asksSubject = vocabulary.subject !== null;
   const saved = newCustomer
@@ -130,8 +138,12 @@ export function BookingFlow({
   const now = useMockNow();
   const today = localDate(MOCK_NOW);
   const [stepParam, setStepParam] = useQueryState('step', 'service');
-  const [serviceId, setServiceId] = useState<string | null>(null);
-  const [variantId, setVariantId] = useState<string | null>(null);
+  const preset = useSearchParams().get('service');
+  const presetService = services.find((s) => s.id === preset);
+  const [serviceId, setServiceId] = useState<string | null>(presetService?.id ?? null);
+  const [variantId, setVariantId] = useState<string | null>(
+    !asksSubject ? (presetService?.variants[0]?.id ?? null) : null,
+  );
   const [subjectId, setSubjectId] = useState<string | null>(newCustomer ? NEW_SUBJECT : null);
   const [newName, setNewName] = useState('');
   const [newValues, setNewValues] = useState<SubjectValues>({});
@@ -183,6 +195,7 @@ export function BookingFlow({
   const step: Step = requested && reachable[requested] ? requested : 'service';
   const stepIndex = steps.indexOf(step);
   const staffName = (id: string) => resources.find((r) => r.id === id)?.name ?? '';
+  const price = variant && service ? priceOf(variant, service.id, staffChoice) : 0n;
 
   const week = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(today, i)), [today]);
   const slotsFor = useCallback(
@@ -228,12 +241,15 @@ export function BookingFlow({
             title: s.profile.title,
             specialty: s.profile.specialty,
             earliest: first ? formatTime(first.startAt) : null,
+            ...(variant && serviceId
+              ? { price: formatVnd(priceFor(variant, s.resourceId, pricedStaff(serviceId))) }
+              : {}),
             nextDay: nextDay?.slot
               ? `Sớm nhất ${weekdayShort(nextDay.d)} ${formatDay(nextDay.d).slice(-5)}`
               : undefined,
           };
         }),
-    [staff, serviceId, slotsFor, date, week],
+    [staff, serviceId, variant, slotsFor, date, week],
   );
 
   const releaseHold = useCallback(() => {
@@ -296,7 +312,7 @@ export function BookingFlow({
         )}
       </div>
       <span className="body-sm sp-num text-(--ink-muted)">
-        {formatMinutes(duration(variant))} · {formatVnd(variant.priceVnd)}
+        {formatMinutes(duration(variant))} · {formatVnd(price)}
       </span>
       {subject && <span className="body-sm text-(--ink-muted)">Cho {subject.name}</span>}
     </div>
@@ -354,7 +370,7 @@ export function BookingFlow({
               id: v.id,
               name: v.name,
               meta: formatMinutes(duration(v)),
-              price: formatVnd(v.priceVnd),
+              price: formatVnd(priceOf(v, s.id)),
             }))}
           />
         ))}
@@ -367,7 +383,7 @@ export function BookingFlow({
           : service
             ? service.name
             : 'Chưa chọn dịch vụ',
-      subtitle: variant ? formatVnd(variant.priceVnd) : undefined,
+      subtitle: variant ? formatVnd(price) : undefined,
       label: 'Tiếp tục',
       disabled: !service || (!asksSubject && !variant),
       onClick: () => go(steps[1]!),
@@ -398,7 +414,7 @@ export function BookingFlow({
                 id: s.id,
                 name: s.name,
                 meta: `${describeSubject(subjectSchema, s)} · ${v.name} · ${formatMinutes(duration(v))}`,
-                price: formatVnd(v.priceVnd),
+                price: formatVnd(priceOf(v, service.id)),
               };
             }),
             {
@@ -407,7 +423,7 @@ export function BookingFlow({
               meta: newVariant
                 ? `${newSubject.name} · ${newVariant.name} · ${formatMinutes(duration(newVariant))}`
                 : askedFields(fixture),
-              price: newVariant ? formatVnd(newVariant.priceVnd) : '',
+              price: newVariant ? formatVnd(priceOf(newVariant, service.id)) : '',
             },
           ]}
         />
@@ -490,7 +506,7 @@ export function BookingFlow({
             <p className="body-sm m-0 text-(--ink-muted)" aria-live="polite">
               {newSubject
                 ? newVariant
-                  ? `Giá cho ${newSubject.name}: ${newVariant.name}, ${formatVnd(newVariant.priceVnd)}.`
+                  ? `Giá cho ${newSubject.name}: ${newVariant.name}, ${formatVnd(priceOf(newVariant, service.id))}.`
                   : `${service.name} chưa nhận ${subjectNoun} này. Chọn dịch vụ khác.`
                 : `Giá theo ${factors}, hiện ngay khi nhập.`}
             </p>
@@ -505,7 +521,7 @@ export function BookingFlow({
     );
     cta = {
       title: subject && variant ? `${subject.name} · ${service.name}` : `Chưa chọn ${subjectNoun}`,
-      subtitle: variant ? formatVnd(variant.priceVnd) : undefined,
+      subtitle: variant ? formatVnd(price) : undefined,
       label: 'Tiếp tục',
       disabled: !variant,
       onClick: () => go('datetime'),
@@ -533,6 +549,7 @@ export function BookingFlow({
             onChange={chooseStaff}
             context={`${staffNoun} làm được ${service.name} · ${formatDay(date)}`}
             anyEarliest={daySlots[0] ? formatTime(daySlots[0].startAt) : null}
+            anyPrice={variant && service ? formatVnd(priceOf(variant, service.id)) : undefined}
           />
         </div>
         <div className="flex flex-col gap-(--space-2)">
@@ -686,7 +703,7 @@ export function BookingFlow({
       ['Thời gian', `${slotLine} · ${formatMinutes(duration(variant))}`],
       [staffNoun, assignedStaff],
       ['Liên hệ', `${name} · ${phoneE164 ? formatPhone(phoneE164) : ''} · ${email.trim()}`],
-      ['Giá', formatVnd(variant.priceVnd)],
+      ['Giá', formatVnd(price)],
       ...(variant.depositVnd
         ? [['Đặt cọc', formatVnd(variant.depositVnd)] as [string, string]]
         : []),
@@ -758,9 +775,7 @@ export function BookingFlow({
     cta = confirmed
       ? null
       : {
-          title: variant.depositVnd
-            ? `Cọc ${formatVnd(variant.depositVnd)}`
-            : formatVnd(variant.priceVnd),
+          title: variant.depositVnd ? `Cọc ${formatVnd(variant.depositVnd)}` : formatVnd(price),
           subtitle: slotLine,
           label: 'Xác nhận đặt lịch',
           disabled: !bookingOpen,
@@ -856,6 +871,7 @@ export function BookingFlow({
                 value={staffChoice}
                 onChange={chooseStaff}
                 anyEarliest={daySlots[0] ? formatTime(daySlots[0].startAt) : null}
+                anyPrice={variant && service ? formatVnd(priceOf(variant, service.id)) : undefined}
               />
             </div>
           )}

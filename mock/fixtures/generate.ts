@@ -11,7 +11,8 @@
  * - Tóc Mây, Thứ Sáu 06/11: a cancelled appointment, a customer name over 30 characters, a long note.
  * - Pawpaw, Thứ Bảy 07/11: two pets booked together, a dog over 10 kg, dryers busy during the groomer's wait.
  */
-import { bookVariant, findVariant, matchesAttributes, type ItemSpec } from './bookings';
+import { occupation, prepMinutes, resourceTypesOf, visibleMinutes } from '../occupation.ts';
+import { bookVariant, findVariant, matchesAttributes, type ItemSpec } from './bookings.ts';
 import type {
   Appointment,
   AppointmentStatus,
@@ -22,7 +23,7 @@ import type {
   Service,
   Staff,
   StaffTimeOff,
-} from './types';
+} from './types.ts';
 
 /** mulberry32: tiny deterministic PRNG. */
 export function seeded(seed: number) {
@@ -104,7 +105,10 @@ export class Occupancy {
   }
 }
 
-/** Picks concrete non-staff resources for one variant starting at `start`, or null. */
+/**
+ * Picks concrete non-staff resources for one variant for a customer arriving at `start`, or null.
+ * A resource is free when it is free for everything the variant holds it for, cleanup included.
+ */
 export function assign(
   cfg: Pick<WeekConfig, 'services' | 'resources' | 'staffTypeId'>,
   occ: Occupancy,
@@ -113,22 +117,15 @@ export function assign(
   start: string,
 ): string[] | null {
   const variant = findVariant(cfg.services, variantId);
-  const types = [...new Set(variant.segments.flatMap((s) => s.resourceTypeIds))].filter(
-    (t) => t !== cfg.staffTypeId,
-  );
+  const origin = Date.parse(start) - prepMinutes(variant) * MINUTE;
   const ids = [staffId];
-  for (const type of types) {
-    const segs = variant.segments.filter((s) => s.resourceTypeIds.includes(type));
+  for (const type of resourceTypesOf(variant)) {
+    if (type === cfg.staffTypeId) continue;
+    const held = occupation(variant, type);
     const candidate = cfg.resources.find(
       (r) =>
         r.resourceTypeId === type &&
-        segs.every((s) =>
-          occ.free(
-            r.id,
-            Date.parse(start) + s.startMinute * MINUTE,
-            Date.parse(start) + s.endMinute * MINUTE,
-          ),
-        ),
+        held.every(([from, to]) => occ.free(r.id, origin + from * MINUTE, origin + to * MINUTE)),
     );
     if (!candidate) return null;
     ids.push(candidate.id);
@@ -160,16 +157,19 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
     for (let attempt = 0; placed < target && attempt < 400; attempt++) {
       const subject = pick(cfg.subjects);
       const service = pick(cfg.services);
-      // BR-13: the variant follows the served subject.
-      const variant = service.variants.find((v) => matchesAttributes(v.match, subject.attributes));
+      // BR-55: the customer picks the variant, or it follows the served subject (BR-13).
+      const variant =
+        service.variantSelection === 'customer'
+          ? pick(service.variants)
+          : service.variants.find((v) => matchesAttributes(v.match, subject.attributes));
       if (!variant) continue;
       // BR-03: only staff with the skill.
       const staff = cfg.staff.filter(
         (s) => s.skillServiceIds.includes(service.id) && !off.has(s.resourceId),
       );
       if (!staff.length) continue;
-      const length = Math.max(...variant.segments.map((s) => s.endMinute));
-      const slots = Math.floor((close - open) / MINUTE / 15) - Math.ceil(length / 15);
+      const slots =
+        Math.floor((close - open) / MINUTE / 15) - Math.ceil(visibleMinutes(variant) / 15);
       if (slots < 0) continue;
       const start = iso(open + Math.floor(rand() * (slots + 1)) * 15 * MINUTE);
       const staffId = pick(staff).resourceId;
@@ -180,7 +180,8 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
         variant,
         Object.fromEntries(ids.map((id) => [typeOf(cfg, id), id])),
       );
-      if (!occ.fits(bookings)) continue;
+      // BR-54: preparation and cleanup stay inside opening hours too.
+      if (!occ.fits(bookings) || !bookings.every((b) => inside(b, open, close))) continue;
 
       const status = statusFor(date, cfg.today, rand, cfg.pastMix);
       const appt = cfg.build(
@@ -198,6 +199,9 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
   }
   return out;
 }
+
+const inside = (b: ResourceBooking, open: number, close: number) =>
+  Date.parse(b.startAt) >= open && Date.parse(b.endAt) <= close;
 
 function typeOf(cfg: Pick<WeekConfig, 'resources'>, id: string) {
   return cfg.resources.find((r) => r.id === id)?.resourceTypeId ?? '';

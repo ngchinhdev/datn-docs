@@ -1,153 +1,25 @@
-import { appointmentBuilder } from './bookings';
-import { dateRange, generateWeek } from './generate';
-import { generatePeople, withVisitCounts } from './people';
-import { hairSalonTemplate } from './templates';
+import { appointmentBuilder } from './bookings.ts';
+import { dateRange, generateWeek } from './generate.ts';
+import { generatePeople, withVisitCounts } from './people.ts';
+import { salonServices as services } from './salon-services.ts';
+import { hairSalonTemplate } from './templates.ts';
 import type {
   Appointment,
   Branch,
   BusinessHours,
   Customer,
   ServedSubject,
-  Service,
   Staff,
   StaffTimeOff,
   TenantFixture,
   Weekday,
-} from './types';
+} from './types.ts';
 
 const tenantId = 'may';
 const branchId = 'may-q3';
 
 const everyDay = (open: BusinessHours['open'], close: BusinessHours['close']): BusinessHours[] =>
   ([0, 1, 2, 3, 4, 5, 6] as Weekday[]).map((weekday) => ({ weekday, open, close }));
-
-const services: Service[] = [
-  {
-    id: 'may-cut',
-    tenantId,
-    name: 'Cắt tóc',
-    variants: [
-      {
-        id: 'may-cut-short',
-        name: 'Tóc ngắn',
-        shortName: 'Cắt ngắn',
-        priceVnd: 150_000n,
-        match: { hairLength: 'short' },
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 45,
-            kind: 'work',
-            resourceTypeIds: ['may-rt-stylist', 'may-rt-chair'],
-          },
-        ],
-      },
-      {
-        id: 'may-cut-long',
-        name: 'Tóc dài',
-        shortName: 'Cắt dài',
-        priceVnd: 200_000n,
-        match: { hairLength: 'long' },
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 60,
-            kind: 'work',
-            resourceTypeIds: ['may-rt-stylist', 'may-rt-chair'],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'may-wash',
-    tenantId,
-    name: 'Gội sấy',
-    variants: [
-      {
-        id: 'may-wash-std',
-        name: 'Tiêu chuẩn',
-        shortName: 'Gội sấy',
-        priceVnd: 80_000n,
-        match: {},
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 30,
-            kind: 'work',
-            resourceTypeIds: ['may-rt-stylist', 'may-rt-wash'],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    // Color has a processing wait: the stylist is free, the chair stays occupied.
-    id: 'may-dye',
-    tenantId,
-    name: 'Nhuộm tóc',
-    variants: [
-      {
-        id: 'may-dye-short',
-        name: 'Tóc ngắn',
-        shortName: 'Nhuộm ngắn',
-        priceVnd: 500_000n,
-        depositVnd: 100_000n,
-        match: { hairLength: 'short' },
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 30,
-            kind: 'work',
-            resourceTypeIds: ['may-rt-stylist', 'may-rt-chair'],
-          },
-          {
-            startMinute: 30,
-            endMinute: 75,
-            kind: 'wait',
-            resourceTypeIds: ['may-rt-chair'],
-            label: 'chờ lên màu',
-          },
-          {
-            startMinute: 75,
-            endMinute: 105,
-            kind: 'work',
-            resourceTypeIds: ['may-rt-stylist', 'may-rt-chair'],
-          },
-        ],
-      },
-      {
-        id: 'may-dye-long',
-        name: 'Tóc dài',
-        shortName: 'Nhuộm dài',
-        priceVnd: 700_000n,
-        depositVnd: 100_000n,
-        match: { hairLength: 'long' },
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 40,
-            kind: 'work',
-            resourceTypeIds: ['may-rt-stylist', 'may-rt-chair'],
-          },
-          {
-            startMinute: 40,
-            endMinute: 85,
-            kind: 'wait',
-            resourceTypeIds: ['may-rt-chair'],
-            label: 'chờ lên màu',
-          },
-          {
-            startMinute: 85,
-            endMinute: 120,
-            kind: 'work',
-            resourceTypeIds: ['may-rt-stylist', 'may-rt-chair'],
-          },
-        ],
-      },
-    ],
-  },
-];
 
 const resources = [
   { id: 'may-mai', tenantId, branchId, resourceTypeId: 'may-rt-stylist', name: 'Mai' },
@@ -158,8 +30,6 @@ const resources = [
   { id: 'may-chair-3', tenantId, branchId, resourceTypeId: 'may-rt-chair', name: 'Ghế 3' },
   { id: 'may-wash-1', tenantId, branchId, resourceTypeId: 'may-rt-wash', name: 'Giường gội 1' },
 ];
-
-const appointment = appointmentBuilder({ tenantId, branchId, services, resources });
 
 const staffList: Staff[] = [
   {
@@ -194,7 +64,7 @@ const staffList: Staff[] = [
     },
     role: 'technician',
     level: 1,
-    skillServiceIds: ['may-cut', 'may-wash'],
+    skillServiceIds: ['may-cut', 'may-wash', 'may-dye'],
   },
   {
     resourceId: 'may-hung',
@@ -214,6 +84,14 @@ const staffList: Staff[] = [
     skillServiceIds: ['may-cut', 'may-wash', 'may-dye'],
   },
 ];
+
+const appointment = appointmentBuilder({
+  tenantId,
+  branchId,
+  services,
+  resources,
+  staff: staffList,
+});
 
 const regulars: Customer[] = [
   {
@@ -284,22 +162,22 @@ const regulars: Customer[] = [
 
 const regularSubjects: ServedSubject[] = (
   [
-    ['thu', 'Nguyễn Minh Thư', 'long'],
-    ['an', 'Trần Bảo An', 'short'],
-    ['ha', 'Lê Thu Hà', 'short'],
-    ['tuan', 'Đỗ Anh Tuấn', 'short'],
-    ['ngoc', 'Hoàng Bích Ngọc', 'long'],
-    ['vy', 'Ngô Tường Vy', 'long'],
-    ['phuc', 'Bùi Hữu Phúc', 'short'],
-    ['van', 'Vũ Thanh Vân', 'short'],
+    ['thu', 'Nguyễn Minh Thư'],
+    ['an', 'Trần Bảo An'],
+    ['ha', 'Lê Thu Hà'],
+    ['tuan', 'Đỗ Anh Tuấn'],
+    ['ngoc', 'Hoàng Bích Ngọc'],
+    ['vy', 'Ngô Tường Vy'],
+    ['phuc', 'Bùi Hữu Phúc'],
+    ['van', 'Vũ Thanh Vân'],
   ] as const
-).map(([key, name, hairLength]) => ({
+).map(([key, name]) => ({
   id: `may-s-${key}`,
   tenantId,
   customerId: `may-c-${key}`,
   kind: 'self' as const,
   name,
-  attributes: { hairLength },
+  attributes: {},
 }));
 
 // Saturday 07/11/2026, as drawn in design/screens/LeTanChiTiet.dc.html and LeTanTaiNguyen.dc.html.
@@ -313,7 +191,7 @@ const saturday: Appointment[] = [
       {
         variantId: 'may-dye-short',
         subjectId: 'may-s-ha',
-        resourceIds: ['may-mai', 'may-chair-1'],
+        resourceIds: ['may-mai', 'may-chair-1', 'may-wash-1'],
       },
     ],
     {
@@ -408,7 +286,7 @@ const saturday: Appointment[] = [
       {
         variantId: 'may-dye-long',
         subjectId: 'may-s-thu',
-        resourceIds: ['may-hung', 'may-chair-3'],
+        resourceIds: ['may-hung', 'may-chair-3', 'may-wash-1'],
       },
     ],
     { depositVnd: 150_000n },
@@ -417,22 +295,22 @@ const saturday: Appointment[] = [
 // Customers who only appear on the other days of the week. [key, name, call name, hair length]
 const others = (
   [
-    ['lam', 'Phan Ngọc Lam', 'Chị Lam', 'long'],
-    ['khanh', 'Trịnh Quốc Khánh', 'Anh Khánh', 'short'],
-    ['my', 'Đặng Thảo My', 'Chị My', 'long'],
-    ['duy', 'Lý Minh Duy', 'Anh Duy', 'short'],
-    ['trang', 'Cao Thùy Trang', 'Chị Trang', 'long'],
-    ['hieu', 'Mạc Trung Hiếu', 'Anh Hiếu', 'short'],
-    ['nhi', 'Tạ Yến Nhi', 'Chị Nhi', 'long'],
-    ['son', 'Hồ Thanh Sơn', 'Anh Sơn', 'short'],
-    ['quyen', 'La Bảo Quyên', 'Chị Quyên', 'long'],
-    ['tam', 'Kiều Minh Tâm', 'Chị Tâm', 'short'],
-    ['long', 'Dương Hải Long', 'Anh Long', 'short'],
-    ['huong', 'Lương Thu Hương', 'Chị Hương', 'long'],
+    ['lam', 'Phan Ngọc Lam', 'Chị Lam'],
+    ['khanh', 'Trịnh Quốc Khánh', 'Anh Khánh'],
+    ['my', 'Đặng Thảo My', 'Chị My'],
+    ['duy', 'Lý Minh Duy', 'Anh Duy'],
+    ['trang', 'Cao Thùy Trang', 'Chị Trang'],
+    ['hieu', 'Mạc Trung Hiếu', 'Anh Hiếu'],
+    ['nhi', 'Tạ Yến Nhi', 'Chị Nhi'],
+    ['son', 'Hồ Thanh Sơn', 'Anh Sơn'],
+    ['quyen', 'La Bảo Quyên', 'Chị Quyên'],
+    ['tam', 'Kiều Minh Tâm', 'Chị Tâm'],
+    ['long', 'Dương Hải Long', 'Anh Long'],
+    ['huong', 'Lương Thu Hương', 'Chị Hương'],
     // Over 30 characters, to test wrapping.
-    ['phuongthao', 'Công Tôn Nữ Hoàng Thị Phương Thảo', 'Chị Phương Thảo', 'long'],
+    ['phuongthao', 'Công Tôn Nữ Hoàng Thị Phương Thảo', 'Chị Phương Thảo'],
   ] as const
-).map(([key, name, callName, hairLength], i) => ({
+).map(([key, name, callName], i) => ({
   customer: {
     id: `may-c-${key}`,
     tenantId,
@@ -447,7 +325,7 @@ const others = (
     customerId: `may-c-${key}`,
     kind: 'self',
     name,
-    attributes: { hairLength },
+    attributes: {},
   } satisfies ServedSubject,
 }));
 
@@ -473,7 +351,7 @@ const people = generatePeople({
       customerId: customer.id,
       kind: 'self',
       name: customer.name,
-      attributes: { hairLength: rand() < 0.5 ? 'short' : 'long' },
+      attributes: {},
     },
   ],
 });
@@ -540,7 +418,7 @@ const handwritten: Appointment[] = [
       {
         variantId: 'may-dye-short',
         subjectId: 'may-s-trang',
-        resourceIds: ['may-mai', 'may-chair-1'],
+        resourceIds: ['may-mai', 'may-chair-1', 'may-wash-1'],
       },
     ],
     { settled: true, depositVnd: 100_000n },
@@ -555,7 +433,7 @@ const handwritten: Appointment[] = [
       {
         variantId: 'may-dye-long',
         subjectId: 'may-s-phuongthao',
-        resourceIds: ['may-hung', 'may-chair-2'],
+        resourceIds: ['may-hung', 'may-chair-2', 'may-wash-1'],
       },
     ],
     {
@@ -651,7 +529,7 @@ export const salonTocMay: TenantFixture = {
   ],
   resourceTypes: [
     { id: 'may-rt-stylist', tenantId, name: 'Thợ', isStaff: true },
-    { id: 'may-rt-chair', tenantId, name: 'Ghế làm tóc', isStaff: false },
+    { id: 'may-rt-chair', tenantId, name: 'Ghế cắt', isStaff: false },
     { id: 'may-rt-wash', tenantId, name: 'Giường gội', isStaff: false },
   ],
   resources,

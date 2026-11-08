@@ -110,7 +110,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {/* Sits above the phone bottom nav on pages that have one. */}
       <div
-        className="sp-toast-region in-[body:has([data-phone-nav])]:max-md:bottom-20"
+        className="sp-toast-region in-[body:has([data-phone-nav])]:max-md:bottom-20 in-[body:has(.sp-savebar)]:bottom-28! in-[body:has(.sp-savebar)]:max-md:bottom-44!"
         role="status"
         aria-live="polite"
       >

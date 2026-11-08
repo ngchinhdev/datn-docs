@@ -2,8 +2,8 @@
  * Seeded customers for the list screens. Names are made of common Vietnamese family, middle and
  * given names; the same seed gives the same people on every run.
  */
-import { seeded } from './generate';
-import type { Appointment, Customer, ServedSubject } from './types';
+import { seeded } from './generate.ts';
+import type { Appointment, Customer, ServedSubject } from './types.ts';
 
 const FAMILY = [
   'Nguyễn',

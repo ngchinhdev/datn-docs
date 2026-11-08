@@ -138,7 +138,7 @@ export function StaffProfileScreen({
     const pending = !draft.skills.includes(serviceId) ? upcomingFor(serviceId) : 0;
     return [
       wait &&
-        `Gồm đoạn ${wait.label ?? 'chờ'}, ${draft.displayName || 'nhân viên'} được rảnh trong đoạn đó`,
+        `Gồm đoạn ${wait.name.charAt(0).toLowerCase()}${wait.name.slice(1)},${draft.displayName || 'nhân viên'} được rảnh trong đoạn đó`,
       pending > 0 && `Còn ${pending} lịch sắp tới dùng kỹ năng này; cần đổi người trước khi bỏ`,
     ]
       .filter(Boolean)

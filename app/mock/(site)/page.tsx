@@ -9,7 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { tenantFixtures, type BusinessHours, type ServiceVariant } from '@/mock/fixtures';
+import { tenantFixtures, type BusinessHours } from '@/mock/fixtures';
+import { visibleMinutes } from '@/mock/occupation';
 import {
   mockScreens,
   screenRoleLabel,
@@ -34,8 +35,7 @@ const weekdayLabel = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
 const vnd = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
 
-const durationMinutes = (variant: ServiceVariant) =>
-  Math.max(...variant.segments.map((s) => s.endMinute));
+const durationMinutes = visibleMinutes;
 
 const formatHours = (hours: BusinessHours[]) =>
   hours.map((h) => `${weekdayLabel[h.weekday]} ${h.open}–${h.close}`).join(', ');

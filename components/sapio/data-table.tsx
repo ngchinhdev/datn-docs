@@ -35,6 +35,8 @@ export function DataTable<T>({
   cards,
   foot,
   phoneFoot,
+  onRowOpen,
+  minWidth = 860,
 }: {
   /** What the list is, for the scroll region: "Danh sách khách hàng". */
   label: string;
@@ -47,6 +49,10 @@ export function DataTable<T>({
   cards: (row: T) => ReactNode;
   foot: ReactNode;
   phoneFoot: ReactNode;
+  /** A click on the row (not on a link, button or switch in it) opens it. */
+  onRowOpen?: (row: T) => void;
+  /** Narrowest the table gets before its card scrolls sideways, px. */
+  minWidth?: number;
 }) {
   return (
     <>
@@ -57,7 +63,7 @@ export function DataTable<T>({
           role="region"
           aria-label={`${label}, cuộn được`}
         >
-          <table className="sp-table min-w-[860px] table-fixed">
+          <table className="sp-table table-fixed" style={{ minWidth }}>
             <colgroup>
               {columns.map((col) => (
                 <col key={col.key} style={col.width ? { width: col.width } : undefined} />
@@ -102,7 +108,19 @@ export function DataTable<T>({
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={rowKey(row)}>
+                <tr
+                  key={rowKey(row)}
+                  className={onRowOpen ? 'cursor-pointer' : undefined}
+                  onClick={
+                    onRowOpen
+                      ? (e) => {
+                          if (!(e.target as HTMLElement).closest('a, button, input, label')) {
+                            onRowOpen(row);
+                          }
+                        }
+                      : undefined
+                  }
+                >
                   {columns.map((col) => (
                     <td
                       key={col.key}
