@@ -62,6 +62,14 @@ export interface ScreenLink {
 const app = (path: string) => (slug: string) => `/mock/app/${slug}/${path}`;
 const firstStaffId = (slug: string) => fixtureBySlug(slug)?.staff[0]?.resourceId ?? '';
 
+/** An appointment already checked in, so its detail has a payment to take. */
+const checkedInId = (slug: string) =>
+  fixtureBySlug(slug)?.appointments.find((a) => a.status === 'checked_in')?.id ?? '';
+
+/** A leave request still waiting for a decision, with appointments to deal with. */
+const pendingLeaveId = (slug: string) =>
+  fixtureBySlug(slug)?.staffTimeOff.find((l) => l.status === 'pending')?.id ?? '';
+
 /** The service with a waiting segment: Nhuộm tóc at Tóc Mây, Tắm sấy at Pawpaw. */
 const waitingServiceId = (slug: string) =>
   fixtureBySlug(slug)?.services.find((s) =>
@@ -82,7 +90,22 @@ const built: Record<string, ScreenLink[]> = {
     { label: 'Theo tài nguyên', href: app('calendar?view=resources') },
   ],
   'MH-25': [{ label: 'Hôm nay', href: app('today') }],
+  'MH-26': [{ label: 'Tạo lịch hẹn', href: app('calendar?create=1') }],
+  'MH-27': [{ label: 'Lịch, kéo thả', href: app('calendar') }],
+  'MH-28': [
+    { label: 'Chi tiết lịch hẹn', href: (slug) => app(`appointments/${checkedInId(slug)}`)(slug) },
+  ],
   'MH-32': [{ label: 'Khách hàng', href: app('customers') }],
+  'MH-35': [{ label: 'Lịch của tôi', href: app('my/schedule?role=technician') }],
+  'MH-36': [{ label: 'Xin nghỉ', href: app('my/time-off?role=technician') }],
+  'MH-38': [{ label: 'Xếp ca', href: app('shifts?role=manager') }],
+  'MH-39': [{ label: 'Nghỉ phép', href: app('time-off?role=manager') }],
+  'MH-40': [
+    {
+      label: 'Xử lý đơn nghỉ',
+      href: (slug) => app(`time-off/${pendingLeaveId(slug)}?role=manager`)(slug),
+    },
+  ],
   'MH-44': [{ label: 'Dịch vụ', href: app('settings/services') }],
   'MH-45': [
     {
@@ -91,6 +114,7 @@ const built: Record<string, ScreenLink[]> = {
     },
   ],
   'MH-47': [{ label: 'Nhân sự', href: app('settings/staff') }],
+  'MH-49': [{ label: 'Chính sách', href: app('settings/policies') }],
   'MH-59': [
     { label: 'Gói cấu hình ngành', href: () => '/mock/admin/templates', platform: true },
     {

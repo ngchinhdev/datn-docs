@@ -1,8 +1,5 @@
+import { fold } from './customers';
 import type { Customer, TenantFixture } from './fixtures/types.ts';
-
-/** Lower case without tone marks, so "nguyen" finds "Nguyễn". */
-export const fold = (text: string) =>
-  text.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd').toLowerCase();
 
 const nationalDigits = (e164: string) => e164.replace(/^\+84/, '0');
 

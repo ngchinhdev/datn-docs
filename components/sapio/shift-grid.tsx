@@ -97,7 +97,11 @@ export function ShiftGrid({
                 const isSelected = selected?.rowId === row.id && selected.date === cell.date;
                 const aria = `${row.name}, ${column.long}`;
                 return (
-                  <td key={cell.date} {...(isSelected ? { 'aria-selected': true } : {})}>
+                  <td
+                    key={cell.date}
+                    {...(isSelected ? { 'aria-current': true, 'data-selected': '' } : {})}
+                    className="data-selected:bg-(--fill-tonal) data-selected:shadow-[inset_0_0_0_1.5px_var(--brand)]"
+                  >
                     {cell.fixed ? (
                       <span
                         className="sp-shift sp-shift--off"

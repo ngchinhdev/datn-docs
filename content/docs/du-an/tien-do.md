@@ -7,6 +7,22 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 08/11/2026 (khuya): mock Bước 11, nghiệp vụ lịch
+- **Đã làm:** Bước 11 (11a–11g) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-11-đợt-a-nghiệp-vụ-lịch-mh-26-mh-27-mh-28-mh-35-mh-36-mh-38-mh-39-mh-40) trên nhánh `feat/mock-scheduling-ops`.
+  - 11a: mỗi mục lịch ghi khách chọn đích danh hay "Bất kỳ ai" (BR-31); ca làm nhiều khung mỗi ngày; đơn nghỉ có trạng thái, giờ, lý do, cách xử lý từng lịch. `findSlots` đọc ca và đơn nghỉ thay cho giờ mở cửa. Cài đặt "Kỹ thuật viên thấy số điện thoại khách" ở Chính sách (BR-36). `ScheduleStore` giữ lịch, khách, ca, đơn nghỉ giữa các màn.
+  - 11b MH-26: bấm ô trống hoặc "Tạo lịch hẹn" mở `SidePanel`, kiểm bằng `findSlots` từng phút (giờ lệch lưới được), gợi ý ba giờ gần nhất, khách vãng lai, khách mới, thêm bé.
+  - 11c MH-27: kéo khối trên lịch nhân viên (chuột, cảm ứng bấm giữ), vùng thả được và không thả được tính bằng `findSlots` bỏ chính lịch đó; lịch "Bất kỳ ai" đổi ngay có Hoàn tác, lịch đích danh hỏi lại và mang dấu "Chưa xác nhận đổi người" (BR-32); "Dời giờ, đổi người" thay cho kéo.
+  - 11d MH-28: trang chi tiết lịch hẹn cho điện thoại.
+  - 11e MH-35, MH-36: Lịch của tôi (ngày, tuần, Bắt đầu phần tiếp, Xong) và Xin nghỉ cho kỹ thuật viên; số điện thoại khách ẩn theo cài đặt.
+  - 11f MH-38, MH-39, MH-40: xếp ca, danh sách đơn nghỉ, xử lý lịch bị ảnh hưởng với gợi ý tính bằng `findSlots`, hạn trả lời BR-33, danh sách "Cần xếp lại" sau khi bớt ca (BR-35).
+- **Kiểm:** `pnpm check:availability` (thêm lịch trong ca, ngày mẫu của màn tạo lịch, vùng thả); Playwright cho từng mục "Xong khi" của Bước 11; axe-core 124 lượt (31 màn và trạng thái, hai theme, 1440px và 390px), 0 lỗi serious hoặc critical; không cuộn ngang ở 390px, trừ lưới lịch; màu chọn trong quản trị là `brand`.
+- **Vướng:**
+  - Bản vẽ dùng `aria-selected` trên ô bảng, trên khối không có vai trò và `aria-pressed` trên `role="radio"`: axe báo lỗi critical, đổi sang `aria-current`, `data-selected` và nút bật tắt.
+  - `.sp-date:hover` đè màu ngày đang chọn thành nền nhạt chữ trắng; `DateStrip` giữ màu khi rê chuột.
+  - Giá lịch Chị Hà ở bản vẽ MH-28 (500.000 ₫ kèm "Mai do khách chọn đích danh") mâu thuẫn với BR-56; dữ liệu mẫu để Chị Hà là "Bất kỳ ai", giá 500.000 ₫.
+  - 09/11 đóng cửa bảo trì nên lưới ca ngày đó là "Đóng cửa", tổng giờ tuần lệch với bản vẽ.
+- **Tiếp theo:** review PR; phiên claude.ai vẽ đợt B (phía khách).
+
 ### 08/11/2026 (tối): chốt đợt A, nghiệp vụ lịch
 - **Đã làm:**
   - Review và người dùng merge PR #5 (Bước 10). Sau review chỉ còn hai chỗ sửa: bảng vừa khung ở 1280–1600px, và trên điện thoại chỉ giữ nút quay lại.

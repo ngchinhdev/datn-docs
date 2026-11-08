@@ -353,7 +353,7 @@ export function CreatePanel({
     >
       {/* Customer */}
       {asksSubject && customer ? (
-        <div className="sp-pick__item" aria-selected="true" style={{ cursor: 'default' }}>
+        <div className="sp-pick__item bg-(--brand-soft)! shadow-[inset_0_0_0_1.5px_var(--brand)] cursor-default!">
           <span className="sp-avatar sp-avatar--sm">{initialsOf(customer.name)}</span>
           <span>
             <span className="sp-pick__name">{customer.name}</span>

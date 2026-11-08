@@ -144,11 +144,7 @@ export function MyTimeOffScreen({ tenantSlug }: { tenantSlug: string }) {
           </span>
         </fieldset>
 
-        <div
-          className="sp-segmented sp-segmented--block"
-          role="radiogroup"
-          aria-label="Thời gian nghỉ"
-        >
+        <div className="sp-segmented sp-segmented--block" role="group" aria-label="Thời gian nghỉ">
           {(
             [
               [false, 'Cả ngày'],
@@ -159,8 +155,6 @@ export function MyTimeOffScreen({ tenantSlug }: { tenantSlug: string }) {
               key={label}
               type="button"
               className="sp-segmented__item"
-              role="radio"
-              aria-checked={fewHours === value}
               aria-pressed={fewHours === value}
               onClick={() => setFewHours(value)}
             >

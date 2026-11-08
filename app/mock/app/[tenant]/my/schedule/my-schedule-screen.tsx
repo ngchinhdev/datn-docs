@@ -187,7 +187,7 @@ export function MyScheduleScreen({ tenantSlug }: { tenantSlug: string }) {
     return (
       <li
         key={appt.id}
-        className={`sp-panel gap-1! px-3.5! py-3! ${closed ? 'opacity-70' : ''}`}
+        className={`sp-panel gap-1! px-3.5! py-3! ${closed ? 'bg-(--surface)!' : ''}`}
         style={phase === 'back' ? { boxShadow: 'inset 0 0 0 1.5px var(--brand)' } : undefined}
       >
         <div className="flex items-start gap-(--space-3)">
