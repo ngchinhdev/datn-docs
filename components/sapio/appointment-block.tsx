@@ -98,7 +98,11 @@ export function AppointmentBlock({
               <span className="sp-appt__meta block">{segment.note}</span>{' '}
             </>
           )}
-          {meta && showsMeta(i) && <span className="sp-appt__meta block">{meta}</span>}
+          {meta && showsMeta(i) && (
+            <>
+              <span className="sp-appt__meta block">{meta}</span>{' '}
+            </>
+          )}
         </span>
       ))}
     </button>

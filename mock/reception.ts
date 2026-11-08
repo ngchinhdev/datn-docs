@@ -234,15 +234,27 @@ export function resourceColumns(
           const waitLabel = run.parts.find((p) => p.kind === 'wait')?.label;
           const range = formatRange(run.startAt, run.endAt);
           const held = appt.status === 'held';
+          // A short part with a buffer beside it has room for one line: the resource goes in the title.
+          const seen = run.parts.filter((part) => !isBuffer(part));
+          const seenMinutes =
+            ((seen.at(-1) ? Date.parse(seen.at(-1)!.endAt) : 0) -
+              (seen[0] ? Date.parse(seen[0].startAt) : 0)) /
+            60_000;
+          const oneLine = !held && seen.length < run.parts.length && seenMinutes <= 30;
+          const title = held
+            ? 'Đang giữ chỗ'
+            : `${L.who(appt)} · ${item ? (L.variant(item.serviceVariantId)?.shortName ?? '') : ''}${oneLine ? ` · ${staffName}` : ''}`;
           return {
             id: `${appt.id}-${run.startAt}`,
             status: appt.status,
-            title: held
-              ? 'Đang giữ chỗ'
-              : `${L.who(appt)} · ${item ? (L.variant(item.serviceVariantId)?.shortName ?? '') : ''}`,
-            meta: held
-              ? `${range} · ${staffName} · còn ${formatCountdown(holdSecondsLeft(appt, now))}`
-              : `${range} · ${staffName}`,
+            title,
+            ...(oneLine
+              ? {}
+              : {
+                  meta: held
+                    ? `${range} · ${staffName} · còn ${formatCountdown(holdSecondsLeft(appt, now))}`
+                    : `${range} · ${staffName}`,
+                }),
             selected: appt.id === selectedId,
             onSelect: () => onSelect(appt.id),
             segments: runSegments(run.parts, waitLabel),

@@ -7,6 +7,23 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 08/11/2026 (đêm): mock Bước 10, cấu hình dịch vụ và gói cấu hình ngành
+- **Đã làm:** Bước 10 (10a–10f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-10-cấu-hình-dịch-vụ-mh-44-mh-45-gói-cấu-hình-ngành-mh-59-và-thanh-cuộn) trên nhánh `feat/mock-services`.
+  - Dữ liệu và hàm thuần: đoạn `prep`, `work`, `wait`, dọn dẹp theo từng loại tài nguyên, giá theo cấp, `variantSelection` theo dịch vụ. `mock/occupation.ts` (mẫu chiếm dụng, khoảng khách thấy, phút bận, giá, kiểm phủ đủ không trùng) và `mock/availability.ts` (phép vừa theo mục 3 của trang thuật toán) là mẫu để chép sang `scheduling-core`.
+  - `pnpm check:availability`: 10 ví dụ ở mục 4 khớp, mỗi ví dụ còn khớp một bản vét cạn từng phút; lịch mẫu của hai cơ sở có 0 đoạn chồng nhau (BR-01) và nằm trong giờ mở cửa (BR-54). Không có ví dụ nào mâu thuẫn với thiết kế.
+  - MH-44 `settings/services` và MH-45 `settings/services/[id]` (Tóc Mây, Pawpaw, điện thoại): trục thời gian, bảng đoạn kéo bằng chuột hoặc ↑/↓, dọn dẹp theo loại, điều kiện biến thể có kiểm tra phủ đủ không trùng, giá theo cấp, "Ai làm được" dùng chung với hồ sơ nhân viên, xem trước trên lịch lễ tân. Trang đặt lịch mở theo `?service=` và hiện giá của người đã chọn (BR-56).
+  - Lịch lễ tân vẽ đoạn chuẩn bị và dọn dẹp bằng viền đứt.
+  - MH-59 `/mock/admin/templates`: khung quản trị nền tảng, bốn gói ngành có bản nháp và xuất bản (BR-70); bước chọn ngành của `/mock/signup` đọc trạng thái từ gói.
+  - Thanh cuộn: có sẵn trong `components.css`, mock không có style riêng; kiểm ở Chrome và Edge, hai theme.
+- **Kiểm:** axe-core 68 lượt (17 trang và trạng thái, hai theme, hai bề rộng), 0 lỗi serious hoặc critical; Playwright cho từng mục "Xong khi" của Bước 10; MH-44, MH-45, MH-59 không cuộn ngang ở 390px; `pnpm build`, `pnpm typecheck`, `prettier --check` xanh.
+- **Vướng:**
+  - Dữ liệu mẫu không có ca làm việc, nên nhân viên làm trong giờ mở cửa và đoạn chuẩn bị không đứng trước giờ mở cửa. Ví dụ VD4 (ca bắt đầu 07:45) được kiểm với ca khai trong script.
+  - Một mục đứng sau một mục khác trong cùng lịch hẹn lùi giờ bắt đầu đúng bằng đoạn chuẩn bị của nó, vì cùng một thợ không pha thuốc lúc còn đang làm mục trước.
+  - Trên `.sp-appt`, axe tính chữ bị cắt trong khối cao 16px: khối ngắn có đoạn dọn chỉ còn một dòng.
+  - Thanh lưu và toast cùng nằm đáy trang, toast che nút "Bỏ thay đổi"; toast nâng lên khi trang có thanh lưu.
+  - Dev server giữ bản server cũ của file đã sửa, báo lỗi hydration giả; khởi động lại thì hết.
+- **Tiếp theo:** review PR; báo cô MH-45 và MH-59; phiên claude.ai chốt 5 câu hỏi của ERD.
+
 ### 08/11/2026 (chiều): chốt cấu hình dịch vụ, gói cấu hình ngành, thuật toán giờ trống
 - **Đã làm:**
   - Review PR #4 (Bước 9), người dùng đã merge sau khi sửa ba điểm: một đồng hồ chung cho mock, giá trung bình mỗi tháng, ngày gia hạn trên trang khóa.
