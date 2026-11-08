@@ -1,9 +1,9 @@
 import { fold } from './customers';
 import { COMMON_PASSWORDS } from './fixtures/common-passwords';
-import { hairSalonTemplate, petSpaTemplate } from './fixtures/templates';
-import type { IndustryTemplate, SampleService } from './fixtures/types';
+import { industryTemplates } from './fixtures/templates';
+import type { IndustryTemplate, SampleService, SampleServiceVariant } from './fixtures/types';
 import { tenantFixtures } from './fixtures';
-import { formatVnd } from './format';
+import { formatDuration, formatVnd } from './format';
 
 export const STEPS = ['account', 'verify', 'industry', 'business', 'done'] as const;
 export type SignupStep = (typeof STEPS)[number];
@@ -135,41 +135,35 @@ export interface IndustryOption {
   template: IndustryTemplate | null;
 }
 
-export const industries: IndustryOption[] = [
-  {
-    id: 'salon',
-    title: 'Salon tóc',
-    description: 'Cắt, gội, nhuộm, uốn. Ghế cắt, giường gội.',
-    template: hairSalonTemplate,
-  },
-  {
-    id: 'nail',
-    title: 'Tiệm nail',
-    description: 'Sơn gel, đắp bột, chăm sóc móng. Bàn nail, ghế pedicure.',
-    template: null,
-  },
-  {
-    id: 'spa',
-    title: 'Spa và thẩm mỹ',
-    description: 'Massage, chăm sóc da. Phòng, giường spa.',
-    template: null,
-  },
-  {
-    id: 'pet',
-    title: 'Spa thú cưng',
-    description:
-      'Tắm, cắt tỉa lông chó mèo. Bàn cắt tỉa, bồn tắm, lồng sấy. Giá theo loài và cân nặng.',
-    template: petSpaTemplate,
-  },
-];
+const SIGNUP_ID: Record<string, IndustryId> = {
+  hair_salon: 'salon',
+  nail_salon: 'nail',
+  beauty_spa: 'spa',
+  pet_spa: 'pet',
+};
+
+/** One card per template that is not hidden; only an `open` one can be picked (BR-70). */
+export const industries: IndustryOption[] = industryTemplates
+  .filter((t) => t.status !== 'hidden' && SIGNUP_ID[t.id])
+  .map((t) => ({
+    id: SIGNUP_ID[t.id]!,
+    title: t.name,
+    description: t.cardDescription,
+    template: t.status === 'open' ? t : null,
+  }));
 
 export const industryById = (id: IndustryId | null) => industries.find((i) => i.id === id);
 
-/** `45 phút`, `1 giờ 45`, `2 giờ`. */
-export function formatDuration(minutes: number): string {
-  if (minutes < 60) return `${minutes} phút`;
-  const rest = minutes % 60;
-  return rest ? `${Math.floor(minutes / 60)} giờ ${rest}` : `${Math.floor(minutes / 60)} giờ`;
+/** The resource types a tenant counts at sign-up: everything except the staff type. */
+export const placedResourceTypes = (template: IndustryTemplate) =>
+  template.resourceTypes.filter((type) => !type.isStaff);
+
+/** Minutes the customer is in the shop: all segments except the preparation at the start. */
+export function sampleMinutes(variant: SampleServiceVariant): number {
+  const lead = variant.segments.findIndex((segment) => segment.kind !== 'prep');
+  return variant.segments
+    .slice(lead < 0 ? variant.segments.length : lead)
+    .reduce((sum, segment) => sum + segment.minutes, 0);
 }
 
 export interface PreviewLine {
@@ -187,7 +181,7 @@ export function previewLines(services: SampleService[]): PreviewLine[] {
     const single = service.variants.length === 1;
     return service.variants.map((variant) => ({
       label: single ? service.name : `${service.name} · ${variant.name}`,
-      detail: `${formatDuration(variant.minutes)} · ${formatVnd(variant.priceVnd)}`,
+      detail: `${formatDuration(sampleMinutes(variant))} · ${formatVnd(variant.priceVnd)}`,
     }));
   });
 }
@@ -324,7 +318,7 @@ export const hasBusinessErrors = (e: BusinessErrors) =>
 
 /** "3 ghế cắt và 1 giường gội": the resources of the first branch, in words. */
 export function describeResources(draft: SignupDraft, template: IndustryTemplate): string {
-  const parts = template.resourceTypes.map(
+  const parts = placedResourceTypes(template).map(
     (type) => `${countOf(draft, type.name, type.defaultCount)} ${type.name.toLowerCase()}`,
   );
   if (parts.length < 2) return parts.join('');

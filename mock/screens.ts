@@ -739,3 +739,17 @@ export function screenForAppPath(rest: string[]): (typeof mockScreens)[number] |
     }),
   );
 }
+
+/** The screen a path inside `/admin` belongs to, matching `[id]` against any segment. */
+export function screenForAdminPath(rest: string[]): (typeof mockScreens)[number] | undefined {
+  return mockScreens.find((screen) =>
+    screen.routes.some((route) => {
+      const want = segments(route).slice(1);
+      return (
+        segments(route)[0] === 'admin' &&
+        want.length === rest.length &&
+        want.every((part, i) => part.startsWith('[') || part === rest[i])
+      );
+    }),
+  );
+}

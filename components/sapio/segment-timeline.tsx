@@ -37,6 +37,8 @@ export interface SegmentTimelineProps {
   mini?: boolean;
   /** Draw the ruler. */
   scale?: boolean;
+  /** Draw the "Khách thấy" row. */
+  showSeen?: boolean;
   /** Width of the label column, px. */
   labelWidth?: number;
   label: string;
@@ -93,6 +95,7 @@ export function SegmentTimeline({
   onSelect,
   mini = false,
   scale = true,
+  showSeen = true,
   labelWidth,
   label,
 }: SegmentTimelineProps) {
@@ -211,17 +214,19 @@ export function SegmentTimeline({
           </div>
         </div>
       ))}
-      <div className="sp-timeline__row">
-        <span className="sp-timeline__label">Khách thấy</span>
-        <div className="sp-timeline__track sp-timeline__track--bare">
-          <span
-            className="sp-timeline__bar sp-timeline__bar--span"
-            style={{ '--from': seenFrom, '--to': seenTo } as CSSProperties}
-          >
-            {spanText}
-          </span>
+      {showSeen && (
+        <div className="sp-timeline__row">
+          <span className="sp-timeline__label">Khách thấy</span>
+          <div className="sp-timeline__track sp-timeline__track--bare">
+            <span
+              className="sp-timeline__bar sp-timeline__bar--span"
+              style={{ '--from': seenFrom, '--to': seenTo } as CSSProperties}
+            >
+              {spanText}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

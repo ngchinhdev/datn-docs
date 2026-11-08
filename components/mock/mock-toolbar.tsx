@@ -18,6 +18,9 @@ import {
   type StaffRole,
 } from '@/mock/selection';
 
+/** Value of the role picker entry that leaves the tenant for the platform administration. */
+const ADMIN = 'admin';
+
 /** Where a mock URL points: the tenant slug and which area it is in. */
 function locate(pathname: string): { area: 'book' | 'app' | 'index'; slug: string | null } {
   const [, , first, second] = pathname.split('/');
@@ -91,9 +94,12 @@ export function MockToolbar() {
       />
       <Picker
         label="Vai trò"
-        options={roles.map((r) => ({ value: r.id, label: r.label }))}
+        options={[
+          ...roles.map((r) => ({ value: r.id, label: r.label })),
+          { value: ADMIN, label: 'Quản trị nền tảng' },
+        ]}
         selected={role}
-        hrefFor={(value) => roleHref(value as Role)}
+        hrefFor={(value) => (value === ADMIN ? '/mock/admin/templates' : roleHref(value as Role))}
       />
       <Picker
         label="Gói"

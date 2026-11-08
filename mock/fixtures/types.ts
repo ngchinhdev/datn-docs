@@ -245,9 +245,51 @@ export type SubjectField =
  * What differs between industries, as data: the words shown to people and the fields of the
  * served subject. Copied into a tenant when it is created (BR-70).
  */
+/** `open`: a tenant can pick it at sign-up; `soon`: the card shows but cannot be picked; `hidden`: no card. */
+export type TemplateStatus = 'open' | 'soon' | 'hidden';
+
+/** Starting values of a new tenant's booking policies (BR-06, BR-08, BR-09, BR-10). */
+export interface TemplatePolicies {
+  /** Earliest booking, hours from now. */
+  minNoticeHours: number;
+  /** Latest booking, days from now. */
+  maxAdvanceDays: number;
+  /** A customer changes or cancels at least this many hours before. */
+  cancelBeforeHours: number;
+  /** Times a customer may reschedule one appointment. */
+  maxReschedules: number;
+  /** Minutes after the start time at which a missed appointment is a no-show. */
+  noShowAfterMinutes: number;
+  /** No-shows in 6 months after which a deposit is required. */
+  depositAfterNoShows: number;
+}
+
+/** The part of a template an administrator edits; a draft remembers it as it was when it began. */
+export interface TemplateContent {
+  name: string;
+  status: TemplateStatus;
+  cardDescription: string;
+  previewNote: string;
+  vocabulary: IndustryTemplate['vocabulary'];
+  defaultPolicies: TemplatePolicies;
+  sampleServices: SampleService[];
+}
+
+/** An industry template (BR-70): published versions are copied into a tenant when it is created. */
 export interface IndustryTemplate {
+  /** The code, e.g. `hair_salon`. */
   id: string;
   name: string;
+  status: TemplateStatus;
+  /** Text on the industry card at sign-up. */
+  cardDescription: string;
+  /** The version new tenants receive; `null` before the first publication. */
+  publishedVersion: { number: number; publishedAt: string; tenantsCreated: number } | null;
+  /** Changes waiting to be published; `base` is the content they started from. */
+  draft: { number: number; changes: string[]; base: Partial<TemplateContent> } | null;
+  defaultPolicies: TemplatePolicies;
+  /** Local date of the last edit, `YYYY-MM-DD`. */
+  updatedAt: string;
   vocabulary: {
     /** Plural-free noun for staff in this industry. */
     staff: string;
@@ -276,19 +318,30 @@ export interface IndustryTemplate {
 
 export interface TemplateResourceType {
   name: string;
+  /** The staff type: made with the owner's account, not counted at sign-up. */
+  isStaff: boolean;
   /** One line under the name when the owner sets the count. */
   hint: string;
   /** Count suggested for the first branch. */
   defaultCount: number;
 }
 
+/** One segment of a sample service; `types` are names from `IndustryTemplate.resourceTypes`. */
+export interface SampleSegment {
+  name: string;
+  kind: SegmentKind;
+  minutes: number;
+  types: string[];
+}
+
 export interface SampleServiceVariant {
   name: string;
-  minutes: number;
   /** Integer VND. */
   priceVnd: bigint;
-  /** Has a wait segment: the staff is free, the other resources stay busy (BR-05). */
-  hasWait?: boolean;
+  /** In order; a `wait` segment frees the staff and keeps the other resources (BR-05). */
+  segments: SampleSegment[];
+  /** Minutes to clean each resource type after use, by type name (BR-52). */
+  cleanup?: Record<string, number>;
 }
 
 export interface SampleService {
