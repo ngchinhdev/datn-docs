@@ -8,6 +8,7 @@ import { Button } from '@/components/sapio/button';
 import { DateStrip } from '@/components/sapio/date-strip';
 import { Field } from '@/components/sapio/form';
 import { HoldBanner } from '@/components/sapio/hold-banner';
+import { OtpField } from '@/components/sapio/otp-field';
 import { PhoneField } from '@/components/sapio/phone-field';
 import { SegmentedTabs } from '@/components/sapio/segmented';
 import { ServiceVariantList } from '@/components/sapio/service-variant-list';
@@ -104,9 +105,12 @@ interface Cta {
 export function BookingFlow({
   tenantSlug,
   newCustomer,
+  bookingOpen = true,
 }: {
   tenantSlug: string;
   newCustomer: boolean;
+  /** `false` while the tenant is on trial (BR-81): the page can be walked through, not booked. */
+  bookingOpen?: boolean;
 }) {
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
   const { tenant, services, staff, resources } = fixture;
@@ -253,7 +257,7 @@ export function BookingFlow({
     const found = daySlots.find((s) => s.startAt === startAt) ?? null;
     setSlot(found);
     // BR-07: choosing a time starts a 10-minute hold.
-    setHoldExpiresAt(found ? addMinutes(now, HOLD_MINUTES) : null);
+    setHoldExpiresAt(found && bookingOpen ? addMinutes(now, HOLD_MINUTES) : null);
     setNotice(null);
   }
   function chooseStaff(v: string) {
@@ -644,18 +648,12 @@ export function BookingFlow({
           />
         </Field>
         {otpSent ? (
-          <Field id="booking-otp" label="Mã xác nhận" help={`Đã gửi mã 6 số tới ${email.trim()}.`}>
-            <input
-              id="booking-otp"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
-              placeholder="Ví dụ: 123456"
-              value={otp}
-              aria-describedby="booking-otp-help"
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-            />
-          </Field>
+          <OtpField
+            id="booking-otp"
+            value={otp}
+            onChange={setOtp}
+            help={`Đã gửi mã 6 số tới ${email.trim()}.`}
+          />
         ) : (
           <div>
             <Button
@@ -765,7 +763,7 @@ export function BookingFlow({
             : formatVnd(variant.priceVnd),
           subtitle: slotLine,
           label: 'Xác nhận đặt lịch',
-          disabled: false,
+          disabled: !bookingOpen,
           onClick: () => setConfirmed(true),
         };
   }

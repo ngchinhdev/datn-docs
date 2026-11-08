@@ -2,16 +2,25 @@
 
 import { useState, type ReactNode } from 'react';
 import { AppointmentBlock } from '@/components/sapio/appointment-block';
+import { Scissors } from 'lucide-react';
+import { Banner } from '@/components/sapio/banner';
 import { BottomBar } from '@/components/sapio/bottom-bar';
 import { Button } from '@/components/sapio/button';
+import { Checklist } from '@/components/sapio/checklist';
+import { ChoiceCards } from '@/components/sapio/choice-cards';
 import { ConfirmDialog } from '@/components/sapio/confirm-dialog';
 import { SegmentedNav, SegmentedTabs } from '@/components/sapio/segmented';
 import { useToast } from '@/components/sapio/toast';
 import { DateStrip } from '@/components/sapio/date-strip';
 import { HoldBanner } from '@/components/sapio/hold-banner';
+import { LockIcon } from '@/components/sapio/lock-icon';
+import { OtpField } from '@/components/sapio/otp-field';
+import { PeriodSwitch, PlanCards } from '@/components/sapio/plan-cards';
 import { PhoneField } from '@/components/sapio/phone-field';
+import { QuantityInput } from '@/components/sapio/quantity-input';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
 import { ServiceVariantList } from '@/components/sapio/service-variant-list';
+import { SignupSteps } from '@/components/sapio/signup-layout';
 import { SlotGrid } from '@/components/sapio/slot-grid';
 import { ANY_STAFF, StaffPicker } from '@/components/sapio/staff-picker';
 import { StatusBadge } from '@/components/sapio/status-badge';
@@ -43,6 +52,10 @@ export default function ComponentsPage() {
   const toast = useToast();
   const [dialog, setDialog] = useState(false);
   const [part, setPart] = useState('morning');
+  const [industry, setIndustry] = useState('salon');
+  const [quantity, setQuantity] = useState(3);
+  const [otp, setOtp] = useState('');
+  const [months, setMonths] = useState('1');
   const [holdUntil, setHoldUntil] = useState(addMinutes(MOCK_NOW, 10));
   const statuses: AppointmentStatus[] = [
     'held',
@@ -333,6 +346,137 @@ export default function ComponentsPage() {
               : null
           }
         />
+      </Example>
+
+      <Example name="SignupLayout">
+        <div className="max-w-xl rounded-(--radius-md) bg-(--surface) p-(--space-4) shadow-[0_0_0_1px_var(--line)]">
+          <SignupSteps current={3} />
+        </div>
+      </Example>
+
+      <Example name="ChoiceCards">
+        <ChoiceCards
+          name="gallery-industry"
+          labelledBy="gallery-industry-title"
+          value={industry}
+          onChange={setIndustry}
+          options={[
+            {
+              value: 'salon',
+              title: 'Salon tóc',
+              description: 'Cắt, gội, nhuộm, uốn. Ghế cắt, giường gội.',
+              icon: <Scissors />,
+            },
+            {
+              value: 'nail',
+              title: 'Tiệm nail',
+              description: 'Sơn gel, đắp bột. Bàn nail, ghế pedicure.',
+              icon: <Scissors />,
+              disabled: true,
+              tag: 'Sắp có',
+            },
+          ]}
+        />
+        <p id="gallery-industry-title" className="body-sm m-0 text-(--ink-muted)">
+          Cơ sở của bạn thuộc ngành nào?
+        </p>
+      </Example>
+
+      <Example name="QuantityInput">
+        <div className="flex items-center gap-(--space-3)">
+          <label htmlFor="gallery-qty" className="body font-medium">
+            Ghế cắt
+          </label>
+          <QuantityInput
+            id="gallery-qty"
+            noun="ghế cắt"
+            value={quantity}
+            min={1}
+            max={20}
+            onChange={setQuantity}
+          />
+        </div>
+      </Example>
+
+      <Example name="OtpField">
+        <OtpField
+          id="gallery-otp"
+          value={otp}
+          onChange={setOtp}
+          help="Gõ đủ 6 số là tự xác nhận. Thử dán 482193."
+        />
+      </Example>
+
+      <Example name="Banner">
+        <div className="flex flex-col gap-(--space-3)">
+          <Banner action={{ label: 'Kích hoạt gói', href: '#' }}>
+            <strong>Dùng thử · còn 5 ngày</strong> (đến 23:59 ngày 13/11). Đặt lịch online và tạo
+            lịch hẹn mở khi kích hoạt gói.
+          </Banner>
+          <Banner tone="warning" action={{ label: 'Gia hạn', href: '#' }}>
+            Gói Chuyên nghiệp hết hạn 23:59 ngày 30/11. Gia hạn để không gián đoạn.
+          </Banner>
+        </div>
+      </Example>
+
+      <Example name="Checklist">
+        <div className="max-w-xl">
+          <Checklist
+            items={[
+              { label: 'Thêm dịch vụ và giá', meta: '5 dịch vụ', done: true, href: '#' },
+              { label: 'Thêm nhân viên nhận đặt online', meta: '0 người', done: false, href: '#' },
+            ]}
+          />
+        </div>
+      </Example>
+
+      <Example name="PlanCards">
+        <PeriodSwitch
+          label="Thời hạn"
+          value={months}
+          onChange={setMonths}
+          options={[
+            { value: '1', label: '1 tháng' },
+            { value: '3', label: '3 tháng', discount: '−10%' },
+            { value: '12', label: '12 tháng', discount: '−20%' },
+          ]}
+        />
+        <PlanCards
+          plans={[
+            {
+              id: 'gallery-basic',
+              name: 'Cơ bản',
+              price: '199.000 ₫',
+              unit: ' / tháng',
+              note: '1 chi nhánh',
+              features: [
+                { label: 'Đặt lịch online trên trang riêng', on: true },
+                { label: 'Chatbot đặt lịch', on: false },
+              ],
+              action: { label: 'Chọn Cơ bản', variant: 'secondary', onClick: () => {} },
+            },
+            {
+              id: 'gallery-pro',
+              name: 'Chuyên nghiệp',
+              badge: 'Đang dùng thử',
+              price: '399.000 ₫',
+              unit: ' / tháng',
+              note: 'Không giới hạn chi nhánh',
+              current: true,
+              features: [
+                { label: 'Đặt lịch online trên trang riêng', on: true },
+                { label: 'Chatbot đặt lịch', on: true },
+              ],
+              action: { label: 'Chọn Chuyên nghiệp', variant: 'primary', onClick: () => {} },
+            },
+          ]}
+        />
+      </Example>
+
+      <Example name="LockIcon">
+        <span className="body inline-flex items-center gap-(--space-2)">
+          Chatbot <LockIcon />
+        </span>
       </Example>
 
       <Example name="BottomBar">
