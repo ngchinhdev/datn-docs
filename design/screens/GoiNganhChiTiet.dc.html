@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Gói cấu hình ngành · Spa thú cưng</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-shell" style="min-height: 2630px; font-family: var(--font-sans);">
+  <nav class="sp-shell__side" id="admin-sidebar" aria-label="Điều hướng quản trị nền tảng">
+    <div class="sp-brand">
+      <span class="sp-brand__name">Sapio</span>
+      <button type="button" class="sp-icon-btn" aria-label="Thu gọn thanh bên" aria-expanded="true" aria-controls="admin-sidebar" title="Thu gọn thanh bên"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg></button>
+    </div>
+    <div class="sp-switcher" style="cursor: default; width: 100%; box-sizing: border-box;">
+      <span class="sp-switcher__mark" aria-hidden="true" style="background: var(--brand-soft); color: var(--brand);">S</span>
+      <span class="sp-switcher__text"><span class="sp-switcher__name">Quản trị nền tảng</span><span class="sp-switcher__sub">admin.sapio.vn</span></span>
+    </div>
+    <div class="sp-nav">
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg><span class="sp-nav__label">Tổng quan</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg><span class="sp-nav__label">Khách thuê</span></a>
+      <a class="sp-nav__item" href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"></path><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"></path></svg><span class="sp-nav__label">Gói cấu hình ngành</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"></circle></svg><span class="sp-nav__label">Gói và giá</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12h-5"></path><path d="M15 8h-5"></path><path d="M19 17V5a2 2 0 0 0-2-2H4"></path><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"></path></svg><span class="sp-nav__label">Nhật ký</span></a>
+    </div>
+    <div class="sp-account">
+      <span class="sp-avatar sp-avatar--sm">CN</span>
+      <span class="sp-account__text"><span class="sp-switcher__name" style="font-size: 13px; line-height: 18px;">Chính Nguyễn</span><span class="sp-switcher__sub">Quản trị nền tảng</span></span>
+      <button type="button" class="sp-icon-btn" aria-label="Chuyển sang giao diện tối" title="Chuyển sang giao diện tối"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></button>
+    </div>
+  </nav>
+  <main class="sp-shell__main">
+    <div class="sp-shell__content">
+      <div class="sp-page-head">
+        <div>
+          <ol class="sp-breadcrumb"><li><a href="#">Gói cấu hình ngành</a></li><li aria-hidden="true">/</li><li aria-current="page">Spa thú cưng</li></ol>
+          <h1 class="sp-page-head__title">Spa thú cưng</h1>
+          <p class="sp-page-head__sub"><code>pet_spa</code> · đang sửa bản nháp 3</p>
+        </div>
+      </div>
+      <div class="sp-detail">
+      <form class="sp-form sp-detail__main">
+      <section class="sp-form-section" aria-labelledby="tp-s1">
+        <div>
+          <h2 class="sp-form-section__title" id="tp-s1">Thẻ ở bước đăng ký</h2>
+          <p class="sp-form-section__desc">Chủ cơ sở thấy thẻ này ở bước "Cơ sở của bạn thuộc ngành nào?".</p>
+        </div>
+        <div class="sp-form-section__fields">
+          <div class="sp-field sp-field--sm"><label class="sp-field__label" for="tp-name">Tên ngành</label><div class="sp-field__control"><input id="tp-name" type="text" value="Spa thú cưng"></div></div>
+          <div class="sp-field sp-field--sm"><label class="sp-field__label" for="tp-state">Trạng thái</label><div class="sp-field__control"><select id="tp-state"><option selected>Đang mở</option><option>Sắp có</option><option>Ẩn</option></select></div><span class="sp-field__help">Sắp có: hiện thẻ nhưng chưa chọn được.</span></div>
+          <div class="sp-field sp-field--sm sp-field--full"><label class="sp-field__label" for="tp-desc">Mô tả trên thẻ</label><div class="sp-field__control sp-field__control--area"><textarea id="tp-desc" rows="2">Tắm, cắt tỉa lông chó mèo. Bàn cắt tỉa, bồn tắm, lồng sấy. Giá theo loài và cân nặng.</textarea></div></div>
+          <div class="sp-field sp-field--sm sp-field--full"><label class="sp-field__label" for="tp-note">Câu dưới bảng xem trước</label><div class="sp-field__control sp-field__control--area"><textarea id="tp-note" rows="2">Giá chọn theo loài và cân nặng của bé (chó dưới 10 kg, từ 10 kg, mèo).</textarea></div></div>
+        </div>
+      </section>
+      <section class="sp-form-section sp-form-section--stack" aria-labelledby="tp-s2">
+        <div class="sp-form-section__head">
+          <div>
+            <h2 class="sp-form-section__title" id="tp-s2">Từ ngữ hiển thị</h2>
+            <p class="sp-form-section__desc">Thay chữ trên mọi màn của cơ sở thuộc ngành này. Lõi đặt lịch chỉ dùng tên chung: nhân viên, đối tượng, tài nguyên.</p>
+          </div>
+          
+        </div>
+        <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Từ ngữ hiển thị, cuộn được">
+          <table class="sp-table">
+            <caption class="sp-sr-only">Từ ngữ hiển thị</caption>
+            <thead><tr><th scope="col">Chỗ dùng</th><th scope="col">Từ của ngành</th><th scope="col">Ví dụ trên màn hình</th></tr></thead>
+            <tbody>
+            <tr><td>Nhân viên</td><td><div class="sp-field sp-field--sm"><div class="sp-field__control"><input type="text" value="Nhân viên chăm sóc" aria-label="Từ cho nhân viên"></div></div></td><td><span class="sp-muted">"Chọn nhân viên chăm sóc", lịch theo nhân viên chăm sóc</span></td></tr>
+            <tr><td>Đối tượng được phục vụ</td><td><div class="sp-field sp-field--sm"><div class="sp-field__control"><input type="text" value="bé" aria-label="Từ cho đối tượng"></div></div></td><td><span class="sp-muted">"Thông tin của bé", "3 bé"</span></td></tr>
+            <tr><td>Câu hỏi chọn đối tượng</td><td><div class="sp-field sp-field--sm"><div class="sp-field__control"><input type="text" value="Cho bé nào?" aria-label="Câu hỏi chọn đối tượng"></div></div></td><td><span class="sp-muted">Tiêu đề bước đặt lịch</span></td></tr>
+            <tr><td>Nút thêm</td><td><div class="sp-field sp-field--sm"><div class="sp-field__control"><input type="text" value="Thêm bé" aria-label="Chữ trên nút thêm"></div></div></td><td><span class="sp-muted">Nút ở bước chọn bé</span></td></tr>
+            <tr><td>Ví dụ tên</td><td><div class="sp-field sp-field--sm"><div class="sp-field__control"><input type="text" value="Mochi" aria-label="Ví dụ tên"></div></div></td><td><span class="sp-muted">Chữ mờ trong ô tên</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="sp-form-section sp-form-section--stack" aria-labelledby="tp-s3">
+        <div class="sp-form-section__head">
+          <div>
+            <h2 class="sp-form-section__title" id="tp-s3">Thông tin của bé</h2>
+            <p class="sp-form-section__desc">Khách nhập một lần cho mỗi bé. Biến thể dịch vụ chọn theo các trường này (BR-13, BR-71).</p>
+          </div>
+          <div><button type="button" class="sp-btn sp-btn--secondary sp-btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Thêm trường</button></div>
+        </div>
+        <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Thông tin của bé, cuộn được">
+          <table class="sp-table">
+            <caption class="sp-sr-only">Thông tin của bé</caption>
+            <thead><tr><th scope="col">Trường</th><th scope="col">Mã</th><th scope="col">Kiểu</th><th scope="col">Lựa chọn hoặc đơn vị</th><th scope="col">Bắt buộc</th><th scope="col"><span class="sp-sr-only">Thao tác</span></th></tr></thead>
+            <tbody>
+            <tr><td>Loài</td><td><code>species</code></td><td>Chọn một</td><td><span class="sp-chips"><span class="sp-chip" style="height: 26px; cursor: default;">Chó · dog</span><span class="sp-chip" style="height: 26px; cursor: default;">Mèo · cat</span></span></td><td>Luôn</td><td class="sp-table__actions"><button type="button" class="sp-icon-btn" aria-label="Kéo để đổi thứ tự trường Loài"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button></td></tr>
+            <tr><td>Giống</td><td><code>breed</code></td><td>Chữ</td><td><span class="sp-muted">Ví dụ: Poodle</span></td><td>Không</td><td class="sp-table__actions"><button type="button" class="sp-icon-btn" aria-label="Kéo để đổi thứ tự trường Giống"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button></td></tr>
+            <tr><td>Cân nặng</td><td><code>weightKg</code></td><td>Số</td><td>kg · ví dụ 6</td><td>Khi Loài là Chó</td><td class="sp-table__actions"><button type="button" class="sp-icon-btn" aria-label="Kéo để đổi thứ tự trường Cân nặng"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg></button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="sp-form-section sp-form-section--stack" aria-labelledby="tp-s4">
+        <div class="sp-form-section__head">
+          <div>
+            <h2 class="sp-form-section__title" id="tp-s4">Loại tài nguyên</h2>
+            <p class="sp-form-section__desc">Tạo sẵn cho chi nhánh đầu tiên; chủ cơ sở chỉnh số lượng ở bước đăng ký.</p>
+          </div>
+          <div><button type="button" class="sp-btn sp-btn--secondary sp-btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Thêm loại</button></div>
+        </div>
+        <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Loại tài nguyên, cuộn được">
+          <table class="sp-table">
+            <caption class="sp-sr-only">Loại tài nguyên</caption>
+            <thead><tr><th scope="col">Tên</th><th scope="col">Là nhân viên</th><th scope="col">Gợi ý khi đăng ký</th><th scope="col" class="sp-table__num">Số gợi ý</th></tr></thead>
+            <tbody>
+            <tr><td>Nhân viên chăm sóc</td><td><span class="sp-badge sp-badge--confirmed">Nhân viên</span></td><td><span class="sp-muted">Tạo cùng tài khoản chủ cơ sở</span></td><td class="sp-table__num"><span class="sp-num">1</span></td></tr>
+            <tr><td>Bồn tắm</td><td><span class="sp-muted">Không</span></td><td>Mỗi bồn tắm một bé một lúc</td><td class="sp-table__num"><span class="sp-num">2</span></td></tr>
+            <tr><td>Lồng sấy</td><td><span class="sp-muted">Không</span></td><td>Mỗi lồng sấy một bé một lúc</td><td class="sp-table__num"><span class="sp-num">2</span></td></tr>
+            <tr><td>Bàn cắt tỉa</td><td><span class="sp-muted">Không</span></td><td>Mỗi bàn phục vụ một bé một lúc</td><td class="sp-table__num"><span class="sp-num">2</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="sp-form-section sp-form-section--stack" aria-labelledby="tp-s5">
+        <div class="sp-form-section__head">
+          <div>
+            <h2 class="sp-form-section__title" id="tp-s5">Dịch vụ mẫu</h2>
+            <p class="sp-form-section__desc">Bấm một dòng để sửa các đoạn, giống màn Chi tiết dịch vụ của cơ sở.</p>
+          </div>
+          <div><button type="button" class="sp-btn sp-btn--secondary sp-btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Thêm dịch vụ</button></div>
+        </div>
+        <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Dịch vụ mẫu, cuộn được">
+          <table class="sp-table">
+            <caption class="sp-sr-only">Dịch vụ mẫu</caption>
+            <thead><tr><th scope="col">Dịch vụ</th><th scope="col">Thời gian, giá</th><th scope="col">Các đoạn</th></tr></thead>
+            <tbody>
+            <tr><td><span class="sp-table__primary"><a href="#">Tắm sấy</a></span><span class="sp-table__secondary">Chó dưới 10 kg</span></td><td><span class="sp-num">1 giờ · 150.000 ₫</span></td><td><div style="min-width: 320px;"><div class="sp-timeline sp-timeline--mini" style="--total: 60; --tl-label: 72px;" role="group" aria-label="Các đoạn">
+  <div class="sp-timeline__row"><span class="sp-timeline__label">Nhân viên</span><div class="sp-timeline__track"><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 0; --to: 20;" title="Làm: Tắm, 20 phút"><span class="sp-sr-only">Làm, 20 phút: </span>Tắm</span><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 50; --to: 60;" title="Làm, 10 phút"><span class="sp-sr-only">Làm, 10 phút: </span></span></div></div>
+  <div class="sp-timeline__row"><span class="sp-timeline__label">Bồn, lồng</span><div class="sp-timeline__track"><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 0; --to: 20;" title="Làm: Bồn, 20 phút"><span class="sp-sr-only">Làm, 20 phút: </span>Bồn</span><span class="sp-timeline__bar sp-timeline__bar--wait" style="--from: 20; --to: 50;" title="Chờ: Lồng sấy, 30 phút"><span class="sp-sr-only">Chờ, 30 phút: </span>Lồng sấy</span></div></div>
+</div>
+</div></td></tr>
+            <tr><td><span class="sp-table__primary"><a href="#">Tắm sấy</a></span><span class="sp-table__secondary">Chó từ 10 kg</span></td><td><span class="sp-num">1 giờ 30 · 250.000 ₫</span></td><td><div style="min-width: 320px;"><div class="sp-timeline sp-timeline--mini" style="--total: 90; --tl-label: 72px;" role="group" aria-label="Các đoạn">
+  <div class="sp-timeline__row"><span class="sp-timeline__label">Nhân viên</span><div class="sp-timeline__track"><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 0; --to: 30;" title="Làm: Tắm, 30 phút"><span class="sp-sr-only">Làm, 30 phút: </span>Tắm</span><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 75; --to: 90;" title="Làm: Chải, 15 phút"><span class="sp-sr-only">Làm, 15 phút: </span>Chải</span></div></div>
+  <div class="sp-timeline__row"><span class="sp-timeline__label">Bồn, lồng</span><div class="sp-timeline__track"><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 0; --to: 30;" title="Làm: Bồn, 30 phút"><span class="sp-sr-only">Làm, 30 phút: </span>Bồn</span><span class="sp-timeline__bar sp-timeline__bar--wait" style="--from: 30; --to: 75;" title="Chờ: Lồng sấy, 45 phút"><span class="sp-sr-only">Chờ, 45 phút: </span>Lồng sấy</span></div></div>
+</div>
+</div></td></tr>
+            <tr><td><span class="sp-table__primary"><a href="#">Tắm sấy</a></span><span class="sp-table__secondary">Mèo</span></td><td><span class="sp-num">1 giờ · 180.000 ₫</span></td><td><div style="min-width: 320px;"><div class="sp-timeline sp-timeline--mini" style="--total: 60; --tl-label: 72px;" role="group" aria-label="Các đoạn">
+  <div class="sp-timeline__row"><span class="sp-timeline__label">Nhân viên</span><div class="sp-timeline__track"><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 0; --to: 25;" title="Làm: Tắm, 25 phút"><span class="sp-sr-only">Làm, 25 phút: </span>Tắm</span><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 55; --to: 60;" title="Làm, 5 phút"><span class="sp-sr-only">Làm, 5 phút: </span></span></div></div>
+  <div class="sp-timeline__row"><span class="sp-timeline__label">Bồn, lồng</span><div class="sp-timeline__track"><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 0; --to: 25;" title="Làm: Bồn, 25 phút"><span class="sp-sr-only">Làm, 25 phút: </span>Bồn</span><span class="sp-timeline__bar sp-timeline__bar--wait" style="--from: 25; --to: 55;" title="Chờ: Lồng sấy, 30 phút"><span class="sp-sr-only">Chờ, 30 phút: </span>Lồng sấy</span></div></div>
+</div>
+</div></td></tr>
+            <tr><td><span class="sp-table__primary"><a href="#">Cắt tỉa lông</a></span><span class="sp-table__secondary">Chó dưới 10 kg</span></td><td><span class="sp-num">1 giờ · 250.000 ₫</span></td><td><div style="min-width: 320px;"><div class="sp-timeline sp-timeline--mini" style="--total: 60; --tl-label: 72px;" role="group" aria-label="Các đoạn">
+  <div class="sp-timeline__row"><span class="sp-timeline__label">Nhân viên</span><div class="sp-timeline__track"><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 0; --to: 60;" title="Làm: Cắt tỉa, 60 phút"><span class="sp-sr-only">Làm, 60 phút: </span>Cắt tỉa</span></div></div>
+  <div class="sp-timeline__row"><span class="sp-timeline__label">Bàn</span><div class="sp-timeline__track"><span class="sp-timeline__bar sp-timeline__bar--work" style="--from: 0; --to: 60;" title="Làm: Bàn cắt tỉa, 60 phút"><span class="sp-sr-only">Làm, 60 phút: </span>Bàn cắt tỉa</span></div></div>
+</div>
+</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="sp-form-section" aria-labelledby="tp-s6">
+        <div>
+          <h2 class="sp-form-section__title" id="tp-s6">Chính sách mặc định</h2>
+          <p class="sp-form-section__desc">Cơ sở mới bắt đầu với các giá trị này và đổi được trong Cài đặt › Chính sách.</p>
+        </div>
+        <div class="sp-form-section__fields">
+          <div class="sp-field sp-field--sm"><label class="sp-field__label" for="po-min">Đặt trước ít nhất</label><div class="sp-field__control"><input id="po-min" type="text" value="2" aria-describedby="po-min-h"><span class="sp-field__suffix">giờ</span></div><span class="sp-field__help" id="po-min-h">BR-06</span></div>
+          <div class="sp-field sp-field--sm"><label class="sp-field__label" for="po-max">Đặt xa nhất</label><div class="sp-field__control"><input id="po-max" type="text" value="30" aria-describedby="po-max-h"><span class="sp-field__suffix">ngày</span></div><span class="sp-field__help" id="po-max-h">BR-06</span></div>
+          <div class="sp-field sp-field--sm"><label class="sp-field__label" for="po-cancel">Tự đổi, hủy trước ít nhất</label><div class="sp-field__control"><input id="po-cancel" type="text" value="4" aria-describedby="po-cancel-h"><span class="sp-field__suffix">giờ</span></div><span class="sp-field__help" id="po-cancel-h">BR-08</span></div>
+          <div class="sp-field sp-field--sm"><label class="sp-field__label" for="po-resch">Tự đổi tối đa</label><div class="sp-field__control"><input id="po-resch" type="text" value="2" aria-describedby="po-resch-h"><span class="sp-field__suffix">lần mỗi lịch</span></div><span class="sp-field__help" id="po-resch-h">BR-08</span></div>
+          <div class="sp-field sp-field--sm"><label class="sp-field__label" for="po-noshow">Đánh dấu không đến sau</label><div class="sp-field__control"><input id="po-noshow" type="text" value="15" aria-describedby="po-noshow-h"><span class="sp-field__suffix">phút</span></div><span class="sp-field__help" id="po-noshow-h">BR-09</span></div>
+          <div class="sp-field sp-field--sm"><label class="sp-field__label" for="po-dep">Bắt buộc cọc khi không đến</label><div class="sp-field__control"><input id="po-dep" type="text" value="2" aria-describedby="po-dep-h"><span class="sp-field__suffix">lần trong 6 tháng</span></div><span class="sp-field__help" id="po-dep-h">BR-10</span></div>
+        </div>
+      </section>
+      <div class="sp-savebar" role="region" aria-label="Lưu bản nháp">
+        <span>Bản nháp 3 · 2 thay đổi so với bản 2</span>
+        <span class="sp-savebar__actions">
+          <button type="button" class="sp-btn sp-btn--ghost">Bỏ bản nháp</button>
+          <button type="button" class="sp-btn sp-btn--secondary">Lưu nháp</button>
+          <button type="button" class="sp-btn sp-btn--primary">Xuất bản bản 3</button>
+        </span>
+      </div>
+      </form>
+      <aside class="sp-detail__side" aria-label="Phiên bản">
+        <section class="sp-panel" aria-labelledby="tv-title">
+          <h2 class="sp-panel__title" id="tv-title">Phiên bản</h2>
+          <dl class="sp-kv">
+            <dt>Đang dùng cho cơ sở mới</dt><dd>Bản 2 · 01/11/2026</dd>
+            <dt>Cơ sở đã tạo từ gói</dt><dd>4</dd>
+            <dt>Bản nháp</dt><dd>Bản 3 · 2 thay đổi</dd>
+          </dl>
+          <ul style="margin: 0; padding-left: 18px; font: 400 13px/20px var(--font-sans);">
+            <li>Tắm sấy: thêm rửa bồn 10′ sau khi dùng</li>
+            <li>Chính sách: đặt xa nhất 14 → 30 ngày</li>
+          </ul>
+          <p class="sp-panel__note">Xuất bản chỉ áp cho cơ sở tạo sau đó. 4 cơ sở đã tạo giữ dữ liệu của mình, không đổi theo (BR-70).</p>
+        </section>
+        <section class="sp-panel" aria-labelledby="tv-pv">
+          <h2 class="sp-panel__title" id="tv-pv">Xem trước</h2>
+          <p class="sp-panel__note">Mở bước chọn ngành và trang đặt lịch mẫu với bản nháp, không tạo cơ sở thật.</p>
+          <button type="button" class="sp-btn sp-btn--secondary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Xem bước chọn ngành</button>
+          <button type="button" class="sp-btn sp-btn--secondary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>Xem trang đặt lịch mẫu</button>
+        </section>
+      </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":2630}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

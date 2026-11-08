@@ -7,3 +7,4 @@ Một lịch hẹn trên lưới lịch, chia theo đoạn chiếm dụng: `.sp-
 - Cột **ghế, phòng, lồng sấy**: một đoạn liền, vì tài nguyên bận suốt.
 - Dòng 1 `appt-title` (khách · dịch vụ), dòng 2 `appt-meta` (giờ · tài nguyên). Một đoạn cao 32px (30 phút) chỉ chứa một dòng: khối có nhiều đoạn thì tên ở đoạn đầu, giờ ở đoạn cuối.
 - Khối không viền; chấm trước tên mang màu trạng thái. Đang kéo: thêm `--dragging`. Đã hủy: không vẽ trên lịch.
+- **Chuẩn bị, dọn dẹp:** `.sp-appt__seg--buffer`, viền đứt, chữ nhỏ mờ. Đoạn chuẩn bị nằm trước giờ hẹn, dọn dẹp sau giờ xong; lễ tân thấy để biết tài nguyên còn bận, khách không thấy (BR-51).

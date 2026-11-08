@@ -48,5 +48,10 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `GoiSapio.dc.html` | MH-61 Cài đặt › Gói Sapio, hai gói | **Đã chọn** | `/mock/app/toc-may/settings/plan` |
 | `GoiHetHan.dc.html` | MH-61 khi hết hạn: chỉ còn trang gia hạn | **Đã chọn** | `/mock/app/toc-may/...?plan=expired` |
 | `GoiKhoaTinhNang.dc.html` | Gói Cơ bản: tính năng bị khóa, nâng gói giữa kỳ | **Đã chọn** | `/mock/app/pawpaw/settings/chatbot` |
+| `DichVuChiTiet.dc.html` | MH-45 Chi tiết dịch vụ (Tóc Mây, Nhuộm tóc): biến thể khách tự chọn, trục đoạn, giá theo cấp, ai làm được, xem trước | **Đã chọn** | `/mock/app/toc-may/settings/services/may-dye` (Bước 10) |
+| `DichVuThuCung.dc.html` | MH-45 (Pawpaw, Tắm sấy): biến thể theo loài và cân nặng, sửa điều kiện, rửa bồn song song | **Đã chọn** | `/mock/app/pawpaw/settings/services/paw-bath` |
+| `DichVuDienThoai.dc.html` | MH-45 trên điện thoại: trục thu nhỏ, sửa đoạn trong bảng trượt | **Đã chọn** | như trên, dưới 768px |
+| `GoiNganhDanhSach.dc.html` | MH-59 danh sách gói cấu hình ngành, khung quản trị nền tảng | **Đã chọn** | `/mock/admin/templates` |
+| `GoiNganhChiTiet.dc.html` | MH-59 Spa thú cưng: từ ngữ, thông tin của bé, tài nguyên, dịch vụ mẫu, chính sách, phiên bản | **Đã chọn** | `/mock/admin/templates/pet_spa` |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-13, BR-14, BR-15 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-13, BR-14, BR-15, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.

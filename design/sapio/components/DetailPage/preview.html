@@ -1,0 +1,31 @@
+<!-- @dsCard group="Layout" height=420 subtitle="Trang chi tiết: cột chính là form, cột phải dính khi cuộn để xem trước." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>DetailPage</title></head>
+<body>
+<div class="sp-detail" style="max-width: 1000px;">
+  <form class="sp-form sp-detail__main">
+      <section class="sp-form-section sp-form-section--stack" aria-labelledby="dp-1">
+        <div class="sp-form-section__head">
+          <div>
+            <h2 class="sp-form-section__title" id="dp-1">Ai làm được</h2>
+            <p class="sp-form-section__desc">Chỉ người được tick mới được xếp cho dịch vụ này (BR-03).</p>
+          </div>
+          
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <label class="sp-check"><input type="checkbox" checked><span>Mai · Thợ chính<span class="sp-check__hint">Nhận đặt online · trả 550.000 ₫ khi khách chọn Mai</span></span></label>
+          <label class="sp-check"><input type="checkbox" checked><span>Lan · Thợ<span class="sp-check__hint">Nhận đặt online · 500.000 ₫</span></span></label>
+          <label class="sp-check"><input type="checkbox"><span>Hùng · Thợ chính<span class="sp-check__hint">Chưa có kỹ năng này: không được xếp lịch nhuộm, khách không chọn được Hùng cho dịch vụ này.</span></span></label>
+        </div>
+      </section>
+  </form>
+  <aside class="sp-detail__side" aria-label="Xem trước">
+    <section class="sp-panel" aria-labelledby="dp-s"><h2 class="sp-panel__title" id="dp-s">Tóm tắt</h2>
+      <dl class="sp-kv"><dt>Thợ bận</dt><dd>1 giờ 15</dd><dt>Ghế cắt bận</dt><dd>1 giờ 40</dd><dt>Lịch sắp tới</dt><dd>6</dd></dl>
+      <p class="sp-panel__note">Lịch đã đặt giữ thời gian và giá cũ (BR-59).</p>
+    </section>
+  </aside>
+</div>
+</body>
+</html>
