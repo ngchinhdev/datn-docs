@@ -14,7 +14,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 | Đợt | Mục tiêu | Phục vụ code ở |
 |---|---|---|
 | 1 | Tài khoản, khung ứng dụng, cấu hình cơ sở, đặt lịch, ca và nghỉ phép, gói cấu hình ngành | Giai đoạn 2–3 (nền tảng, lõi đặt lịch) |
-| 2 | Tiền: thu tiền, cọc, gói, ví, hóa đơn, hoàn tiền | Giai đoạn 4 |
+| 2 | Tiền: thu tiền, cọc, gói, ví, hóa đơn, hoàn tiền, gói Sapio | Giai đoạn 4 |
 | 3 | Hoa hồng, báo cáo, thông báo, chatbot, tổng quan | Giai đoạn 5–6 |
 
 **Mức thiết kế:**
@@ -28,7 +28,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 
 ## Quy ước route
 
-Đã chốt ở [T-15](../ky-thuat/quyet-dinh-ky-thuat.md#t-15-route-của-web-tiếng-anh-slug-cơ-sở-trong-url).
+Đã chốt ở [T-15](../ky-thuat/quyet-dinh-ky-thuat.md#t-15-route-của-web-tiếng-anh-slug-cơ-sở-trong-url); trang khách chạy trên tên miền con theo [T-16](../ky-thuat/quyet-dinh-ky-thuat.md#t-16-trang-khách-của-mỗi-cơ-sở-trên-tên-miền-con).
 
 - **Tiếng Anh**, chữ thường, nối bằng gạch ngang, danh từ số nhiều cho tập hợp (`/customers/[id]`), cùng từ với [Thuật ngữ](../nghiep-vu/thuat-ngu.md). Lý do: khớp tên trong code và API (`/v1/customers`), không có vấn đề dấu tiếng Việt trong URL, theo thói quen của các sản phẩm SaaS. Chữ hiển thị trên màn hình vẫn là tiếng Việt; tài liệu `/docs` giữ đường dẫn tiếng Việt.
 - **Bốn khu:**
@@ -36,7 +36,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 | Khu | Tiền tố | Ai dùng |
 |---|---|---|
 | Công khai của Sapio | `/`, `/signup`, `/login`... | Người chưa đăng nhập |
-| Trang khách của một cơ sở | `/[tenant]/...` | Khách hàng |
+| Trang khách của một cơ sở | `[tenant].<domain>/...` (T-16); mock: `/mock/[tenant]/...` | Khách hàng |
 | Khu nội bộ của một cơ sở | `/app/[tenant]/...` | LT, KTV, QL, CCS |
 | Quản trị nền tảng | `/admin/...` | QTNT |
 
@@ -50,7 +50,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
 | MH-01 | Trang giới thiệu Sapio | `/` | Ai cũng xem | 1 | Nhẹ | Sapio là gì, ảnh lịch nhiều cột, nút "Đăng ký cơ sở" |
-| MH-02 | Đăng ký cơ sở | `/signup?step=account\|verify\|industry\|business\|done` | CCS | 1 | Vẽ | Tài khoản → mã xác thực email → **chọn ngành** → tên, slug, chi nhánh đầu tiên, giờ mở cửa → xem trước dịch vụ mẫu từ gói ngành rồi tạo. BR-70 |
+| MH-02 | Đăng ký cơ sở | `/signup?step=account\|verify\|industry\|business\|done` | CCS | 1 | Vẽ | **Đã chọn.** Tài khoản (mật khẩu BR-73) → mã 6 số qua email → **chọn ngành** có xem trước gói → tên, địa chỉ `toc-may.sapio.vn`, chi nhánh đầu, giờ mở cửa, số tài nguyên → đã tạo, **dùng thử 7 ngày**. BR-70, BR-72, BR-74, BR-80 |
 | MH-03 | Đăng nhập | `/login` | Nhân sự | 1 | Nhẹ | Email + mật khẩu; khóa tạm sau nhiều lần sai |
 | MH-04 | Quên và đặt lại mật khẩu | `/forgot-password`, `/reset-password` | Nhân sự | 1 | Nhẹ | |
 | MH-05 | Nhận lời mời | `/invite/[token]` | LT, KTV, QL | 1 | Nhẹ | Thấy tên cơ sở, vai trò được mời; đặt mật khẩu hoặc nhận bằng tài khoản có sẵn |
@@ -60,26 +60,28 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-07 | Khung ứng dụng | mọi route `/app/[tenant]` | Nhân sự | 1 | Vẽ | Thanh bên theo vai trò, đổi chi nhánh, tìm nhanh khách, menu tài khoản, nút sáng/tối. Máy tính: thanh bên; iPad: thu gọn thành icon; điện thoại: thanh điều hướng dưới (như `LeTanDienThoai`) |
+| MH-07 | Khung ứng dụng | mọi route `/app/[tenant]` | Nhân sự | 1 | Vẽ | Thanh bên theo vai trò, đổi chi nhánh, tìm nhanh khách, menu tài khoản, nút sáng/tối. Máy tính: thanh bên; iPad: thu gọn thành icon; điện thoại: thanh điều hướng dưới (như `LeTanDienThoai`). Dải báo dùng thử, sắp hết hạn (`Banner`, BR-86); mục ngoài gói có ổ khóa (BR-87) |
 | MH-08 | Mẫu trang danh sách | | | 1 | Vẽ | Dùng cho mọi màn mức DS |
 | MH-09 | Mẫu trang form | | | 1 | Vẽ | Dùng cho mọi màn mức Form; có thanh "Còn thay đổi chưa lưu" |
 | MH-10 | Trang lỗi và trạng thái | | Mọi người | 1 | Nhẹ | 404, 403 "Không có quyền", lỗi máy chủ, cơ sở bị khóa (trang khách và nội bộ nói khác nhau), mất kết nối realtime |
 
-## C. Khách hàng: `/[tenant]`
+## C. Khách hàng: `[tenant].<domain>`
+
+Route trong bảng là đường dẫn trên tên miền con của cơ sở (ví dụ `/book` là `toc-may.sapio.vn/book`). Mock dùng `/mock/[tenant]/book`.
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-11 | Trang cơ sở | `/[tenant]` | KH | 1 | Vẽ | Tên, ảnh, địa chỉ chi nhánh, giờ mở cửa, nhóm dịch vụ và giá, nhân viên (hồ sơ công khai, BR-15), chính sách hủy; nút "Đặt lịch" |
-| MH-12 | Luồng đặt lịch | `/[tenant]/book?step=...` | KH | 1 | Vẽ | **Đang làm** (D-12, D-13, D-14). BR-03, BR-06, BR-07, BR-13, BR-14, BR-16, BR-17 |
+| MH-11 | Trang cơ sở | `/` | KH | 1 | Vẽ | Tên, ảnh, địa chỉ chi nhánh, giờ mở cửa, nhóm dịch vụ và giá, nhân viên (hồ sơ công khai, BR-15), chính sách hủy; nút "Đặt lịch" |
+| MH-12 | Luồng đặt lịch | `/book?step=...` | KH | 1 | Vẽ | **Đang làm** (D-12, D-13, D-14). BR-03, BR-06, BR-07, BR-13, BR-14, BR-16, BR-17 |
 | MH-13 | Đặt nhiều dịch vụ | trong MH-12 | KH | 1 | Vẽ | Thêm dịch vụ vào giỏ, thứ tự làm, cùng hay khác thợ; giờ trống tính cho cả chuỗi (BT1) |
 | MH-14 | Đặt nhóm | trong MH-12 | KH | 1 | Vẽ | Nhiều người hoặc nhiều bé cùng giờ, mỗi đối tượng một dịch vụ; không đủ chỗ thì gợi ý giờ lệch nhau |
-| MH-15 | Trả tiền cọc | `/[tenant]/book/pay` | KH | 2 | Vẽ | QR của provider giả lập (D-09), đếm ngược giữ chỗ, kết quả thanh toán; trả xong mà giữ chỗ đã hết hạn (BR-07, BR-21) |
-| MH-16 | Đăng nhập khách | `/[tenant]/login` | KH | 1 | Nhẹ | Email → mã 6 số (BR-16); phiên gắn với cơ sở |
-| MH-17 | Lịch của tôi | `/[tenant]/me` | KH | 1 | Nhẹ | Sắp tới, đã qua; đặt lại lịch cũ |
-| MH-18 | Chi tiết lịch hẹn của khách | `/[tenant]/me/appointments/[id]` | KH | 1 | Vẽ | Đổi giờ (BR-08: trước X giờ, tối đa N lần), hủy kèm mức hoàn cọc (BR-23); hết hạn tự đổi thì hiện số điện thoại cơ sở |
-| MH-19 | Đối tượng được phục vụ | `/[tenant]/me/subjects` | KH | 1 | Form | Thuộc tính theo schema của ngành (BR-71). Ngành không có đối tượng khác thì không hiện mục này |
-| MH-20 | Gói và ví | `/[tenant]/me/wallet` | KH | 2 | Nhẹ | Số buổi còn và hạn của gói; số dư tiền thật, tiền tặng; lịch sử |
-| MH-21 | Thông tin cá nhân | `/[tenant]/me/profile` | KH | 1 | Form | Họ tên, số điện thoại, email; đồng ý nhận quảng cáo (BR-64) |
+| MH-15 | Trả tiền cọc | `/book/pay` | KH | 2 | Vẽ | QR của provider giả lập (D-09), đếm ngược giữ chỗ, kết quả thanh toán; trả xong mà giữ chỗ đã hết hạn (BR-07, BR-21) |
+| MH-16 | Đăng nhập khách | `/login` | KH | 1 | Nhẹ | Email → mã 6 số (BR-16); phiên gắn với cơ sở |
+| MH-17 | Lịch của tôi | `/me` | KH | 1 | Nhẹ | Sắp tới, đã qua; đặt lại lịch cũ |
+| MH-18 | Chi tiết lịch hẹn của khách | `/me/appointments/[id]` | KH | 1 | Vẽ | Đổi giờ (BR-08: trước X giờ, tối đa N lần), hủy kèm mức hoàn cọc (BR-23); hết hạn tự đổi thì hiện số điện thoại cơ sở |
+| MH-19 | Đối tượng được phục vụ | `/me/subjects` | KH | 1 | Form | Thuộc tính theo schema của ngành (BR-71). Ngành không có đối tượng khác thì không hiện mục này |
+| MH-20 | Gói và ví | `/me/wallet` | KH | 2 | Nhẹ | Số buổi còn và hạn của gói; số dư tiền thật, tiền tặng; lịch sử |
+| MH-21 | Thông tin cá nhân | `/me/profile` | KH | 1 | Form | Họ tên, số điện thoại, email; đồng ý nhận quảng cáo (BR-64) |
 | MH-22 | Khung chat đặt lịch | nổi trên MH-11, MH-12 | KH | 3 | Vẽ | BT7: hỏi giá, giờ; giữ chỗ rồi chuyển sang bước OTP; "Gặp lễ tân" |
 | MH-23 | Email gửi khách | | KH | 1 (OTP), 3 | Nhẹ | Mã OTP, xác nhận lịch, nhắc 24h và 2h, đã đổi, đã hủy, đã hoàn tiền |
 
@@ -138,23 +140,25 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | MH-55 | Báo cáo | `/app/[tenant]/reports` | CCS, QL | 3 | Vẽ | Doanh thu, tiền trả trước và doanh thu thực hiện, lấp đầy, không đến; lọc chi nhánh và khoảng ngày |
 | MH-56 | Hoa hồng | `/app/[tenant]/commission`, `/commission/periods/[id]` | CCS | 3 | Vẽ | Quy tắc có ngày hiệu lực (BR-41), chia nhiều thợ (BR-43), chốt kỳ, khoản thu hồi vào kỳ sau (BR-42) |
 | MH-57 | Nhật ký thao tác | `/app/[tenant]/audit-log` | CCS | 3 | DS | BR-63; cột: giờ, người, thao tác, đối tượng |
+| MH-61 | Gói Sapio | `/app/[tenant]/settings/plan` | CCS | 2 | Vẽ | Trạng thái gói, hai thẻ gói, chọn kỳ 1/3/12 tháng, thanh toán QR, lịch sử thanh toán (BR-83, BR-84). Hết hạn: mọi route khu nội bộ chuyển về đây, kèm bảng lịch đã đặt sau hạn chỉ để đọc (BR-82). Trang của tính năng bị khóa có bảng tiền nâng gói (BR-85, BR-87) |
 
 ## H. Quản trị nền tảng: `/admin`
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-58 | Khách thuê | `/admin/tenants`, `/admin/tenants/[id]` | QTNT | 1 | DS | Duyệt, khóa, mở khóa; chi tiết chỉ có số liệu tổng (số chi nhánh, số lịch tháng), **không** xem dữ liệu khách của cơ sở |
+| MH-58 | Khách thuê | `/admin/tenants`, `/admin/tenants/[id]` | QTNT | 1 | DS | Khóa, mở khóa có lý do (BR-75); cột gói, trạng thái (dùng thử, đang dùng, hết hạn) và hạn; gia hạn thủ công; chi tiết chỉ có số liệu tổng (số chi nhánh, số lịch tháng), **không** xem dữ liệu khách của cơ sở |
 | MH-59 | Gói cấu hình ngành | `/admin/templates`, `/admin/templates/[id]` | QTNT | 1 | Vẽ | **Màn chứng minh BT8.** Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70) |
 | MH-60 | Tổng quan nền tảng | `/admin` | QTNT | 3 | Nhẹ | Số cơ sở theo ngành, số lịch đặt, cơ sở mới |
+| MH-62 | Gói và giá | `/admin/plans` | QTNT | 2 | Form | Giá tháng, tính năng và giới hạn của từng gói (BR-83); mức giảm theo kỳ; đổi giá không ảnh hưởng kỳ đã trả |
 
 ## Tổng hợp
 
 | Đợt | Vẽ | DS | Form | Nhẹ | Cộng |
 |---|---|---|---|---|---|
 | 1 | 20 | 7 | 6 | 10 | 43 |
-| 2 | 2 | 2 | 2 | 2 | 8 |
+| 2 | 3 | 2 | 3 | 2 | 10 |
 | 3 | 4 | 1 | 2 | 2 | 9 |
-| **Cộng** | **26** | **10** | **10** | **14** | **60** |
+| **Cộng** | **27** | **10** | **11** | **14** | **62** |
 
 Đợt 1 nhiều nhất vì giai đoạn 2–3 là phần lớn mã nguồn. Trong đợt 1, thứ tự vẽ đề xuất:
 

@@ -66,9 +66,28 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 | BR-64 | Khách đồng ý xử lý dữ liệu cá nhân khi đặt lịch lần đầu; đồng ý nhận quảng cáo là lựa chọn riêng |
 | BR-70 | Gói cấu hình ngành chỉ được nạp khi tạo tenant; sau đó mọi chỉnh sửa thuộc về tenant, không ảnh hưởng gói gốc |
 | BR-71 | Thuộc tính của đối tượng được phục vụ phải hợp lệ theo schema của ngành trước khi lưu |
-| BR-72 | Slug của cơ sở: chữ thường không dấu, số, gạch ngang, 3–40 ký tự, duy nhất trên nền tảng, không trùng từ dành riêng (`app`, `admin`, `api`, `signup`, `login`, `logout`, `invite`, `verify-email`, `forgot-password`, `reset-password`, `select-workspace`, `docs`, `mock`, `help`, `about`, `terms`, `privacy`, `static`, `assets`). Đổi slug thì link cũ tự chuyển sang slug mới |
+| BR-72 | Slug của cơ sở (cũng là tên miền con, T-16): chữ thường không dấu, số, gạch ngang, 3–40 ký tự, không bắt đầu hoặc kết thúc bằng gạch ngang, duy nhất trên nền tảng, không trùng từ dành riêng (`www`, `app`, `admin`, `api`, `mail`, `status`, `blog`, `cdn`, `signup`, `login`, `logout`, `invite`, `verify-email`, `forgot-password`, `reset-password`, `select-workspace`, `docs`, `mock`, `help`, `about`, `terms`, `privacy`, `static`, `assets`). Đổi slug thì link cũ tự chuyển sang slug mới |
+| BR-73 | Mật khẩu nhân sự theo NIST SP 800-63B-4: tối thiểu 15 ký tự, tối đa ít nhất 64; không ép trộn loại ký tự; nhận mọi ký tự (kể cả dấu cách, tiếng Việt có dấu); so với danh sách mật khẩu phổ biến hoặc đã lộ, trùng thì phải chọn mật khẩu khác; không bắt đổi định kỳ; cho dán, có nút hiện/ẩn |
+| BR-74 | Mỗi email đã xác thực chỉ tạo được một cơ sở dùng thử. Đăng ký và gửi mã xác thực bị giới hạn số lần theo email và theo IP |
+| BR-75 | Quản trị nền tảng khóa hoặc mở khóa cơ sở vi phạm bất kỳ lúc nào, kèm lý do; bị khóa thì khu quản trị và trang đặt lịch đều dừng, không phụ thuộc gói. Mọi lần khóa, mở khóa, gia hạn thủ công ghi vào nhật ký |
 
 ---
+
+## Gói Sapio và dùng thử
+
+Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-hai-gói-sapio-thay-cho-duyệt-tay). Thanh toán qua cổng giả lập (D-09).
+
+| Mã | Quy tắc |
+|---|---|
+| BR-80 | Cơ sở mới dùng thử **7 ngày**, tính cả ngày tạo, hết lúc 23:59 ngày thứ 7 theo giờ của chi nhánh đầu tiên |
+| BR-81 | Trong dùng thử: dùng được mọi tính năng của gói Chuyên nghiệp để **cấu hình** (dịch vụ, tài nguyên, nhân sự, ca, chính sách, thương hiệu) và xem thử trang đặt lịch (chỉ người đã đăng nhập của cơ sở, gắn `noindex`). **Không** nhận đặt lịch online và **không** tạo được lịch hẹn |
+| BR-82 | Hết dùng thử mà chưa kích hoạt, hoặc hết kỳ đã trả mà chưa gia hạn: tài khoản **chỉ còn trang Gói Sapio** (và đăng xuất); trang đặt lịch ngừng nhận khách. Trang Gói Sapio hiện chỉ để đọc các lịch hẹn đã đặt sau thời điểm hết hạn (giờ, khách, số điện thoại, dịch vụ, nhân viên) để cơ sở báo khách. Khách vẫn xem và hủy được lịch của mình. Không xóa dữ liệu |
+| BR-83 | Có hai gói, giá và tính năng là **dữ liệu** do quản trị nền tảng cấu hình. Mặc định: **Cơ bản** 199.000 ₫/tháng (1 chi nhánh; không có gói liệu trình và ví, hoa hồng, báo cáo đầy đủ, chatbot) và **Chuyên nghiệp** 399.000 ₫/tháng (không giới hạn chi nhánh, đủ tính năng). Không giới hạn nhân viên và lịch hẹn ở cả hai gói |
+| BR-84 | Mua theo kỳ 1, 3 hoặc 12 tháng; 3 tháng giảm 10%, 12 tháng giảm 20%, làm tròn tới nghìn đồng. Gói tính từ lúc thanh toán thành công; ngày dùng thử còn lại không cộng thêm |
+| BR-85 | **Nâng gói** có hiệu lực ngay, trả phần chênh = (giá tháng gói mới − giá tháng gói cũ) × số ngày còn lại của kỳ / 30, làm tròn lên tới nghìn đồng; ngày hết kỳ giữ nguyên. **Hạ gói** có hiệu lực từ kỳ sau, và chỉ chọn được khi cơ sở đang nằm trong giới hạn của gói thấp (ví dụ còn 1 chi nhánh hoạt động) |
+| BR-86 | Nhắc hết hạn qua email cho chủ cơ sở trước 3 ngày, trước 1 ngày và lúc hết hạn; dải báo trong khu quản trị từ khi còn 3 ngày (cả khi đang dùng thử) |
+| BR-87 | Tính năng không có trong gói: API từ chối bằng Problem Details mã `plan-feature-required`; giao diện hiện ổ khóa và trang giải thích kèm nút nâng cấp, không ẩn hẳn. Dữ liệu cũ của tính năng đó (khi hạ gói) giữ nguyên ở chế độ chỉ đọc |
+| BR-88 | Kích hoạt hoặc gia hạn chỉ được ghi nhận một lần cho mỗi giao dịch, dù webhook gửi lặp; khoản thu ghi vào sổ của nền tảng, chỉ thêm không sửa (quy tắc 6) |
 
 ## Tình huống đặc biệt phải có test
 
@@ -76,6 +95,10 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 |---|---|---|
 | Hai khách cùng bấm đặt giờ cuối cùng trong một giây | Đúng 1 người thành công, người kia nhận lỗi kèm gợi ý giờ gần nhất | BR-01, BR-07 |
 | Khách thanh toán xong nhưng giữ chỗ đã hết hạn | Giờ còn trống thì xác nhận; đã có người đặt thì tự tạo yêu cầu hoàn tiền | BR-07, BR-21 |
+| Đồng hồ chạy qua 23:59:59 ngày thứ 7 của dùng thử | Từ 00:00:00 mọi trang trừ Gói Sapio bị chuyển hướng, API nghiệp vụ trả 402/403; kiểm bằng `Clock` giả, không chờ job | BR-80, BR-82 |
+| Webhook kích hoạt gói gửi 3 lần | Một kỳ gói, một bút toán | BR-88 |
+| Nâng gói khi còn 22 ngày | Trả thêm 147.000 ₫ (200.000 × 22/30 làm tròn lên), ngày hết kỳ không đổi | BR-85 |
+| Hạ gói khi đang có 3 chi nhánh | Không cho chọn, báo phải tạm dừng bớt chi nhánh | BR-85 |
 | Cổng thanh toán báo kết quả hai lần | Chỉ ghi nhận một lần | BR-21 |
 | Dịch vụ kéo dài quá giờ, lấn sang lịch sau | Cảnh báo lễ tân, gợi ý chuyển lịch sau cho nhân viên khác | BR-01 |
 | Đổi giá dịch vụ khi đã có lịch đặt trước | Lịch cũ giữ giá cũ | BR-12 |

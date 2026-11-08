@@ -100,7 +100,7 @@ Ghi rõ bảng này trong chương 1 của báo cáo. Hội đồng đánh giá 
 
 | # | Phân hệ | Nội dung chính |
 |---|---|---|
-| 1 | Khách thuê | Tự đăng ký, **chọn ngành**, trang đặt lịch riêng theo slug, cấu hình thương hiệu, cô lập dữ liệu |
+| 1 | Khách thuê | Tự đăng ký, **chọn ngành**, dùng thử 7 ngày rồi kích hoạt gói Sapio (giả lập, D-15), trang đặt lịch riêng trên tên miền con (T-16), cấu hình thương hiệu, cô lập dữ liệu |
 | 2 | Gói cấu hình theo ngành | Loại tài nguyên, dịch vụ mẫu, từ ngữ hiển thị, đối tượng được phục vụ, chính sách mặc định |
 | 3 | Chi nhánh | 1–2 chi nhánh, giờ mở cửa nhiều khung/ngày, ngày đặc biệt, giá theo chi nhánh |
 | 4 | Dịch vụ | Các đoạn chiếm dụng (chuẩn bị, làm, chờ, dọn), tài nguyên yêu cầu, kỹ năng, giá theo cấp nhân viên |
@@ -124,7 +124,7 @@ Ghi rõ bảng này trong chương 1 của báo cáo. Hội đồng đánh giá 
 
 ### 3.3. Không làm (đưa vào chương "Hướng phát triển")
 
-Nha khoa và hồ sơ bệnh án · Kho và vật tư · Tính năng riêng của ngành thú cưng (sổ tiêm phòng, khách sạn thú cưng) · Ngành thứ ba trở đi · Hạng thành viên, điểm thưởng, kịch bản chăm sóc tự động · Thu phí nền tảng thật · Dự đoán khách bỏ hẹn bằng ML · Ứng dụng di động native · Hóa đơn điện tử · Đặt vượt số lượng · Bảng lương đầy đủ.
+Nha khoa và hồ sơ bệnh án · Kho và vật tư · Tính năng riêng của ngành thú cưng (sổ tiêm phòng, khách sạn thú cưng) · Ngành thứ ba trở đi · Hạng thành viên, điểm thưởng, kịch bản chăm sóc tự động · Thu phí nền tảng thật (bản đồ án chỉ giả lập, D-15) · Dự đoán khách bỏ hẹn bằng ML · Ứng dụng di động native · Hóa đơn điện tử · Đặt vượt số lượng · Bảng lương đầy đủ.
 
 ---
 
@@ -134,7 +134,7 @@ Tên hiển thị của vai trò thay đổi theo ngành (ví dụ "thợ" ở s
 
 | Vai trò | Phạm vi | Quyền chính |
 |---|---|---|
-| Quản trị nền tảng | Toàn hệ thống | Duyệt/khóa khách thuê, quản lý gói cấu hình ngành, xem thống kê tổng; **không** xem dữ liệu chi tiết của khách thuê |
+| Quản trị nền tảng | Toàn hệ thống | Khóa/mở khóa khách thuê, cấu hình gói Sapio và giá, quản lý gói cấu hình ngành, xem thống kê tổng; **không** xem dữ liệu chi tiết của khách thuê |
 | Chủ cơ sở | Toàn chuỗi | Cấu hình, dịch vụ, nhân sự, chính sách, báo cáo, chốt kỳ hoa hồng |
 | Quản lý chi nhánh | Chi nhánh được giao | Xếp ca, duyệt nghỉ phép, xử lý lịch bị ảnh hưởng, báo cáo chi nhánh |
 | Lễ tân / Thu ngân | Chi nhánh đang làm | Đặt, đổi, hủy lịch; check-in; thu tiền; bán gói; nạp ví |
@@ -366,6 +366,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 - [ ] Sổ cái chỉ ghi thêm (BT4); ví tiền thật/tiền tặng; nạp ví
 - [ ] Gói liệu trình: bán, trừ buổi, ghi doanh thu thực hiện, hết hạn, hoàn gói
 - [ ] Thanh toán kết hợp nhiều phương thức
+- [ ] Gói Sapio: dùng thử 7 ngày, hai gói, kích hoạt và gia hạn bằng QR giả lập, nâng gói tính phần chênh, hạ gói kỳ sau, hết hạn chỉ còn trang gói (D-15, T-17, BR-80 đến BR-88)
 
 **Tiêu chí:** test webhook lặp 10 lần; test bất biến sổ cái sau 5.000 thao tác ngẫu nhiên.
 

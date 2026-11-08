@@ -107,6 +107,7 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 ## T-08. Xác thực: tự xây bằng phiên trong cookie
 
 - **Nhân viên:** email + mật khẩu (băm bằng argon2id, gói `@node-rs/argon2` có sẵn bản build cho Windows). Đăng nhập tạo **session token ngẫu nhiên**, lưu bản băm trong bảng `sessions`, gửi về bằng cookie `httpOnly`, `Secure`, `SameSite=Lax`. Thu hồi phiên được ngay (đăng xuất, đổi mật khẩu).
+- **Mật khẩu** theo BR-73 (NIST SP 800-63B-4): kiểm độ dài, so với danh sách khoảng 100.000 mật khẩu phổ biến đóng gói kèm API (không gọi dịch vụ ngoài), không có luật ép loại ký tự.
 - **Khách hàng:** OTP qua email theo từng khách thuê → phiên khách gắn với `tenant` đó.
 - Triển khai web và api **cùng site** (ví dụ `app.<domain>` và `api.<domain>`) để cookie hoạt động; môi trường dev dùng `localhost` khác cổng. CORS chỉ cho phép origin của web, có `credentials`.
 - Giới hạn tần suất (`@nestjs/throttler`) cho đăng nhập và gửi OTP.
@@ -151,7 +152,7 @@ datn/                      ← thư mục cha trên máy (không phải repo)
 
 ## T-15. Route của web: tiếng Anh, slug cơ sở trong URL
 
-Chốt ngày 07/11/2026 cùng [Danh sách màn hình](../thiet-ke/man-hinh.md).
+Chốt ngày 07/11/2026 cùng [Danh sách màn hình](../thiet-ke/man-hinh.md). Phần trang khách được thay bằng [T-16](#t-16-trang-khách-của-mỗi-cơ-sở-trên-tên-miền-con) (tên miền con).
 
 - **Route tiếng Anh**, chữ thường, nối bằng gạch ngang, danh từ số nhiều cho tập hợp, cùng từ với [Thuật ngữ](../nghiep-vu/thuat-ngu.md) và REST API (`/app/toc-may/customers` ↔ `GET /v1/customers`). Chữ trên màn hình vẫn là tiếng Việt. Tài liệu `/docs` giữ đường dẫn tiếng Việt.
 - **Bốn khu:** công khai của Sapio (`/`, `/signup`, `/login`), trang khách của một cơ sở (`/[tenant]/...`), khu nội bộ (`/app/[tenant]/...`), quản trị nền tảng (`/admin/...`). Trong `apps/web` là bốn route group của App Router, mỗi group một layout; `proxy.ts` kiểm phiên cho `/app` và `/admin`.
@@ -160,6 +161,79 @@ Chốt ngày 07/11/2026 cùng [Danh sách màn hình](../thiet-ke/man-hinh.md).
 - **Slug** theo BR-72 (danh sách từ dành riêng).
 - **Mock** trong `datn-docs` dùng đúng route thật, thêm tiền tố `/mock`.
 - **Vì sao không giữ tenant trong phiên** (`/app/calendar`): gọn URL hơn nhưng hai tab hai cơ sở dùng chung phiên sẽ ghi nhầm dữ liệu; link chia sẻ không mang theo cơ sở.
+
+## T-16. Trang khách của mỗi cơ sở trên tên miền con
+
+Chốt ngày 07/11/2026, thay phần "trang khách" của T-15. Khu nội bộ, quản trị nền tảng và mock giữ như T-15.
+
+| Phần | Địa chỉ (ví dụ với tên miền `sapio.vn`) |
+|---|---|
+| Trang giới thiệu, đăng ký, đăng nhập nhân sự | `sapio.vn/`, `sapio.vn/signup`, `sapio.vn/login` |
+| Khu nội bộ của một cơ sở | `sapio.vn/app/toc-may/calendar` (như T-15) |
+| Quản trị nền tảng | `sapio.vn/admin` |
+| API | `api.sapio.vn/v1/...` |
+| **Trang khách của một cơ sở** | **`toc-may.sapio.vn/`, `toc-may.sapio.vn/book`, `toc-may.sapio.vn/me`** |
+
+- **Một ứng dụng Next.js phục vụ tất cả.** `proxy.ts` đọc tên miền của request:
+  - Là tên miền con chứa slug hợp lệ: rewrite vào route group trang khách `/(site)/[tenant]/...`. Người dùng không thấy đường dẫn nội bộ này.
+  - Slug không tồn tại: trang "Không tìm thấy cơ sở".
+  - Cơ sở bị khóa: trang báo cơ sở tạm ngưng (MH-10).
+- **Cookie tách theo tên miền:**
+  - Trang khách gọi API qua đường cùng origin `/api/*`, Next rewrite sang `api.<domain>`.
+  - Cookie phiên khách đặt tên `__Host-...`, `Secure`, `HttpOnly`, `Path=/`, `SameSite=Lax` và **không có `Domain`**. Vì vậy mỗi cơ sở có phiên khách riêng, đúng BR-17 ("phiên gắn với cơ sở").
+  - Cookie phiên nhân sự chỉ thuộc tên miền gốc, nên trang khách của bất kỳ cơ sở nào cũng không nhận được.
+  - Request đổi dữ liệu kiểm header `Origin` (T-08).
+- **Public Suffix List:** chưa cần. Cơ sở chỉ nhập chữ, ảnh và màu; không tự đăng HTML hay chạy mã trên tên miền con. Sau này nếu cho cơ sở tự sửa HTML, phải đăng tên miền lên Public Suffix List trước.
+- **Dev:** dùng `toc-may.localhost:3000`. Chrome, Edge và Firefox tự trỏ `*.localhost` về máy, không cần sửa file hosts.
+- **Triển khai:**
+  - Cần một tên miền thật, thêm `*.<domain>` vào Vercel.
+  - Vercel cấp **một** chứng chỉ wildcard cho mọi cơ sở. Để làm được việc này, tên miền phải dùng nameserver của Vercel, hoặc ủy quyền bản ghi `_acme-challenge` cho Vercel.
+  - Chưa có tên miền thì đặt biến môi trường `TENANT_ROUTING=path`: trang khách chạy ở `/<slug>/...` như T-15, phần còn lại giữ nguyên.
+- **Slug là một nhãn DNS:** BR-72 thêm luật không bắt đầu hoặc kết thúc bằng gạch ngang, và thêm các tên dành riêng cho tên miền con (`www`, `api`, `app`, `admin`, `mail`, `status`, `blog`, `cdn`).
+- **Tên miền riêng của tiệm** (`datlich.tocmay.vn`) để sau, ghi vào chương Hướng phát triển. Cách làm khi đó:
+  - Thêm bảng `tenant_domains`.
+  - Thêm bước xác minh bằng bản ghi TXT.
+  - Gắn tên miền vào dự án Vercel bằng Vercel SDK để tự cấp HTTPS.
+  - `proxy.ts` tra bảng này trước khi rewrite.
+  - Thêm thẻ canonical để trang không bị trùng nội dung giữa hai địa chỉ.
+- **Vì sao chọn tên miền con thay cho `sapio.vn/toc-may`:** link mang tên tiệm ở đầu, trông "của tiệm" hơn khi in lên mã QR hoặc dán lên Facebook. Cookie của khách tách hẳn theo cơ sở. Cách này cũng là bước đệm cho tên miền riêng sau này. Đổi lại phải có tên miền thật khi triển khai, và proxy phức tạp hơn.
+- Tham khảo: [Vercel, Configuring Custom Domains](https://vercel.com/docs/platforms/multi-tenant-platforms/configuring-domains).
+
+## T-17. Gói Sapio: gói và tính năng là dữ liệu, kiểm qua một hàm
+
+Chốt ngày 08/11/2026 cùng [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-hai-gói-sapio-thay-cho-duyệt-tay).
+
+- **Bảng:** đây là dữ liệu của nền tảng, không có `tenant_id`, nên không chịu RLS. Chỉ role của quản trị nền tảng được ghi.
+
+  | Bảng | Nội dung |
+  |---|---|
+  | `plans` | `code`, `name`, `monthly_price_vnd`, `features` (mảng mã tính năng: `multi_branch`, `packages_wallet`, `commission`, `full_reports`, `chatbot`), `limits` (`{ "branches": 1 }`) |
+  | `subscriptions` | Mỗi cơ sở một dòng: `tenant_id`, `plan_code`, `status`, `trial_ends_at`, `current_period_end`, `pending_plan_code` cho hạ gói kỳ sau |
+  | `platform_payments` | Khoản thu của nền tảng, chỉ thêm không sửa, khóa idempotency theo mã giao dịch của cổng thanh toán |
+
+- **Trạng thái của `subscriptions.status`:**
+
+  | Từ | Sang | Khi nào |
+  |---|---|---|
+  | `trialing` | `active` | Thanh toán thành công |
+  | `trialing` | `expired` | Quá `trial_ends_at` |
+  | `active` | `active` | Gia hạn, nâng gói |
+  | `active` | `expired` | Quá `current_period_end` |
+  | `expired` | `active` | Thanh toán thành công |
+
+  Khóa vi phạm là cờ riêng `tenants.locked_at` (BR-75), không trộn vào trạng thái gói.
+- **Không tin vào job:** BullMQ có job đổi `status` lúc hết hạn và gửi email nhắc (BR-86). Nhưng mọi request đều tính quyền từ `Clock.now()` so với `trial_ends_at` và `current_period_end`. Job chậm thì quyền vẫn đúng, và test được bằng `Clock` giả.
+- **Một hàm hỏi quyền:** `entitlements(tenant, now)` trả về `{ mode: 'trial' | 'active' | 'expired' | 'locked', features, limits }`. Trên đó có hai hàm:
+  - `can(tenant, feature)`.
+  - `canBook(tenant)`: chỉ `true` khi `active` và không bị khóa.
+- **Ba chỗ kiểm quyền:**
+  - Guard của Nest đặt trên từng route nghiệp vụ, khai báo bằng decorator `@RequiresFeature('chatbot')` và `@RequiresBooking()`.
+  - Dịch vụ tạo lịch hẹn và giữ chỗ (lớp application) kiểm lại `canBook`, để không có đường tắt nào tạo được lịch.
+  - Giao diện nhận `entitlements` để hiện ổ khóa, dải báo và chuyển hướng về trang gói. Giao diện chỉ để hiển thị, không thay cho kiểm ở API.
+- **Lỗi trả về:** Problem Details. Hết hạn trả `402` `subscription-expired`. Thiếu tính năng trả `403` `plan-feature-required` kèm mã tính năng.
+- **Thanh toán:** dùng lại `PaymentProvider` của tiền cọc. Webhook có chữ ký HMAC. Mỗi giao dịch chỉ được kích hoạt hoặc gia hạn một lần (BR-88), bằng ràng buộc unique trên mã giao dịch trong `platform_payments`.
+- **Tính tiền nâng gói:** hàm thuần trong domain theo BR-85, có test thuộc tính (fast-check): kết quả luôn ≥ 0, làm tròn lên tới nghìn đồng, và bằng 0 khi còn 0 ngày.
+- **Mock (`datn-docs`):** đổi trạng thái bằng `?plan=trial|basic|pro|expired` để xem dải báo, ổ khóa và màn hết hạn.
 
 ## Nguồn
 

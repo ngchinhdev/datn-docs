@@ -22,6 +22,23 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - Sapio cần bổ sung: `.sp-shell__side` không dính trên trang dài (mock thêm `sticky top-0 h-screen`); `.sp-shell__content--fill` giữ chiều cao 100vh cả trên điện thoại (mock chỉ dùng từ 768px); thanh bên không nói tên cơ sở và chi nhánh nằm ở đâu khi dưới 768px (mock đặt ô đổi cơ sở ở đầu trang như `QuanTriDienThoai`).
 - **Tiếp theo:** review PR; chốt hai màn MH-07, MH-08, MH-09 với cô; phiên claude.ai vẽ MH-02 Đăng ký cơ sở có chọn ngành.
 
+### 08/11/2026: chốt đăng ký cơ sở, tên miền con, dùng thử và gói Sapio
+- **Đã làm:**
+  - Review PR #3 (Bước 8). Người dùng đã merge sau khi Claude Code sửa 3 điểm: chữ cái của cơ sở, tìm theo đầu từ, bỏ `?tenant=` khi chuyển hướng.
+  - Tiêu đề cột bảng viết hoa theo ý người dùng, đã đưa vào Sapio.
+  - Vẽ và chốt MH-02 Đăng ký cơ sở (6 màn) và phần dùng thử, gói Sapio (4 màn) trên canvas.
+- **Chốt:**
+  - Trang khách trên tên miền con `toc-may.sapio.vn` ([T-16](../ky-thuat/quyet-dinh-ky-thuat.md#t-16-trang-khách-của-mỗi-cơ-sở-trên-tên-miền-con)). Mock giữ đường dẫn; tên miền riêng của tiệm để làm sau. BR-72 thêm luật DNS.
+  - Mật khẩu theo NIST SP 800-63B-4 (BR-73).
+  - Bỏ duyệt tay. Thay bằng **dùng thử 7 ngày** (chỉ cấu hình, không nhận lịch), rồi kích hoạt **gói Cơ bản 199.000 ₫ hoặc Chuyên nghiệp 399.000 ₫ mỗi tháng**: 3 tháng giảm 10%, 12 tháng giảm 20%. Nâng gói trả phần chênh theo ngày; hết hạn chỉ còn trang gói ([D-15](./quyet-dinh.md#d-15-dùng-thử-7-ngày-và-hai-gói-sapio-thay-cho-duyệt-tay), [T-17](../ky-thuat/quyet-dinh-ky-thuat.md#t-17-gói-sapio-gói-và-tính-năng-là-dữ-liệu-kiểm-qua-một-hàm), BR-74, BR-75, BR-80 đến BR-88).
+  - Ô mã xác nhận 6 ô vuông (`OtpField`, dùng `InputOTP` của shadcn/ui với thư viện `input-otp`, đã báo người dùng).
+  - Thêm MH-61 Gói Sapio, MH-62 Gói và giá: tổng cộng 62 màn.
+  - Sapio thêm Banner, Checklist, OtpField, ChoiceCard, Plan, SignupFlow.
+- **Cần báo cô:** phần dùng thử và gói Sapio giả lập là thêm so với đề cương (D-15).
+- **Tiếp theo:**
+  - Claude Code làm [Bước 9](../ky-thuat/ke-hoach-ui-mock.md#bước-9-đăng-ký-cơ-sở-dùng-thử-và-gói-sapio).
+  - Phiên claude.ai vẽ MH-45 Chi tiết dịch vụ (các đoạn chiếm dụng) và MH-59 Gói cấu hình ngành.
+
 ### 07/11/2026 (đêm): chốt khung ứng dụng, mẫu danh sách và mẫu form
 - **Đã làm:**
   - Review lại PR #2 (Bước 7): đạt. Người dùng đã merge.

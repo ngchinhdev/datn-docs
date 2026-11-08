@@ -270,6 +270,101 @@ Bản chép `app/sapio/*.css` đã cập nhật sẵn. Làm trên nhánh `feat/m
 - Hồ sơ Mai: sửa tên thì thanh lưu hiện; rời trang thì bị hỏi lại; lưu xong thấy tên mới ở bảng Nhân sự.
 - Trang đặt lịch của Pawpaw không còn chữ của ngành trong code.
 
+## Bước 9. Đăng ký cơ sở, dùng thử và gói Sapio
+
+Sau khi PR #3 merge. Căn cứ:
+- Màn hình đã chốt: `design/screens/DangKy*.dc.html` và `Goi*.dc.html` (bảng ở `design/README.md`).
+- README của `SignupFlow`, `ChoiceCard`, `OtpField`, `Banner`, `Checklist`, `Plan` trong `design/sapio/components/`.
+- Quyết định [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-hai-gói-sapio-thay-cho-duyệt-tay), [T-16](./quyet-dinh-ky-thuat.md#t-16-trang-khách-của-mỗi-cơ-sở-trên-tên-miền-con), [T-17](./quyet-dinh-ky-thuat.md#t-17-gói-sapio-gói-và-tính-năng-là-dữ-liệu-kiểm-qua-một-hàm).
+- Quy tắc BR-72 đến BR-75, BR-80 đến BR-88.
+
+Bản chép `app/sapio/*.css` đã cập nhật sẵn. Làm trên nhánh `feat/mock-signup-plan`, mỗi mục 9a–9f một commit, mở PR mới, không merge.
+
+### 9a. Component mới
+
+- **Các component:** `SignupLayout` (bố cục `.sp-auth` và các bước `.sp-steps`), `ChoiceCards`, `QuantityInput` (`.sp-qty`), `OtpField`, `Banner`, `Checklist`, `PlanCards`, `LockIcon`. Mỗi cái một ví dụ trên `/mock/components`.
+- **`OtpField`:** dùng `InputOTP` của shadcn/ui.
+  - Thêm gói `input-otp`, ghim đúng phiên bản (người dùng đã đồng ý). Đổi class cho khớp `.sp-otp`.
+  - Phải có `autocomplete="one-time-code"`, `inputmode="numeric"`, dán được cả mã.
+  - Gõ đủ 6 số thì tự gửi.
+  - **Thay ô mã ở bước Thông tin của `/mock/[tenant]/book`** bằng component này.
+
+### 9b. Đăng ký cơ sở (MH-02): `/mock/signup?step=account|verify|industry|business|done`
+
+Làm đúng 6 màn `DangKy*`. Bước nằm trong `?step=`, và chỉ đi tới được bước kế tiếp khi bước hiện tại đã hợp lệ.
+
+- **Bước 1, tài khoản.**
+  - Mật khẩu theo BR-73: tối thiểu 15 ký tự, không ép loại ký tự.
+  - So với danh sách mật khẩu phổ biến: chép khoảng 200 mật khẩu thường gặp vào `mock/fixtures/common-passwords.ts`, trong đó có các mật khẩu tiếng Việt kiểu `matkhau123456789`. Trùng thì báo "Mật khẩu này quá phổ biến, chọn câu khác.".
+  - Nút hiện/ẩn mật khẩu. Bắt buộc tick đồng ý điều khoản.
+- **Bước 2, mã xác nhận.** Mã nào 6 số cũng đúng, trừ `000000`: mã này dùng để thử trạng thái lỗi "Mã chưa đúng. Còn 2 lần thử.". Nút "Gửi lại mã sau 0:42" đếm ngược bằng `MOCK_NOW` cộng thời gian đã trôi.
+- **Bước 3, ngành.**
+  - 4 thẻ ngành. Bảng xem trước lấy từ `IndustryTemplate`: thêm trường `sampleServices` (tên, biến thể, thời lượng, giá, có đoạn chờ không), `resourceTypes` có sẵn, và `vocabulary` có sẵn.
+  - Nail và Spa chưa có dữ liệu thì thẻ hiện "Sắp có" ở trạng thái `disabled`.
+  - Chọn ngành nào thì bảng xem trước đổi theo ngành đó.
+- **Bước 4, thông tin cơ sở.**
+  - Ô địa chỉ có đuôi `.sapio.vn`. Kiểm theo BR-72:
+    - khi rời ô: sai định dạng, hoặc trùng tên dành riêng;
+    - sau khi ngừng gõ 500 ms: trùng `toc-may` hoặc `pawpaw` thì báo "Đã có cơ sở dùng địa chỉ này"; còn trống thì báo "toc-may.sapio.vn còn trống".
+  - Gõ tên cơ sở thì tự gợi ý địa chỉ: bỏ dấu, thay dấu cách bằng gạch ngang.
+  - Giờ mở cửa: 7 dòng, mỗi dòng một công tắc. Tài nguyên dùng `QuantityInput`, tối thiểu 1, tối đa 20.
+- **Bước 5, đã tạo.**
+  - Nội dung tóm tắt lấy từ dữ liệu đã nhập.
+  - "Vào trang quản trị" dẫn tới `/mock/app/toc-may/calendar?plan=trial`. Mock không tạo cơ sở mới thật; ghi điều này ở mục "Tự quyết".
+- Lỗi hiện ngay dưới ô (`.sp-field--error`, `aria-describedby`, `aria-invalid`). Ở 390px không có cuộn ngang. Bước 3 trên điện thoại có thanh nút dính đáy.
+
+### 9c. Quyền theo gói trong mock (T-17)
+
+- **`mock/subscription.ts`:**
+  - Có `plans` (dữ liệu theo BR-83) và hàm thuần `entitlements(tenant, now)` trả `{ mode, features, limits, trialEndsAt, periodEnd }`, kèm `can(e, feature)` và `canBook(e)`.
+  - Có hàm thuần `upgradeCharge(fromPlan, toPlan, daysLeft)` theo BR-85, và `periodPrice(plan, months)` theo BR-84 (làm tròn tới nghìn đồng).
+  - Viết comment đầu file: đây là bản mẫu để chép sang `datn-saas` kèm test.
+- **Trạng thái mặc định:** Tóc Mây dùng gói Chuyên nghiệp, hết hạn 30/11/2026. Pawpaw dùng gói Cơ bản, hết hạn 30/11/2026.
+- **Ghi đè trạng thái** bằng `?plan=trial|basic|pro|expired`. Giá trị này phải giữ khi bấm sang trang khác trong khu `/mock/app`. Thêm một bộ chọn "Gói" trên thanh của `/mock`.
+- **Dùng thử (`trial`):**
+  - `Banner` "Dùng thử · còn 5 ngày" trên mọi trang `/mock/app`. Tính từ `MOCK_NOW`, dùng thử hết lúc 23:59 ngày 13/11.
+  - Trang Lịch thay lưới lịch bằng thẻ "Lịch hẹn mở khi kích hoạt gói" và `Checklist` (đúng `GoiDungThu.dc.html`). Checklist tính từ dữ liệu: số dịch vụ, tài nguyên, nhân viên nhận đặt online, ca.
+  - "Tạo lịch hẹn" và nút Check-in ở trang Hôm nay bị tắt, có câu giải thích.
+  - `/mock/[tenant]/book` hiện "Cơ sở chưa nhận đặt lịch online", chỉ cho xem thử.
+- **Hết hạn (`expired`):** mọi trang `/mock/app/[tenant]/...` hiện màn `GoiHetHan.dc.html`, trừ trang `settings/plan`. Bảng "lịch đã đặt sau hạn" lấy từ lịch hẹn thật trong dữ liệu sau ngày hết hạn. Trang đặt lịch báo tạm ngưng.
+- **Gói Cơ bản (`basic`):**
+  - Ổ khóa trên thanh bên và trong menu cài đặt cho mọi tính năng không có trong gói (BR-87).
+  - Bấm vào thì mở trang khóa đúng `GoiKhoaTinhNang.dc.html`. Bảng tiền nâng gói tính bằng `upgradeCharge`, số ngày còn lại tính từ `MOCK_NOW`.
+  - Trang Chatbot là `/mock/app/[tenant]/settings/chatbot`. Hoa hồng và Gói liệu trình dùng chung trang khóa đó, chỉ đổi tên tính năng.
+- **Sắp hết hạn** (còn 3 ngày trở xuống): `Banner` dạng cảnh báo. Thử bằng `?plan=pro&periodEnd=2026-11-09`.
+
+### 9d. Cài đặt › Gói Sapio (MH-61): `/mock/app/[tenant]/settings/plan`
+
+- Làm đúng `GoiSapio.dc.html`.
+- **Chọn kỳ:** chọn 1, 3 hay 12 tháng thì giá trong hai thẻ đổi theo: hiện giá mỗi tháng sau giảm và tổng tiền, tính bằng `periodPrice`.
+- **Thanh toán:** nút "Chọn …" hoặc "Gia hạn …" mở `ConfirmDialog`.
+  - Hộp ghi gói, kỳ, tổng tiền và ngày hết hạn mới, kèm ô QR giả (khung có chữ "QR giả lập").
+  - Có nút "Giả lập thanh toán thành công". Bấm vào thì trạng thái đổi sang `active` trong state của trang, hiện toast "Đã kích hoạt gói Chuyên nghiệp đến 08/12/2026.", và lịch sử thanh toán thêm một dòng.
+- **Nâng gói giữa kỳ:** hộp hiện đúng số tiền của `upgradeCharge`.
+- **Hạ gói:** ghi "có hiệu lực từ kỳ sau". Nếu cơ sở đang có nhiều hơn 1 chi nhánh hoạt động thì nút bị tắt, kèm lý do "Tạm dừng bớt chi nhánh, chỉ giữ 1, rồi mới hạ được gói" (BR-85). Dữ liệu mock chỉ có 1 chi nhánh, nên thêm ghi đè `?branches=3` để thử trạng thái này.
+- Thêm mục "Gói Sapio" lên đầu menu cài đặt. Thêm MH-61 và MH-62 vào `mock/screens.ts`. Trạng thái "Đang làm": MH-02, MH-61.
+
+### 9e. Thay đổi nhỏ theo các quyết định mới
+
+- Màn "Đã tạo" và mọi chỗ hiện địa chỉ trang khách đều ghi `toc-may.sapio.vn`. Route mock vẫn là `/mock/toc-may/...`, theo T-16.
+- Ô địa chỉ hiển thị phải đọc tên miền gốc từ một hằng số `BASE_DOMAIN = 'sapio.vn'` trong `mock/`, không viết thẳng trong component.
+
+### 9f. Kiểm tra và hoàn tất
+
+- Chạy axe trên 5 bước đăng ký, `settings/plan`, trang khóa, và màn hết hạn, cả hai theme. Không có lỗi serious hoặc critical.
+- `pnpm build`, `pnpm typecheck`, `pnpm exec prettier --check app components lib mock` xanh.
+- Mở PR mới: mô tả theo 9a–9f, mục "Tự quyết", ảnh ở 1280px và 390px. Ghi một mục Tiến độ.
+
+**Xong khi:**
+- Đi hết 5 bước đăng ký chỉ bằng bàn phím, ở cả 1280px và 390px. Ở 390px không có cuộn ngang.
+- Mật khẩu `matkhau123456789` bị từ chối. Mật khẩu `tiem toc may mo cua 8 gio` được chấp nhận.
+- Gõ địa chỉ `toc-may` thì báo đã có người dùng. Gõ `app` thì báo tên dành riêng. Gõ `-abc` thì báo sai định dạng.
+- Dán `482193` vào ô mã thì điền đủ 6 ô và tự gửi.
+- Với `?plan=trial`: không tạo được lịch hẹn ở đâu cả, và trang đặt lịch báo chưa nhận khách.
+- Với `?plan=expired`: mọi trang `/mock/app` chỉ còn màn gia hạn.
+- Với `?plan=basic`: Chatbot có ổ khóa, và trang khóa ghi "Trả thêm hôm nay 147.000 ₫" (còn 22 ngày tính từ 08/11).
+- Giả lập thanh toán xong thì dải báo dùng thử biến mất ngay.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -306,4 +401,17 @@ FormSection. Làm Bước 8 trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mo
 mục 8a đến 8f, mỗi mục một commit. Bố cục và chữ lấy theo design/screens/QuanTri*.dc.html.
 Kiểm "Xong khi" trước khi báo xong, mở PR mới, không merge. Dừng lại hỏi mình nếu
 thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 9:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-signup-plan.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, D-15 trong
+quyet-dinh.md, T-16 và T-17 trong quyet-dinh-ky-thuat.md, BR-72 đến BR-75 và BR-80 đến
+BR-88 trong quy-tac.md, design/README.md và README của SignupFlow, ChoiceCard, OtpField,
+Banner, Checklist, Plan. Làm Bước 9 trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md,
+mục 9a đến 9f, mỗi mục một commit. Bố cục và chữ lấy theo design/screens/DangKy*.dc.html
+và Goi*.dc.html. Kiểm "Xong khi" trước khi báo xong, mở PR mới, không merge. Dừng lại hỏi
+mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
 ```
