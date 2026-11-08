@@ -1,5 +1,7 @@
 /** Mock clock: Saturday 07/11/2026 10:20 in Vietnam. Never read the real clock in mock screens. */
 export const MOCK_NOW = '2026-11-07T03:20:00Z';
+/** Local date of `MOCK_NOW`, `2026-11-07`. */
+export const MOCK_TODAY = '2026-11-07';
 export const BRANCH_TIME_ZONE = 'Asia/Ho_Chi_Minh';
 
 const MINUTE = 60_000;

@@ -30,8 +30,8 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - MH-61 `settings/plan`: chọn kỳ, hộp thanh toán QR giả lập, nâng và hạ gói (BR-85). Thêm MH-61, MH-62 vào danh sách màn.
 - **Kiểm:** Playwright qua 5 bước ở 1280 và 390px (không cuộn ngang) và các kịch bản gói; axe-core 56 lượt (14 trang, hai theme, hai bề rộng), 0 lỗi serious hoặc critical.
 - **Vướng:**
-  - `MOCK_NOW` là 07/11 nhưng các màn thiết kế dùng 09/11 (còn 5 ngày, còn 22 ngày). Phần gói có đồng hồ riêng `PLAN_NOW` (09/11, hai ngày sau khi tạo cơ sở); lịch hẹn giữ `MOCK_NOW`.
-  - Dữ liệu lịch hẹn chỉ tới 22/11, nên `?plan=expired` đặt hết hạn lúc 23:59 ngày 08/11 để bảng "lịch đã đặt sau hạn" có dòng.
+  - Phần gói dùng chung đồng hồ `MOCK_NOW` (07/11). Mốc mẫu: `?plan=trial` là cơ sở tạo ngày 07/11, dùng thử hết 23:59 ngày 13/11 (còn 7 ngày); `DEFAULT_PERIOD_END` là 28/11 (còn 22 ngày, nâng gói trả 147.000 ₫); `?plan=expired` hết hạn ngày 06/11.
+  - Dữ liệu lịch hẹn chỉ tới 22/11, nên mốc hết hạn 30/11 sẽ làm bảng "lịch đã đặt sau hạn" trống; hết hạn ngày 06/11 thì bảng có dòng.
   - Sapio không có kiểu cho `role="radio"` trong `.sp-segmented` (chỉ `aria-pressed`, `aria-selected`, `aria-current`); chọn kỳ dùng nhóm nút bấm.
 - **Tiếp theo:** review PR; báo cô phần dùng thử và gói Sapio (D-15); phiên claude.ai vẽ MH-45 và MH-59.
 

@@ -414,7 +414,7 @@ export default function ComponentsPage() {
             lịch hẹn mở khi kích hoạt gói.
           </Banner>
           <Banner tone="warning" action={{ label: 'Gia hạn', href: '#' }}>
-            Gói Chuyên nghiệp hết hạn 23:59 ngày 30/11. Gia hạn để không gián đoạn.
+            Gói Chuyên nghiệp hết hạn 23:59 ngày 28/11. Gia hạn để không gián đoạn.
           </Banner>
         </div>
       </Example>

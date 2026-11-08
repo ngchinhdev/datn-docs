@@ -2,7 +2,8 @@
 
 import { useSearchParams } from 'next/navigation';
 import { BookingFlow } from './booking-flow';
-import { PLAN_NOW, entitlements, mockSubscription, planOverrideOf } from '@/mock/subscription';
+import { MOCK_NOW } from '@/mock/time';
+import { entitlements, mockSubscription, planOverrideOf } from '@/mock/subscription';
 import { fixtureBySlug } from '@/mock/selection';
 
 /**
@@ -19,7 +20,7 @@ export function BookingGate({
   const query = useSearchParams();
   const mode = entitlements(
     mockSubscription(tenantSlug, planOverrideOf(query.get('plan')), query.get('periodEnd')),
-    PLAN_NOW,
+    MOCK_NOW,
   ).mode;
   const name = fixtureBySlug(tenantSlug)?.tenant.name ?? '';
 

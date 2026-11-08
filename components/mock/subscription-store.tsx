@@ -3,8 +3,6 @@
 import { useSearchParams } from 'next/navigation';
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import {
-  PLAN_NOW,
-  PLAN_TODAY,
   canBook,
   can,
   daysLeft,
@@ -20,6 +18,7 @@ import {
   type Purchase,
   type Subscription,
 } from '@/mock/subscription';
+import { MOCK_NOW, MOCK_TODAY } from '@/mock/time';
 
 interface SubscriptionStore {
   subscription: Subscription;
@@ -51,7 +50,7 @@ function Provider({
 
   const buy = useCallback(
     (p: Purchase) => {
-      const result = purchase(subscription, p, PLAN_TODAY);
+      const result = purchase(subscription, p, MOCK_TODAY);
       setSubscription(result.subscription);
       // Newest first, as a history reads.
       setPayments((list) => [result.payment, ...list]);
@@ -61,12 +60,12 @@ function Provider({
   );
 
   const value = useMemo<SubscriptionStore>(() => {
-    const e = entitlements(subscription, PLAN_NOW);
+    const e = entitlements(subscription, MOCK_NOW);
     const end = endsOn(e);
     return {
       subscription,
       entitlements: e,
-      daysLeft: end ? daysLeft(end, PLAN_TODAY) : null,
+      daysLeft: end ? daysLeft(end, MOCK_TODAY) : null,
       payments,
       branches,
       can: (feature) => can(e, feature),

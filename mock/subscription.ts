@@ -6,7 +6,7 @@
  * current time always an argument, never read from a clock (rule 2). Nothing here touches React.
  */
 import { TRIAL_DAYS } from './signup';
-import { addDays, localDate, localToUtc, MOCK_NOW } from './time';
+import { addDays, localToUtc, MOCK_TODAY } from './time';
 
 export type FeatureCode =
   'multi_branch' | 'packages_wallet' | 'commission' | 'full_reports' | 'chatbot';
@@ -61,10 +61,6 @@ export const planFeatureList: { label: string; requires: FeatureCode[] }[] = [
 
 export const planHasAll = (plan: Plan, required: FeatureCode[]) =>
   required.every((f) => plan.features.includes(f));
-
-/** The mock's "now" for everything about plans: two days after the sample tenant was created. */
-export const PLAN_NOW = '2026-11-09T03:20:00Z';
-export const PLAN_TODAY = localDate(PLAN_NOW);
 
 /** What the platform stores per tenant. Dates are the last day, valid until 23:59 local time. */
 export interface Subscription {
@@ -182,7 +178,7 @@ export function addMonths(date: string, n: number): string {
     .slice(0, 10);
 }
 
-/** Last day of a period of `months` that starts on `start`: 09/11 plus 1 month ends 08/12. */
+/** Last day of a period of `months` that starts on `start`: 07/11 plus 1 month ends 06/12. */
 export const periodEnd = (start: string, months: number) => addDays(addMonths(start, months), -1);
 
 export type Purchase =
@@ -290,11 +286,12 @@ export function downgradeBlock(target: Plan, activeBranches: number): string | n
 const DEFAULT_PLAN: Record<string, PlanCode> = { 'toc-may': 'pro', pawpaw: 'basic' };
 
 /** The day the sample tenants' trial ends; they signed up on `MOCK_NOW` and the trial counts that day. */
-export const TRIAL_ENDS_ON = addDays(localDate(MOCK_NOW), TRIAL_DAYS - 1);
+export const TRIAL_ENDS_ON = addDays(MOCK_TODAY, TRIAL_DAYS - 1);
 
-export const DEFAULT_PERIOD_END = '2026-11-30';
-/** Hết hạn is tried with a period that ended yesterday, before the appointments in the data. */
-export const EXPIRED_PERIOD_END = addDays(PLAN_TODAY, -1);
+/** 22 days left from `MOCK_TODAY`, counting that day. */
+export const DEFAULT_PERIOD_END = '2026-11-28';
+/** An expired plan is tried with a period that ended the day before `MOCK_TODAY`. */
+export const EXPIRED_PERIOD_END = addDays(MOCK_TODAY, -1);
 
 export type PlanOverride = 'trial' | 'basic' | 'pro' | 'expired';
 

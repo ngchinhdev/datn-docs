@@ -9,7 +9,6 @@ import { formatVnd } from '@/mock/format';
 import {
   PERIODS,
   PLAN_CODES,
-  PLAN_TODAY,
   daysLeft,
   downgradeBlock,
   periodEnd,
@@ -22,7 +21,7 @@ import {
   type Plan,
   type Purchase,
 } from '@/mock/subscription';
-import { addDays, formatFullDate } from '@/mock/time';
+import { addDays, formatFullDate, MOCK_TODAY } from '@/mock/time';
 
 /** The fake QR of the payment: the mock has no payment provider behind it (D-09). */
 function FakeQr() {
@@ -49,7 +48,7 @@ interface Described {
 /** What the confirm box says for each kind of purchase, in the words of BR-84 and BR-85. */
 function describe(p: Purchase, current: Plan, periodEndsOn: string | null): Described {
   const plan = plans[p.planCode];
-  const today = PLAN_TODAY;
+  const today = MOCK_TODAY;
   switch (p.kind) {
     case 'buy': {
       const end = periodEnd(today, p.months);
@@ -241,7 +240,7 @@ export function PlanPurchase({ heading, headingId }: { heading: string; headingI
     }
     const block = downgradeBlock(plan, branches);
     const scheduled = subscription.pendingPlan === code;
-    const from = formatFullDate(addDays(end ?? PLAN_TODAY, 1));
+    const from = formatFullDate(addDays(end ?? MOCK_TODAY, 1));
     return {
       ...shared,
       ...(scheduled ? { badge: 'Từ kỳ sau' } : {}),

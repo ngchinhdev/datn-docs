@@ -8,8 +8,7 @@ import { Button } from '@/components/sapio/button';
 import { Checklist, type ChecklistItem } from '@/components/sapio/checklist';
 import { PageHeader } from '@/components/sapio/page-header';
 import { tenantFixtures } from '@/mock/fixtures';
-import { PLAN_TODAY } from '@/mock/subscription';
-import { formatDay } from '@/mock/time';
+import { formatDay, MOCK_TODAY } from '@/mock/time';
 
 /** "3 ghế, 1 giường": the count of each kind of resource, by the first word of its name. */
 function describeResources(counts: Map<string, number>) {
@@ -68,7 +67,7 @@ export function TrialCalendar({ tenantSlug }: { tenantSlug: string }) {
     <div className="sp-shell__content">
       <PageHeader
         title="Lịch"
-        sub={`${formatDay(PLAN_TODAY)}/${PLAN_TODAY.slice(0, 4)} · ${branch.name}`}
+        sub={`${formatDay(MOCK_TODAY)}/${MOCK_TODAY.slice(0, 4)} · ${branch.name}`}
         actions={
           <>
             <Link
