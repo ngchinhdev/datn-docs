@@ -1,0 +1,20 @@
+<!-- @dsCard group="Layout" height=420 subtitle="Lưới ca tuần: nhân viên × ngày, nhiều khung mỗi ngày, cảnh báo giờ không ai trực." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ShiftGrid</title></head>
+<body>
+      <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Ca tuần 09/11–15/11, cuộn được">
+        <table class="sp-shiftgrid">
+          <caption class="sp-sr-only">Ca làm tuần 09/11 đến 15/11, mỗi hàng một nhân viên</caption>
+          <thead><tr><th scope="col"><span class="sp-sr-only">Nhân viên</span></th><th scope="col">T2<small>09/11</small></th><th scope="col">T3<small>10/11</small></th><th scope="col">T4<small>11/11</small></th><th scope="col">T5<small>12/11</small></th><th scope="col">T6<small>13/11</small></th><th scope="col">T7<small>14/11</small></th><th scope="col">CN<small>15/11</small></th></tr></thead>
+          <tbody>
+<tr><th scope="row">Mai<small>Thợ chính<br>49,5 giờ/tuần</small></th><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift sp-shift--off">Nghỉ</button></td></tr>
+<tr><th scope="row">Lan<small>Thợ<br>49 giờ/tuần</small></th><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift sp-shift--leave">Nghỉ phép</button><span class="sp-badge sp-badge--pending" style="margin-top: 2px;">Chờ duyệt</span></td><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift ">09:00–13:00</button><button type="button" class="sp-shift ">15:00–20:00</button></td></tr>
+<tr><th scope="row">Hùng<small>Thợ chính<br>59 giờ/tuần</small></th><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td aria-selected="true"><button type="button" class="sp-shift sp-shift--warn">10:00–15:00<span class="sp-shift__count">!</span></button></td><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td><button type="button" class="sp-shift ">08:00–12:00</button></td></tr>
+          </tbody>
+          <tfoot><tr><th scope="row">Mở cửa</th><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00<span style="display: block; color: var(--danger);">13:00–15:00 không ai trực</span></td></tr></tfoot>
+        </table>
+      </div>
+
+</body>
+</html>

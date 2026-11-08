@@ -53,5 +53,15 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `DichVuDienThoai.dc.html` | MH-45 trên điện thoại: trục thu nhỏ, sửa đoạn trong bảng trượt | **Đã chọn** | như trên, dưới 768px |
 | `GoiNganhDanhSach.dc.html` | MH-59 danh sách gói cấu hình ngành, khung quản trị nền tảng | **Đã chọn** | `/mock/admin/templates` |
 | `GoiNganhChiTiet.dc.html` | MH-59 Spa thú cưng: từ ngữ, thông tin của bé, tài nguyên, dịch vụ mẫu, chính sách, phiên bản | **Đã chọn** | `/mock/admin/templates/pet_spa` |
+| `LichTaoMoi.dc.html` | MH-26 Tạo lịch từ ô trống (Tóc Mây): tìm khách, giờ và thợ điền sẵn, kiểm ngay | **Đã chọn** | `/mock/app/toc-may/calendar` (Bước 11) |
+| `LichTaoPawpaw.dc.html` | MH-26 (Pawpaw): chọn bé, biến thể theo cân nặng, giờ không đặt được kèm 3 giờ gần nhất | **Đã chọn** | `/mock/app/pawpaw/calendar` |
+| `LichKeoTha.dc.html` | MH-27 Đang kéo: vùng thả được, không thả được, nhãn giờ mới | **Đã chọn** | `/mock/app/toc-may/calendar` |
+| `LichDoiNguoi.dc.html` | MH-27 Thả lịch khách chọn đích danh sang người khác: hỏi lại | **Đã chọn** | như trên |
+| `LichChiTietDienThoai.dc.html` | MH-28 Chi tiết lịch hẹn trên điện thoại | **Đã chọn** | `/mock/app/toc-may/appointments/[id]` |
+| `KtvLich.dc.html` | MH-35 Lịch của kỹ thuật viên | **Đã chọn** | `/mock/app/toc-may/my/schedule` |
+| `KtvXinNghi.dc.html` | MH-36 Kỹ thuật viên xin nghỉ | **Đã chọn** | `/mock/app/toc-may/my/time-off` |
+| `XepCa.dc.html` | MH-38 Xếp ca tuần | **Đã chọn** | `/mock/app/toc-may/shifts` |
+| `NghiPhepDanhSach.dc.html` | MH-39 Đơn nghỉ phép | **Đã chọn** | `/mock/app/toc-may/time-off` |
+| `NghiPhepXuLy.dc.html` | MH-40 Xử lý lịch bị ảnh hưởng | **Đã chọn** | `/mock/app/toc-may/time-off/[id]` |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-13, BR-14, BR-15, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-13, BR-14, BR-15, BR-30 đến BR-36, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.

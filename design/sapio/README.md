@@ -79,6 +79,8 @@ Lịch là màn hình đặc trưng của Sapio; giữ đúng các quy tắc sau
 - Trạng thái tài khoản (dùng thử, sắp hết hạn) hiện bằng `Banner` trên cùng vùng nội dung. Tính năng ngoài gói hiện ổ khóa `.sp-lock` và trang giải thích kèm nút nâng cấp (`Plan`), không ẩn hẳn.
 - **Trang chi tiết** (dịch vụ, gói cấu hình ngành) theo `DetailPage`: form bên trái, cột xem trước dính bên phải. Các đoạn của dịch vụ vẽ bằng `SegmentTimeline`.
 - **Thanh cuộn:** mảnh, bo tròn, màu `ink-muted` pha trong suốt, đậm hơn khi rê chuột vào vùng cuộn. Đặt sẵn cho mọi phần tử trong `components.css`, không dùng thanh xám dày mặc định.
+- **Màu khi chọn trong khu quản trị là màu Sapio:** ngày, biến thể, ô giờ đang chọn dùng `brand`. `.sp-shell` và `.sp-admin` đặt `--accent` bằng `brand`. Màu của cơ sở chỉ còn ở ô chữ cái trong bộ chọn cơ sở (`.sp-switcher__mark.sp-tenant-*`), vì màu cơ sở là của trang khách.
+- **Nghiệp vụ lịch** dùng `SidePanel` cạnh lịch (tạo lịch hẹn), `ShiftGrid` (xếp ca), `AffectedList` (lịch bị ảnh hưởng). Màn của kỹ thuật viên là điện thoại trước, khung `.sp-admin` với thanh điều hướng dưới riêng: Lịch của tôi, Xin nghỉ, Hoa hồng, Tài khoản.
 - Nút chỉ có icon dùng `.sp-icon-btn` (36px, 44px trên điện thoại), luôn có `aria-label` và `.sp-tooltip`.
 
 ## Xác nhận và hoàn tác

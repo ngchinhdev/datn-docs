@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Xếp ca tuần</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-shell sp-tenant-may" style="position: relative; height: 760px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <nav class="sp-shell__side" id="app-sidebar" aria-label="Điều hướng chính">
+    <div class="sp-brand">
+      <span class="sp-brand__name">Sapio</span>
+      <button type="button" class="sp-icon-btn" aria-label="Thu gọn thanh bên" aria-expanded="true" aria-controls="app-sidebar" title="Thu gọn thanh bên"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg></button>
+    </div>
+    <button class="sp-switcher" type="button" aria-haspopup="menu" aria-expanded="false">
+      <span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent);">M</span>
+      <span class="sp-switcher__text"><span class="sp-sr-only">Đổi cơ sở hoặc chi nhánh:</span><span class="sp-switcher__name">Salon Tóc Mây</span><span class="sp-switcher__sub">Chi nhánh Quận 3</span></span>
+      <svg class="sp-switcher__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+    </button>
+    <div class="sp-nav">
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg><span class="sp-nav__label">Tổng quan</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path></svg><span class="sp-nav__label">Hôm nay</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg><span class="sp-nav__label">Lịch</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span class="sp-nav__label">Khách hàng</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><path d="M12 17.5v-11"></path></svg><span class="sp-nav__label">Hóa đơn</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg><span class="sp-nav__label">Hoàn tiền</span><span class="sp-nav__badge">1</span></a>
+      <div class="sp-nav__group">Nhân sự</div>
+      <a class="sp-nav__item" href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="sp-nav__label">Xếp ca</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="m14 14-4 4"></path><path d="m10 14 4 4"></path></svg><span class="sp-nav__label">Nghỉ phép</span><span class="sp-nav__badge">2</span></a>
+      <div class="sp-nav__group">Kinh doanh</div>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg><span class="sp-nav__label">Báo cáo</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 5 5 19"></path><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg><span class="sp-nav__label">Hoa hồng</span></a>
+      <div class="sp-nav__group">Cơ sở</div>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4h-7"></path><path d="M10 4H3"></path><path d="M21 12h-9"></path><path d="M8 12H3"></path><path d="M21 20h-5"></path><path d="M12 20H3"></path><path d="M14 2v4"></path><path d="M8 10v4"></path><path d="M16 18v4"></path></svg><span class="sp-nav__label">Cài đặt</span></a>
+    </div>
+    <div class="sp-account">
+      <span class="sp-avatar sp-avatar--sm">CN</span>
+      <span class="sp-account__text"><span class="sp-switcher__name" style="font-size: 13px; line-height: 18px;">Chính Nguyễn</span><span class="sp-switcher__sub">Chủ cơ sở</span></span>
+      <button type="button" class="sp-icon-btn" aria-label="Chuyển sang giao diện tối" title="Chuyển sang giao diện tối"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></button>
+    </div>
+  </nav>
+  <main class="sp-shell__main" style="overflow: auto;">
+    <div class="sp-shell__content sp-shell__content--wide">
+      <div class="sp-page-head" style="align-items: center;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+          <h1 class="sp-page-head__title" style="margin-right: 8px;">Xếp ca</h1>
+          <button type="button" class="sp-icon-btn" aria-label="Tuần trước"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+          <span class="sp-num" style="font: 600 15px/22px var(--font-sans);">Tuần 09/11–15/11</span>
+          <button type="button" class="sp-icon-btn" aria-label="Tuần sau"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+        </div>
+        <div class="sp-page-head__actions">
+          <button type="button" class="sp-btn sp-btn--secondary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>Chép tuần trước</button>
+          <button type="button" class="sp-btn sp-btn--primary">Lưu ca tuần</button>
+        </div>
+      </div>
+      <p class="sp-page-head__sub" style="margin: 0;">Chi nhánh Quận 3. Bấm một ô để sửa; một ngày có thể có nhiều khung. Ca có thể bắt đầu trước giờ mở cửa để chuẩn bị (BR-54).</p>
+      <div style="display: flex; align-items: flex-start; gap: 20px;">
+      <section style="flex: 1 1 auto; min-width: 0;" aria-label="Lưới ca">
+      <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Ca tuần 09/11–15/11, cuộn được">
+        <table class="sp-shiftgrid">
+          <caption class="sp-sr-only">Ca làm tuần 09/11 đến 15/11, mỗi hàng một nhân viên</caption>
+          <thead><tr><th scope="col"><span class="sp-sr-only">Nhân viên</span></th><th scope="col">T2<small>09/11</small></th><th scope="col">T3<small>10/11</small></th><th scope="col">T4<small>11/11</small></th><th scope="col">T5<small>12/11</small></th><th scope="col">T6<small>13/11</small></th><th scope="col">T7<small>14/11</small></th><th scope="col">CN<small>15/11</small></th></tr></thead>
+          <tbody>
+<tr><th scope="row">Mai<small>Thợ chính<br>49,5 giờ/tuần</small></th><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift ">08:45–17:00</button></td><td><button type="button" class="sp-shift sp-shift--off">Nghỉ</button></td></tr>
+<tr><th scope="row">Lan<small>Thợ<br>49 giờ/tuần</small></th><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift sp-shift--leave">Nghỉ phép</button><span class="sp-badge sp-badge--pending" style="margin-top: 2px;">Chờ duyệt</span></td><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift ">12:00–20:00</button></td><td><button type="button" class="sp-shift ">09:00–13:00</button><button type="button" class="sp-shift ">15:00–20:00</button></td></tr>
+<tr><th scope="row">Hùng<small>Thợ chính<br>59 giờ/tuần</small></th><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td aria-selected="true"><button type="button" class="sp-shift sp-shift--warn">10:00–15:00<span class="sp-shift__count">!</span></button></td><td><button type="button" class="sp-shift ">10:00–20:00</button></td><td><button type="button" class="sp-shift ">08:00–12:00</button></td></tr>
+          </tbody>
+          <tfoot><tr><th scope="row">Mở cửa</th><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00</td><td class="sp-num">09:00–20:00<span style="display: block; color: var(--danger);">13:00–15:00 không ai trực</span></td></tr></tfoot>
+        </table>
+      </div>
+      </section>
+      <aside class="sp-side" aria-labelledby="sh-title" style="flex: 0 0 320px;">
+        <div class="sp-side__head"><h2 class="sp-side__title" id="sh-title">Hùng · Thứ Sáu 13/11</h2><button type="button" class="sp-icon-btn" aria-label="Đóng"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+        <div style="display: flex; align-items: flex-end; gap: 8px;">
+          <div class="sp-field sp-field--sm" style="width: 110px;"><label class="sp-field__label" for="sh-a">Từ</label><div class="sp-field__control"><input id="sh-a" type="text" value="10:00"></div></div>
+          <div class="sp-field sp-field--sm" style="width: 110px;"><label class="sp-field__label" for="sh-b">Đến</label><div class="sp-field__control"><input id="sh-b" type="text" value="15:00"></div></div>
+          <button type="button" class="sp-icon-btn" aria-label="Xóa khung này" style="margin-bottom: 2px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+        </div>
+        <button type="button" class="sp-btn sp-btn--ghost sp-btn--sm" style="align-self: flex-start;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Thêm khung trong ngày</button>
+        <div class="sp-banner sp-banner--warning" role="alert" style="border-radius: var(--radius-md);">
+          <span class="sp-banner__text"><strong>2 lịch của Hùng sau 15:00 sẽ không còn người làm:</strong><br><span class="sp-num">16:00 Anh Kha · Cắt ngắn · Bất kỳ ai</span><br><span class="sp-num">18:30 Chị Hằng · Nhuộm ngắn · chọn Hùng</span></span>
+        </div>
+        <p class="sp-panel__note">Lưu ca này thì hai lịch trên chuyển sang danh sách "Cần xếp lại", xử lý như nghỉ phép (BR-11).</p>
+        <label class="sp-check"><input type="checkbox"><span>Áp cho mọi Thứ Sáu từ nay</span></label>
+        <div class="sp-side__foot"><button type="button" class="sp-btn sp-btn--ghost">Hủy</button><button type="button" class="sp-btn sp-btn--primary">Lưu và xếp lại 2 lịch</button></div>
+      </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>
