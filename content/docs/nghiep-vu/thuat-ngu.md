@@ -21,6 +21,14 @@ Dùng **đúng một tên** cho mỗi khái niệm, cả trong tài liệu lẫn
 | Biến thể dịch vụ | `serviceVariant` | Cùng dịch vụ nhưng khác thời lượng, giá (tóc ngắn/dài, chó nhỏ/lớn) |
 | Đoạn chiếm dụng | `serviceSegment` | Một khoảng thời gian trong dịch vụ mà một loại tài nguyên bị chiếm, ví dụ thợ bận 0–20', rảnh 20–50', bận 50–70' |
 | Đoạn chờ | `segment.kind = 'wait'` | Đoạn mà nhân viên được rảnh nhưng ghế, phòng, lồng sấy vẫn bị chiếm (processing time) |
+| Đoạn chuẩn bị | `segment.kind = 'prep'` | Đoạn đầu dịch vụ, trước giờ hẹn, khách không thấy; ví dụ thợ pha thuốc (BR-51) |
+| Đoạn làm | `segment.kind = 'work'` | Đoạn mà mọi tài nguyên đã chọn cùng bận |
+| Dọn dẹp sau khi dùng | `cleanupMinutes` (theo loại tài nguyên của biến thể) | Số phút một tài nguyên còn bận sau đoạn cuối dùng nó (BR-52) |
+| Gốc | `origin` | Đầu đoạn đầu tiên của một mục; mọi đoạn tính phút từ gốc. Giờ khách thấy = gốc + thời lượng chuẩn bị |
+| Mẫu chiếm dụng | `occupation` | Các khoảng (tính từ gốc) mà một loại tài nguyên bị chiếm trong một biến thể, đã gồm dọn dẹp |
+| Cách chọn biến thể | `variantSelection = 'customer' \| 'subject'` | Khách tự chọn, hoặc tự động theo thuộc tính đối tượng (BR-55) |
+| Cấp nhân viên | `staffLevel` | Bậc của nhân viên (Thợ, Thợ chính, Thợ cả); biến thể có thể có giá theo cấp (BR-56) |
+| Phiên bản gói cấu hình ngành | `industryTemplateVersion` | Bản đã xuất bản của gói; cơ sở mới nhận bản đang xuất bản lúc tạo (BR-70) |
 | Giờ trống | `availableSlot` | Thời điểm bắt đầu mà mọi đoạn chiếm dụng của dịch vụ đều xếp được |
 | Giữ chỗ | `hold` | Các đoạn chiếm dụng tạm thời trong 10 phút khi khách đang hoàn tất đặt lịch |
 | Lịch hẹn | `appointment` | Một lần khách đến, có thể gồm nhiều dịch vụ |

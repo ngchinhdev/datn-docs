@@ -365,6 +365,167 @@ Làm đúng 6 màn `DangKy*`. Bước nằm trong `?step=`, và chỉ đi tới 
 - Với `?plan=basic`: Chatbot có ổ khóa, và trang khóa ghi "Trả thêm hôm nay 147.000 ₫" (còn 22 ngày tính từ 08/11).
 - Giả lập thanh toán xong thì dải báo dùng thử biến mất ngay.
 
+## Bước 10. Cấu hình dịch vụ (MH-44, MH-45), gói cấu hình ngành (MH-59) và thanh cuộn
+
+Sau khi PR #4 merge. Căn cứ:
+- Màn đã chốt: `design/screens/DichVu*.dc.html` và `GoiNganh*.dc.html`.
+- README của `SegmentTimeline`, `DetailPage`, `FormSection`, `AppointmentBlock` trong `design/sapio/components/`.
+- Quy tắc BR-50 đến BR-59 và BR-70.
+- [Thuật toán tính giờ trống](./thuat-toan-gio-trong.md), mục 2 và mục 4.
+
+Bản chép `app/sapio/components.css` đã cập nhật sẵn, gồm cả thanh cuộn. Làm trên nhánh `feat/mock-services`, mỗi mục 10a–10f một commit, mở PR mới, không merge.
+
+### 10a. Dữ liệu và hàm thuần
+
+**Kiểu dữ liệu (`mock/fixtures/types.ts`):**
+- `ServiceSegment.kind` thành `'prep' | 'work' | 'wait'`.
+- `ServiceVariant` thêm:
+  - `cleanupMinutes: Record<resourceTypeId, number>`;
+  - `pricesByLevel?: bigint[]`, xếp theo `staffLevels`. `priceVnd` vẫn là giá cấp thấp nhất.
+- `Service` thêm `group` và `variantSelection: 'customer' | 'subject'`.
+
+**Tóc Mây:**
+- **Nhuộm ngắn** đúng bảng ở mục 2.2 của trang thuật toán:
+  - Pha thuốc 15′ (Thợ);
+  - Bôi thuốc 30′ (Thợ, Ghế cắt);
+  - Chờ lên màu 45′ (Ghế cắt);
+  - Xả thuốc, gội 15′ (Thợ, Giường gội);
+  - Sấy, tạo kiểu 15′ (Thợ, Ghế cắt);
+  - dọn ghế 10′;
+  - giá 500.000 / 550.000 / 600.000 ₫.
+- **Nhuộm dài:** Pha 15′, Bôi 40′, Chờ 45′, Xả gội 15′, Sấy 20′, dọn ghế 10′; giá 700.000 / 770.000 / 840.000 ₫.
+- Thêm kỹ năng Nhuộm cho Lan. Hùng giữ nguyên.
+- Bỏ `match: { hairLength }` ở các biến thể salon: salon có `subjectSchema` rỗng và `variantSelection: 'customer'`.
+
+**Pawpaw:**
+- `variantSelection: 'subject'`.
+- Tắm sấy chó từ 10 kg đúng bảng mục 2.2. Mọi biến thể Tắm sấy dọn bồn 10′, lồng 5′.
+
+**Sinh lịch hẹn mẫu:**
+- `mock/fixtures/bookings.ts` sinh thêm đoạn chuẩn bị trước giờ hẹn và đoạn dọn sau khi dùng (BR-51, BR-52).
+- `Appointment.startAt` vẫn là giờ khách thấy.
+- Chạy lại sinh lịch, rồi kiểm không có hai đoạn chồng nhau trên cùng một tài nguyên (BR-01). Chỗ nào chồng thì dời lịch mẫu, không bỏ đoạn.
+
+**Hàm thuần mới trong `mock/occupation.ts`** (mẫu để chép sang `scheduling-core` kèm test):
+- `occupation(variant, resourceTypeId)`;
+- `visibleRange(variant)`;
+- `busyMinutes(variant)`: số phút bận theo từng loại, cho ô Tóm tắt;
+- `priceFor(variant, staff | 'any', staffList)` (BR-56);
+- `checkVariantCoverage(service, subjectSchema)` (BR-55). Cách kiểm:
+  - Trường chọn một: thử từng giá trị.
+  - Trường số: lấy mọi mốc `min` và `max` của các biến thể, thử từng mốc và một giá trị giữa hai mốc liền nhau.
+  - Trả về danh sách lỗi đọc được, ví dụ "Chó 10 kg khớp 2 biến thể: Chó dưới 12 kg, Chó từ 10 kg." hoặc "Chó từ 10 đến dưới 12 kg chưa khớp biến thể nào."
+
+**Giờ trống:**
+- Viết lại `mock/availability.ts` theo mã giả mục 3 (phép vừa, từng loại tài nguyên độc lập, `pick` theo BR-57). Bỏ chú thích "không đúng hẳn" ở đầu file.
+- Thêm `scripts/check-availability.ts`, chạy bằng `node scripts/check-availability.ts` (Node 24 tự bỏ kiểu). Script dựng lại bối cảnh A và B của mục 4 rồi so 10 kết quả với trang thuật toán. Thêm lệnh `pnpm check:availability`.
+
+### 10b. Cài đặt › Dịch vụ (MH-44): `/mock/app/[tenant]/settings/services`
+
+- Mẫu danh sách (MH-08). Cột:
+  - dịch vụ và nhóm;
+  - số biến thể;
+  - thời gian khách thấy (ngắn nhất–dài nhất);
+  - giá từ;
+  - số người làm được;
+  - công tắc "Nhận đặt online".
+- Bấm một dòng thì mở MH-45. Mục "Dịch vụ" trong menu cài đặt trỏ tới đây.
+
+### 10c. Chi tiết dịch vụ (MH-45): `/mock/app/[tenant]/settings/services/[id]`
+
+Làm đúng `DichVuChiTiet` (Tóc Mây, `may-dye`), `DichVuThuCung` (Pawpaw, `paw-bath`) và `DichVuDienThoai` (dưới 768px).
+
+**Component mới:** `SegmentTimeline`, `SegmentTable`, `DetailLayout`, `Panel`, `KeyValueList`. Mỗi cái một ví dụ trên `/mock/components`.
+- Trục vẽ từ `occupation()`, thước giờ lấy ví dụ hẹn 09:00.
+- Bấm một thanh thì chọn đúng dòng trong bảng, và ngược lại.
+
+**Bảng đoạn:**
+- Sửa tên, loại và số phút: số nguyên 5–480, bước 5.
+- Bật/tắt từng loại tài nguyên.
+- Thêm, xóa, đổi thứ tự. Nút kéo dùng được bằng bàn phím: lấy focus rồi bấm ↑/↓.
+- Đoạn Chờ tắt nút của loại nhân viên. Đổi một đoạn sang Chờ thì bỏ chọn nhân viên ngay (BR-50).
+- Đoạn Chuẩn bị chỉ đứng đầu: chọn Chuẩn bị cho đoạn ở giữa thì báo lỗi ngay dưới ô.
+- Dọn dẹp sau khi dùng: một ô cho mỗi loại tài nguyên không phải nhân viên.
+
+**Biến thể:**
+- Bảng biến thể; biến thể đang sửa nằm trong `?variant=`. Có "Nhân bản" và "Thêm biến thể".
+- Chọn biến thể bằng `Segmented`.
+- Pawpaw có ô sửa điều kiện (Loài; Cân nặng từ, đến dưới).
+- Dải báo kiểm phủ đủ, không trùng chạy theo từng thay đổi (`checkVariantCoverage`). Còn lỗi thì nút Lưu tắt và câu lỗi nằm trong dải báo.
+
+**Giá theo cấp:**
+- Công tắc và bảng ba cấp.
+- Cột "Người ở cấp này" lấy từ nhân viên.
+- Giá ở bảng biến thể hiện khoảng giá của những người làm được (500.000–550.000 ₫).
+
+**Ai làm được:** hộp kiểm theo `skillServiceIds`, dùng chung state với `staff-store`, để hồ sơ Mai đổi theo.
+
+**Cột phải:**
+- Xem trước trên lịch: `ResourceCalendar` thu nhỏ với cột Thợ và các tài nguyên của biến thể. Đoạn chuẩn bị và dọn dẹp dùng `.sp-appt__seg--buffer`.
+- Thẻ "Khách thấy": giá cho "Bất kỳ ai" (BR-56).
+- Tóm tắt (`busyMinutes`) và số lịch sắp tới dùng biến thể.
+
+**Lưu:**
+- Thanh lưu đếm số thay đổi và ghi "N lịch đã đặt giữ thời gian và giá cũ (BR-12)".
+- Lưu thì toast "Đã lưu Nhuộm tóc. 6 lịch đã đặt giữ thời gian và giá cũ." Thay đổi giữ trong state của phiên (như `staff-store`), không ghi đè lịch đã sinh.
+
+**Điện thoại:**
+- Tab biến thể, trục thu nhỏ, danh sách thẻ đoạn.
+- Bấm một thẻ thì mở `.sp-sheet` để sửa đoạn đó.
+- Không cuộn ngang.
+
+**Nối sang trang khác:**
+- "Xem như khách" mở `/mock/[tenant]/book?service=…`.
+- Ở bước chọn thợ của trang đặt lịch, giá đổi theo người đã chọn: "Bất kỳ ai" 500.000 ₫, Mai 550.000 ₫ (BR-56).
+- Lịch lễ tân vẽ đoạn chuẩn bị và dọn dẹp bằng `--buffer`.
+
+### 10d. Gói cấu hình ngành (MH-59): `/mock/admin/templates`, `/mock/admin/templates/[code]`
+
+**Khung quản trị nền tảng:**
+- `AppShell` với menu Tổng quan, Khách thuê, Gói cấu hình ngành, Gói và giá, Nhật ký. Mục chưa làm mở trang "Chưa làm".
+- Bộ chọn vai trò của `/mock` thêm "Quản trị nền tảng", dẫn tới `/mock/admin/templates`.
+
+**Dữ liệu `IndustryTemplate` thêm:**
+- `code`;
+- `status: 'open' | 'soon' | 'hidden'`;
+- `publishedVersion` (số bản, ngày xuất bản, số cơ sở đã tạo);
+- `draft` (danh sách thay đổi);
+- `defaultPolicies` (đặt trước ít nhất, đặt xa nhất, đổi/hủy trước, số lần tự đổi, không đến sau, số lần không đến thì bắt buộc cọc);
+- loại tài nguyên có cờ nhân viên;
+- dịch vụ mẫu có đủ đoạn.
+
+Thêm `nail_salon` và `beauty_spa` ở trạng thái `soon`. Bước chọn ngành của `/mock/signup` đọc trạng thái từ đây.
+
+**Hai trang:**
+- Danh sách và chi tiết đúng `GoiNganhDanhSach` và `GoiNganhChiTiet`. Dịch vụ mẫu dùng `SegmentTimeline` dạng `--mini`.
+- "Xuất bản bản 3" mở `ConfirmDialog`: "Xuất bản bản 3 của Spa thú cưng? Chỉ cơ sở tạo sau đó nhận bản này; 4 cơ sở đã tạo giữ dữ liệu của mình (BR-70)."
+- Xuất bản xong thì số bản tăng, bản nháp trống, và hiện toast.
+
+### 10e. Thanh cuộn và rà lại
+
+- Thanh cuộn đã nằm trong `components.css`. Xóa mọi style thanh cuộn riêng trong mock nếu có, rồi kiểm ở bảng khách hàng, lịch lễ tân và trang dài.
+- Cần kiểm trên Chrome và Edge (Windows), ở cả hai theme.
+- `mock/screens.ts`: MH-44, MH-45, MH-59 thành "Đang làm".
+
+### 10f. Kiểm tra và hoàn tất
+
+- Chạy axe trên MH-44, MH-45 (cả hai cơ sở), sheet sửa đoạn trên điện thoại, MH-59 danh sách và chi tiết, ở hai theme và hai bề rộng. Không có lỗi serious hoặc critical.
+- `pnpm check:availability`, `pnpm build`, `pnpm typecheck`, `pnpm exec prettier --check app components lib mock scripts` đều xanh.
+- Mở PR mới: mô tả theo 10a–10f, mục "Tự quyết", ảnh ở 1440px và 390px. Ghi một mục Tiến độ.
+
+**Xong khi:**
+- **Trục thời gian:** Nhuộm tóc, Tóc ngắn có hàng "Khách thấy" ghi "09:00–10:45 · 1 giờ 45". Sửa Chờ lên màu thành 60′ thì thành "09:00–11:00 · 2 giờ". Tóm tắt "Ghế cắt bận" đổi theo, thanh lưu ghi "1 thay đổi".
+- **Đoạn chờ:** đổi đoạn Bôi thuốc sang Chờ thì nút Thợ của đoạn đó tắt và bỏ chọn.
+- **Dọn dẹp:** đặt dọn ghế 0′ thì thanh Dọn biến mất. Đặt lại 10′ thì thanh nằm ngay sau đoạn Sấy, không phải sau đoạn cuối của cả dịch vụ.
+- **Điều kiện biến thể (Tắm sấy):**
+  - "Chó từ 10 kg" đổi "từ" thành 12 thì dải báo ghi "Chó từ 10 đến dưới 12 kg chưa khớp biến thể nào." và nút Lưu tắt.
+  - "Chó dưới 10 kg" đổi "đến dưới" thành 12 thì báo trùng.
+- **Giá:** trang đặt lịch Tóc Mây, Nhuộm tóc, "Bất kỳ ai" hiện 500.000 ₫. Chọn Mai thì hiện 550.000 ₫.
+- **Lịch lễ tân:** khối nhuộm có đoạn Pha thuốc trước giờ hẹn và Dọn sau, viền đứt. Script kiểm báo 0 đoạn chồng nhau.
+- **Giờ trống:** `pnpm check:availability` khớp cả 10 ví dụ.
+- **Gói ngành:** `/mock/admin/templates` có 4 dòng. Xuất bản Spa thú cưng thì hỏi lại, rồi thành bản 3.
+- **Điện thoại:** ở 390px, MH-44, MH-45 và MH-59 không cuộn ngang.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -414,4 +575,18 @@ Banner, Checklist, Plan. Làm Bước 9 trong datn-docs/content/docs/ky-thuat/ke
 mục 9a đến 9f, mỗi mục một commit. Bố cục và chữ lấy theo design/screens/DangKy*.dc.html
 và Goi*.dc.html. Kiểm "Xong khi" trước khi báo xong, mở PR mới, không merge. Dừng lại hỏi
 mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 10:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-services.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, BR-50 đến BR-59
+và BR-70 trong quy-tac.md, content/docs/ky-thuat/thuat-toan-gio-trong.md (mục 2 đến 4),
+T-05 trong quyet-dinh-ky-thuat.md, design/README.md và README của SegmentTimeline,
+DetailPage, FormSection, AppointmentBlock. Làm Bước 10 trong
+datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 10a đến 10f, mỗi mục một commit.
+Bố cục và chữ lấy theo design/screens/DichVu*.dc.html và GoiNganh*.dc.html. Kiểm "Xong khi"
+trước khi báo xong, mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với
+quy tắc nghiệp vụ hoặc với 10 ví dụ của trang thuật toán.
 ```

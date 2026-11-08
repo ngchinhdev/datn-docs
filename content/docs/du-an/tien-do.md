@@ -7,6 +7,30 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 1 (02/11 – 08/11/2026)
 
+### 08/11/2026 (chiều): chốt cấu hình dịch vụ, gói cấu hình ngành, thuật toán giờ trống
+- **Đã làm:**
+  - Review PR #4 (Bước 9), người dùng đã merge sau khi sửa ba điểm: một đồng hồ chung cho mock, giá trung bình mỗi tháng, ngày gia hạn trên trang khóa.
+  - Vẽ và chốt MH-45 Chi tiết dịch vụ (Tóc Mây, Pawpaw, điện thoại) và MH-59 Gói cấu hình ngành (danh sách, chi tiết) trên canvas.
+  - Sapio thêm `SegmentTimeline`, `DetailPage`, đoạn chuẩn bị, dọn dẹp trên khối lịch hẹn, thanh cuộn mảnh theo theme.
+  - Viết [Thuật toán tính giờ trống](../ky-thuat/thuat-toan-gio-trong.md) (BT1): mô hình, mã giả, 10 ví dụ tính tay, đối chứng vét cạn cho E1. Cả 10 ví dụ đã kiểm lại bằng một bản vét cạn viết riêng; bản này bắt được bốn chỗ tính tay sai ở cận trên, đã sửa.
+- **Chốt:**
+  - Khách chỉ thấy phần làm; chuẩn bị trước giờ hẹn, dọn dẹp sau.
+  - Dọn dẹp tính theo từng loại tài nguyên, bắt đầu ngay khi đoạn cuối dùng loại đó xong.
+  - Đoạn chờ không giữ nhân viên.
+  - Một mục giữ cùng một thợ, cùng một ghế.
+  - Dọn dẹp phải xong trước giờ đóng cửa.
+  - Lưới 15′.
+  - "Bất kỳ ai" trả giá cấp thấp nhất và được xếp cho cấp thấp nhất trước.
+  - Biến thể theo thuộc tính phải phủ đủ, không trùng.
+  - Lịch đã đặt giữ thời gian và giá cũ.
+
+  Các ý trên ghi thành BR-50 đến BR-59. BR-12, BR-14, BR-70 sửa theo; gói ngành có bản nháp và xuất bản.
+  - [T-05](../ky-thuat/quyet-dinh-ky-thuat.md#t-05-packagesscheduling-core-thuật-toán-thuần) đổi sang phút từ mốc Unix (UTC).
+- **Vướng:** dữ liệu mẫu Tóc Mây cho Hùng làm nhuộm, Lan thì không. Thiết kế giữ cả ba thợ làm được nhuộm (thêm kỹ năng cho Lan) để "Bất kỳ ai" có giá 500.000 ₫.
+- **Tiếp theo:**
+  - Claude Code làm [Bước 10](../ky-thuat/ke-hoach-ui-mock.md#bước-10-cấu-hình-dịch-vụ-mh-44-mh-45-gói-cấu-hình-ngành-mh-59-và-thanh-cuộn).
+  - Phiên claude.ai làm ERD (giai đoạn 1).
+
 ### 07/11/2026 (đêm khuya): mock Bước 8, khung ứng dụng, danh sách và form
 - **Đã làm:** Bước 8 (8a–8f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-8-route-tiếng-anh-khung-ứng-dụng-mẫu-danh-sách-và-form), mỗi mục một commit trên nhánh `feat/mock-app-shell`.
   - Route theo [T-15](../ky-thuat/quyet-dinh-ky-thuat.md#t-15-route-của-web-tiếng-anh-slug-cơ-sở-trong-url): `/mock/[tenant]/book`, `/mock/app/[tenant]/…`; URL cũ chuyển hướng 308; trạng thái xem nằm trong query.

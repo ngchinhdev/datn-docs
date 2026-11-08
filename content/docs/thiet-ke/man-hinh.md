@@ -127,7 +127,7 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | MH-42 | Chi nhánh | `/app/[tenant]/settings/branches` | CCS | 1 | DS | |
 | MH-43 | Chi tiết chi nhánh | `/app/[tenant]/settings/branches/[id]` | CCS | 1 | Vẽ | Giờ mở cửa nhiều khung mỗi ngày, ngày đặc biệt (BR-02), giá riêng của chi nhánh |
 | MH-44 | Dịch vụ | `/app/[tenant]/settings/services` | CCS | 1 | DS | Nhóm dịch vụ, kéo đổi thứ tự, bật/tắt đặt online |
-| MH-45 | Chi tiết dịch vụ | `/app/[tenant]/settings/services/[id]` | CCS | 1 | Vẽ | **Màn đặc trưng thứ hai.** Biến thể theo thuộc tính đối tượng (BR-13); các đoạn chiếm dụng vẽ trên trục thời gian, mỗi đoạn chọn loại tài nguyên (BR-04, BR-05); kỹ năng (BR-03); giá theo cấp nhân viên; xem trước khối lịch hẹn như trên lịch lễ tân |
+| MH-45 | Chi tiết dịch vụ | `/app/[tenant]/settings/services/[id]` | CCS | 1 | Vẽ | **Đã chọn. Màn đặc trưng thứ hai.** Biến thể khách tự chọn hoặc theo thuộc tính đối tượng, kiểm điều kiện phủ đủ, không trùng (BR-13, BR-55); trục thời gian theo từng loại tài nguyên, đoạn Chuẩn bị, Làm, Chờ, dọn dẹp theo loại tài nguyên (BR-50 đến BR-52); giá theo cấp nhân viên (BR-56); ai làm được (BR-03); cột phải xem trước trên lịch lễ tân và thẻ khách thấy; lịch đã đặt giữ thời gian, giá cũ (BR-59) |
 | MH-46 | Tài nguyên | `/app/[tenant]/settings/resources` | CCS | 1 | DS | Nhóm theo loại (từ gói ngành), chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng |
 | MH-47 | Nhân sự | `/app/[tenant]/settings/staff` | CCS | 1 | DS | Mời, vai trò, chi nhánh, nhận đặt online |
 | MH-48 | Hồ sơ nhân viên | `/app/[tenant]/settings/staff/[id]` | CCS | 1 | Form | Hai lớp hồ sơ (BR-15), kỹ năng, cấp, chi nhánh, vai trò |
@@ -147,7 +147,7 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
 | MH-58 | Khách thuê | `/admin/tenants`, `/admin/tenants/[id]` | QTNT | 1 | DS | Khóa, mở khóa có lý do (BR-75); cột gói, trạng thái (dùng thử, đang dùng, hết hạn) và hạn; gia hạn thủ công; chi tiết chỉ có số liệu tổng (số chi nhánh, số lịch tháng), **không** xem dữ liệu khách của cơ sở |
-| MH-59 | Gói cấu hình ngành | `/admin/templates`, `/admin/templates/[id]` | QTNT | 1 | Vẽ | **Màn chứng minh BT8.** Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70) |
+| MH-59 | Gói cấu hình ngành | `/admin/templates`, `/admin/templates/[id]` | QTNT | 1 | Vẽ | **Đã chọn. Màn chứng minh BT8.** Bản nháp, xuất bản theo phiên bản (BR-70). Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70) |
 | MH-60 | Tổng quan nền tảng | `/admin` | QTNT | 3 | Nhẹ | Số cơ sở theo ngành, số lịch đặt, cơ sở mới |
 | MH-62 | Gói và giá | `/admin/plans` | QTNT | 2 | Form | Giá tháng, tính năng và giới hạn của từng gói (BR-83); mức giảm theo kỳ; đổi giá không ảnh hưởng kỳ đã trả |
 
