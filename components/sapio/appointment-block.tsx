@@ -8,8 +8,9 @@ export interface BlockSegment {
   /** ISO 8601, UTC. */
   startAt: string;
   endAt: string;
-  kind: 'work' | 'wait';
-  /** Extra line inside a wait segment, e.g. "Chờ lên màu · Hùng rảnh". */
+  /** `buffer` is preparation or cleanup: dashed, outside the time the customer sees (BR-51). */
+  kind: 'work' | 'wait' | 'buffer';
+  /** Extra line inside a wait segment, e.g. "Chờ lên màu · Hùng rảnh"; the name of a buffer. */
   note?: string;
 }
 
@@ -48,13 +49,18 @@ export function AppointmentBlock({
     top: slots(minutesBetween(dayStart, first.startAt)),
     height: slots(minutesBetween(first.startAt, last.endAt)),
   };
-  const single = segments.length === 1;
-  const showsMeta = (i: number) => single || (i === segments.length - 1 && i > 0);
+  // The title sits on the first segment the customer sees, the time on the last one.
+  const seen = segments.flatMap((s, i) => (s.kind === 'buffer' ? [] : [i]));
+  const titleAt = seen[0] ?? 0;
+  const metaAt = seen.at(-1) ?? 0;
+  const showsMeta = (i: number) => i === metaAt && (seen.length === 1 || i > titleAt);
   // Same texts in the same order as on screen, so the name contains what is visible.
-  const label = [
-    title,
-    ...segments.flatMap((s, i) => [s.note, meta && showsMeta(i) ? meta : undefined]),
-  ]
+  const label = segments
+    .flatMap((s, i) => [
+      i === titleAt ? title : undefined,
+      s.note,
+      meta && showsMeta(i) ? meta : undefined,
+    ])
     .filter(Boolean)
     .join(', ');
 
@@ -75,10 +81,14 @@ export function AppointmentBlock({
       {segments.map((segment, i) => (
         <span
           key={segment.startAt}
-          className={cn('sp-appt__seg block', segment.kind === 'wait' && 'sp-appt__seg--wait')}
+          className={cn(
+            'sp-appt__seg block',
+            segment.kind === 'wait' && 'sp-appt__seg--wait',
+            segment.kind === 'buffer' && 'sp-appt__seg--buffer',
+          )}
           style={{ height: slots(minutesBetween(segment.startAt, segment.endAt)) }}
         >
-          {i === 0 && (
+          {i === titleAt && (
             <>
               <span className="sp-appt__title">{title}</span>{' '}
             </>

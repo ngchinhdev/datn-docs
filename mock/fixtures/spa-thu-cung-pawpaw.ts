@@ -1,18 +1,18 @@
-import { appointmentBuilder } from './bookings';
-import { dateRange, generateWeek } from './generate';
-import { generatePeople, withVisitCounts } from './people';
-import { petSpaTemplate } from './templates';
+import { appointmentBuilder } from './bookings.ts';
+import { dateRange, generateWeek } from './generate.ts';
+import { generatePeople, withVisitCounts } from './people.ts';
+import { petServices as services } from './pawpaw-services.ts';
+import { petSpaTemplate } from './templates.ts';
 import type {
   Appointment,
   Branch,
   BusinessHours,
   Customer,
   ServedSubject,
-  Service,
   Staff,
   TenantFixture,
   Weekday,
-} from './types';
+} from './types.ts';
 
 const tenantId = 'pawpaw';
 const branchId = 'pawpaw-td';
@@ -22,123 +22,6 @@ const mondayToSaturday = (
   close: BusinessHours['close'],
 ): BusinessHours[] =>
   ([1, 2, 3, 4, 5, 6] as Weekday[]).map((weekday) => ({ weekday, open, close }));
-
-const services: Service[] = [
-  {
-    // Bath then cage drying: the groomer is free while the pet is in the dryer.
-    id: 'paw-bath',
-    tenantId,
-    name: 'Tắm sấy',
-    variants: [
-      {
-        id: 'paw-bath-small',
-        name: 'Chó dưới 10 kg',
-        shortName: 'Tắm chó nhỏ',
-        priceVnd: 150_000n,
-        match: { species: 'dog', weightKg: { max: 10 } },
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 20,
-            kind: 'work',
-            resourceTypeIds: ['paw-rt-groomer', 'paw-rt-bath'],
-          },
-          {
-            startMinute: 20,
-            endMinute: 50,
-            kind: 'wait',
-            resourceTypeIds: ['paw-rt-dryer'],
-            label: 'sấy lồng',
-          },
-          { startMinute: 50, endMinute: 60, kind: 'work', resourceTypeIds: ['paw-rt-groomer'] },
-        ],
-      },
-      {
-        id: 'paw-bath-large',
-        name: 'Chó từ 10 kg',
-        shortName: 'Tắm chó lớn',
-        priceVnd: 250_000n,
-        match: { species: 'dog', weightKg: { min: 10 } },
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 30,
-            kind: 'work',
-            resourceTypeIds: ['paw-rt-groomer', 'paw-rt-bath'],
-          },
-          {
-            startMinute: 30,
-            endMinute: 75,
-            kind: 'wait',
-            resourceTypeIds: ['paw-rt-dryer'],
-            label: 'sấy lồng',
-          },
-          { startMinute: 75, endMinute: 90, kind: 'work', resourceTypeIds: ['paw-rt-groomer'] },
-        ],
-      },
-      {
-        id: 'paw-bath-cat',
-        name: 'Mèo',
-        shortName: 'Tắm mèo',
-        priceVnd: 180_000n,
-        match: { species: 'cat' },
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 25,
-            kind: 'work',
-            resourceTypeIds: ['paw-rt-groomer', 'paw-rt-bath'],
-          },
-          {
-            startMinute: 25,
-            endMinute: 55,
-            kind: 'wait',
-            resourceTypeIds: ['paw-rt-dryer'],
-            label: 'sấy lồng',
-          },
-          { startMinute: 55, endMinute: 60, kind: 'work', resourceTypeIds: ['paw-rt-groomer'] },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'paw-groom',
-    tenantId,
-    name: 'Cắt tỉa lông',
-    variants: [
-      {
-        id: 'paw-groom-small',
-        name: 'Chó dưới 10 kg',
-        shortName: 'Tỉa chó nhỏ',
-        priceVnd: 250_000n,
-        match: { species: 'dog', weightKg: { max: 10 } },
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 60,
-            kind: 'work',
-            resourceTypeIds: ['paw-rt-groomer', 'paw-rt-table'],
-          },
-        ],
-      },
-      {
-        id: 'paw-groom-large',
-        name: 'Chó từ 10 kg',
-        shortName: 'Tỉa chó lớn',
-        priceVnd: 400_000n,
-        match: { species: 'dog', weightKg: { min: 10 } },
-        segments: [
-          {
-            startMinute: 0,
-            endMinute: 90,
-            kind: 'work',
-            resourceTypeIds: ['paw-rt-groomer', 'paw-rt-table'],
-          },
-        ],
-      },
-    ],
-  },
-];
 
 const resources = [
   { id: 'paw-khoa', tenantId, branchId, resourceTypeId: 'paw-rt-groomer', name: 'Khoa' },
@@ -150,8 +33,6 @@ const resources = [
   { id: 'paw-dryer-3', tenantId, branchId, resourceTypeId: 'paw-rt-dryer', name: 'Lồng sấy 3' },
   { id: 'paw-table-1', tenantId, branchId, resourceTypeId: 'paw-rt-table', name: 'Bàn 1' },
 ];
-
-const appointment = appointmentBuilder({ tenantId, branchId, services, resources });
 
 const staffList: Staff[] = [
   {
@@ -189,6 +70,14 @@ const staffList: Staff[] = [
     skillServiceIds: ['paw-bath'],
   },
 ];
+
+const appointment = appointmentBuilder({
+  tenantId,
+  branchId,
+  services,
+  resources,
+  staff: staffList,
+});
 
 const regulars: Customer[] = [
   {

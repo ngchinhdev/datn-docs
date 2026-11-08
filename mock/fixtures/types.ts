@@ -84,17 +84,20 @@ export interface Staff {
   skillServiceIds: string[];
 }
 
+export type SegmentKind = 'prep' | 'work' | 'wait';
+
 /**
- * Minutes from the start of the service, half-open `[startMinute, endMinute)`.
- * A `wait` segment frees the staff but keeps the other resources (BR-05).
+ * Minutes from the start of the first segment, half-open `[startMinute, endMinute)` (BR-50).
+ * `prep` stands only at the start; the customer does not see it (BR-51). A `wait` segment frees
+ * the staff but keeps the other resources (BR-05).
  */
 export interface ServiceSegment {
   startMinute: number;
   endMinute: number;
-  kind: 'work' | 'wait';
+  kind: SegmentKind;
+  /** Name on the calendar, e.g. "Pha thuốc", "Chờ lên màu". */
+  name: string;
   resourceTypeIds: string[];
-  /** What happens during a wait, e.g. "chờ lên màu". */
-  label?: string;
 }
 
 /** An exact value, or a number range: `min` included, `max` not (`{ max: 10 }` is "under 10"). */
@@ -112,12 +115,29 @@ export interface ServiceVariant {
   /** Served-subject attributes that select this variant (BR-13). */
   match: Record<string, MatchValue>;
   segments: ServiceSegment[];
+  /**
+   * Minutes to clean each resource type after its last segment ends (BR-52); a missing type
+   * needs none.
+   */
+  cleanupMinutes: Record<string, number>;
+  /** Price per staff level, in the order of `TenantFixture.staffLevels` (BR-56); `priceVnd` is the lowest. */
+  pricesByLevel?: bigint[];
 }
+
+/** Who picks the variant: the customer, or the attributes of the served subject (BR-55). */
+export type VariantSelection = 'customer' | 'subject';
 
 export interface Service {
   id: string;
   tenantId: string;
   name: string;
+  /** One of `IndustryTemplate.serviceGroups`. */
+  group: string;
+  /** Shown to the customer under the name. */
+  description?: string;
+  variantSelection: VariantSelection;
+  /** Off hides the service on the customer page. */
+  bookableOnline: boolean;
   variants: ServiceVariant[];
 }
 
@@ -161,9 +181,11 @@ export interface ResourceBooking {
   resourceId: string;
   startAt: string;
   endAt: string;
-  kind: 'work' | 'wait';
+  /** `cleanup` is the time after the last segment that uses the resource (BR-52). */
+  kind: SegmentKind | 'cleanup';
   /** Index into `Appointment.items`. */
   itemIndex: number;
+  /** Segment name in lower case, e.g. "chờ lên màu". */
   label?: string;
 }
 
@@ -242,6 +264,8 @@ export interface IndustryTemplate {
   subjectSchema: SubjectField[];
   /** Resources other than staff that a new tenant starts with. */
   resourceTypes: TemplateResourceType[];
+  /** Groups a service can belong to. */
+  serviceGroups: string[];
   /** Services created with the tenant; the sign-up preview lists them. */
   sampleServices: SampleService[];
   /** Who the customer books for, in the sign-up preview: "chính mình", "thú cưng". */

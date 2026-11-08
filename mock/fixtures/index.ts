@@ -1,7 +1,7 @@
-import { salonTocMay } from './salon-toc-may';
-import { spaThuCungPawpaw } from './spa-thu-cung-pawpaw';
-import type { TenantFixture } from './types';
+import { salonTocMay } from './salon-toc-may.ts';
+import { spaThuCungPawpaw } from './spa-thu-cung-pawpaw.ts';
+import type { TenantFixture } from './types.ts';
 
-export type * from './types';
+export type * from './types.ts';
 
 export const tenantFixtures: TenantFixture[] = [salonTocMay, spaThuCungPawpaw];

@@ -36,9 +36,14 @@ export function dayAppointments(appointments: Appointment[], date: string) {
     .sort(byStart);
 }
 
+/** When the customer is done: the end of the last segment they see, not the cleanup (BR-51). */
 export function appointmentEnd(appt: Appointment) {
-  return appt.bookings.reduce((end, b) => (b.endAt > end ? b.endAt : end), appt.startAt);
+  return appt.bookings
+    .filter((b) => b.kind === 'work' || b.kind === 'wait')
+    .reduce((end, b) => (b.endAt > end ? b.endAt : end), appt.startAt);
 }
+
+const isBuffer = (b: ResourceBooking) => b.kind === 'prep' || b.kind === 'cleanup';
 
 export function holdSecondsLeft(appt: Appointment, now: string) {
   return appt.holdExpiresAt ? (Date.parse(appt.holdExpiresAt) - Date.parse(now)) / 1000 : 0;
@@ -61,12 +66,24 @@ function otherResources(appt: Appointment, L: Lookups, staffId?: string) {
   ).map(L.name);
 }
 
-/** Staff view: the staff's work segments, gaps between them drawn as waits (BR-05). */
+/**
+ * Staff view: the staff's work segments, gaps between them drawn as waits (BR-05), preparation
+ * and cleanup as dashed buffers (BR-04).
+ */
 function staffSegments(appt: Appointment, staffId: string): BlockSegment[] {
   const work = appt.bookings.filter((b) => b.resourceId === staffId).sort(byStart);
   const segments: BlockSegment[] = [];
   work.forEach((b, i) => {
     const prev = work[i - 1];
+    if (isBuffer(b)) {
+      segments.push({
+        startAt: b.startAt,
+        endAt: b.endAt,
+        kind: 'buffer',
+        ...(b.label ? { note: capitalize(b.label) } : {}),
+      });
+      return;
+    }
     if (prev && prev.endAt < b.startAt) {
       const label = appt.bookings.find(
         (x) => x.kind === 'wait' && x.startAt <= prev.endAt && x.endAt >= b.startAt,
@@ -86,8 +103,9 @@ function staffSegments(appt: Appointment, staffId: string): BlockSegment[] {
 }
 
 const within = (inner: BlockSegment[], outer: BlockSegment[]) => {
-  const start = inner[0]?.startAt ?? '';
-  const end = inner.at(-1)?.endAt ?? '';
+  const seen = inner.filter((s) => s.kind !== 'buffer');
+  const start = seen[0]?.startAt ?? '';
+  const end = seen.at(-1)?.endAt ?? '';
   return outer.some((s) => s.kind === 'wait' && s.startAt <= start && s.endAt >= end);
 };
 
@@ -112,8 +130,9 @@ export function staffColumns(
       const covered = mine.some((o) => o.id !== appt.id && within(segs.get(o.id) ?? [], segments));
       const staffName = L.name(s.resourceId);
       const others = otherResources(appt, L, s.resourceId).join(', ');
-      const start = segments[0]?.startAt ?? appt.startAt;
-      const end = segments.at(-1)?.endAt ?? appt.startAt;
+      const seen = segments.filter((seg) => seg.kind !== 'buffer');
+      const start = seen[0]?.startAt ?? appt.startAt;
+      const end = seen.at(-1)?.endAt ?? appt.startAt;
       const short = Date.parse(end) - Date.parse(start) <= 30 * 60_000;
       const range = formatRange(start, end);
       const mineItems = itemsOf(appt, s.resourceId);
@@ -143,7 +162,9 @@ export function staffColumns(
         segments: segments.map((seg) =>
           seg.kind === 'wait' && seg.note && !covered
             ? { ...seg, note: `${seg.note} · ${staffName} rảnh` }
-            : { ...seg, note: undefined },
+            : seg.kind === 'buffer'
+              ? seg
+              : { ...seg, note: undefined },
         ) as BlockSegment[],
       };
     });
@@ -169,6 +190,27 @@ function runs(bookings: ResourceBooking[]) {
     } else out.push({ startAt: b.startAt, endAt: b.endAt, parts: [b] });
   }
   return out;
+}
+
+/** The resource is busy throughout, so waits read as work; prep and cleanup stay dashed. */
+function runSegments(parts: ResourceBooking[], waitLabel: string | undefined): BlockSegment[] {
+  const segments: BlockSegment[] = [];
+  for (const part of parts) {
+    const kind = isBuffer(part) ? 'buffer' : 'work';
+    const last = segments.at(-1);
+    if (kind === 'work' && last?.kind === 'work') last.endAt = part.endAt;
+    else {
+      segments.push({
+        startAt: part.startAt,
+        endAt: part.endAt,
+        kind,
+        ...(kind === 'buffer' && part.label ? { note: capitalize(part.label) } : {}),
+      });
+    }
+  }
+  const work = segments.find((seg) => seg.kind === 'work');
+  if (work && waitLabel) work.note = `Bận suốt, kể cả lúc ${waitLabel}`;
+  return segments;
 }
 
 export function resourceColumns(
@@ -203,14 +245,7 @@ export function resourceColumns(
               : `${range} · ${staffName}`,
             selected: appt.id === selectedId,
             onSelect: () => onSelect(appt.id),
-            segments: [
-              {
-                startAt: run.startAt,
-                endAt: run.endAt,
-                kind: 'work',
-                ...(waitLabel ? { note: `Bận suốt, kể cả lúc ${waitLabel}` } : {}),
-              },
-            ],
+            segments: runSegments(run.parts, waitLabel),
           };
         }),
       );
@@ -241,6 +276,8 @@ export interface DetailLine {
   range: string;
   text: string;
   wait: boolean;
+  /** Preparation or cleanup: the resource is busy but the customer is not there (BR-51). */
+  buffer: boolean;
 }
 
 export function appointmentDetail(fixture: TenantFixture, appt: Appointment) {
@@ -253,6 +290,7 @@ export function appointmentDetail(fixture: TenantFixture, appt: Appointment) {
       const [startAt = '', endAt = ''] = key.split('|');
       const here = mine.filter((b) => b.startAt === startAt && b.endAt === endAt);
       const wait = here.find((b) => b.kind === 'wait');
+      const buffer = here.find(isBuffer);
       const names = here
         .sort((a, b) => Number(L.isStaff(b.resourceId)) - Number(L.isStaff(a.resourceId)))
         .map((b) => L.name(b.resourceId))
@@ -261,8 +299,11 @@ export function appointmentDetail(fixture: TenantFixture, appt: Appointment) {
         range: formatRange(startAt, endAt),
         text: wait
           ? `${names} · ${wait.label ?? 'chờ'}, ${L.name(item.staffResourceId)} rảnh`
-          : names,
+          : buffer
+            ? `${names} · ${buffer.kind === 'prep' ? `${buffer.label ?? 'chuẩn bị'}, trước giờ hẹn` : 'dọn sau khi dùng'}`
+            : names,
         wait: Boolean(wait),
+        buffer: Boolean(buffer && !wait),
       };
     });
     return {

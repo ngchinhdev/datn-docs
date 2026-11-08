@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start --port 3100",
     "typecheck": "next typegen && tsc --noEmit",
+    "check:availability": "node scripts/check-availability.ts",
     "format": "prettier --write app components lib mock"
   },
   "dependencies": {

@@ -24,7 +24,7 @@ import { useToast } from '@/components/sapio/toast';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
 import { freeSlots, type FreeSlot } from '@/mock/availability';
-import { matchesAttributes } from '@/mock/fixtures/bookings';
+import { matchesAttributes, visibleMinutes } from '@/mock/occupation';
 import { tenantFixtures, type ServedSubject, type ServiceVariant } from '@/mock/fixtures';
 import { formatMinutes, formatPhone, formatVnd, normalizePhone } from '@/mock/format';
 import { openingHours } from '@/mock/hours';
@@ -60,7 +60,7 @@ const PARTS: { value: Part; label: string; from: number; to: number }[] = [
   { value: 'evening', label: 'Tối', from: 17, to: 24 },
 ];
 
-const duration = (v: ServiceVariant) => Math.max(...v.segments.map((s) => s.endMinute));
+const duration = visibleMinutes;
 const matches = (v: ServiceVariant, subject: ServedSubject) =>
   matchesAttributes(v.match, subject.attributes);
 const partOf = (slot: FreeSlot) => {

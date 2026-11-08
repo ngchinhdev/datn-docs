@@ -118,10 +118,13 @@ export function DetailPanel({
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'size-3.5 flex-none rounded-(--radius-xs) shadow-[inset_0_0_0_1px_var(--status-checked-in)]',
+                      'size-3.5 flex-none rounded-(--radius-xs)',
+                      line.buffer
+                        ? 'bg-(--surface-raised) shadow-[inset_0_0_0_1px_var(--line-strong)]'
+                        : 'shadow-[inset_0_0_0_1px_var(--status-checked-in)]',
                       line.wait
                         ? 'bg-[repeating-linear-gradient(135deg,var(--status-checked-in-soft)_0_3px,var(--surface-raised)_3px_7px)]'
-                        : 'bg-(--status-checked-in-soft)',
+                        : !line.buffer && 'bg-(--status-checked-in-soft)',
                     )}
                   />
                   <span className="w-24 flex-none whitespace-nowrap text-(--ink-muted)">

@@ -1,4 +1,4 @@
-import type { IndustryTemplate } from './types';
+import type { IndustryTemplate } from './types.ts';
 
 export const hairSalonTemplate: IndustryTemplate = {
   id: 'hair_salon',
@@ -15,6 +15,7 @@ export const hairSalonTemplate: IndustryTemplate = {
     { name: 'Ghế cắt', hint: 'Mỗi ghế phục vụ một khách một lúc', defaultCount: 3 },
     { name: 'Giường gội', hint: 'Dùng cho gội và gội sấy', defaultCount: 1 },
   ],
+  serviceGroups: ['Cắt', 'Gội', 'Nhuộm và uốn', 'Phục hồi'],
   sampleServices: [
     {
       name: 'Cắt tóc',
@@ -73,6 +74,7 @@ export const petSpaTemplate: IndustryTemplate = {
     { name: 'Lồng sấy', hint: 'Mỗi lồng sấy một bé một lúc', defaultCount: 2 },
     { name: 'Bàn cắt tỉa', hint: 'Mỗi bàn phục vụ một bé một lúc', defaultCount: 2 },
   ],
+  serviceGroups: ['Tắm', 'Cắt tỉa', 'Chăm sóc thêm'],
   sampleServices: [
     {
       name: 'Tắm sấy',
