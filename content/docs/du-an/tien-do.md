@@ -22,6 +22,19 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - Sapio cần bổ sung: `.sp-shell__side` không dính trên trang dài (mock thêm `sticky top-0 h-screen`); `.sp-shell__content--fill` giữ chiều cao 100vh cả trên điện thoại (mock chỉ dùng từ 768px); thanh bên không nói tên cơ sở và chi nhánh nằm ở đâu khi dưới 768px (mock đặt ô đổi cơ sở ở đầu trang như `QuanTriDienThoai`).
 - **Tiếp theo:** review PR; chốt hai màn MH-07, MH-08, MH-09 với cô; phiên claude.ai vẽ MH-02 Đăng ký cơ sở có chọn ngành.
 
+### 08/11/2026 (tối): mock Bước 9, đăng ký cơ sở, dùng thử và gói Sapio
+- **Đã làm:** Bước 9 (9a–9f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-9-đăng-ký-cơ-sở-dùng-thử-và-gói-sapio) trên nhánh `feat/mock-signup-plan`.
+  - Component mới: `SignupLayout`, `ChoiceCards`, `QuantityInput`, `OtpField` (`InputOTP` của shadcn/ui, thư viện `input-otp@1.5.0`), `Banner`, `Checklist`, `PlanCards`, `LockIcon`; ô mã ở trang đặt lịch dùng `OtpField`.
+  - MH-02 `/mock/signup?step=…`: 5 bước, mật khẩu theo BR-73 (331 mật khẩu phổ biến), mã `000000` cho trạng thái lỗi, địa chỉ `*.sapio.vn` theo BR-72, bảng xem trước đọc từ `IndustryTemplate`.
+  - `mock/subscription.ts`: `plans`, `entitlements`, `can`, `canBook`, `periodPrice`, `upgradeCharge` (hàm thuần, để chép sang `datn-saas`). `?plan=trial|basic|pro|expired` giữ khi chuyển trang; dải báo, ổ khóa, màn dùng thử, màn hết hạn, trang tính năng bị khóa.
+  - MH-61 `settings/plan`: chọn kỳ, hộp thanh toán QR giả lập, nâng và hạ gói (BR-85). Thêm MH-61, MH-62 vào danh sách màn.
+- **Kiểm:** Playwright qua 5 bước ở 1280 và 390px (không cuộn ngang) và các kịch bản gói; axe-core 56 lượt (14 trang, hai theme, hai bề rộng), 0 lỗi serious hoặc critical.
+- **Vướng:**
+  - `MOCK_NOW` là 07/11 nhưng các màn thiết kế dùng 09/11 (còn 5 ngày, còn 22 ngày). Phần gói có đồng hồ riêng `PLAN_NOW` (09/11, hai ngày sau khi tạo cơ sở); lịch hẹn giữ `MOCK_NOW`.
+  - Dữ liệu lịch hẹn chỉ tới 22/11, nên `?plan=expired` đặt hết hạn lúc 23:59 ngày 08/11 để bảng "lịch đã đặt sau hạn" có dòng.
+  - Sapio không có kiểu cho `role="radio"` trong `.sp-segmented` (chỉ `aria-pressed`, `aria-selected`, `aria-current`); chọn kỳ dùng nhóm nút bấm.
+- **Tiếp theo:** review PR; báo cô phần dùng thử và gói Sapio (D-15); phiên claude.ai vẽ MH-45 và MH-59.
+
 ### 08/11/2026: chốt đăng ký cơ sở, tên miền con, dùng thử và gói Sapio
 - **Đã làm:**
   - Review PR #3 (Bước 8). Người dùng đã merge sau khi Claude Code sửa 3 điểm: chữ cái của cơ sở, tìm theo đầu từ, bỏ `?tenant=` khi chuyển hướng.
