@@ -146,15 +146,24 @@ export default async function MockIndexPage({ searchParams }: PageProps<'/mock'>
                         {screen.links.map((link) => (
                           <span key={link.label} className="flex flex-wrap gap-x-3">
                             <span>{link.label}:</span>
-                            {tenantFixtures.map((f) => (
+                            {link.platform ? (
                               <Link
-                                key={f.tenant.slug}
-                                href={link.href(f.tenant.slug)}
+                                href={link.href('')}
                                 className="font-medium text-primary hover:underline"
                               >
-                                {f.tenant.name}
+                                Mở
                               </Link>
-                            ))}
+                            ) : (
+                              tenantFixtures.map((f) => (
+                                <Link
+                                  key={f.tenant.slug}
+                                  href={link.href(f.tenant.slug)}
+                                  className="font-medium text-primary hover:underline"
+                                >
+                                  {f.tenant.name}
+                                </Link>
+                              ))
+                            )}
                           </span>
                         ))}
                       </CardContent>

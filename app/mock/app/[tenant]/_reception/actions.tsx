@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSubscription } from '@/components/mock/subscription-store';
 import { ConfirmDialog } from '@/components/sapio/confirm-dialog';
 import { useToast } from '@/components/sapio/toast';
 import type { Appointment, TenantFixture } from '@/mock/fixtures';
@@ -43,6 +44,8 @@ export function useAppointmentActions(
 ) {
   const L = lookups(fixture);
   const toast = useToast();
+  // On trial nobody can be checked in (BR-81): the appointments are sample data to configure around.
+  const { canBook } = useSubscription();
   const [pending, setPending] = useState<Pending>(null);
   const [method, setMethod] = useState<Method>('cash');
   const [canceller, setCanceller] = useState<Canceller>('customer');
@@ -51,7 +54,7 @@ export function useAppointmentActions(
   function allowed(a: Appointment): AllowedActions {
     const due = appointmentDetail(fixture, a).due;
     return {
-      checkIn: a.status === 'confirmed',
+      checkIn: canBook && a.status === 'confirmed',
       collect: a.status === 'checked_in' || (a.status === 'completed' && !a.settled && due > 0n),
       // BR-09: only once the start time has passed without a check-in.
       noShow: a.status === 'confirmed' && now >= a.startAt,
@@ -175,6 +178,8 @@ export function useAppointmentActions(
 
   return {
     allowed,
+    /** `false` while the plan does not take bookings. */
+    bookingOpen: canBook,
     checkIn,
     collect: (a: Appointment) => ask('collect', a),
     noShow: (a: Appointment) => ask('no-show', a),

@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { StaffRole } from '@/mock/selection';
+import type { FeatureCode } from '@/mock/subscription';
 
 export interface NavEntry {
   id: string;
@@ -25,6 +26,8 @@ export interface NavEntry {
   group?: string;
   /** Mock count of pending work. */
   badge?: number;
+  /** The plan must have this feature, otherwise the entry shows a padlock (BR-87). */
+  feature?: FeatureCode;
 }
 
 const overview: NavEntry = { id: 'overview', label: 'Tổng quan', path: '', icon: LayoutDashboard };
@@ -66,6 +69,7 @@ const reports: NavEntry = {
   path: 'reports',
   icon: ChartColumn,
   group: 'Kinh doanh',
+  feature: 'full_reports',
 };
 const commission: NavEntry = {
   id: 'commission',
@@ -73,6 +77,7 @@ const commission: NavEntry = {
   path: 'commission',
   icon: Percent,
   group: 'Kinh doanh',
+  feature: 'commission',
 };
 const settings: NavEntry = {
   id: 'settings',
@@ -108,19 +113,26 @@ export interface SettingsEntry {
   label: string;
   /** Path under `/mock/app/[tenant]`. */
   path: string;
+  feature?: FeatureCode;
 }
 
 /** Entries of the settings menu (FormSection README). */
 export const settingsEntries: SettingsEntry[] = [
+  { id: 'plan', label: 'Gói Sapio', path: 'settings/plan' },
   { id: 'branches', label: 'Chi nhánh', path: 'settings/branches' },
   { id: 'services', label: 'Dịch vụ', path: 'settings/services' },
   { id: 'resources', label: 'Tài nguyên', path: 'settings/resources' },
   { id: 'staff', label: 'Nhân sự', path: 'settings/staff' },
-  { id: 'packages', label: 'Gói liệu trình', path: 'settings/packages' },
+  {
+    id: 'packages',
+    label: 'Gói liệu trình',
+    path: 'settings/packages',
+    feature: 'packages_wallet',
+  },
   { id: 'policies', label: 'Chính sách', path: 'settings/policies' },
   { id: 'branding', label: 'Thương hiệu', path: 'settings/branding' },
   { id: 'payments', label: 'Thanh toán', path: 'settings/payments' },
   { id: 'notifications', label: 'Thông báo', path: 'settings/notifications' },
-  { id: 'chatbot', label: 'Chatbot', path: 'settings/chatbot' },
+  { id: 'chatbot', label: 'Chatbot', path: 'settings/chatbot', feature: 'chatbot' },
   { id: 'audit-log', label: 'Nhật ký thao tác', path: 'audit-log' },
 ];

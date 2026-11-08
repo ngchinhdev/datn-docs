@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { tenantFixtures } from '@/mock/fixtures';
 import { fixtureBySlug } from '@/mock/selection';
 import { StaffStoreProvider } from '@/components/mock/staff-store';
+import { SubscriptionProvider } from '@/components/mock/subscription-store';
 import { AppFrame } from './app-frame';
 
 export function generateStaticParams() {
@@ -17,7 +18,9 @@ export default async function AppLayout({ children, params }: LayoutProps<'/mock
   return (
     <Suspense fallback={null}>
       <StaffStoreProvider tenantSlug={tenant}>
-        <AppFrame tenantSlug={tenant}>{children}</AppFrame>
+        <SubscriptionProvider tenantSlug={tenant}>
+          <AppFrame tenantSlug={tenant}>{children}</AppFrame>
+        </SubscriptionProvider>
       </StaffStoreProvider>
     </Suspense>
   );

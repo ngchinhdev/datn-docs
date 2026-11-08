@@ -2,6 +2,7 @@
 
 import { Plus } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
+import Link from 'next/link';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { Button } from '@/components/sapio/button';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
@@ -102,6 +103,7 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
       : `${staffOf(a)} · ${others(a)} · xong lúc ${formatTime(appointmentEnd(a))}`;
   };
   const checkIn = actions.checkIn;
+  const bookingOpen = actions.bookingOpen;
   const collect = actions.collect;
 
   return (
@@ -112,15 +114,34 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
           <p className="sp-page-head__sub">{branch.name}</p>
         </div>
         <div className="sp-page-head__actions flex flex-wrap items-center gap-(--space-3)">
-          <Button onClick={() => notify('Khách vãng lai: chưa có trong mock.')}>
+          <Button
+            disabled={!bookingOpen}
+            aria-describedby={bookingOpen ? undefined : 'trial-note'}
+            onClick={() => notify('Khách vãng lai: chưa có trong mock.')}
+          >
             Khách vãng lai
           </Button>
-          <Button variant="primary" onClick={() => notify('Tạo lịch hẹn: chưa có trong mock.')}>
+          <Button
+            variant="primary"
+            disabled={!bookingOpen}
+            aria-describedby={bookingOpen ? undefined : 'trial-note'}
+            onClick={() => notify('Tạo lịch hẹn: chưa có trong mock.')}
+          >
             <Plus size={16} aria-hidden="true" />
             Tạo lịch hẹn
           </Button>
         </div>
       </header>
+
+      {!bookingOpen && (
+        <p id="trial-note" className="body-sm m-0 text-(--ink-muted)">
+          Đang dùng thử: chưa tạo được lịch hẹn và chưa check-in. Mọi lịch hẹn ở đây là dữ liệu mẫu.{' '}
+          <Link href={appHref('settings/plan')} className="font-medium">
+            Kích hoạt gói để mở
+          </Link>
+          .
+        </p>
+      )}
 
       <main className="flex flex-wrap items-start gap-(--space-5)">
         <aside
@@ -186,7 +207,12 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
                   onSelect={() => setSelectedId(a.id)}
                   meta={`${staffOf(a)} · ${others(a)}${a.depositVnd ? ` · đã cọc ${formatVnd(a.depositVnd)}` : ''}`}
                   action={
-                    <Button size="sm" onClick={() => checkIn(a)}>
+                    <Button
+                      size="sm"
+                      disabled={!bookingOpen}
+                      aria-describedby={bookingOpen ? undefined : 'trial-note'}
+                      onClick={() => checkIn(a)}
+                    >
                       Check-in
                     </Button>
                   }

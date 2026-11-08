@@ -240,6 +240,38 @@ export interface IndustryTemplate {
   };
   /** Empty when the customer is the only subject. */
   subjectSchema: SubjectField[];
+  /** Resources other than staff that a new tenant starts with. */
+  resourceTypes: TemplateResourceType[];
+  /** Services created with the tenant; the sign-up preview lists them. */
+  sampleServices: SampleService[];
+  /** Who the customer books for, in the sign-up preview: "chính mình", "thú cưng". */
+  bookingFor: string;
+  /** One sentence under the preview about what is special in this industry. */
+  previewNote: string;
+}
+
+export interface TemplateResourceType {
+  name: string;
+  /** One line under the name when the owner sets the count. */
+  hint: string;
+  /** Count suggested for the first branch. */
+  defaultCount: number;
+}
+
+export interface SampleServiceVariant {
+  name: string;
+  minutes: number;
+  /** Integer VND. */
+  priceVnd: bigint;
+  /** Has a wait segment: the staff is free, the other resources stay busy (BR-05). */
+  hasWait?: boolean;
+}
+
+export interface SampleService {
+  name: string;
+  variants: SampleServiceVariant[];
+  /** Price depends on the served subject: the preview shows one line "từ <lowest price>". */
+  priceBySubject?: boolean;
 }
 
 export interface TenantFixture {

@@ -55,6 +55,8 @@ export interface MockScreen {
 export interface ScreenLink {
   label: string;
   href: (tenantSlug: string) => string;
+  /** One link for the whole platform instead of one per tenant (the sign-up flow). */
+  platform?: boolean;
 }
 
 const app = (path: string) => (slug: string) => `/mock/app/${slug}/${path}`;
@@ -62,6 +64,7 @@ const firstStaffId = (slug: string) => fixtureBySlug(slug)?.staff[0]?.resourceId
 
 /** Screens that have a mock page, with the links that open them. Everything else is not built. */
 const built: Record<string, ScreenLink[]> = {
+  'MH-02': [{ label: 'Đăng ký cơ sở', href: () => '/mock/signup', platform: true }],
   'MH-07': [{ label: 'Khung ứng dụng', href: app('customers') }],
   'MH-08': [{ label: 'Khách hàng', href: app('customers') }],
   'MH-09': [
@@ -75,6 +78,12 @@ const built: Record<string, ScreenLink[]> = {
   'MH-25': [{ label: 'Hôm nay', href: app('today') }],
   'MH-32': [{ label: 'Khách hàng', href: app('customers') }],
   'MH-47': [{ label: 'Nhân sự', href: app('settings/staff') }],
+  'MH-61': [
+    { label: 'Gói Sapio', href: app('settings/plan') },
+    { label: 'Dùng thử', href: app('calendar?plan=trial') },
+    { label: 'Tính năng bị khóa (gói Cơ bản)', href: app('settings/chatbot?plan=basic') },
+    { label: 'Hết hạn', href: app('calendar?plan=expired') },
+  ],
   'MH-48': [
     { label: 'Hồ sơ nhân viên', href: (slug) => app(`settings/staff/${firstStaffId(slug)}`)(slug) },
   ],
@@ -683,6 +692,26 @@ const rows: Row[] = [
     level: 'Nhẹ',
     routes: ['/admin'],
     note: 'Số cơ sở theo ngành, số lịch đặt, cơ sở mới',
+  },
+  {
+    code: 'MH-61',
+    title: 'Gói Sapio',
+    zone: 'G',
+    roles: ['owner'],
+    wave: 2,
+    level: 'Vẽ',
+    routes: ['/app/[tenant]/settings/plan'],
+    note: 'Trạng thái gói, hai thẻ gói, chọn kỳ 1/3/12 tháng, thanh toán QR, lịch sử thanh toán (BR-83, BR-84). Hết hạn: mọi route khu nội bộ chuyển về đây, kèm bảng lịch đã đặt sau hạn chỉ để đọc (BR-82). Trang của tính năng bị khóa có bảng tiền nâng gói (BR-85, BR-87)',
+  },
+  {
+    code: 'MH-62',
+    title: 'Gói và giá',
+    zone: 'H',
+    roles: ['admin'],
+    wave: 2,
+    level: 'Form',
+    routes: ['/admin/plans'],
+    note: 'Giá tháng, tính năng và giới hạn của từng gói (BR-83); mức giảm theo kỳ; đổi giá không ảnh hưởng kỳ đã trả',
   },
 ];
 

@@ -1,5 +1,7 @@
 /** Mock clock: Saturday 07/11/2026 10:20 in Vietnam. Never read the real clock in mock screens. */
 export const MOCK_NOW = '2026-11-07T03:20:00Z';
+/** Local date of `MOCK_NOW`, `2026-11-07`. */
+export const MOCK_TODAY = '2026-11-07';
 export const BRANCH_TIME_ZONE = 'Asia/Ho_Chi_Minh';
 
 const MINUTE = 60_000;
@@ -58,3 +60,7 @@ export const formatCountdown = (seconds: number) => {
   const s = Math.max(0, Math.floor(seconds));
   return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 };
+
+/** `13/11/2026`. */
+export const formatFullDate = (date: string) =>
+  `${date.slice(8, 10)}/${date.slice(5, 7)}/${date.slice(0, 4)}`;

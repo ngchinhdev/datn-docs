@@ -1,5 +1,6 @@
 'use client';
 
+import { Check } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -44,6 +45,9 @@ export function Field({
   optional = false,
   help,
   error,
+  ok = false,
+  suffix,
+  live = false,
   full = false,
   size = 'sm',
   area = false,
@@ -52,8 +56,14 @@ export function Field({
   id: string;
   label: string;
   optional?: boolean;
-  help?: string | undefined;
+  help?: ReactNode;
   error?: string | null | undefined;
+  /** The value passed a check that took time (address is free): help turns green with a tick. */
+  ok?: boolean;
+  /** Fixed text after the input inside the box: ".sapio.vn". */
+  suffix?: string;
+  /** The line under the field is read out when it changes (a check that runs while typing). */
+  live?: boolean;
   /** Spans both columns of the section. */
   full?: boolean;
   /** `sm` is the admin density (40px), `md` the customer pages (48px). */
@@ -70,6 +80,7 @@ export function Field({
         'sp-field',
         size === 'sm' && 'sp-field--sm',
         error && 'sp-field--error',
+        ok && !error && 'sp-field--ok',
         full && 'sp-field--full',
       )}
     >
@@ -77,9 +88,21 @@ export function Field({
         {label}
         {optional && <span className="sp-field__optional"> (không bắt buộc)</span>}
       </label>
-      <div className={cn('sp-field__control', area && 'sp-field__control--area')}>{children}</div>
+      <div className={cn('sp-field__control', area && 'sp-field__control--area')}>
+        {children}
+        {suffix && (
+          <span className="sp-field__suffix flex items-center self-stretch border-l border-(--line)">
+            {suffix}
+          </span>
+        )}
+      </div>
       {message && (
-        <span id={`${id}-help`} className="sp-field__help">
+        <span
+          id={`${id}-help`}
+          className="sp-field__help"
+          {...(live ? { 'aria-live': 'polite' as const } : {})}
+        >
+          {ok && !error && <Check size={14} aria-hidden="true" className="me-1 inline" />}
           {message}
         </span>
       )}

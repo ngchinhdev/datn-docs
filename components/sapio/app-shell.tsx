@@ -24,6 +24,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
+import { LockIcon } from './lock-icon';
 import { Sheet } from './sheet';
 import { Tip } from './tooltip';
 import { useMediaQuery } from './use-media-query';
@@ -38,6 +39,8 @@ export interface ShellNavItem {
   group?: string;
   /** Pending work for this item. */
   badge?: number;
+  /** The plan does not include it: a padlock, and the page explains the upgrade (BR-87). */
+  locked?: boolean;
   current: boolean;
 }
 
@@ -62,6 +65,8 @@ export interface ShellProps {
   account: { name: string; initials: string; roleLabel: string };
   /** Extra account entries (role switch in the mock); `kind` tells menu rows from sheet rows. */
   accountExtra?: ((kind: 'menu' | 'list') => ReactNode) | undefined;
+  /** Notice above the page content (trial, plan about to end). */
+  banner?: ReactNode;
   onProfile: () => void;
   onSignOut: () => void;
   children: ReactNode;
@@ -350,14 +355,24 @@ function NavItems({ items, rail }: { items: ShellNavItem[]; rail: boolean }) {
                 aria-current={item.current ? 'page' : undefined}
                 aria-label={
                   rail
-                    ? item.badge
-                      ? `${item.label}, ${item.badge} việc chờ`
-                      : item.label
+                    ? [
+                        item.label,
+                        item.badge ? `${item.badge} việc chờ` : null,
+                        item.locked ? 'cần nâng gói' : null,
+                      ]
+                        .filter(Boolean)
+                        .join(', ')
                     : undefined
                 }
               >
                 <Icon aria-hidden="true" />
                 <span className="sp-nav__label">{item.label}</span>
+                {item.locked && !rail && (
+                  <>
+                    <span className="sp-sr-only"> (cần nâng gói)</span>
+                    <LockIcon />
+                  </>
+                )}
                 {item.badge ? (
                   <>
                     <span className="sp-nav__badge">
@@ -484,7 +499,10 @@ export function AppShell(props: ShellProps) {
           />
           <div ref={setPhoneSlot} className="flex flex-none items-center gap-(--space-2)" />
         </header>
-        <PhoneSlot.Provider value={phoneSlot}>{children}</PhoneSlot.Provider>
+        <PhoneSlot.Provider value={phoneSlot}>
+          {props.banner}
+          {children}
+        </PhoneSlot.Provider>
       </div>
 
       <nav
@@ -535,7 +553,11 @@ export function AppShell(props: ShellProps) {
                     onClick={() => setMore(false)}
                   >
                     <Icon size={18} aria-hidden="true" />
-                    <span className="sp-menu__text">{item.label}</span>
+                    <span className="sp-menu__text">
+                      {item.label}
+                      {item.locked && <span className="sp-sr-only"> (cần nâng gói)</span>}
+                    </span>
+                    {item.locked && <LockIcon />}
                     {item.badge ? <span className="sp-nav__badge">{item.badge}</span> : null}
                     {item.current && <Check size={16} aria-hidden="true" />}
                   </Link>
