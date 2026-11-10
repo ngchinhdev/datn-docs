@@ -210,10 +210,14 @@ export function useCalendarDrag(args: {
           );
         if (!column) return;
         const steps = Math.round((ev.clientY - s.startY) / s.slotPx);
-        const minute = Math.min(
-          Math.max(Math.round((s.oldMinute + steps * SLOT) / SLOT) * SLOT, 0),
-          24 * 60 - SLOT,
-        );
+        // Less than one cell of travel keeps an off-grid time (14:05) as it is.
+        const minute =
+          steps === 0
+            ? s.oldMinute
+            : Math.min(
+                Math.max(Math.round((s.oldMinute + steps * SLOT) / SLOT) * SLOT, 0),
+                24 * 60 - SLOT,
+              );
         const key = `${column.id}|${minute}`;
         const target = key === s.lastKey ? s.last.target : evaluate(appt, column.id, minute);
         s.lastKey = key;
