@@ -123,9 +123,7 @@ export function AppointmentScreen({ tenantSlug, id }: { tenantSlug: string; id: 
       </div>
 
       <div className="flex flex-col gap-0.5">
-        <h1 className="m-0 text-[22px] leading-[30px] font-semibold">
-          {L.customerName(appt)}
-        </h1>
+        <h1 className="m-0 text-[22px] leading-[30px] font-semibold">{L.customerName(appt)}</h1>
         {customer && (
           <span className="body-sm">
             {!showPhone ? (
