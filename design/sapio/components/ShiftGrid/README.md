@@ -7,6 +7,6 @@ Lưới ca tuần (MH-38): `table.sp-shiftgrid`, hàng là nhân viên (tên, c�
   - `--off`: nghỉ, viền mảnh.
   - `--leave`: nghỉ phép, màu của trạng thái không đến, kèm badge Chờ duyệt hoặc Đã duyệt.
   - `--warn`: khung vừa sửa mà còn lịch bên ngoài, viền `danger`.
-- Ô đang sửa có `aria-selected="true"`. Bảng sửa ca nằm ở `SidePanel` bên phải: các khung giờ, "Thêm khung trong ngày", "Áp cho mọi Thứ … từ nay", và cảnh báo các lịch không còn người làm (BR-35).
+- Ô đang sửa có `aria-current="true"` và `data-selected` (ô bảng không nhận `aria-selected`). Bảng sửa ca nằm ở `SidePanel` bên phải: các khung giờ, "Thêm khung trong ngày", "Áp cho mọi Thứ … từ nay", và cảnh báo các lịch không còn người làm (BR-35).
 - **Hàng chân "Mở cửa":** giờ mở cửa từng ngày, kèm cảnh báo khoảng giờ mở cửa mà không ai trực.
 - Lưới nằm trong `.sp-table-wrap` và cuộn ngang bên trong khi hẹp; dưới 768px đổi thành danh sách theo ngày.

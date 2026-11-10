@@ -5,6 +5,38 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 **Quy ước:** mới nhất ở trên. Mỗi mục ghi: đã làm gì, vướng gì, việc tiếp theo. Cuối đồ án, trang này dùng làm phụ lục báo cáo.
 
+## Tuần 2 (09/11 – 15/11/2026)
+
+### 10/11/2026: review và merge PR #6 (Bước 11)
+- **Đã làm:**
+  - Review PR #6. Sửa trên cùng nhánh rồi người dùng merge:
+    - Lúc duyệt nghỉ, kiểm lại từng cách xử lý; cách không còn hợp lệ thì lịch về "chưa xử lý".
+    - Khách vãng lai giữ `customerId` rỗng, không sinh hồ sơ "Khách lẻ".
+    - Bỏ tick gửi email thì không gắn dấu "Chưa xác nhận đổi người".
+    - Lịch giờ lẻ kéo chưa đủ một ô thì giữ giờ.
+  - Sapio:
+    - `.sp-date` đang chọn giữ màu khi rê chuột.
+    - Ô `ShiftGrid` đang sửa dùng `aria-current` và `data-selected`.
+    - Nhóm chọn giá trị (Cả ngày / Vài giờ, thời hạn gói) là `role="group"` với nút `aria-pressed`, bỏ `role="radio"`.
+  - Bảng vẽ sửa theo dữ liệu mẫu đã merge:
+    - Chị Hà là "Bất kỳ ai".
+    - Chị Ngọc giữ Ghế 1.
+    - Chị Hằng 17:30.
+    - Đơn của Hùng gửi 05/11 17:40.
+    - Mã quy tắc trên hộp đổi người và ô "đích danh" là BR-32, BR-31.
+  - Quy tắc:
+    - BR-11: đơn chờ duyệt đã chặn đặt lịch mới với người đó.
+    - BR-34: bỏ chỗ mâu thuẫn với BR-35 (bớt ca thì lưu ngay, lịch vào "Cần xếp lại"); lúc duyệt kiểm lại từng cách xử lý.
+- **Ghi chú cho ERD** (thêm vào danh sách của 08/11):
+  - `leave_requests` có khoảng ngày (`from_date`, `to_date`) và giờ; mock đang tách mỗi ngày một đơn.
+  - Tiến độ làm ghi trên `appointment_items` (`started`, `resumed`, `done`); không cần trạng thái `in_service` ở lịch hẹn. Kỹ thuật viên bấm Bắt đầu thì lịch thành `checked_in` nếu chưa.
+  - Lịch khách vãng lai có `customer_id` null.
+- **Đưa vào bước mock sau:**
+  - Gỡ `aria-pressed:hover:bg-(--accent)!` trong `components/sapio/date-strip.tsx`, vì CSS Sapio đã sửa.
+  - Đổi chữ "(BR-11)" ở ô "Khách yêu cầu đích danh" thành BR-31, ở hộp đổi người thành BR-32, ở panel bớt ca thành BR-35.
+  - Lưới ca dùng class `.sp-shiftgrid td[data-selected]` thay cho class Tailwind tự viết.
+- **Tiếp theo:** phiên claude.ai vẽ đợt B (phía khách: MH-11, MH-13 đến MH-21, MH-23).
+
 ## Tuần 1 (02/11 – 08/11/2026)
 
 ### 08/11/2026 (khuya): mock Bước 11, nghiệp vụ lịch

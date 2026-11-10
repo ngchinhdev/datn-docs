@@ -29,10 +29,10 @@ a{color:var(--brand)}a:hover{color:var(--ink)}
       <section aria-labelledby="ex-plans" style="display: flex; flex-direction: column; gap: 16px;">
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
           <h2 id="ex-plans" style="margin: 0; font: 600 18px/26px var(--font-sans);">Gia hạn để dùng tiếp</h2>
-          <div class="sp-segmented" role="radiogroup" aria-label="Thời hạn">
-            <button type="button" class="sp-segmented__item" role="radio" aria-checked="true" aria-pressed="true">1 tháng</button>
-            <button type="button" class="sp-segmented__item" role="radio" aria-checked="false">3 tháng <span class="sp-segmented__count" style="color: var(--brand); font-weight: 600;">−10%</span></button>
-            <button type="button" class="sp-segmented__item" role="radio" aria-checked="false">12 tháng <span class="sp-segmented__count" style="color: var(--brand); font-weight: 600;">−20%</span></button>
+          <div class="sp-segmented" role="group" aria-label="Thời hạn">
+            <button type="button" class="sp-segmented__item" aria-pressed="true">1 tháng</button>
+            <button type="button" class="sp-segmented__item" aria-pressed="false">3 tháng <span class="sp-segmented__count" style="color: var(--brand); font-weight: 600;">−10%</span></button>
+            <button type="button" class="sp-segmented__item" aria-pressed="false">12 tháng <span class="sp-segmented__count" style="color: var(--brand); font-weight: 600;">−20%</span></button>
           </div>
         </div>
         <div class="sp-plans">

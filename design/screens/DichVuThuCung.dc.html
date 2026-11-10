@@ -84,9 +84,9 @@ a{color:var(--brand)}a:hover{color:var(--ink)}
         </div>
         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
           <span id="pm-label" style="font: 500 13px/18px var(--font-sans);">Chọn biến thể</span>
-          <div class="sp-segmented" role="radiogroup" aria-labelledby="pm-label">
-            <button type="button" class="sp-segmented__item" role="radio" aria-checked="false">Khách tự chọn</button>
-            <button type="button" class="sp-segmented__item" role="radio" aria-checked="true" aria-pressed="true">Theo thông tin của bé</button>
+          <div class="sp-segmented" role="group" aria-labelledby="pm-label">
+            <button type="button" class="sp-segmented__item" aria-pressed="false">Khách tự chọn</button>
+            <button type="button" class="sp-segmented__item" aria-pressed="true">Theo thông tin của bé</button>
           </div>
         </div>
         <div class="sp-banner" role="status" style="border-radius: var(--radius-md);">
