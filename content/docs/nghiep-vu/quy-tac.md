@@ -21,7 +21,7 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 | BR-05 | Đoạn "chờ" giải phóng nhân viên nhưng vẫn chiếm phòng/ghế/lồng sấy theo cấu hình dịch vụ |
 | BR-06 | Không cho đặt sớm hơn X giờ và xa hơn Y ngày so với hiện tại (cấu hình) |
 | BR-07 | Giữ chỗ tồn tại tối đa 10 phút; hết hạn thì tự trả lại |
-| BR-08 | Khách tự đổi/hủy phải trước tối thiểu X giờ; tự đổi tối đa N lần mỗi lịch |
+| BR-08 | Khách tự đổi/hủy phải trước tối thiểu X giờ; tự đổi tối đa N lần mỗi lịch. Khách chỉ đổi giờ hoặc hủy **cả lịch**; bỏ một dịch vụ trong chuỗi hay một người trong nhóm thì qua tiệm. Quá hạn tự đổi thì trang hiện số điện thoại cơ sở. "Chọn lại giờ" khi trả lời đề nghị đổi người (BR-32, BR-33) không tính vào N lần |
 | BR-09 | Quá giờ hẹn M phút mà chưa check-in thì đánh dấu "không đến" |
 | BR-10 | Không đến K lần trong 6 tháng thì lần sau bắt buộc đặt cọc |
 | BR-11 | Duyệt nghỉ phép phải xử lý xong mọi lịch bị ảnh hưởng; khách chọn đích danh phải được hỏi ý trước khi đổi người. Cách xử lý từng lịch: BR-34. Đơn đang chờ duyệt đã chặn đặt lịch mới với người đó trong khoảng xin nghỉ (trang khách và lễ tân); đơn bị từ chối thì mở lại |
@@ -29,8 +29,10 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 | BR-13 | Biến thể dịch vụ (giá, thời lượng) được chọn theo thuộc tính của đối tượng được phục vụ |
 | BR-14 | Khi khách chọn nhân viên: "Bất kỳ ai" đứng đầu và được chọn sẵn (hệ thống xếp người theo BR-57); chỉ liệt kê nhân viên nhận đặt online và có kỹ năng làm dịch vụ đã chọn (BR-03); người kín lịch trong ngày đang xem vẫn hiện nhưng làm mờ, ghi "Hết giờ ngày này"; chọn một người thì giờ trống lọc theo lịch người đó |
 | BR-15 | Trang khách chỉ hiện hồ sơ công khai của nhân viên: tên hiển thị, ảnh (không có thì chữ cái đầu), chức danh, thế mạnh, giờ trống sớm nhất. Họ tên đầy đủ, mã nhân viên, số điện thoại chỉ hiện trong khu quản trị |
-| BR-16 | Khách xác nhận lịch bằng mã 6 số gửi qua **email**. Số điện thoại vẫn bắt buộc, làm thông tin liên hệ cho cơ sở, không dùng để xác thực. Mã hết hạn sau X phút; nhập sai N lần thì phải gửi mã mới (cấu hình) |
-| BR-17 | Đối tượng được phục vụ đã lưu (ví dụ thú cưng) chỉ hiện khi khách đã có phiên, tức đã xác thực OTP tại cơ sở đó trước đây. Chưa có phiên thì khách khai đối tượng mới ngay trong luồng đặt lịch |
+| BR-16 | Khách xác nhận lịch bằng mã 6 số gửi qua **email**. Số điện thoại vẫn bắt buộc, làm thông tin liên hệ cho cơ sở, không dùng để xác thực. Mã hết hạn sau X phút; nhập sai N lần thì phải gửi mã mới (cấu hình). Đăng nhập trang khách cũng bằng mã email; phiên riêng cho từng cơ sở; email chưa có lịch vẫn đăng nhập được |
+| BR-17 | Đối tượng được phục vụ đã lưu (ví dụ thú cưng) chỉ hiện khi khách đã có phiên, tức đã xác thực OTP tại cơ sở đó trước đây. Chưa có phiên thì khách khai đối tượng mới ngay trong luồng đặt lịch. Không xóa được đối tượng còn lịch sắp tới; sửa thuộc tính không đổi giá và thời lượng của lịch đã đặt (BR-12) |
+| BR-18 | **Chuỗi dịch vụ:** một lịch online có tối đa 4 dịch vụ cho cùng một đối tượng, làm lần lượt theo thứ tự khách xếp. Dịch vụ sau bắt đầu ngay khi phần khách thấy của dịch vụ trước kết thúc (BR-51); nếu cùng một người làm và dịch vụ sau có đoạn Chuẩn bị thì khách chờ thêm đúng đoạn đó. Khách chọn một người cho cả chuỗi hoặc chọn riêng từng dịch vụ; "Bất kỳ ai" xếp từng dịch vụ theo BR-57, cùng cấp thì ưu tiên người làm dịch vụ trước. Giá, cọc là tổng của từng mục (BR-56) |
+| BR-19 | **Đặt nhóm:** một lịch online cho tối đa 4 đối tượng (người đi cùng hoặc nhiều thú cưng), mỗi đối tượng một dịch vụ, cùng giờ bắt đầu; mỗi loại tài nguyên phải là tài nguyên khác nhau (khác người làm, khác ghế). Không có giờ chung thì gợi ý giờ lệch nhau, các mục bắt đầu cách nhau không quá 60 phút, xếp theo giờ xong sớm nhất. Người đi cùng chỉ cần tên; một người đặt, một mã OTP, một email xác nhận cho cả nhóm |
 
 ## Vận hành lịch: lễ tân, ca, nghỉ phép
 
@@ -74,6 +76,7 @@ Chi tiết và ví dụ tính tay ở [Thuật toán tính giờ trống](../ky-
 | BR-26 | Doanh thu gói ghi nhận theo từng buổi sử dụng |
 | BR-27 | Hoàn gói = giá gói − (số buổi đã dùng × giá lẻ tại thời điểm mua) − phí hủy; âm thì bằng 0 |
 | BR-28 | Hoàn tiền bắt buộc ghi lý do và cần quyền quản lý; kéo theo thu hồi hoa hồng và hoàn buổi gói |
+| BR-29 | Giữ chỗ khi trả cọc vẫn là 10 phút tính từ lúc chọn giờ (BR-07); sang trang trả cọc không cộng thêm. Tiền cọc về sau khi hết giữ chỗ: giờ còn trống thì vẫn xác nhận; đã có người đặt thì hệ thống tự hoàn đủ, không cần quản lý duyệt (khác BR-28), và gợi ý giờ gần nhất |
 
 ## Hoa hồng
 
@@ -92,7 +95,7 @@ Chi tiết và ví dụ tính tay ở [Thuật toán tính giờ trống](../ky-
 | BR-61 | Số điện thoại được chuẩn hóa (`0912...` và `+84912...` là một) |
 | BR-62 | Ghi chú nội bộ không bao giờ hiển thị cho khách |
 | BR-63 | Thao tác nhạy cảm (hoàn tiền, xuất danh sách khách, đổi giá) được ghi nhật ký |
-| BR-64 | Khách đồng ý xử lý dữ liệu cá nhân khi đặt lịch lần đầu; đồng ý nhận quảng cáo là lựa chọn riêng |
+| BR-64 | Khách đồng ý xử lý dữ liệu cá nhân khi đặt lịch lần đầu; đồng ý nhận quảng cáo là lựa chọn riêng, mặc định tắt. Đổi email đăng nhập phải nhập mã gửi tới email mới |
 | BR-70 | Gói cấu hình ngành chỉ được nạp khi tạo tenant; sau đó mọi chỉnh sửa thuộc về tenant, không ảnh hưởng gói gốc. Gói có bản nháp và các bản đã xuất bản; cơ sở mới nhận bản đang xuất bản lúc tạo, sửa hay xuất bản bản mới không đổi cơ sở đã tạo |
 | BR-71 | Thuộc tính của đối tượng được phục vụ phải hợp lệ theo schema của ngành trước khi lưu |
 | BR-72 | Slug của cơ sở (cũng là tên miền con, T-16): chữ thường không dấu, số, gạch ngang, 3–40 ký tự, không bắt đầu hoặc kết thúc bằng gạch ngang, duy nhất trên nền tảng, không trùng từ dành riêng (`www`, `app`, `admin`, `api`, `mail`, `status`, `blog`, `cdn`, `signup`, `login`, `logout`, `invite`, `verify-email`, `forgot-password`, `reset-password`, `select-workspace`, `docs`, `mock`, `help`, `about`, `terms`, `privacy`, `static`, `assets`). Đổi slug thì link cũ tự chuyển sang slug mới |
@@ -123,7 +126,7 @@ Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-h
 | Tình huống | Xử lý | BR liên quan |
 |---|---|---|
 | Hai khách cùng bấm đặt giờ cuối cùng trong một giây | Đúng 1 người thành công, người kia nhận lỗi kèm gợi ý giờ gần nhất | BR-01, BR-07 |
-| Khách thanh toán xong nhưng giữ chỗ đã hết hạn | Giờ còn trống thì xác nhận; đã có người đặt thì tự tạo yêu cầu hoàn tiền | BR-07, BR-21 |
+| Khách thanh toán xong nhưng giữ chỗ đã hết hạn | Giờ còn trống thì xác nhận; đã có người đặt thì tự hoàn đủ, gợi ý giờ gần nhất | BR-07, BR-21, BR-29 |
 | Đồng hồ chạy qua 23:59:59 ngày thứ 7 của dùng thử | Từ 00:00:00 mọi trang trừ Gói Sapio bị chuyển hướng, API nghiệp vụ trả 402/403; kiểm bằng `Clock` giả, không chờ job | BR-80, BR-82 |
 | Webhook kích hoạt gói gửi 3 lần | Một kỳ gói, một bút toán | BR-88 |
 | Nâng gói khi còn 22 ngày | Trả thêm 147.000 ₫ (200.000 × 22/30 làm tròn lên), ngày hết kỳ không đổi | BR-85 |
@@ -136,7 +139,10 @@ Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-h
 | Nhân viên nghỉ đột xuất, đã có lịch trong ngày | Liệt kê lịch bị ảnh hưởng; khách chọn đích danh được hỏi ý | BR-11 |
 | Gói liệu trình hết hạn khi khách còn lịch đặt trước | Cảnh báo khi đặt; đến ngày, lễ tân chọn gia hạn hoặc tính giá lẻ | BR-26 |
 | Cùng số điện thoại đặt ở hai cơ sở khác nhau | Hai hồ sơ độc lập, không cơ sở nào thấy của nhau | BR-60 |
-| Một khách đặt cho hai thú cưng cùng lúc | Đặt nhóm, mỗi bé là một đối tượng được phục vụ | BR-13 |
+| Một khách đặt cho hai thú cưng cùng lúc | Đặt nhóm, mỗi bé là một đối tượng được phục vụ | BR-13, BR-19 |
+| Hai bé cùng giờ mà chỉ còn một lồng sấy rảnh | Không hiện giờ đó cho "cùng giờ"; gợi ý giờ lệch nhau không quá 60 phút | BR-19 |
+| Khách chọn Lan cho cả Cắt rồi Nhuộm | Nhuộm bắt đầu sau khi cắt xong thêm 15 phút pha thuốc; khách thấy khoảng chờ này | BR-18 |
+| Khách bấm "Chọn lại giờ" trong email hỏi ý, lịch đã đổi 2 lần | Vẫn chọn lại được, không tính vào số lần đổi | BR-08, BR-33 |
 | Thợ có lịch cắt nằm trọn trong đoạn chờ lên màu của khách nhuộm | Cả hai lịch hợp lệ; lịch cắt phải ở ghế khác (VD3 của BT1) | BR-05, BR-53 |
 | Lịch nhuộm cuối buổi sáng mà 10 phút dọn ghế lấn qua giờ đóng cửa | Không hiện giờ đó (VD5) | BR-52, BR-54 |
 | Chỉ có một bồn tắm, bé trước đang sấy | Bé sau vào bồn ngay khi rửa bồn xong, không chờ bé trước sấy xong (VD8) | BR-52 |
@@ -156,7 +162,5 @@ Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-h
 
 Ghi các điểm chưa rõ ở đây; chốt xong thì chuyển thành BR.
 
-- Giữ chỗ 10 phút có áp dụng cho lễ tân đặt tại quầy không, hay chỉ cho trang công khai? (Đề xuất ở [ERD](../thiet-ke/erd.md#13-câu-hỏi-còn-mở): không giữ chỗ, tạo thẳng lịch đã xác nhận.)
 - Gộp đối tượng trùng sau OTP; email và số điện thoại trỏ tới hai khách khác nhau; bỏ kỹ năng khi còn lịch sắp tới; dịch vụ cần hai nhân viên. Đề xuất ở [ERD](../thiet-ke/erd.md#13-câu-hỏi-còn-mở).
-- Khi khách chọn "bất kỳ ai", có cho lễ tân đổi người sau khi đã xác nhận mà không báo khách không?
 - Hoa hồng của dịch vụ trả bằng buổi trong gói tính trên giá một buổi của gói hay giá lẻ hiện hành? (Phân tích gốc: giá một buổi của gói.)

@@ -627,6 +627,156 @@ Bản chép `app/sapio/components.css` đã cập nhật sẵn. Làm trên nhán
 - **Nghỉ phép:** ở đơn của Lan, "Duyệt nghỉ" tắt cho tới khi xử lý xong cả 4 lịch.
 - **Điện thoại:** ở 390px, mọi màn mới không cuộn ngang, trừ lưới lịch và lưới ca.
 
+## Bước 12. Đợt B: phía khách (MH-11, MH-13 đến MH-21, MH-23)
+
+Sau khi PR #6 merge. Căn cứ:
+- Các bảng `design/screens/Khach*.dc.html` của đợt B (bảng ở `design/README.md`).
+- Quy tắc BR-08, BR-16 đến BR-19, BR-23, BR-29, BR-64 và BR-32, BR-33 (phía khách trả lời đề nghị đổi người).
+- Hàm `findSlots`, `pick`, `placeItem` ở `mock/`.
+
+**Chữ và số trên bảng là minh họa.** Mock lấy từ dữ liệu mẫu và tính bằng hàm thật. Bảng ghi "Thư", nhưng khách đăng nhập trong mock là chị Quyên (Tóc Mây), người có lịch 10/11 14:00 với Lan đang chờ hỏi ý, và chị Linh (Pawpaw).
+
+Làm trên nhánh `feat/mock-customer`, mỗi mục 12a–12i một commit, mở PR mới, không merge.
+
+### 12a. Dọn sau Bước 11 và dữ liệu khách
+
+- Gỡ `aria-pressed:hover:bg-(--accent)!` trong `components/sapio/date-strip.tsx`; CSS Sapio đã sửa.
+- Lưới ca dùng `.sp-shiftgrid td[data-selected]` thay cho class Tailwind tự viết.
+- Đổi "(BR-11)" thành:
+  - BR-31 ở ô "Khách yêu cầu đích danh";
+  - BR-32 ở hộp đổi người;
+  - BR-35 ở panel bớt ca.
+- **Khách đăng nhập:** `CustomerSession` theo từng cơ sở, giữ khách đang đăng nhập.
+- **Dữ liệu cho chị Quyên:**
+  - thêm email;
+  - một lịch đã qua (hoàn thành) và một lịch đã hủy;
+  - một lịch sắp tới nữa;
+  - một lịch hôm nay trong vòng 4 giờ tới, để có trạng thái "quá hạn tự đổi";
+  - gói 10 lần gội sấy còn 6 buổi;
+  - ví có tiền nạp và tiền tặng.
+- **Dữ liệu cho chị Linh:** email, Mochi và Lucky.
+- Đưa `ScheduleStoreProvider` lên layout chung của `/mock`, để trang khách và khu quản trị cùng thấy một lịch. Ví dụ: khách bấm "Đồng ý" thì ở MH-40 dòng đó thành "Khách đã đồng ý". Không làm được gọn thì ghi vào "Tự quyết".
+
+### 12b. Trang cơ sở (MH-11)
+
+- `/mock/[tenant]`, đúng `KhachTrangCoSo` (điện thoại) và `KhachTrangCoSoDesktop` (từ 900px).
+- Dịch vụ theo nhóm, giá "từ …" khi có nhiều biến thể hoặc giá theo cấp. Nút "Đặt" mở `/book` với dịch vụ đó đã chọn.
+- Thợ theo hồ sơ công khai (BR-15), kèm giờ trống sớm nhất hôm nay tính bằng `findSlots` với dịch vụ đầu tiên người đó làm được.
+- Giờ mở cửa theo tuần, ngày đặc biệt ghi riêng. Chính sách lấy từ cài đặt của cơ sở.
+- Header có "Đăng nhập", hoặc ảnh đại diện khi đã đăng nhập.
+
+### 12c. Nhiều dịch vụ (MH-13, BR-18)
+
+- **Bước Dịch vụ:**
+  - Chọn được tối đa 4 dịch vụ.
+  - Khối "Làm theo thứ tự" có nút lên, xuống, bỏ. Thứ tự mặc định là thứ tự chọn.
+  - Thanh dưới hiện tổng giá, tổng thời gian và cọc.
+- **Giờ trống cho cả chuỗi:** thêm `findChainSlots` (hàm thuần) ở `mock/`:
+  - Mục sau bắt đầu đúng lúc phần khách thấy của mục trước kết thúc.
+  - Cùng một người làm và mục sau có đoạn Chuẩn bị thì lùi đúng đoạn đó.
+  - "Bất kỳ ai" xếp từng mục theo BR-57; cùng cấp thì ưu tiên người làm mục trước. Mỗi mục trừ phần chiếm dụng của mình trước khi tính mục sau.
+- **Bước Ngày giờ:**
+  - Dòng "Thợ" kèm link "Chọn thợ riêng cho từng dịch vụ", mở `.sp-sheet` đúng bảng vẽ. Mỗi lựa chọn ghi giá theo BR-56.
+  - Chọn giờ thì khối "Lịch của bạn" liệt kê từng mục: giờ, người, đoạn chờ nếu có.
+- Xác nhận và email ghi đủ các mục.
+- `check:availability` thêm:
+  - Nhuộm rồi Cắt cùng Lan, nối liền nhau;
+  - Cắt rồi Nhuộm cùng Lan, lùi 15 phút pha thuốc;
+  - "Bất kỳ ai" cùng cấp thì giữ người;
+  - đối chứng vét cạn cho chuỗi 2 mục.
+
+### 12d. Đặt nhóm (MH-14, BR-19)
+
+- **Pawpaw:** bước "Cho bé nào?" chọn nhiều bé (tối đa 4), mỗi bé chọn một dịch vụ, giá theo thuộc tính của từng bé.
+- **Tóc Mây:**
+  - Ở bước Dịch vụ có "Đặt cho nhiều người" mở "Đi mấy người?" đúng bảng vẽ.
+  - Người đi cùng chỉ cần tên.
+  - Đặt nhóm thì mỗi người một dịch vụ; khối "Làm theo thứ tự" tắt.
+- **Giờ:** thêm `findGroupSlots` (hàm thuần):
+  - "Cùng giờ": các mục cùng gốc, mỗi loại tài nguyên khác nhau, thử gán bằng quay lui.
+  - "Giờ lệch nhau": khi không có giờ chung, gợi ý tổ hợp bắt đầu cách nhau không quá 60 phút, sắp theo giờ xong sớm nhất, tối đa 3 gợi ý mỗi buổi.
+- Một người đặt, một mã OTP, một email.
+- `check:availability` thêm:
+  - Mochi và Lucky cùng giờ khi chỉ còn một lồng sấy rảnh: không có;
+  - gợi ý lệch nhau đúng giới hạn 60 phút;
+  - đối chứng vét cạn cho nhóm 2 mục.
+
+### 12e. Trả cọc (MH-15, BR-29)
+
+- Lịch có cọc thì "Xác nhận đặt lịch" sang `/mock/[tenant]/book/pay`, đúng `KhachTraCoc`:
+  - QR tĩnh, số tiền, nội dung chuyển khoản, nút chép;
+  - đếm ngược giữ chỗ lấy từ lúc chọn giờ, không cộng thêm.
+- Mock có hai nút **chỉ cho người xem mock**, tách riêng và ghi rõ: "Giả lập: tiền về" và "Giả lập: tiền về sau khi hết giữ chỗ".
+  - Tiền về kịp: thành màn "Đã đặt lịch".
+  - Tiền về muộn, giờ còn trống: vẫn xác nhận.
+  - Tiền về muộn, giờ đã có người đặt: màn "vừa có người đặt", báo đã hoàn đủ và 3 giờ gần nhất.
+- Hết giữ chỗ mà chưa trả thì quay về bước Ngày giờ, giữ lựa chọn dịch vụ.
+
+### 12f. Đăng nhập, lịch hẹn của khách (MH-16, MH-17, MH-18)
+
+- **`/mock/[tenant]/login`:**
+  - Email, rồi mã 6 số (mock nhận mã `482193`).
+  - Email chưa có lịch thì màn "Chưa có lịch nào".
+  - Phiên chỉ có ở cơ sở đó.
+- **`/me`:** Sắp tới, Đã qua. Lịch chờ trả lời có badge "Cần bạn trả lời" và nút. "Đặt lại" mở `/book` với cùng dịch vụ và người.
+- **`/me/appointments/[id]`:**
+  - **Đề nghị đổi người** (lịch đang có cách xử lý "asked" ở đơn nghỉ):
+    - "Đồng ý đổi sang …" thì cách xử lý thành "agreed".
+    - "Chọn lại giờ" mở bước Ngày giờ với người khách đã chọn; không tính vào số lần đổi.
+    - Hạn trả lời tính theo BR-33.
+  - **Đổi giờ** ghi "còn N lần". Dùng lại bước Ngày giờ; đổi xong lịch giữ giá (BR-12).
+  - **Hủy** mở `.sp-sheet`:
+    - thời gian còn tới giờ hẹn;
+    - tiền cọc, tiền hoàn theo BR-23 tính từ giờ mock;
+    - lý do không bắt buộc.
+    Hủy xong thì lịch trên lịch lễ tân thành Đã hủy.
+  - **Quá hạn tự đổi** (dưới X giờ): ẩn hai nút, hiện số điện thoại cơ sở.
+  - Lịch chuỗi hoặc nhóm chỉ đổi, hủy được cả lịch (BR-08).
+
+### 12g. Bé, gói và ví, thông tin (MH-19, MH-20, MH-21)
+
+- Thanh "Lịch hẹn · Bé của tôi · Gói và ví · Thông tin" ở mọi trang `/me`. "Bé của tôi" chỉ có ở ngành có đối tượng khác.
+- **`/me/subjects`:**
+  - Danh sách, Thêm, Sửa với trường theo schema ngành (dùng lại `SubjectFields`).
+  - Kiểm theo BR-71.
+  - Bé còn lịch sắp tới thì không có nút Xóa và ghi lý do.
+  - Sửa thuộc tính không đổi lịch đã đặt.
+- **`/me/wallet`:** gói (số buổi còn, hạn), ví (tiền nạp, tiền tặng), lịch sử. Chỉ xem.
+- **`/me/profile`:**
+  - Họ tên, số điện thoại (chuẩn hóa BR-61).
+  - Email, với "Đổi email" gửi mã tới email mới.
+  - "Nhận tin khuyến mãi" mặc định tắt (BR-64), ngày đồng ý xử lý dữ liệu.
+  - Đăng xuất.
+
+### 12h. Email (MH-23)
+
+- `/mock/[tenant]/emails`: trang chỉ có trong mock, xem các mẫu email theo `KhachEmail`.
+- Các mẫu: mã xác nhận, đã đặt lịch, nhắc trước 24 giờ, nhắc trước 2 giờ, đã đổi giờ, đã hủy, đã hoàn cọc, hỏi ý đổi người.
+- Chung một khung: tên cơ sở, địa chỉ, dòng "gửi qua Sapio". Nội dung lấy từ lịch mẫu thật.
+- Nút trong email trỏ tới route mock tương ứng.
+
+### 12i. Kiểm tra và hoàn tất
+
+- `mock/screens.ts`: MH-11, MH-13 đến MH-21, MH-23 thành "Đang làm".
+- Trang khách dùng màu nhấn của cơ sở cho nút chính, ô chọn và link. Không dùng `sp-btn--primary` ở trang khách.
+- axe trên mọi màn và trạng thái mới, hai theme, 390px và 1280px: 0 serious hoặc critical. Không cuộn ngang ở 390px.
+- `pnpm check:availability`, `pnpm build`, `pnpm typecheck`, `prettier --check` xanh.
+- Mở PR mới: mô tả theo 12a–12i, mục "Tự quyết", ảnh. Ghi một mục Tiến độ.
+
+**Xong khi:**
+- **Trang cơ sở:** `/mock/toc-may` hiện giờ trống sớm nhất của Mai, Lan, Hùng. Bấm "Đặt" ở Nhuộm tóc vào `/book` với Nhuộm đã chọn.
+- **Nhiều dịch vụ:**
+  - Chọn Nhuộm tóc ngắn rồi Cắt tóc ngắn, ngày 07/11. Mọi giờ hiện ra đều có lịch "Lịch của bạn" đúng BR-18, và vét cạn khớp.
+  - Đổi thứ tự sang Cắt rồi Nhuộm, chọn Lan cho cả hai: giữa hai mục có 15 phút chờ.
+- **Đặt nhóm:**
+  - Pawpaw, chọn Mochi và Lucky, Tắm sấy cả hai: có giờ "cùng giờ" hoặc gợi ý lệch nhau không quá 60 phút.
+  - Tóc Mây 2 người: hai mục khác thợ, khác ghế.
+- **Trả cọc:** đủ ba trạng thái bằng hai nút giả lập. Hết đếm ngược thì quay về bước Ngày giờ.
+- **Đổi người:** đăng nhập chị Quyên, mở lịch 10/11 và bấm "Đồng ý". Ở `/mock/app/toc-may/time-off/may-lv-1`, dòng đó thành "Khách đã đồng ý" (hoặc ghi lý do trong "Tự quyết" nếu chưa chung store).
+- **Hủy:** lịch có cọc, còn trên 24 giờ, hủy thì hoàn 100%. Lịch hôm nay trong 4 giờ thì không có nút hủy, có số điện thoại.
+- **Bé:** sửa cân nặng Lucky thành 0 thì báo lỗi. Lucky còn lịch nên không có nút Xóa.
+- **Điện thoại:** ở 390px mọi màn mới không cuộn ngang.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -702,4 +852,16 @@ của SidePanel, ShiftGrid, AffectedList, ResourceCalendar. Làm Bước 11 tron
 datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 11a đến 11g, mỗi mục một commit.
 Bố cục và chữ lấy theo các bảng của đợt A trong design/screens/. Kiểm "Xong khi" trước khi báo
 xong, mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 12:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-customer.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, BR-08, BR-16 đến BR-19,
+BR-23, BR-29, BR-32, BR-33, BR-64 trong quy-tac.md, và design/README.md (các bảng Khach*). Làm Bước 12
+trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 12a đến 12i, mỗi mục một commit. Bố cục
+theo các bảng của đợt B trong design/screens/; chữ và số lấy từ dữ liệu mẫu, tính bằng hàm thật. Kiểm
+"Xong khi" trước khi báo xong, mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy
+tắc nghiệp vụ.
 ```

@@ -71,19 +71,19 @@ Route trong bảng là đường dẫn trên tên miền con của cơ sở (ví
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-11 | Trang cơ sở | `/` | KH | 1 | Vẽ | Tên, ảnh, địa chỉ chi nhánh, giờ mở cửa, nhóm dịch vụ và giá, nhân viên (hồ sơ công khai, BR-15), chính sách hủy; nút "Đặt lịch" |
+| MH-11 | Trang cơ sở | `/` | KH | 1 | Vẽ | **Đã chọn.** Tên, ảnh, địa chỉ chi nhánh, giờ mở cửa, nhóm dịch vụ và giá, nhân viên (hồ sơ công khai, BR-15), chính sách hủy; nút "Đặt lịch" |
 | MH-12 | Luồng đặt lịch | `/book?step=...` | KH | 1 | Vẽ | **Đang làm** (D-12, D-13, D-14). BR-03, BR-06, BR-07, BR-13, BR-14, BR-16, BR-17 |
-| MH-13 | Đặt nhiều dịch vụ | trong MH-12 | KH | 1 | Vẽ | Thêm dịch vụ vào giỏ, thứ tự làm, cùng hay khác thợ; giờ trống tính cho cả chuỗi (BT1) |
-| MH-14 | Đặt nhóm | trong MH-12 | KH | 1 | Vẽ | Nhiều người hoặc nhiều bé cùng giờ, mỗi đối tượng một dịch vụ; không đủ chỗ thì gợi ý giờ lệch nhau |
-| MH-15 | Trả tiền cọc | `/book/pay` | KH | 2 | Vẽ | QR của provider giả lập (D-09), đếm ngược giữ chỗ, kết quả thanh toán; trả xong mà giữ chỗ đã hết hạn (BR-07, BR-21) |
-| MH-16 | Đăng nhập khách | `/login` | KH | 1 | Nhẹ | Email → mã 6 số (BR-16); phiên gắn với cơ sở |
-| MH-17 | Lịch của tôi | `/me` | KH | 1 | Nhẹ | Sắp tới, đã qua; đặt lại lịch cũ |
-| MH-18 | Chi tiết lịch hẹn của khách | `/me/appointments/[id]` | KH | 1 | Vẽ | Đổi giờ (BR-08: trước X giờ, tối đa N lần), hủy kèm mức hoàn cọc (BR-23); hết hạn tự đổi thì hiện số điện thoại cơ sở |
-| MH-19 | Đối tượng được phục vụ | `/me/subjects` | KH | 1 | Form | Thuộc tính theo schema của ngành (BR-71). Ngành không có đối tượng khác thì không hiện mục này |
-| MH-20 | Gói và ví | `/me/wallet` | KH | 2 | Nhẹ | Số buổi còn và hạn của gói; số dư tiền thật, tiền tặng; lịch sử |
-| MH-21 | Thông tin cá nhân | `/me/profile` | KH | 1 | Form | Họ tên, số điện thoại, email; đồng ý nhận quảng cáo (BR-64) |
+| MH-13 | Đặt nhiều dịch vụ | trong MH-12 | KH | 1 | Vẽ | **Đã chọn.** BR-18. Thêm dịch vụ vào giỏ, thứ tự làm, cùng hay khác thợ; giờ trống tính cho cả chuỗi (BT1) |
+| MH-14 | Đặt nhóm | trong MH-12 | KH | 1 | Vẽ | **Đã chọn.** BR-19. Nhiều người hoặc nhiều bé cùng giờ, mỗi đối tượng một dịch vụ; không đủ chỗ thì gợi ý giờ lệch nhau |
+| MH-15 | Trả tiền cọc | `/book/pay` | KH | 2 | Vẽ | **Đã chọn.** BR-29. QR của provider giả lập (D-09), đếm ngược giữ chỗ, kết quả thanh toán; trả xong mà giữ chỗ đã hết hạn (BR-07, BR-21) |
+| MH-16 | Đăng nhập khách | `/login` | KH | 1 | Nhẹ | **Đã chọn.** Email → mã 6 số (BR-16); phiên gắn với cơ sở |
+| MH-17 | Lịch của tôi | `/me` | KH | 1 | Nhẹ | **Đã chọn.** Sắp tới, đã qua; đặt lại lịch cũ |
+| MH-18 | Chi tiết lịch hẹn của khách | `/me/appointments/[id]` | KH | 1 | Vẽ | **Đã chọn.** Đổi giờ (BR-08: trước X giờ, tối đa N lần), hủy kèm mức hoàn cọc (BR-23); hết hạn tự đổi thì hiện số điện thoại cơ sở |
+| MH-19 | Đối tượng được phục vụ | `/me/subjects` | KH | 1 | Form | **Đã chọn.** Thuộc tính theo schema của ngành (BR-71). Ngành không có đối tượng khác thì không hiện mục này |
+| MH-20 | Gói và ví | `/me/wallet` | KH | 2 | Nhẹ | **Đã chọn.** Số buổi còn và hạn của gói; số dư tiền thật, tiền tặng; lịch sử |
+| MH-21 | Thông tin cá nhân | `/me/profile` | KH | 1 | Form | **Đã chọn.** Họ tên, số điện thoại, email; đồng ý nhận quảng cáo (BR-64) |
 | MH-22 | Khung chat đặt lịch | nổi trên MH-11, MH-12 | KH | 3 | Vẽ | BT7: hỏi giá, giờ; giữ chỗ rồi chuyển sang bước OTP; "Gặp lễ tân" |
-| MH-23 | Email gửi khách | | KH | 1 (OTP), 3 | Nhẹ | Mã OTP, xác nhận lịch, nhắc 24h và 2h, đã đổi, đã hủy, đã hoàn tiền |
+| MH-23 | Email gửi khách | | KH | 1 (OTP), 3 | Nhẹ | **Đã chọn.** Mã OTP, xác nhận lịch, nhắc 24h và 2h, đã đổi, đã hủy, đã hoàn tiền |
 
 ## D. Lễ tân và thu ngân: `/app/[tenant]`
 

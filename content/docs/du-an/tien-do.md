@@ -7,6 +7,40 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 10/11/2026 (tối): chốt đợt B, phía khách
+- **Đã làm:**
+  - Vẽ và chốt đợt B (12 bảng):
+    - MH-11 trang cơ sở, điện thoại và máy tính;
+    - MH-13 nhiều dịch vụ;
+    - MH-14 đặt nhóm;
+    - MH-15 trả cọc;
+    - MH-16 đăng nhập khách;
+    - MH-17 lịch hẹn của khách;
+    - MH-18 chi tiết lịch hẹn của khách;
+    - MH-19 bé của tôi;
+    - MH-20 gói và ví;
+    - MH-21 thông tin;
+    - MH-23 email.
+  - Quy tắc mới:
+    - BR-18 chuỗi dịch vụ;
+    - BR-19 đặt nhóm;
+    - BR-29 tiền cọc về sau khi hết giữ chỗ.
+  - Quy tắc bổ sung:
+    - BR-08: khách chỉ đổi, hủy cả lịch; "Chọn lại giờ" không tính lần đổi.
+    - BR-16: đăng nhập khách bằng mã email, phiên theo cơ sở.
+    - BR-17: không xóa đối tượng còn lịch.
+    - BR-64: tin khuyến mãi mặc định tắt, đổi email cần mã.
+  - Bỏ hai câu hỏi mở đã có lời: lễ tân không giữ chỗ (BR-30); đổi người lịch "Bất kỳ ai" không cần hỏi (BR-34).
+- **Ghi chú cho ERD:**
+  - `appointment_items` có thứ tự trong lịch (`position`) và cờ giờ bắt đầu riêng cho nhóm lệch giờ.
+  - Người đi cùng là `served_subjects` loại `person` chỉ có tên, thuộc khách đặt.
+  - `customer_sessions` theo từng tenant.
+  - Hoàn cọc tự động (BR-29) là một loại hoàn tiền không cần người duyệt.
+  - `customers.marketing_opt_in` mặc định false, kèm ngày đồng ý xử lý dữ liệu.
+- **Tiếp theo:**
+  - Claude Code làm [Bước 12](../ky-thuat/ke-hoach-ui-mock.md#bước-12-đợt-b-phía-khách-mh-11-mh-13-đến-mh-21-mh-23).
+  - Phiên claude.ai vẽ đợt C (tiền: MH-29, MH-30, MH-31, MH-33, MH-34).
+
 ### 10/11/2026: review và merge PR #6 (Bước 11)
 - **Đã làm:**
   - Review PR #6. Sửa trên cùng nhánh rồi người dùng merge:
