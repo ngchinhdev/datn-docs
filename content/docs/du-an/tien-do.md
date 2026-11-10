@@ -11,7 +11,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 - **Đã làm:**
   - Review PR #6. Sửa trên cùng nhánh rồi người dùng merge:
     - Lúc duyệt nghỉ, kiểm lại từng cách xử lý; cách không còn hợp lệ thì lịch về "chưa xử lý".
-    - Khách vãng lai giữ `customerId` rỗng, không sinh hồ sơ "Khách lẻ".
+    - Khách vãng lai có `customerId: null`, không sinh hồ sơ "Khách lẻ".
     - Bỏ tick gửi email thì không gắn dấu "Chưa xác nhận đổi người".
     - Lịch giờ lẻ kéo chưa đủ một ô thì giữ giờ.
   - Sapio:
