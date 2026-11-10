@@ -67,6 +67,7 @@ export function previewCalendar(
         serviceVariantId: variant.id,
         servedSubjectId: '',
         staffResourceId: member.resourceId,
+        staffChoice: 'any',
         priceVnd: variant.priceVnd,
       },
     ],
@@ -78,6 +79,7 @@ export function previewCalendar(
     services: [{ ...service, variants: [variant] }],
     staff: [member],
     resources: fixture.resources.filter((r) => shown.has(r.id)),
+    shifts: [],
     staffTimeOff: [],
     appointments: [appointment],
   };

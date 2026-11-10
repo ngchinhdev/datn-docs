@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, PointerEvent } from 'react';
 import { cn } from '@/lib/utils';
 import type { AppointmentStatus } from '@/mock/fixtures';
 import { minutesBetween } from '@/mock/time';
@@ -25,6 +25,15 @@ export interface AppointmentBlockProps {
   /** ISO instant of the calendar's top edge. */
   dayStart: string;
   onSelect?: () => void;
+  /** Can be picked up with the pointer (MH-27); the screen reads the press. */
+  draggable?: boolean;
+  onPointerDown?: (e: PointerEvent<HTMLButtonElement>) => void;
+  /** The block being carried: lifted, and it does not take the pointer. */
+  dragging?: boolean;
+  /** The place the carried block came from, faded. */
+  ghost?: boolean;
+  /** Id of the appointment, for the drag code to find the block. */
+  appointmentId?: string;
 }
 
 const SLOT_MINUTES = 15;
@@ -40,6 +49,11 @@ export function AppointmentBlock({
   selected = false,
   dayStart,
   onSelect,
+  draggable = false,
+  onPointerDown,
+  dragging = false,
+  ghost = false,
+  appointmentId,
 }: AppointmentBlockProps) {
   const first = segments[0];
   const last = segments.at(-1);
@@ -48,6 +62,8 @@ export function AppointmentBlock({
   const style: CSSProperties = {
     top: slots(minutesBetween(dayStart, first.startAt)),
     height: slots(minutesBetween(first.startAt, last.endAt)),
+    ...(ghost ? { opacity: 0.35 } : {}),
+    ...(dragging ? { pointerEvents: 'none', zIndex: 4 } : {}),
   };
   // The title sits on the first segment the customer sees, the time on the last one.
   const seen = segments.flatMap((s, i) => (s.kind === 'buffer' ? [] : [i]));
@@ -68,12 +84,16 @@ export function AppointmentBlock({
     <button
       type="button"
       onClick={onSelect}
+      onPointerDown={onPointerDown}
       aria-pressed={selected}
       aria-label={label}
+      {...(appointmentId ? { 'data-appointment-id': appointmentId } : {})}
       className={cn(
         'sp-appt border-0 p-0 text-left',
         `sp-appt--${statusModifier[status]}`,
         inset && 'sp-appt--inset',
+        dragging && 'sp-appt--dragging',
+        draggable && 'cursor-grab select-none',
         selected && 'outline-2 outline-offset-1 outline-(--brand)',
       )}
       style={style}

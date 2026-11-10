@@ -1,9 +1,9 @@
 'use client';
 
 import { X } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { SegmentedNav } from '@/components/sapio/segmented';
-import type { ReactNode } from 'react';
 import { Button } from '@/components/sapio/button';
 import { StatusBadge, statusLabel } from '@/components/sapio/status-badge';
 import { cn } from '@/lib/utils';
@@ -45,7 +45,11 @@ export interface DetailActions {
   onCancel: () => void;
   onReschedule: () => void;
   onAddService: () => void;
+  /** The customer agreed to the change of person (BR-32); clears the mark. */
+  onSwapConfirmed: () => void;
   onClose: () => void;
+  /** Address of the page for phones (MH-28); the panel offers it below 768px. */
+  pageHref?: string;
 }
 
 /** Right column ≥ 1200px, drawer 768–1199px, bottom sheet < 768px. */
@@ -85,6 +89,14 @@ export function DetailPanel({
       >
         <div className="flex items-center justify-between gap-(--space-2)">
           <StatusBadge status={appt.status} {...(badge ? { label: badge } : {})} />
+          {actions.pageHref && (
+            <Link
+              href={actions.pageHref}
+              className="sp-btn sp-btn--ghost sp-btn--sm ms-auto no-underline md:hidden"
+            >
+              Mở trang riêng
+            </Link>
+          )}
           <Button
             variant="ghost"
             aria-label="Đóng"
@@ -95,10 +107,10 @@ export function DetailPanel({
           </Button>
         </div>
         <div className="flex flex-col gap-0.5">
-          <h2 className="heading m-0">{customer?.name ?? 'Khách đang đặt online'}</h2>
+          <h2 className="heading m-0">{L.customerName(appt)}</h2>
           {customer && (
             <span className="body-sm sp-num text-(--ink-muted)">
-              {formatPhone(customer.phone)}
+              {customer.phone ? formatPhone(customer.phone) : 'Không có số điện thoại'}
               {customer.visitCount ? ` · khách lần thứ ${customer.visitCount}` : ''}
             </span>
           )}
@@ -142,6 +154,17 @@ export function DetailPanel({
           <Fact term="Đặt qua" value={d.channel} />
           <Fact term="Hoa hồng" value={d.commission} />
         </dl>
+        {appt.items.some((i) => i.swapUnconfirmed) && (
+          <div className="flex flex-col items-start gap-(--space-2) rounded-(--radius-md) bg-(--status-no-show-soft) p-(--space-3)">
+            <span className="body-sm font-semibold">Chưa xác nhận đổi người</span>
+            <span className="body-sm">
+              Khách chưa trả lời email. Quá hạn trả lời thì gọi khách; lịch không tự hủy (BR-33).
+            </span>
+            <Button size="sm" onClick={actions.onSwapConfirmed}>
+              Khách đã đồng ý
+            </Button>
+          </div>
+        )}
         {appt.note && (
           <div className="flex flex-col gap-(--space-1)">
             <span className="body-sm text-(--ink-muted)">Ghi chú</span>

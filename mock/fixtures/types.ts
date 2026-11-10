@@ -168,10 +168,22 @@ export interface ServedSubject {
 export type AppointmentStatus =
   'held' | 'confirmed' | 'checked_in' | 'completed' | 'cancelled' | 'no_show';
 
+/** Who picked the person: the customer named them, or left it to the system (BR-31). */
+export type StaffChoice = 'any' | 'chosen';
+
 export interface AppointmentItem {
   serviceVariantId: string;
   servedSubjectId: string;
   staffResourceId: string;
+  /** `chosen`: changing the person needs the customer's consent (BR-32, BR-34). */
+  staffChoice: StaffChoice;
+  /** The person was changed by a drag and the customer has not answered yet (BR-32). */
+  swapUnconfirmed?: boolean;
+  /**
+   * How far the technician has taken the item (BR-36): started, started the part after the wait,
+   * or done. Absent until they press a button.
+   */
+  stage?: 'started' | 'resumed' | 'done';
   /** Price at booking time (BR-12). */
   priceVnd: bigint;
 }
@@ -212,12 +224,71 @@ export interface Appointment {
   note?: string;
 }
 
-/** A staff member off for a whole local day; no appointment can use them that day. */
-export interface StaffTimeOff {
+/** One block of a working day of one person; a day may have several (BR-35). */
+export interface Shift {
   resourceId: string;
   /** Local date `YYYY-MM-DD`. */
   date: string;
-  note: string;
+  /** May be before opening time, to prepare (BR-54). */
+  start: LocalTime;
+  end: LocalTime;
+}
+
+export type LeaveStatus = 'pending' | 'approved' | 'rejected';
+
+/**
+ * How one affected appointment is dealt with (BR-34). Nothing changes on the calendar until the
+ * leave is approved.
+ */
+export type LeaveHandling =
+  /** "Bất kỳ ai": another person at the same time. */
+  | { kind: 'swap'; staffResourceId: string }
+  /** The customer chose the person: an email asks them to accept `staffResourceId` (BR-33). */
+  | { kind: 'asked'; staffResourceId: string; sentAt: string }
+  /** The customer accepted the other person. */
+  | { kind: 'agreed'; staffResourceId: string }
+  /** Another time, with a person. */
+  | { kind: 'move'; staffResourceId: string; startAt: string }
+  /** Cancelled and the customer told; the deposit is refunded in full (BR-24). */
+  | { kind: 'cancel' };
+
+/** A request to be off, whole days or a few hours of one day. */
+export interface StaffTimeOff {
+  id: string;
+  resourceId: string;
+  /** Local date `YYYY-MM-DD`. */
+  date: string;
+  /** Local times of a few hours off; both absent = the whole day. */
+  from?: LocalTime;
+  to?: LocalTime;
+  /** The reason the person gave. */
+  reason: string;
+  status: LeaveStatus;
+  /** ISO 8601, UTC. */
+  sentAt: string;
+  /** Appointments it touched when decided; a pending request counts them from the calendar. */
+  affectedCount?: number;
+  /** Pending only: how each affected appointment will be dealt with, by appointment id. */
+  handling?: Record<string, LeaveHandling>;
+  /** Rejected only: shown to the person. */
+  rejectReason?: string;
+}
+
+/**
+ * Appointments left without their person after a shift was cut short (BR-35): dealt with like the
+ * ones a leave request touches, then the entry goes.
+ */
+export interface Requeue {
+  id: string;
+  resourceId: string;
+  /** Local date `YYYY-MM-DD` of the shortened shift. */
+  date: string;
+  /** What changed, e.g. "Còn làm 10:00–15:00". */
+  reason: string;
+  /** ISO 8601, UTC. */
+  createdAt: string;
+  appointmentIds: string[];
+  handling: Record<string, LeaveHandling>;
 }
 
 /** One field a customer fills in for the person or thing being served (BR-71). */
@@ -362,7 +433,11 @@ export interface TenantFixture {
   staffTitles: string[];
   /** Pay levels, lowest first, e.g. "Thợ", "Thợ chính", "Thợ cả". */
   staffLevels: string[];
+  /** Working blocks. A date with no block for anybody means everyone works the opening hours. */
+  shifts: Shift[];
   staffTimeOff: StaffTimeOff[];
+  /** Whether technicians see the customer's phone number (BR-36); off by default. */
+  staffSeesCustomerPhone: boolean;
   services: Service[];
   customers: Customer[];
   servedSubjects: ServedSubject[];

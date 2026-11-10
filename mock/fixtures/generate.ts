@@ -21,9 +21,12 @@ import type {
   ResourceBooking,
   ServedSubject,
   Service,
+  Shift,
   Staff,
   StaffTimeOff,
 } from './types.ts';
+import type { Interval } from '../intervals.ts';
+import { staffWindows } from '../shifts.ts';
 
 /** mulberry32: tiny deterministic PRNG. */
 export function seeded(seed: number) {
@@ -56,6 +59,8 @@ export interface WeekConfig {
   staffTypeId: string;
   subjects: ServedSubject[];
   timeOff: StaffTimeOff[];
+  /** Working blocks; a date that has none means everyone works the opening hours. */
+  shifts?: Shift[];
   build: Build;
   /** Local dates to fill. */
   dates: string[];
@@ -69,7 +74,7 @@ export interface WeekConfig {
   defaultCount?: number;
   /** Share of past appointments that end as no-show and as cancelled; the rest complete. */
   pastMix?: { noShow: number; cancelled: number };
-  /** Staff not to use on a date (besides time off). */
+  /** Staff not to use on a date (besides time off and shifts). */
   avoidStaff?: Record<string, string[]>;
 }
 
@@ -146,12 +151,27 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
     if (!hours) continue;
     const target = cfg.counts?.[date] ?? cfg.defaultCount ?? 6 + Math.floor(rand() * 9);
     const already = cfg.fixed.filter((a) => toLocal(a.startAt) === date).length;
-    const off = new Set([
-      ...cfg.timeOff.filter((t) => t.date === date).map((t) => t.resourceId),
-      ...(cfg.avoidStaff?.[date] ?? []),
-    ]);
     const open = Date.parse(toUtc(date, hours.open));
     const close = Date.parse(toUtc(date, hours.close));
+    // BR-35, BR-54: staff work their shifts (or the opening hours on a day with no rota), minus leave.
+    const windows = new Map(
+      cfg.staff.map((s) => [
+        s.resourceId,
+        staffWindows({
+          shifts: cfg.shifts ?? [],
+          timeOff: cfg.timeOff,
+          resourceId: s.resourceId,
+          date,
+          open: [[open / MINUTE, close / MINUTE]],
+        }),
+      ]),
+    );
+    const off = new Set([
+      ...cfg.staff
+        .filter((s) => (windows.get(s.resourceId) ?? []).length === 0)
+        .map((s) => s.resourceId),
+      ...(cfg.avoidStaff?.[date] ?? []),
+    ]);
     let placed = already;
 
     for (let attempt = 0; placed < target && attempt < 400; attempt++) {
@@ -180,16 +200,25 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
         variant,
         Object.fromEntries(ids.map((id) => [typeOf(cfg, id), id])),
       );
-      // BR-54: preparation and cleanup stay inside opening hours too.
-      if (!occ.fits(bookings) || !bookings.every((b) => inside(b, open, close))) continue;
+      // BR-54: other resources stay inside opening hours, cleanup included; staff stay in their shifts.
+      const staffTypeId = cfg.staffTypeId;
+      const insideHours = bookings.every((b) =>
+        typeOf(cfg, b.resourceId) === staffTypeId
+          ? within(b, windows.get(b.resourceId) ?? [])
+          : inside(b, open, close),
+      );
+      if (!occ.fits(bookings) || !insideHours) continue;
 
       const status = statusFor(date, cfg.today, rand, cfg.pastMix);
+      // Every third generated appointment names its person (BR-31); no random draw, so the
+      // other choices stay where they were.
+      const staffChoice = ++n % 3 === 0 ? 'chosen' : 'any';
       const appt = cfg.build(
-        `${cfg.idPrefix}-g${++n}`,
+        `${cfg.idPrefix}-g${n}`,
         subject.customerId,
         start,
         status,
-        [{ variantId: variant.id, subjectId: subject.id, resourceIds: ids }],
+        [{ variantId: variant.id, subjectId: subject.id, resourceIds: ids, staffChoice }],
         status === 'completed' ? { settled: true } : {},
       );
       occ.add(appt.bookings);
@@ -202,6 +231,13 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
 
 const inside = (b: ResourceBooking, open: number, close: number) =>
   Date.parse(b.startAt) >= open && Date.parse(b.endAt) <= close;
+
+/** The booking lies inside one window (minutes since the epoch). */
+const within = (b: ResourceBooking, windows: readonly Interval[]) => {
+  const start = Date.parse(b.startAt) / MINUTE;
+  const end = Date.parse(b.endAt) / MINUTE;
+  return windows.some(([from, to]) => from <= start && end <= to);
+};
 
 function typeOf(cfg: Pick<WeekConfig, 'resources'>, id: string) {
   return cfg.resources.find((r) => r.id === id)?.resourceTypeId ?? '';

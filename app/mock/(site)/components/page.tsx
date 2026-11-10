@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
+import { AffectedList } from '@/components/sapio/affected-list';
 import { AppointmentBlock } from '@/components/sapio/appointment-block';
 import { Scissors } from 'lucide-react';
 import { Banner } from '@/components/sapio/banner';
@@ -23,6 +24,8 @@ import { PhoneField } from '@/components/sapio/phone-field';
 import { QuantityInput } from '@/components/sapio/quantity-input';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
 import { ServiceVariantList } from '@/components/sapio/service-variant-list';
+import { ShiftGrid } from '@/components/sapio/shift-grid';
+import { SidePanel } from '@/components/sapio/side-panel';
 import { SignupSteps } from '@/components/sapio/signup-layout';
 import { SlotGrid } from '@/components/sapio/slot-grid';
 import { ANY_STAFF, StaffPicker } from '@/components/sapio/staff-picker';
@@ -75,6 +78,11 @@ export default function ComponentsPage() {
     DYE.segments.map((s) => ({ ...s })),
   );
   const [picked, setPicked] = useState<number | null>(2);
+  const [panel, setPanel] = useState(false);
+  const [shiftCell, setShiftCell] = useState<{ rowId: string; date: string } | null>({
+    rowId: 'hung',
+    date: '2026-11-13',
+  });
   const dye = timelineOf({ segments: dyeSegments }, [
     { id: 'may-rt-stylist', tenantId: 'may', name: 'Thợ', isStaff: true },
     { id: 'may-rt-chair', tenantId: 'may', name: 'Ghế cắt', isStaff: false },
@@ -565,6 +573,121 @@ export default function ComponentsPage() {
             />
           </Panel>
         </div>
+      </Example>
+
+      <Example name="SidePanel">
+        <div className="flex flex-col items-start gap-(--space-3)">
+          <p className="body-sm m-0 text-(--ink-muted)">
+            Bảng bên phải lịch: cột của trang từ 1200px, ngăn kéo từ 768px, bảng trượt lên bên dưới.
+          </p>
+          <Button onClick={() => setPanel(true)}>Mở bảng tạo lịch hẹn</Button>
+          {panel && (
+            <SidePanel
+              title="Tạo lịch hẹn"
+              onClose={() => setPanel(false)}
+              footer={
+                <>
+                  <Button variant="ghost" onClick={() => setPanel(false)}>
+                    Hủy
+                  </Button>
+                  <Button variant="primary" onClick={() => setPanel(false)}>
+                    Tạo lịch hẹn
+                  </Button>
+                </>
+              }
+            >
+              <p className="sp-fit sp-fit--ok m-0" role="status">
+                Trống: Lan, Ghế 2. Xong lúc 14:45.
+              </p>
+            </SidePanel>
+          )}
+        </div>
+      </Example>
+
+      <Example name="ShiftGrid">
+        <ShiftGrid
+          label="Ca tuần 09/11–15/11"
+          columns={['09', '10', '11', '12', '13', '14', '15'].map((d, i) => ({
+            date: `2026-11-${d}`,
+            short: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'][i]!,
+            label: `${d}/11`,
+            long: `Ngày ${d}/11`,
+          }))}
+          rows={[
+            {
+              id: 'mai',
+              name: 'Mai',
+              title: 'Thợ chính',
+              hours: '41,25 giờ/tuần',
+              cells: ['09', '10', '11', '12', '13', '14', '15'].map((d) => ({
+                date: `2026-11-${d}`,
+                blocks: d === '15' ? [] : [{ text: '08:45–17:00' }],
+              })),
+            },
+            {
+              id: 'hung',
+              name: 'Hùng',
+              title: 'Thợ',
+              hours: '49 giờ/tuần',
+              cells: ['09', '10', '11', '12', '13', '14', '15'].map((d) => ({
+                date: `2026-11-${d}`,
+                blocks: [
+                  d === '13'
+                    ? { text: '10:00–15:00', warn: true, count: '!' }
+                    : { text: '10:00–20:00' },
+                ],
+                ...(d === '10' ? { leave: { status: 'pending' as const } } : {}),
+              })),
+            },
+          ]}
+          footer={['09', '10', '11', '12', '13', '14', '15'].map((d) => ({
+            text: '09:00–20:00',
+            ...(d === '15' ? { warnings: ['13:00–15:00 không ai trực'] } : {}),
+          }))}
+          selected={shiftCell}
+          onSelect={(rowId, date) => setShiftCell({ rowId, date })}
+        />
+      </Example>
+
+      <Example name="AffectedList">
+        <AffectedList
+          label="Lịch bị ảnh hưởng"
+          rows={[
+            {
+              id: 'a',
+              time: '12:00',
+              title: 'Chị Hằng · Cắt dài',
+              choice: { text: 'Bất kỳ ai', named: false },
+              meta: 'Ghế 2 · 200.000 ₫',
+              fix: 'Đã đổi sang Mai, cùng giờ, Ghế 1',
+              tone: 'done',
+              done: true,
+              actions: (
+                <Button variant="ghost" size="sm">
+                  Hoàn tác
+                </Button>
+              ),
+            },
+            {
+              id: 'b',
+              time: '17:30',
+              title: 'Chị Lam · Gội sấy',
+              choice: { text: 'Bất kỳ ai', named: false },
+              meta: 'Giường gội 1 · 80.000 ₫',
+              fix: 'Không ai trống 17:30. Gần nhất: 18:00 với Hùng.',
+              tone: 'bad',
+              done: false,
+              actions: (
+                <>
+                  <Button size="sm">Hủy và báo khách</Button>
+                  <Button variant="primary" size="sm">
+                    Dời sang 18:00, Hùng
+                  </Button>
+                </>
+              ),
+            },
+          ]}
+        />
       </Example>
 
       <Example name="LockIcon">

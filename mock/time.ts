@@ -64,3 +64,9 @@ export const formatCountdown = (seconds: number) => {
 /** `13/11/2026`. */
 export const formatFullDate = (date: string) =>
   `${date.slice(8, 10)}/${date.slice(5, 7)}/${date.slice(0, 4)}`;
+
+/** `07/11 08:05`: a moment with its date, whatever today is. */
+export const formatDateTime = (iso: string) => {
+  const date = localDate(iso);
+  return `${date.slice(8, 10)}/${date.slice(5, 7)} ${formatTime(iso)}`;
+};

@@ -3,6 +3,7 @@
 import { Plus } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { Button } from '@/components/sapio/button';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
@@ -68,13 +69,14 @@ function Group({ label, count, children }: { label: string; count: number; child
 
 export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
   const appHref = useAppHref(tenantSlug);
+  const router = useRouter();
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
   const branch = fixture.branches[0]!;
   const L = lookups(fixture);
   const now = useMockNow();
   const date = localDate(MOCK_NOW);
   const hours = openingHours(fixture, date) ?? { open: '08:00', close: '18:00' };
-  const { appointments, replace, notify } = useReception(fixture);
+  const { appointments, replace, notify } = useReception();
   const actions = useAppointmentActions(fixture, appointments, replace, now);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -117,7 +119,7 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
           <Button
             disabled={!bookingOpen}
             aria-describedby={bookingOpen ? undefined : 'trial-note'}
-            onClick={() => notify('Khách vãng lai: chưa có trong mock.')}
+            onClick={() => router.push(appHref('calendar', { create: '1', customer: 'walkin' }))}
           >
             Khách vãng lai
           </Button>
@@ -125,7 +127,7 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
             variant="primary"
             disabled={!bookingOpen}
             aria-describedby={bookingOpen ? undefined : 'trial-note'}
-            onClick={() => notify('Tạo lịch hẹn: chưa có trong mock.')}
+            onClick={() => router.push(appHref('calendar', { create: '1' }))}
           >
             <Plus size={16} aria-hidden="true" />
             Tạo lịch hẹn
@@ -246,11 +248,17 @@ export function TodayScreen({ tenantSlug }: { tenantSlug: string }) {
             actions={{
               allowed: actions.allowed(selected),
               onClose: () => setSelectedId(null),
+              pageHref: appHref(`appointments/${selected.id}`),
               onCheckIn: () => checkIn(selected),
               onCollect: () => collect(selected),
               onNoShow: () => actions.noShow(selected),
               onCancel: () => actions.cancel(selected),
-              onReschedule: () => notify('Đổi giờ: chưa có trong mock.'),
+              onReschedule: () => router.push(appHref('calendar')),
+              onSwapConfirmed: () =>
+                replace({
+                  ...selected,
+                  items: selected.items.map((i) => ({ ...i, swapUnconfirmed: false })),
+                }),
               onAddService: () => notify('Thêm dịch vụ: chưa có trong mock.'),
             }}
           />

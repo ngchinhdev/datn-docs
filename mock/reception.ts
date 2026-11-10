@@ -3,6 +3,7 @@ import type { CalendarColumn } from '@/components/sapio/resource-calendar';
 import type { BlockSegment } from '@/components/sapio/appointment-block';
 import type { Appointment, ResourceBooking, TenantFixture } from './fixtures';
 import { formatVnd } from './format';
+import { staffOf } from './move';
 import { formatCountdown, formatRange, localDate } from './time';
 
 type Block = CalendarColumn['blocks'][number];
@@ -22,10 +23,14 @@ export function lookups(fixture: TenantFixture) {
       .flatMap((s) => s.variants.map((v) => ({ ...v, service: s })))
       .find((v) => v.id === id);
   const customer = (appt: Appointment) => fixture.customers.find((c) => c.id === appt.customerId);
-  const who = (appt: Appointment) => customer(appt)?.callName ?? 'Khách đang đặt online';
+  /** A walk-in has no customer record; an online hold has not given details yet. */
+  const nameless = (appt: Appointment) =>
+    appt.status === 'held' ? 'Khách đang đặt online' : 'Khách lẻ';
+  const customerName = (appt: Appointment) => customer(appt)?.name ?? nameless(appt);
+  const who = (appt: Appointment) => customer(appt)?.callName ?? nameless(appt);
   const services = (appt: Appointment) =>
     appt.items.map((i) => variant(i.serviceVariantId)?.shortName ?? '').join(', ');
-  return { isStaff, name, variant, customer, who, services, resource };
+  return { isStaff, name, variant, customer, customerName, who, services, resource };
 }
 
 export type Lookups = ReturnType<typeof lookups>;
@@ -119,7 +124,9 @@ export function staffColumns(
 ): CalendarColumn[] {
   const L = lookups(fixture);
   return fixture.staff.map((s) => {
-    const off = fixture.staffTimeOff.find((t) => t.resourceId === s.resourceId && t.date === date);
+    const off = fixture.staffTimeOff.find(
+      (t) => t.resourceId === s.resourceId && t.date === date && t.status === 'approved' && !t.from,
+    );
     const mine = appts.filter(
       (a) => isLive(a, now) && a.bookings.some((b) => b.resourceId === s.resourceId),
     );
@@ -142,6 +149,10 @@ export function staffColumns(
         .join(', ');
       let title = `${L.who(appt)} · ${services}`;
       let meta: string | undefined = `${range} · ${others}`;
+      // BR-32: the person was changed and the customer has not answered.
+      const unconfirmed = appt.items.some(
+        (i) => i.staffResourceId === s.resourceId && i.swapUnconfirmed,
+      );
       if (appt.status === 'held') {
         title = 'Đang giữ chỗ · đặt online';
         meta = `${range} · ${others} · còn ${formatCountdown(holdSecondsLeft(appt, now))}`;
@@ -151,8 +162,14 @@ export function staffColumns(
         title = `${title} · ${others}`;
         meta = undefined;
       }
+      if (unconfirmed) {
+        if (meta) meta = `${meta} · Chưa xác nhận đổi người`;
+        else title = `${title} · Chưa xác nhận đổi người`;
+      }
       return {
         id: appt.id,
+        appointmentId: appt.id,
+        draggable: appt.status === 'confirmed' && staffOf(appt).length === 1,
         status: appt.status,
         title,
         ...(meta ? { meta } : {}),
@@ -173,7 +190,7 @@ export function staffColumns(
       name: s.profile.displayName,
       kind: `${s.profile.title} · ${mine.length} lịch`,
       label: `${s.profile.displayName}, ${s.profile.title}, ${off ? 'nghỉ' : `${mine.length} lịch hẹn`}`,
-      ...(off ? { offLabel: `Nghỉ · ${off.note}` } : {}),
+      ...(off ? { offLabel: `Nghỉ · ${off.reason}` } : {}),
       blocks,
     };
   });

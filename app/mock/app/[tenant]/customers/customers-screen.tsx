@@ -4,6 +4,7 @@ import { ChevronRight, Download, Plus, SlidersHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { PhoneHeaderAction } from '@/components/sapio/app-shell';
@@ -50,7 +51,13 @@ const FIRST_DIR: Record<SortKey, 'asc' | 'desc'> = {
 };
 
 export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
-  const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
+  const base = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
+  const { customers, appointments } = useScheduleStore();
+  // Customers made at the counter this session show here too.
+  const fixture = useMemo(
+    () => ({ ...base, customers, appointments }),
+    [base, customers, appointments],
+  );
   const branch = fixture.branches[0]!;
   const router = useRouter();
   const pathname = usePathname();
@@ -230,7 +237,7 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
           aria-label={
             canBook ? `Đặt lịch cho ${row.name}` : `Đặt lịch cho ${row.name}, mở khi kích hoạt gói`
           }
-          onClick={() => toast({ text: 'Tạo lịch hẹn: chưa có trong mock.' })}
+          onClick={() => router.push(appHref('calendar', { create: '1', customer: row.id }))}
         >
           Đặt lịch
         </Button>

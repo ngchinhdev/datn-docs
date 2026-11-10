@@ -3,7 +3,8 @@ import { dayOfMonth, weekdayShort } from '@/mock/time';
 export interface DateStripProps {
   /** Seven local dates `YYYY-MM-DD`. */
   dates: { date: string; closed?: boolean }[];
-  selected: string;
+  /** One date, or several (a range of days off). */
+  selected: string | readonly string[];
   onSelect: (date: string) => void;
 }
 
@@ -14,8 +15,8 @@ export function DateStrip({ dates, selected, onSelect }: DateStripProps) {
         <button
           key={date}
           type="button"
-          className="sp-date"
-          aria-pressed={date === selected}
+          className="sp-date aria-pressed:hover:bg-(--accent)!"
+          aria-pressed={typeof selected === 'string' ? date === selected : selected.includes(date)}
           disabled={closed}
           aria-label={closed ? `${weekdayShort(date)} ${dayOfMonth(date)}, nghỉ` : undefined}
           onClick={() => onSelect(date)}

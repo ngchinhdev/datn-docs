@@ -1,16 +1,24 @@
 'use client';
 
 import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { useQueryState } from '@/components/mock/use-query-state';
 import { Button } from '@/components/sapio/button';
+import { useToast } from '@/components/sapio/toast';
 import { SegmentedNav } from '@/components/sapio/segmented';
-import { ResourceCalendar } from '@/components/sapio/resource-calendar';
+import { ResourceCalendar, type CalendarTarget } from '@/components/sapio/resource-calendar';
 import { StatusBadge } from '@/components/sapio/status-badge';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { dayHours } from '@/mock/hours';
-import { tenantFixtures } from '@/mock/fixtures';
+import { fixtureBySlug } from '@/mock/selection';
+import { ANY_STAFF } from '@/mock/availability';
+import type { Appointment } from '@/mock/fixtures';
+import { itemArrival } from '@/mock/move';
+import { firstFreeMinute } from '@/mock/placement';
+import { isoOf, localMinutes, minutesOf } from '@/mock/shifts';
 import {
   dayAppointments,
   freeResourcesAt,
@@ -19,15 +27,21 @@ import {
   resourceColumns,
   staffColumns,
 } from '@/mock/reception';
-import { addDays, formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
+import { addDays, formatDay, formatRange, formatTime, localDate, MOCK_NOW } from '@/mock/time';
 import { useAppointmentActions } from '../_reception/actions';
+import { CreatePanel } from '../_reception/create-panel';
 import { DetailPanel, ViewTabs, type CalendarView } from '../_reception/parts';
 import { useReception } from '../_reception/use-reception';
+import { useCalendarDrag, type DragTarget } from '../_reception/use-calendar-drag';
+import { endOf, useMoveFlow } from '../_reception/use-move-flow';
 
 const WIDE_QUERY = '(min-width: 1200px)';
 
+const minuteText = (minute: number) =>
+  `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
+
 export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
-  const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
+  const fixture = useLiveFixture(tenantSlug);
   const branch = fixture.branches[0]!;
   const L = lookups(fixture);
   const now = useMockNow();
@@ -38,41 +52,170 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
   const view: CalendarView = viewParam === 'resources' ? 'resources' : 'staff';
   const hours = dayHours(fixture, date);
 
-  const { appointments, replace, notify } = useReception(fixture);
+  const { appointments, replace, notify } = useReception();
   const actions = useAppointmentActions(fixture, appointments, replace, now);
   const day = dayAppointments(appointments, date);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [creating, setCreating] = useState<{
+    minute: number;
+    staffResourceId: string;
+    customerId: string | null;
+  } | null>(null);
+  const [targets, setTargets] = useState<CalendarTarget[]>([]);
+  const toast = useToast();
   const cancelled = appointments.filter(
     (a) => a.status === 'cancelled' && localDate(a.startAt) === date,
   );
   const selected =
     [...day, ...cancelled].find((a) => a.id === selectedId && isLive(a, now)) ?? null;
+  const selectAppointment = (id: string) => {
+    setCreating(null);
+    setSelectedId(id);
+  };
 
   // Only the wide layout opens a detail at load; below 1200px the drawer would cover the calendar.
+  const sample = fixtureBySlug(tenantSlug);
   useEffect(() => {
-    if (window.matchMedia(WIDE_QUERY).matches) {
+    if (sample && window.matchMedia(WIDE_QUERY).matches) {
       setSelectedId(
-        dayAppointments(fixture.appointments, today).find((a) => a.status === 'checked_in')?.id ??
+        dayAppointments(sample.appointments, today).find((a) => a.status === 'checked_in')?.id ??
           null,
       );
     }
-  }, [fixture, today]);
+  }, [sample, today]);
 
   const goTo = (d: string) => {
     setDate(d);
     setSelectedId(null);
+    setCreating(null);
   };
+
+  /** The panel opens on a time and a person; without them, the nearest free quarter hour (BR-30). */
+  function openCreate(
+    at?: { minute: number; staffResourceId: string },
+    customerId: string | null = null,
+  ) {
+    const first = fixture.services[0];
+    const variant = first?.variants[0];
+    let minute = at?.minute;
+    if (minute === undefined && first && variant) {
+      const startOfDay = localMinutes(date, '00:00');
+      const afterNow =
+        date === today ? Math.ceil((Date.parse(now) / 60_000 - startOfDay) / 15) * 15 : 0;
+      minute =
+        firstFreeMinute(
+          { fixture, service: first, variant, date, minute: 0, staffResourceId: ANY_STAFF, now },
+          afterNow,
+        ) ?? undefined;
+    }
+    const open = hours.open
+      ? Number(hours.open.slice(0, 2)) * 60 + Number(hours.open.slice(3))
+      : 9 * 60;
+    setSelectedId(null);
+    setCreating({
+      minute: minute ?? open,
+      staffResourceId: at?.staffResourceId ?? ANY_STAFF,
+      customerId,
+    });
+  }
+
+  // `?create=1` (from Hôm nay or Khách hàng) opens the panel once, with `?customer=` chosen.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const createParam = searchParams.get('create');
+  const customerParam = searchParams.get('customer');
+  useEffect(() => {
+    if (createParam !== '1') return;
+    openCreate(undefined, customerParam);
+    const params = new URLSearchParams(searchParams);
+    params.delete('create');
+    params.delete('customer');
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    // Runs when the link brings the parameter, not when the form below changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createParam]);
+
+  // `?select=` (from the page of an appointment, on a wide screen) opens its panel.
+  const selectParam = searchParams.get('select');
+  useEffect(() => {
+    if (!selectParam) return;
+    setCreating(null);
+    setSelectedId(selectParam);
+    const params = new URLSearchParams(searchParams);
+    params.delete('select');
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    // Runs when the link brings the parameter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectParam]);
+
+  /** An empty part of a column was pressed: its time, and its person in the staff view. */
+  function onEmptyPress(columnId: string, startAt: string) {
+    const time = formatTime(startAt);
+    openCreate({
+      minute: Number(time.slice(0, 2)) * 60 + Number(time.slice(3)),
+      staffResourceId: view === 'staff' ? columnId : ANY_STAFF,
+    });
+  }
+
+  const staffName = (id: string) => L.name(id);
+  const flow = useMoveFlow({
+    fixture,
+    date: () => date,
+    now,
+    replace,
+    notify,
+  });
+
+  const drag = useCalendarDrag({
+    enabled: view === 'staff' && hours.open !== null,
+    fixture,
+    date,
+    now,
+    from: hours.from,
+    to: hours.to,
+    onDrop: flow.handleDrop,
+    onRejected: (reason) => toast({ text: reason, tone: 'danger' }),
+  });
 
   // `?staff=` narrows the staff view to one person (the "Xem lịch" button of the staff list).
   const [staffOnly, setStaffOnly] = useQueryState('staff', '');
-  const allColumns = (view === 'staff' ? staffColumns : resourceColumns)(
+  const pressBlock = (id: string) => {
+    if (drag.consumeClick()) return;
+    selectAppointment(id);
+  };
+  const baseColumns = (view === 'staff' ? staffColumns : resourceColumns)(
     fixture,
     day,
     now,
     selectedId,
-    setSelectedId,
+    pressBlock,
     date,
   );
+  // While a block is carried: it fades where it was and a copy follows the pointer.
+  const carried = drag.active ? day.find((a) => a.id === drag.active!.apptId) : undefined;
+  const target = drag.active?.target ?? null;
+  const allColumns = baseColumns.map((column) => {
+    const preview =
+      carried && target && target.columnId === column.id
+        ? previewBlock(baseColumns, carried, target)
+        : null;
+    return {
+      ...column,
+      blocks: [
+        ...column.blocks.map((block) => ({
+          ...block,
+          ...(view === 'staff' && block.draggable
+            ? { onPointerDown: drag.onBlockPointerDown(block.id) }
+            : {}),
+          ...(carried && block.id === carried.id ? { ghost: true } : {}),
+        })),
+        ...(preview ? [preview] : []),
+      ],
+    };
+  });
   const only = view === 'staff' ? allColumns.find((c) => c.id === staffOnly) : undefined;
   const columns = only ? [only] : allColumns;
   const [phoneColumn, setPhoneColumn] = useState(columns[0]?.id ?? '');
@@ -85,6 +228,31 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
           a.bookings.some((b) => b.resourceId === phoneCol.id),
       )
     : undefined;
+
+  /** The carried block as it would sit at the target: its segments moved, its line rewritten. */
+  function previewBlock(columns: typeof baseColumns, appt: Appointment, at: DragTarget) {
+    const original = columns.flatMap((c) => c.blocks).find((b) => b.id === appt.id);
+    if (!original) return null;
+    const delta = localMinutes(date, '00:00') + at.minute - minutesOf(itemArrival(appt, 0));
+    const shift = (iso: string) => isoOf(minutesOf(iso) + delta);
+    const segments = original.segments.map((seg) => ({
+      ...seg,
+      startAt: shift(seg.startAt),
+      endAt: shift(seg.endAt),
+    }));
+    const seen = segments.filter((seg) => seg.kind !== 'buffer');
+    const range = formatRange(seen[0]?.startAt ?? '', seen.at(-1)?.endAt ?? '');
+    const where = at.resourcesAfter.length ? ` · ${at.resourcesAfter.join(', ')}` : '';
+    return {
+      ...original,
+      id: `${appt.id}-carried`,
+      selected: false,
+      inset: false,
+      dragging: true,
+      segments,
+      ...(original.meta ? { meta: `${range}${where}` } : {}),
+    };
+  }
 
   const calendarLabel = `Lịch ${view === 'staff' ? 'nhân viên' : 'tài nguyên'} ${branch.name}, ${formatDay(date)}`;
 
@@ -127,7 +295,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
               className="body-sm w-56 border-0 bg-transparent text-(--ink) outline-none"
             />
           </label>
-          <Button variant="primary" onClick={() => notify('Tạo lịch hẹn: chưa có trong mock.')}>
+          <Button variant="primary" onClick={() => openCreate()}>
             <Plus size={16} aria-hidden="true" />
             Tạo lịch hẹn
           </Button>
@@ -147,7 +315,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
             variant="primary"
             aria-label="Tạo lịch hẹn"
             className="size-11! rounded-(--radius-pill)! p-0!"
-            onClick={() => notify('Tạo lịch hẹn: chưa có trong mock.')}
+            onClick={() => openCreate()}
           >
             <Plus size={20} aria-hidden="true" />
           </Button>
@@ -166,7 +334,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
             <button
               key={c.id}
               type="button"
-              className="sp-slot flex-none px-(--space-4)! [--accent:var(--primary)] [--on-accent:var(--on-primary)]"
+              className="sp-slot flex-none px-(--space-4)!"
               aria-pressed={c.id === phoneCol?.id}
               onClick={() => setPhoneColumn(c.id)}
             >
@@ -219,6 +387,9 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
               close={hours.close}
               {...(hours.closedLabel ? { closedLabel: hours.closedLabel } : {})}
               now={now}
+              onEmptyPress={onEmptyPress}
+              targets={targets}
+              drops={drag.zones}
             />
           </div>
           <div className="md:hidden">
@@ -233,6 +404,9 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
                 close={hours.close}
                 {...(hours.closedLabel ? { closedLabel: hours.closedLabel } : {})}
                 now={now}
+                onEmptyPress={onEmptyPress}
+                targets={targets}
+                drops={drag.zones}
               />
             )}
           </div>
@@ -244,7 +418,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
                   key={a.id}
                   type="button"
                   className="sp-badge sp-badge--cancelled cursor-pointer border-0"
-                  onClick={() => setSelectedId(a.id)}
+                  onClick={() => selectAppointment(a.id)}
                 >
                   {formatTime(a.startAt)} {L.who(a)} · {L.services(a)}
                 </button>
@@ -259,6 +433,15 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
               <span className="body-sm flex items-center gap-(--space-2) text-(--ink-muted)">
                 <span
                   aria-hidden="true"
+                  className="h-3.5 w-6 rounded-(--radius-xs) bg-[color-mix(in_oklab,var(--brand-soft)_70%,transparent)] shadow-[0_0_0_1px_var(--line)]"
+                />
+                Kéo khối sang giờ hoặc cột khác; vùng gạch chéo không thả được. Esc để hủy.
+              </span>
+            )}
+            {view === 'staff' && (
+              <span className="body-sm flex items-center gap-(--space-2) text-(--ink-muted)">
+                <span
+                  aria-hidden="true"
                   className="h-4 w-7 rounded-(--radius-xs) bg-[repeating-linear-gradient(135deg,var(--status-checked-in-soft)_0_4px,var(--surface-raised)_4px_10px)] shadow-[0_0_0_1px_var(--line)]"
                 />
                 Vạch chéo: nhân viên rảnh, tài nguyên vẫn bận. Xem ở tab Tài nguyên.
@@ -267,19 +450,44 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
           </div>
         </section>
 
-        {selected ? (
+        {creating ? (
+          <CreatePanel
+            fixture={fixture}
+            date={date}
+            now={now}
+            initial={creating}
+            presetCustomerId={creating.customerId}
+            onClose={() => setCreating(null)}
+            onTargets={setTargets}
+            onCreated={(id) => {
+              setCreating(null);
+              setSelectedId(id);
+            }}
+          />
+        ) : selected ? (
           <DetailPanel
             fixture={fixture}
             appt={selected}
             actions={{
               allowed: actions.allowed(selected),
               onClose: () => setSelectedId(null),
+              pageHref: appHref(`appointments/${selected.id}`),
               onCheckIn: () => actions.checkIn(selected),
               onCollect: () => actions.collect(selected),
               onNoShow: () => actions.noShow(selected),
               onCancel: () => actions.cancel(selected),
-              onReschedule: () =>
-                notify('Kéo khối lịch hẹn sang giờ mới để đổi giờ (chưa có trong mock).'),
+              onReschedule: () => flow.openMove(selected),
+              onSwapConfirmed: () => {
+                const done: Appointment = {
+                  ...selected,
+                  items: selected.items.map((i) => ({ ...i, swapUnconfirmed: false })),
+                };
+                replace(done);
+                toast({
+                  text: `Đã ghi nhận ${flow.inSentence(selected)} đồng ý đổi người.`,
+                  undo: () => replace(selected),
+                });
+              },
               onAddService: () => notify('Thêm dịch vụ: chưa có trong mock.'),
             }}
           />
@@ -292,7 +500,44 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
           </aside>
         )}
         {actions.dialog}
+        {flow.dialogs}
       </main>
+      {drag.active?.target && carried && (
+        <div
+          className={`sp-drag-label${drag.active.target.ok ? '' : ' sp-drag-label--blocked'}`}
+          style={{
+            position: 'fixed',
+            left: drag.active.x + 14,
+            top: drag.active.y + 14,
+            pointerEvents: 'none',
+            whiteSpace: 'normal',
+            maxWidth: 320,
+          }}
+        >
+          {drag.active.target.ok && drag.active.target.moved ? (
+            <>
+              {formatRange(drag.active.target.moved.startAt, endOf(drag.active.target.moved))} ·{' '}
+              {[staffName(drag.active.target.columnId), ...drag.active.target.resourcesAfter].join(
+                ' · ',
+              )}
+              {carried.items.some((i) => i.staffChoice === 'chosen') &&
+              drag.active.target.columnId !== carried.items[0]?.staffResourceId ? (
+                <small>
+                  Khách chọn đích danh {staffName(carried.items[0]?.staffResourceId ?? '')}: đổi
+                  người phải hỏi ý khách
+                </small>
+              ) : drag.active.target.columnId !== carried.items[0]?.staffResourceId ? (
+                <small>Khách để &quot;Bất kỳ ai&quot;: đổi người không cần hỏi</small>
+              ) : null}
+            </>
+          ) : (
+            <>
+              {minuteText(drag.active.target.minute)} · {staffName(drag.active.target.columnId)}
+              <small>{drag.active.target.reason}</small>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

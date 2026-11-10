@@ -9,7 +9,9 @@ import type {
   BusinessHours,
   Customer,
   ServedSubject,
+  Shift,
   Staff,
+  StaffTimeOff,
   TenantFixture,
   Weekday,
 } from './types.ts';
@@ -100,19 +102,19 @@ const regularSubjects: ServedSubject[] = [
     attributes: { species: 'dog', breed: 'Poodle', weightKg: '6' },
   },
   {
-    id: 'paw-s-bong',
+    id: 'paw-s-lucky',
     tenantId,
     customerId: 'paw-c-linh',
     kind: 'other',
-    name: 'Bông',
-    attributes: { species: 'cat', breed: 'Mèo Anh lông ngắn', weightKg: '4' },
+    name: 'Lucky',
+    attributes: { species: 'dog', breed: 'Corgi', weightKg: '12' },
   },
   {
-    id: 'paw-s-lucky',
+    id: 'paw-s-bong',
     tenantId,
     customerId: 'paw-c-duc',
     kind: 'other',
-    name: 'Lucky',
+    name: 'Bông',
     attributes: { species: 'dog', breed: 'Golden Retriever', weightKg: '28' },
   },
 ];
@@ -234,84 +236,149 @@ const servedSubjects = [...weekSubjects, ...people.subjects];
 
 const at = (hhmm: string) => new Date(`2026-11-07T${hhmm}:00+07:00`).toISOString();
 
-// Saturday 07/11/2026 at Pawpaw: now is 10:20.
+// Saturday 07/11/2026 at Pawpaw: now is 10:20. Lucky (12 kg, Tắm sấy) cannot start at 11:00 with
+// Vy; the nearest times are 10:00 Vy, 12:00 Khoa and 12:30 Vy (design/screens/LichTaoPawpaw.dc.html).
 const saturday: Appointment[] = [
   // Two pets of one customer booked together (group booking).
   appointment(
     'paw-a-group',
-    'paw-c-linh',
-    at('08:30'),
+    'paw-c-quynh',
+    at('08:00'),
     'completed',
     [
       {
         variantId: 'paw-bath-small',
-        subjectId: 'paw-s-mochi',
+        subjectId: 'paw-s-quynh-1',
         resourceIds: ['paw-khoa', 'paw-bath-1', 'paw-dryer-1'],
       },
       {
-        variantId: 'paw-bath-cat',
-        subjectId: 'paw-s-bong',
+        variantId: 'paw-bath-small',
+        subjectId: 'paw-s-quynh-2',
         resourceIds: ['paw-vy', 'paw-bath-2', 'paw-dryer-2'],
-        startAt: at('08:30'),
+        startAt: at('08:00'),
       },
     ],
     { settled: true },
   ),
-  // Over 10 kg takes the large variant; the dryer stays busy while Khoa is free (BR-05).
   appointment(
-    'paw-a-lucky',
-    'paw-c-duc',
-    at('10:00'),
+    'paw-a-mochi',
+    'paw-c-linh',
+    at('09:00'),
+    'checked_in',
+    [
+      {
+        variantId: 'paw-bath-small',
+        subjectId: 'paw-s-mochi',
+        resourceIds: ['paw-khoa', 'paw-bath-1', 'paw-dryer-3'],
+      },
+    ],
+    { checkedInAt: at('08:56') },
+  ),
+  // Over 10 kg takes the large variant; the dryer stays busy while Vy is free (BR-05).
+  appointment(
+    'paw-a-milo',
+    'paw-c-hoa',
+    at('09:30'),
     'checked_in',
     [
       {
         variantId: 'paw-bath-large',
-        subjectId: 'paw-s-lucky',
-        resourceIds: ['paw-khoa', 'paw-bath-1', 'paw-dryer-1'],
+        subjectId: 'paw-s-hoa-1',
+        resourceIds: ['paw-vy', 'paw-bath-2', 'paw-dryer-1'],
       },
     ],
-    { checkedInAt: at('09:55') },
+    { checkedInAt: at('09:25') },
   ),
-  appointment('paw-a-kem', 'paw-c-phat', at('09:30'), 'no_show', [
+  appointment('paw-a-bong', 'paw-c-duc', at('10:30'), 'confirmed', [
     {
-      variantId: 'paw-bath-small',
-      subjectId: 'paw-s-phat-1',
-      resourceIds: ['paw-vy', 'paw-bath-2', 'paw-dryer-2'],
+      variantId: 'paw-groom-large',
+      subjectId: 'paw-s-bong',
+      resourceIds: ['paw-khoa', 'paw-table-1'],
     },
   ]),
-  appointment('paw-a-na', 'paw-c-nam', at('10:45'), 'confirmed', [
+  appointment('paw-a-na', 'paw-c-nam', at('11:30'), 'confirmed', [
     {
       variantId: 'paw-bath-cat',
       subjectId: 'paw-s-nam-1',
-      resourceIds: ['paw-vy', 'paw-bath-2', 'paw-dryer-2'],
+      resourceIds: ['paw-vy', 'paw-bath-1', 'paw-dryer-2'],
     },
   ]),
   appointment(
     'paw-a-rex',
     'paw-c-tri',
-    at('13:00'),
+    at('13:30'),
     'confirmed',
     [
       {
         variantId: 'paw-groom-large',
         subjectId: 'paw-s-tri-1',
         resourceIds: ['paw-khoa', 'paw-table-1'],
+        staffChoice: 'chosen',
       },
     ],
     { note: 'Rex sợ máy sấy, sấy tay ở chế độ nhỏ.' },
   ),
-  appointment('paw-a-milo', 'paw-c-hoa', at('14:00'), 'confirmed', [
+  appointment('paw-a-muop', 'paw-c-ngan', at('14:30'), 'confirmed', [
     {
-      variantId: 'paw-bath-large',
-      subjectId: 'paw-s-hoa-1',
-      resourceIds: ['paw-vy', 'paw-bath-1', 'paw-dryer-3'],
+      variantId: 'paw-bath-cat',
+      subjectId: 'paw-s-ngan-1',
+      resourceIds: ['paw-vy', 'paw-bath-1', 'paw-dryer-1'],
     },
   ]),
-  appointment('paw-a-bo', 'paw-c-quynh', at('15:30'), 'confirmed', [
+  appointment('paw-a-bin', 'paw-c-uyen', at('15:30'), 'confirmed', [
     {
       variantId: 'paw-groom-small',
-      subjectId: 'paw-s-quynh-1',
+      subjectId: 'paw-s-uyen-1',
       resourceIds: ['paw-khoa', 'paw-table-1'],
+    },
+  ]),
+];
+
+/** Local `YYYY-MM-DD` and `HH:mm` as a UTC instant. */
+const atDay = (date: string, hhmm: string) => new Date(`${date}T${hhmm}:00+07:00`).toISOString();
+
+const staffTimeOff: StaffTimeOff[] = [
+  // Pending: Vy off Thursday 12/11 with two appointments.
+  {
+    id: 'paw-lv-1',
+    resourceId: 'paw-vy',
+    date: '2026-11-12',
+    reason: 'Đi khám sức khỏe',
+    status: 'pending',
+    sentAt: atDay('2026-11-06', '16:20'),
+  },
+];
+
+// Shifts: today and the weeks 09/11 and 16/11.
+const shifts: Shift[] = [
+  { resourceId: 'paw-khoa', date: '2026-11-07', start: '08:00', end: '18:00' },
+  { resourceId: 'paw-vy', date: '2026-11-07', start: '08:00', end: '18:00' },
+  ...dateRange('2026-11-09', '2026-11-22').flatMap((date): Shift[] => {
+    const sunday = new Date(`${date}T00:00:00Z`).getUTCDay() === 0;
+    return sunday
+      ? [{ resourceId: 'paw-khoa', date, start: '08:00', end: '12:00' }]
+      : [
+          { resourceId: 'paw-khoa', date, start: '08:00', end: '18:00' },
+          { resourceId: 'paw-vy', date, start: '09:00', end: '18:00' },
+        ];
+  }),
+];
+
+// Thursday 12/11, Vy off: two appointments to deal with.
+const ahead: Appointment[] = [
+  appointment('paw-a-lv-1', 'paw-c-phat', atDay('2026-11-12', '09:30'), 'confirmed', [
+    {
+      variantId: 'paw-bath-small',
+      subjectId: 'paw-s-phat-1',
+      resourceIds: ['paw-vy', 'paw-bath-1', 'paw-dryer-1'],
+    },
+  ]),
+  appointment('paw-a-lv-2', 'paw-c-ngan', atDay('2026-11-12', '11:00'), 'confirmed', [
+    {
+      variantId: 'paw-bath-cat',
+      subjectId: 'paw-s-ngan-1',
+      resourceIds: ['paw-vy', 'paw-bath-1', 'paw-dryer-1'],
+      staffChoice: 'chosen',
     },
   ]),
 ];
@@ -339,7 +406,8 @@ const week = generateWeek({
   staff: staffList,
   staffTypeId: 'paw-rt-groomer',
   subjects: weekSubjects,
-  timeOff: [],
+  timeOff: staffTimeOff,
+  shifts,
   build: appointment,
   dates: ['2026-11-02', '2026-11-03', '2026-11-04', '2026-11-05', '2026-11-06', '2026-11-08'],
   today: '2026-11-07',
@@ -354,7 +422,8 @@ const longRun = {
   staff: staffList,
   staffTypeId: 'paw-rt-groomer',
   subjects: servedSubjects,
-  timeOff: [],
+  timeOff: staffTimeOff,
+  shifts,
   build: appointment,
   today: '2026-11-07',
   fixed: [],
@@ -373,8 +442,9 @@ const upcoming = generateWeek({
   seed: 20261110,
   idPrefix: 'paw-f',
   dates: dateRange('2026-11-10', '2026-11-22'),
+  fixed: ahead,
 });
-const appointments = [...history, ...saturday, ...week, ...upcoming];
+const appointments = [...history, ...saturday, ...week, ...ahead, ...upcoming];
 
 export const spaThuCungPawpaw: TenantFixture = {
   tenant: {
@@ -411,7 +481,9 @@ export const spaThuCungPawpaw: TenantFixture = {
   staff: staffList,
   staffTitles: ['Chăm sóc chính', 'Chăm sóc', 'Học việc'],
   staffLevels: ['Chăm sóc', 'Chăm sóc chính', 'Chăm sóc cả'],
-  staffTimeOff: [],
+  shifts,
+  staffTimeOff,
+  staffSeesCustomerPhone: false,
   services,
   customers: withVisitCounts(everyone, appointments),
   servedSubjects,

@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 import { navByRole, tabIds } from '@/components/mock/app-nav';
 import { ExpiredScreen } from '@/components/mock/expired-screen';
+import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useStaffStore } from '@/components/mock/staff-store';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
@@ -46,6 +47,9 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   const toast = useToast();
   const router = useRouter();
   const { staff } = useStaffStore();
+  const { leaves, requeues } = useScheduleStore();
+  /** Requests waiting for a decision, and shifts cut short that left appointments to place. */
+  const waiting = leaves.filter((l) => l.status === 'pending').length + requeues.length;
   const { entitlements: plan, daysLeft, can } = useSubscription();
   const role = staffRoleOf(searchParams.get('role'));
   const branch =
@@ -70,7 +74,9 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
     href: appHref(entry.path),
     icon: entry.icon,
     ...(entry.group ? { group: entry.group } : {}),
-    ...(entry.badge ? { badge: entry.badge } : {}),
+    ...((entry.id === 'time-off' ? waiting : entry.badge)
+      ? { badge: entry.id === 'time-off' ? waiting : entry.badge! }
+      : {}),
     ...(entry.feature && !can(entry.feature) ? { locked: true } : {}),
     current: isCurrent(entry.path),
   }));
@@ -84,7 +90,10 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
     });
 
   const person =
-    role === 'technician' ? (staff[0]?.profile.displayName ?? 'Kỹ thuật viên') : PEOPLE[role];
+    role === 'technician'
+      ? ((staff.find((s) => s.resourceId === searchParams.get('me')) ?? staff[0])?.profile
+          .displayName ?? 'Kỹ thuật viên')
+      : PEOPLE[role];
 
   const withQuery = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -151,6 +160,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
       banner={banner}
       items={items}
       tabs={tabs}
+      {...(role === 'technician' ? { moreLabel: 'Tài khoản' } : {})}
       account={{ name: person, initials: initialsOf(person), roleLabel: roleLabel(role) }}
       onProfile={() => toast({ text: 'Hồ sơ cá nhân: chưa có trong mock.' })}
       onSignOut={() => toast({ text: 'Đăng xuất: chưa có trong mock.' })}

@@ -24,6 +24,9 @@ import {
   visibleRange,
 } from '../mock/occupation.ts';
 import { openingHours } from '../mock/hours.ts';
+import { moveAppointment, validStarts } from '../mock/move.ts';
+import { applyHandling } from '../mock/leave.ts';
+import { localMinutes, staffWindows } from '../mock/shifts.ts';
 
 let failures = 0;
 const report = (ok: boolean, name: string, detail = '') => {
@@ -371,6 +374,7 @@ const mini = (holdExpiresAt: string): TenantFixture => {
         profile: { bookableOnline: true },
       },
     ],
+    shifts: [],
     staffTimeOff: [],
     appointments: [hold],
   } as unknown as TenantFixture;
@@ -390,11 +394,135 @@ report(
   'BR-07: giữ chỗ hết hạn thì 13:30 hiện lại',
 );
 
+// ---- The sample day the create screen is checked against (MH-26) ----
+
+const sample = (slug: string) => tenantFixtures.find((f) => f.tenant.slug === slug)!;
+const sampleVariant = (fixture: TenantFixture, id: string) => {
+  for (const service of fixture.services) {
+    const variant = service.variants.find((v) => v.id === id);
+    if (variant) return { variant, serviceId: service.id };
+  }
+  throw new Error(id);
+};
+const startsOf = (fixture: TenantFixture, variantId: string, who: string, time?: string) => {
+  const { variant, serviceId } = sampleVariant(fixture, variantId);
+  const at = time ? `${DAY}T${time}:00+07:00` : undefined;
+  return freeSlots({
+    fixture,
+    variant,
+    serviceId,
+    date: DAY,
+    staffResourceId: who,
+    channel: 'staff',
+    ...(at
+      ? { step: 1, notBefore: new Date(at).toISOString(), notAfter: new Date(at).toISOString() }
+      : {}),
+  });
+};
+const local = (iso: string) => new Date(Date.parse(iso) + 7 * 3600_000).toISOString().slice(11, 16);
+
+const may = sample('toc-may');
+const lan14 = startsOf(may, 'may-cut-short', 'may-lan', '14:00');
+report(
+  lan14[0]?.assignment['may-rt-chair'] === 'may-chair-2',
+  'Tóc Mây 07/11: Lan 14:00 cắt ngắn trống, ngồi Ghế 2',
+  JSON.stringify(lan14[0]?.assignment),
+);
+report(
+  startsOf(may, 'may-cut-short', 'may-lan', '14:05').length === 1,
+  'Tóc Mây 07/11: giờ lệch lưới 14:05 vẫn đặt được (BR-58)',
+);
+const paw = sample('pawpaw');
+report(
+  startsOf(paw, 'paw-bath-large', 'paw-vy', '11:00').length === 0,
+  'Pawpaw 07/11: Tắm sấy chó từ 10 kg lúc 11:00 với Vy không đặt được',
+);
+const lucky = startsOf(paw, 'paw-bath-large', ANY_STAFF)
+  .slice(0, 3)
+  .map((x) => `${local(x.startAt)} ${x.staffResourceId.replace('paw-', '')}`)
+  .join(', ');
+report(
+  lucky === '10:00 vy, 12:00 khoa, 12:30 vy',
+  'Pawpaw 07/11: ba giờ đầu còn trống là 10:00 Vy, 12:00 Khoa, 12:30 Vy',
+  lucky,
+);
+
+// ---- Moving by drag (MH-27) on the same day ----
+
+const NOW = `${DAY}T03:20:00Z`;
+const apptOf = (id: string) => may.appointments.find((a) => a.id === id)!;
+const moveTo = (id: string, who: string, hhmm: string) => {
+  const [h = 0, m = 0] = hhmm.split(':').map(Number);
+  return moveAppointment({
+    fixture: may,
+    appt: apptOf(id),
+    date: DAY,
+    minute: h * 60 + m,
+    staffResourceId: who,
+    now: NOW,
+  });
+};
+report(
+  moveTo('may-a-van', 'may-lan', '11:30').ok,
+  'Kéo Chị Vân (Hùng 11:30) sang Lan 11:30: thả được',
+);
+report(
+  !moveTo('may-a-ngoc', 'may-lan', '11:00').ok,
+  'Kéo Chị Ngọc sang Lan 11:00: giữ chỗ của Lan chặn',
+);
+const ngoc = moveTo('may-a-ngoc', 'may-lan', '11:15');
+report(
+  ngoc.ok &&
+    ngoc.appt.items[0]?.priceVnd === 200_000n &&
+    ngoc.appt.items[0]?.staffChoice === 'chosen',
+  'Kéo Chị Ngọc sang Lan 11:15: thả được, giá giữ 200.000 ₫, vẫn ghi đích danh (BR-12, BR-32)',
+);
+const laneStarts = validStarts({
+  fixture: may,
+  appt: apptOf('may-a-van'),
+  date: DAY,
+  staffResourceId: 'may-lan',
+  now: NOW,
+})
+  .slice(2, 7)
+  .map((m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`)
+  .join(' ');
+report(
+  laneStarts === '11:15 11:30 11:45 12:00 12:15',
+  'Vùng thả của Chị Vân ở cột Lan: 11:15 đến 12:15',
+  laneStarts,
+);
+
+// ---- BR-11: a decision that no longer fits is reported, not skipped ----
+
+const applied = applyHandling(
+  may,
+  may.appointments,
+  {
+    'may-a-ngoc': { kind: 'swap', staffResourceId: 'may-lan' },
+    'may-a-van': { kind: 'cancel' },
+  },
+  NOW,
+);
+report(
+  applied.failed.length === 1 &&
+    applied.failed[0]?.id === 'may-a-ngoc' &&
+    !!applied.failed[0].reason,
+  'Cách xử lý không còn hợp lệ (Chị Ngọc sang Lan cùng giờ) được trả về kèm lý do (BR-11)',
+  JSON.stringify(applied.failed),
+);
+report(
+  applied.appointments.find((a) => a.id === 'may-a-ngoc') === apptOf('may-a-ngoc') &&
+    applied.appointments.find((a) => a.id === 'may-a-van')?.status === 'cancelled',
+  'Lịch không áp được giữ nguyên, lịch hủy vẫn được áp',
+);
+
 // ---- BR-01 and BR-54 over the sample appointments ----
 
 const LIVE: Appointment['status'][] = ['held', 'confirmed', 'checked_in', 'completed'];
 for (const fixture of tenantFixtures) {
   const name = fixture.tenant.name;
+  const staffIds = new Set(fixture.staff.map((m) => m.resourceId));
   const byResource = new Map<string, { start: number; end: number; id: string }[]>();
   let outside = 0;
   for (const appt of fixture.appointments.filter((a) => LIVE.includes(a.status))) {
@@ -406,9 +534,19 @@ for (const fixture of tenantFixtures) {
       const list = byResource.get(b.resourceId) ?? [];
       list.push({ start, end, id: appt.id });
       byResource.set(b.resourceId, list);
-      const from = hours ? Date.parse(`${date}T${hours.open}:00+07:00`) / 60_000 : Infinity;
-      const to = hours ? Date.parse(`${date}T${hours.close}:00+07:00`) / 60_000 : -Infinity;
-      if (start < from || end > to) outside++;
+      const from = hours ? localMinutes(date, hours.open) : Infinity;
+      const to = hours ? localMinutes(date, hours.close) : -Infinity;
+      if (staffIds.has(b.resourceId)) {
+        // BR-35, BR-54: staff work in their shifts, preparation before opening included.
+        const windows = staffWindows({
+          shifts: fixture.shifts,
+          timeOff: fixture.staffTimeOff.filter((t) => t.status === 'approved'),
+          resourceId: b.resourceId,
+          date,
+          open: [[from, to]],
+        });
+        if (!windows.some(([a, z]) => a <= start && end <= z)) outside++;
+      } else if (start < from || end > to) outside++;
     }
   }
   let overlaps = 0;
@@ -431,8 +569,8 @@ for (const fixture of tenantFixtures) {
   );
   report(
     outside === 0,
-    `${name}: mọi đoạn nằm trong giờ mở cửa (BR-54)`,
-    `${outside} đoạn ngoài giờ`,
+    `${name}: tài nguyên trong giờ mở cửa, nhân viên trong ca (BR-54, BR-35)`,
+    `${outside} đoạn ngoài giờ hoặc ngoài ca`,
   );
 }
 
