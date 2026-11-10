@@ -187,7 +187,9 @@ function whoIsIn(input: PlaceInput, resourceId: string, at: Interval) {
       const subject = fixture.servedSubjects.find((s) => s.id === item?.servedSubjectId);
       const customer = fixture.customers.find((c) => c.id === appt.customerId);
       const name =
-        subject?.kind === 'other' ? subject.name : (customer?.callName ?? 'khách đang đặt online');
+        subject?.kind === 'other'
+          ? subject.name
+          : (customer?.callName ?? (appt.status === 'held' ? 'khách đang đặt online' : 'khách lẻ'));
       return { name, from, to };
     }
   }

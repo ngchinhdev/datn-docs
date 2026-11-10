@@ -107,7 +107,7 @@ export function DetailPanel({
           </Button>
         </div>
         <div className="flex flex-col gap-0.5">
-          <h2 className="heading m-0">{customer?.name ?? 'Khách đang đặt online'}</h2>
+          <h2 className="heading m-0">{L.customerName(appt)}</h2>
           {customer && (
             <span className="body-sm sp-num text-(--ink-muted)">
               {customer.phone ? formatPhone(customer.phone) : 'Không có số điện thoại'}

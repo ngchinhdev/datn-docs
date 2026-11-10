@@ -23,10 +23,14 @@ export function lookups(fixture: TenantFixture) {
       .flatMap((s) => s.variants.map((v) => ({ ...v, service: s })))
       .find((v) => v.id === id);
   const customer = (appt: Appointment) => fixture.customers.find((c) => c.id === appt.customerId);
-  const who = (appt: Appointment) => customer(appt)?.callName ?? 'Khách đang đặt online';
+  /** A walk-in has no customer record; an online hold has not given details yet. */
+  const nameless = (appt: Appointment) =>
+    appt.status === 'held' ? 'Khách đang đặt online' : 'Khách lẻ';
+  const customerName = (appt: Appointment) => customer(appt)?.name ?? nameless(appt);
+  const who = (appt: Appointment) => customer(appt)?.callName ?? nameless(appt);
   const services = (appt: Appointment) =>
     appt.items.map((i) => variant(i.serviceVariantId)?.shortName ?? '').join(', ');
-  return { isStaff, name, variant, customer, who, services, resource };
+  return { isStaff, name, variant, customer, customerName, who, services, resource };
 }
 
 export type Lookups = ReturnType<typeof lookups>;

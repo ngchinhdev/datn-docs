@@ -229,17 +229,18 @@ export function CreatePanel({
     if (!result?.ok || !variant || !ready) return;
     sequence += 1;
     const n = sequence;
-    let customerId = customer?.id ?? '';
+    // A walk-in has no customer record: the appointment keeps `customerId: null`.
+    let customerId: string | null = customer?.id ?? null;
     let madeCustomer: Customer | null = null;
     let madeSubject: ServedSubject | null = null;
-    if (!customer) {
-      const name = picked?.kind === 'new' ? newName.trim() : 'Khách lẻ';
+    if (!customer && picked?.kind === 'new') {
+      const name = newName.trim();
       madeCustomer = {
         id: `${tenantId}-c-new${n}`,
         tenantId,
         name,
-        callName: picked?.kind === 'new' ? (name.split(/\s+/).at(-1) ?? name) : name,
-        phone: picked?.kind === 'new' ? (normalizePhone(newPhone) ?? '') : '',
+        callName: name.split(/\s+/).at(-1) ?? name,
+        phone: normalizePhone(newPhone) ?? '',
         visitCount: 0,
       };
       customerId = madeCustomer.id;
@@ -248,20 +249,20 @@ export function CreatePanel({
     let servedSubjectId = '';
     if (asksSubject && subject) {
       if (chosenPetId === NEW_PET) {
-        madeSubject = { ...subject, id: `${tenantId}-s-new${n}`, customerId };
+        madeSubject = { ...subject, id: `${tenantId}-s-new${n}`, customerId: customerId ?? '' };
         store.addSubject(madeSubject);
         servedSubjectId = madeSubject.id;
       } else servedSubjectId = subject.id;
     } else if (!asksSubject) {
       const own = fixture.servedSubjects.find(
-        (s) => s.customerId === customerId && s.kind === 'self',
+        (s) => customerId !== null && s.customerId === customerId && s.kind === 'self',
       );
       if (own) servedSubjectId = own.id;
       else if (madeCustomer) {
         madeSubject = {
           id: `${tenantId}-s-new${n}`,
           tenantId,
-          customerId,
+          customerId: madeCustomer.id,
           kind: 'self',
           name: madeCustomer.name,
           attributes: {},
@@ -291,7 +292,7 @@ export function CreatePanel({
       ...(note.trim() ? { note: note.trim() } : {}),
     };
     store.addAppointment(appt);
-    const who = customer?.name ?? madeCustomer?.name ?? 'khách';
+    const who = customer?.name ?? madeCustomer?.name ?? 'khách lẻ';
     toast({
       text: `Đã tạo lịch cho ${who} lúc ${formatTime(appt.startAt)}.`,
       undo: () => {
