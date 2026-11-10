@@ -3,6 +3,7 @@
  * only types, so Node can run it.
  */
 import type { Appointment, ResourceBooking, TenantFixture } from './fixtures/types.ts';
+import { minutesOf } from './shifts.ts';
 
 export type ItemPhase =
   /** Not yet time. */
@@ -19,7 +20,6 @@ export type ItemPhase =
   /** Cancelled or no-show. */
   | 'closed';
 
-const MINUTE = 60_000;
 const EARLY_MINUTES = 15;
 
 const itemBookings = (appt: Appointment, index: number) =>
@@ -39,18 +39,18 @@ export function itemPhase(appt: Appointment, index: number, now: string): ItemPh
   if (!started) {
     const arrival = itemBookings(appt, index)
       .filter((b) => b.kind === 'work')
-      .map((b) => b.startAt)
-      .sort()[0];
-    return Date.parse(now) >= Date.parse(arrival ?? appt.startAt) - EARLY_MINUTES * MINUTE
+      .map((b) => minutesOf(b.startAt))
+      .sort((a, b) => a - b)[0];
+    return minutesOf(now) >= (arrival ?? minutesOf(appt.startAt)) - EARLY_MINUTES
       ? 'due'
       : 'upcoming';
   }
   const wait = itemBookings(appt, index)
     .filter((b) => b.kind === 'wait')
-    .sort((a, b) => a.startAt.localeCompare(b.startAt))[0];
+    .sort((a, b) => minutesOf(a.startAt) - minutesOf(b.startAt))[0];
   if (wait && item.stage !== 'resumed') {
-    if (now < wait.startAt) return 'working';
-    return now < wait.endAt ? 'waiting' : 'back';
+    if (minutesOf(now) < minutesOf(wait.startAt)) return 'working';
+    return minutesOf(now) < minutesOf(wait.endAt) ? 'waiting' : 'back';
   }
   return 'working';
 }
@@ -59,7 +59,7 @@ export function itemPhase(appt: Appointment, index: number, now: string): ItemPh
 export function waitOf(appt: Appointment, index: number): ResourceBooking | undefined {
   return itemBookings(appt, index)
     .filter((b) => b.kind === 'wait')
-    .sort((a, b) => a.startAt.localeCompare(b.startAt))[0];
+    .sort((a, b) => minutesOf(a.startAt) - minutesOf(b.startAt))[0];
 }
 
 /** "xả thuốc, gội ở Giường gội 1": the part that starts when the wait ends, and where. */
@@ -67,7 +67,7 @@ export function nextPartText(fixture: TenantFixture, appt: Appointment, index: n
   const wait = waitOf(appt, index);
   if (!wait) return '';
   const next = itemBookings(appt, index).filter(
-    (b) => b.startAt === wait.endAt && b.kind === 'work',
+    (b) => minutesOf(b.startAt) === minutesOf(wait.endAt) && b.kind === 'work',
   );
   const label = next.find((b) => b.label)?.label ?? 'phần tiếp';
   const staffIds = new Set(fixture.staff.map((s) => s.resourceId));
