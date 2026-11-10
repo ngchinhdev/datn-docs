@@ -216,20 +216,31 @@ export const isSettled = (
   h: LeaveHandling | undefined,
 ): h is Exclude<LeaveHandling, { kind: 'asked' }> => h !== undefined && h.kind !== 'asked';
 
+/** A decision that could not be carried out, and why (BR-11). */
+export interface FailedHandling {
+  id: string;
+  reason: string;
+}
+
 /**
  * The appointments as they will be once the decisions are carried out: swaps and moves done,
- * cancelled ones gone. An appointment whose decision no longer fits is left as it is.
+ * cancelled ones gone. An appointment whose decision no longer fits is left as it is and listed
+ * in `failed`.
  */
 export function applyHandling(
   fixture: TenantFixture,
   appointments: readonly Appointment[],
   handling: Record<string, LeaveHandling>,
   now: string,
-): Appointment[] {
+): { appointments: Appointment[]; failed: FailedHandling[] } {
   let current = [...appointments];
+  const failed: FailedHandling[] = [];
   for (const [id, h] of Object.entries(handling)) {
     const appt = current.find((a) => a.id === id);
-    if (!appt) continue;
+    if (!appt) {
+      failed.push({ id, reason: 'Không tìm thấy lịch hẹn.' });
+      continue;
+    }
     if (h.kind === 'cancel') {
       current = current.map((a) => (a.id === id ? { ...a, status: 'cancelled' as const } : a));
     } else if (h.kind === 'swap' || h.kind === 'agreed' || h.kind === 'move') {
@@ -247,7 +258,8 @@ export function applyHandling(
         now,
       });
       if (result.ok) current = current.map((a) => (a.id === id ? result.appt : a));
+      else failed.push({ id, reason: result.reason });
     }
   }
-  return current;
+  return { appointments: current, failed };
 }

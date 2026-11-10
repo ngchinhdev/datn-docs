@@ -91,7 +91,10 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
     [handling],
   );
   const planned = useMemo(
-    () => ({ ...fixture, appointments: applyHandling(fixture, appointments, settled, now) }),
+    () => ({
+      ...fixture,
+      appointments: applyHandling(fixture, appointments, settled, now).appointments,
+    }),
     [fixture, appointments, settled, now],
   );
 
@@ -101,6 +104,8 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState('');
   const [reasonTouched, setReasonTouched] = useState(false);
+  /** Why a decision made earlier no longer fits, per appointment, until a new one is made. */
+  const [stale, setStale] = useState<Record<string, string>>({});
 
   if (!subject) {
     return (
@@ -126,6 +131,10 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
     const copy = { ...handling };
     if (next) copy[apptId] = next;
     else delete copy[apptId];
+    setStale((current) => {
+      const { [apptId]: _dropped, ...rest } = current;
+      return rest;
+    });
     if (leave) replaceLeave({ ...leave, handling: copy });
     else if (requeue) replaceRequeue({ ...requeue, handling: copy });
   };
@@ -153,6 +162,21 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
   };
 
   function buildRow(appt: Appointment): AffectedRow {
+    const row = buildRowCore(appt);
+    const note = stale[appt.id];
+    return note && !row.done
+      ? {
+          ...row,
+          fix: (
+            <>
+              <strong>Cách xử lý trước không còn áp được: {note}</strong> {row.fix}
+            </>
+          ),
+        }
+      : row;
+  }
+
+  function buildRowCore(appt: Appointment): AffectedRow {
     const h = handling[appt.id];
     const total = appt.items.reduce((sum, i) => sum + i.priceVnd, 0n);
     const deposit = appt.depositVnd ?? 0n;
@@ -336,16 +360,34 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
   const rows = affected.map(buildRow);
 
   // ---- Deciding ----
-  function carryOut() {
-    const result = applyHandling(fixture, appointments, handling, now);
+  /**
+   * Checks every decision again against the calendar as it is now (BR-11). One that no longer
+   * fits is dropped, its row goes back to "chưa xử lý" with the reason, and nothing is applied.
+   */
+  function carryOut(): boolean {
+    const { appointments: result, failed } = applyHandling(fixture, appointments, handling, now);
+    if (failed.length > 0) {
+      const copy = { ...handling };
+      for (const { id: apptId } of failed) delete copy[apptId];
+      if (leave) replaceLeave({ ...leave, handling: copy });
+      else if (requeue) replaceRequeue({ ...requeue, handling: copy });
+      setStale((current) => ({
+        ...current,
+        ...Object.fromEntries(failed.map(({ id: apptId, reason }) => [apptId, reason])),
+      }));
+      toast({
+        text: `${failed.length} lịch không còn xử lý được theo cách đã chọn. Chọn lại cách xử lý rồi ${leave ? 'duyệt' : 'xếp lại'}.`,
+      });
+      return false;
+    }
     for (const appt of affected) {
       const after = result.find((a) => a.id === appt.id);
       if (after && after !== appt) replaceAppointment(after);
     }
+    return true;
   }
   function approve() {
-    if (!leave) return;
-    carryOut();
+    if (!leave || !carryOut()) return;
     replaceLeave({ ...withoutPlan(leave), status: 'approved', affectedCount: affected.length });
     toast({
       text: `Đã duyệt nghỉ của ${name} ${whenText(leave)}. ${affected.length} lịch đã được xử lý.`,
@@ -353,8 +395,7 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
     router.push(appHref('time-off'));
   }
   function finishRequeue() {
-    if (!requeue) return;
-    carryOut();
+    if (!requeue || !carryOut()) return;
     removeRequeue(requeue.id);
     toast({ text: `Đã xếp lại ${affected.length} lịch của ${name}.` });
     router.push(appHref('time-off'));

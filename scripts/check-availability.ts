@@ -25,6 +25,7 @@ import {
 } from '../mock/occupation.ts';
 import { openingHours } from '../mock/hours.ts';
 import { moveAppointment, validStarts } from '../mock/move.ts';
+import { applyHandling } from '../mock/leave.ts';
 import { localMinutes, staffWindows } from '../mock/shifts.ts';
 
 let failures = 0;
@@ -490,6 +491,30 @@ report(
   laneStarts === '11:15 11:30 11:45 12:00 12:15',
   'Vùng thả của Chị Vân ở cột Lan: 11:15 đến 12:15',
   laneStarts,
+);
+
+// ---- BR-11: a decision that no longer fits is reported, not skipped ----
+
+const applied = applyHandling(
+  may,
+  may.appointments,
+  {
+    'may-a-ngoc': { kind: 'swap', staffResourceId: 'may-lan' },
+    'may-a-van': { kind: 'cancel' },
+  },
+  NOW,
+);
+report(
+  applied.failed.length === 1 &&
+    applied.failed[0]?.id === 'may-a-ngoc' &&
+    !!applied.failed[0].reason,
+  'Cách xử lý không còn hợp lệ (Chị Ngọc sang Lan cùng giờ) được trả về kèm lý do (BR-11)',
+  JSON.stringify(applied.failed),
+);
+report(
+  applied.appointments.find((a) => a.id === 'may-a-ngoc') === apptOf('may-a-ngoc') &&
+    applied.appointments.find((a) => a.id === 'may-a-van')?.status === 'cancelled',
+  'Lịch không áp được giữ nguyên, lịch hủy vẫn được áp',
 );
 
 // ---- BR-01 and BR-54 over the sample appointments ----
