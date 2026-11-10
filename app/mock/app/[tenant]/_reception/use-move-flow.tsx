@@ -70,10 +70,15 @@ export function useMoveFlow(args: {
     const moved = swap?.target.moved;
     if (!swap || !moved) return;
     const { appt, target } = swap;
+    // Only an email asks the customer to confirm, so only then does the mark stay (BR-32).
     commit(
       appt,
-      { ...moved, items: moved.items.map((i) => ({ ...i, swapUnconfirmed: true })) },
-      `Đã đổi ${L.who(appt)} sang ${staffName(target.columnId)}.${sendEmail ? ' Đã gửi email báo khách.' : ''} Lịch mang dấu "Chưa xác nhận đổi người".`,
+      sendEmail
+        ? { ...moved, items: moved.items.map((i) => ({ ...i, swapUnconfirmed: true })) }
+        : moved,
+      sendEmail
+        ? `Đã đổi ${L.who(appt)} sang ${staffName(target.columnId)}. Đã gửi email báo khách. Lịch mang dấu "Chưa xác nhận đổi người".`
+        : `Đã đổi ${L.who(appt)} sang ${staffName(target.columnId)}. Chưa báo khách.`,
     );
     setSwap(null);
   }
