@@ -141,18 +141,47 @@ export interface Service {
   variants: ServiceVariant[];
 }
 
+export interface CustomerPackage {
+  id: string;
+  name: string;
+  totalSessions: number;
+  usedSessions: number;
+  remainingSessions: number;
+  expiresAt: string;
+  serviceVariantId?: string;
+  note?: string;
+}
+
+export interface WalletTransaction {
+  id: string;
+  date: string;
+  description: string;
+  amountText: string;
+  isPositive?: boolean;
+}
+
+export interface CustomerWallet {
+  balanceVnd: bigint;
+  realVnd: bigint;
+  bonusVnd: bigint;
+  history: WalletTransaction[];
+}
+
 export interface Customer {
   id: string;
   tenantId: string;
   name: string;
   /** E.164, normalized (BR-61). */
   phone: string;
+  email?: string;
   /** How staff address them on the calendar, e.g. "Chị Hà". */
   callName: string;
   /** Visits so far, including today. */
   visitCount?: number;
   /** Internal note; never shown to the customer (BR-62). */
   note?: string;
+  packages?: CustomerPackage[];
+  wallet?: CustomerWallet;
 }
 
 export interface ServedSubject {

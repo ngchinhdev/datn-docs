@@ -641,7 +641,7 @@ export function CreatePanel({
           <span>
             Khách yêu cầu đích danh {staffName}
             <span className="sp-check__hint">
-              Đổi người sau này sẽ phải hỏi ý khách (BR-11). Giá theo cấp của {staffName}.
+              Đổi người sau này sẽ phải hỏi ý khách (BR-31). Giá theo cấp của {staffName}.
             </span>
           </span>
         </label>

@@ -15,7 +15,7 @@ export function DateStrip({ dates, selected, onSelect }: DateStripProps) {
         <button
           key={date}
           type="button"
-          className="sp-date aria-pressed:hover:bg-(--accent)!"
+          className="sp-date"
           aria-pressed={typeof selected === 'string' ? date === selected : selected.includes(date)}
           disabled={closed}
           aria-label={closed ? `${weekdayShort(date)} ${dayOfMonth(date)}, nghỉ` : undefined}

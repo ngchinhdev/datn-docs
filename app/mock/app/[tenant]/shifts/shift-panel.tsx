@@ -249,7 +249,7 @@ export function ShiftPanel({
           </div>
           <p className="sp-panel__note">
             Lưu ca này thì {affected.length === 1 ? 'lịch' : `${affected.length} lịch`} trên chuyển
-            sang danh sách &quot;Cần xếp lại&quot;, xử lý như nghỉ phép (BR-11).
+            sang danh sách &quot;Cần xếp lại&quot;, xử lý như nghỉ phép (BR-35).
           </p>
         </>
       )}
