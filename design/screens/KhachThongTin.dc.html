@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MH-21 · Thông tin cá nhân</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; background: var(--surface);">
+<div class="sp-tenant-may" style="position: relative; width: 390px; height: 980px; flex: none; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans); box-shadow: 0 0 0 1px var(--line); border-radius: 12px;">
+  <header style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px 8px 16px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <a href="#" style="color: var(--accent); display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;"><span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent); width: 32px; height: 32px; font-size: 14px; border-radius: 8px;">M</span><span style="font: 600 15px/20px var(--font-sans);">Salon Tóc Mây</span></a>
+    <a href="#" class="sp-icon-btn" aria-label="Tài khoản của Thư" style="width: 44px; height: 44px; text-decoration: none;"><span class="sp-avatar sp-avatar--sm">T</span></a>
+  </header>
+  <div style="display: flex; flex-direction: column; gap: 20px; padding: 20px 16px 32px;">
+        <div><h1 style="margin: 0; font: 600 24px/32px var(--font-sans); letter-spacing: -0.01em;">Thông tin</h1></div>
+
+    <nav aria-label="Tài khoản"><div class="sp-segmented sp-segmented--block" style="overflow-x: auto;"><a href="#"  class="sp-segmented__item" style="white-space: nowrap; padding: 0 8px; font-size: 14px; text-decoration: none;">Lịch hẹn</a><a href="#"  class="sp-segmented__item" style="white-space: nowrap; padding: 0 8px; font-size: 14px; text-decoration: none;">Gói và ví</a><a href="#" aria-current="page" class="sp-segmented__item" style="white-space: nowrap; padding: 0 8px; font-size: 14px; text-decoration: none;">Thông tin</a></div></nav>
+    <div class="sp-field"><label class="sp-field__label" for="pr-n">Họ và tên</label><div class="sp-field__control"><input id="pr-n" value="Nguyễn Minh Thư" autocomplete="name"></div></div>
+    <div class="sp-field"><label class="sp-field__label" for="pr-p">Số điện thoại</label><div class="sp-field__control"><span class="sp-field__prefix">+84</span><input id="pr-p" value="912 345 678" inputmode="tel" autocomplete="tel"></div><span class="sp-field__help">Để tiệm gọi khi cần đổi lịch.</span></div>
+    <div class="sp-field"><span class="sp-field__label">Email đăng nhập</span><div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;"><span style="font: 400 15px/22px var(--font-sans);">thu@example.com</span><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đổi email</button></div><span class="sp-field__help">Đổi email thì gửi mã tới email mới để xác nhận.</span></div>
+    <label class="sp-switch"><span><span style="display: block; font: 500 15px/22px var(--font-sans);">Nhận tin khuyến mãi</span><span style="display: block; font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Email ưu đãi của Tóc Mây, tối đa 2 lần mỗi tháng. Email về lịch hẹn vẫn gửi.</span></span><input type="checkbox" role="switch"></label>
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px;"><button type="button" class="sp-btn sp-btn--secondary sp-btn--lg">Hủy</button><button type="button" class="sp-btn sp-btn--accent sp-btn--lg">Lưu</button></div>
+    <div style="height: 1px; background: var(--line);"></div>
+    <p style="margin: 0; font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Bạn đồng ý cho Tóc Mây xử lý dữ liệu cá nhân khi đặt lịch lần đầu, ngày 15/10/2026.</p>
+    <button type="button" class="sp-btn sp-btn--ghost sp-btn--block">Đăng xuất</button>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":390,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

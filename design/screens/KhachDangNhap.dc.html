@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MH-16 · Đăng nhập khách bằng mã email</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 1314px; height: 800px; box-sizing: border-box; padding: 24px 32px; display: flex; gap: 40px; align-items: flex-start; background: var(--surface-sunken, var(--fill-tonal)); color: var(--ink); font-family: var(--font-sans);">
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<p style="margin: 0; font: 600 14px/20px var(--font-sans); color: var(--ink-muted);">1. Email</p>
+<div class="sp-tenant-may" style="position: relative; width: 390px; height: 720px; flex: none; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans); box-shadow: 0 0 0 1px var(--line); border-radius: 12px;">
+  <header style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px 8px 16px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <a href="#" style="color: var(--accent); display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;"><span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent); width: 32px; height: 32px; font-size: 14px; border-radius: 8px;">M</span><span style="font: 600 15px/20px var(--font-sans);">Salon Tóc Mây</span></a>
+    <a href="#" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Đăng nhập</a>
+  </header>
+  <div style="display: flex; flex-direction: column; gap: 20px; padding: 24px 16px 32px;">
+        <div><h1 style="margin: 0; font: 600 24px/32px var(--font-sans); letter-spacing: -0.01em;">Đăng nhập</h1><p style="margin: 4px 0 0; font: 400 14px/20px var(--font-sans); color: var(--ink-muted);">Xem và đổi lịch hẹn ở Salon Tóc Mây.</p></div>
+
+    <div class="sp-field"><label class="sp-field__label" for="li-email">Email bạn dùng khi đặt lịch</label><div class="sp-field__control"><input id="li-email" type="email" value="thu@example.com" autocomplete="email"></div></div>
+    <button type="button" class="sp-btn sp-btn--accent sp-btn--lg sp-btn--block">Gửi mã</button>
+    <p style="margin: 0; font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Không cần mật khẩu. Mã 6 số gửi tới email, dùng một lần trong 10 phút.</p>
+  </div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<p style="margin: 0; font: 600 14px/20px var(--font-sans); color: var(--ink-muted);">2. Mã 6 số</p>
+<div class="sp-tenant-may" style="position: relative; width: 390px; height: 720px; flex: none; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans); box-shadow: 0 0 0 1px var(--line); border-radius: 12px;">
+  <header style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px 8px 16px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <a href="#" style="color: var(--accent); display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;"><span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent); width: 32px; height: 32px; font-size: 14px; border-radius: 8px;">M</span><span style="font: 600 15px/20px var(--font-sans);">Salon Tóc Mây</span></a>
+    <a href="#" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Đăng nhập</a>
+  </header>
+  <div style="display: flex; flex-direction: column; gap: 20px; padding: 24px 16px 32px;">
+        <div><h1 style="margin: 0; font: 600 24px/32px var(--font-sans); letter-spacing: -0.01em;">Nhập mã</h1><p style="margin: 4px 0 0; font: 400 14px/20px var(--font-sans); color: var(--ink-muted);">Đã gửi mã 6 số tới thu@example.com.</p></div>
+
+    <div class="sp-field"><label class="sp-field__label" for="li-otp">Mã xác nhận</label>
+      <div class="sp-otp"><span class="sp-otp__slot">4</span><span class="sp-otp__slot">8</span><span class="sp-otp__slot">2</span><span class="sp-otp__slot">1</span><span class="sp-otp__slot" data-active></span><span class="sp-otp__slot"></span><input class="sp-otp__input" id="li-otp" value="4821" autocomplete="one-time-code" inputmode="numeric" maxlength="6"></div>
+      <span class="sp-field__help">Sai 5 lần thì phải gửi mã mới.</span></div>
+    <div style="display: flex; justify-content: space-between; align-items: center;"><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Đổi email</button><span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Gửi lại sau 0:42</span></div>
+    <p style="margin: 0; font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Đăng nhập chỉ có hiệu lực ở Salon Tóc Mây. Ở cơ sở khác dùng Sapio, bạn đăng nhập riêng.</p>
+  </div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<p style="margin: 0; font: 600 14px/20px var(--font-sans); color: var(--ink-muted);">3. Email chưa có lịch</p>
+<div class="sp-tenant-may" style="position: relative; width: 390px; height: 720px; flex: none; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans); box-shadow: 0 0 0 1px var(--line); border-radius: 12px;">
+  <header style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px 8px 16px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <a href="#" style="color: var(--accent); display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;"><span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent); width: 32px; height: 32px; font-size: 14px; border-radius: 8px;">M</span><span style="font: 600 15px/20px var(--font-sans);">Salon Tóc Mây</span></a>
+    <a href="#" class="sp-icon-btn" aria-label="Tài khoản của T" style="width: 44px; height: 44px; text-decoration: none;"><span class="sp-avatar sp-avatar--sm">T</span></a>
+  </header>
+  <div style="display: flex; flex-direction: column; gap: 20px; padding: 24px 16px 32px;">
+        <div><h1 style="margin: 0; font: 600 24px/32px var(--font-sans); letter-spacing: -0.01em;">Chưa có lịch nào</h1><p style="margin: 4px 0 0; font: 400 14px/20px var(--font-sans); color: var(--ink-muted);">Email thu@example.com chưa từng đặt lịch ở Salon Tóc Mây.</p></div>
+
+    <p style="margin: 0; font: 400 14px/19px var(--font-sans); color: var(--ink-muted);">Bạn vẫn đăng nhập được để đặt lịch nhanh hơn lần sau. Thông tin và bé đã lưu chỉ hiện sau khi bạn đặt lịch đầu tiên.</p>
+    <a href="#" class="sp-btn sp-btn--accent sp-btn--lg sp-btn--block" style="box-sizing: border-box; width: 100%; text-decoration: none;">Đặt lịch</a>
+  </div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1314,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

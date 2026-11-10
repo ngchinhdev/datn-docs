@@ -63,5 +63,17 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `XepCa.dc.html` | MH-38 Xếp ca tuần | **Đã chọn** | `/mock/app/toc-may/shifts` |
 | `NghiPhepDanhSach.dc.html` | MH-39 Đơn nghỉ phép | **Đã chọn** | `/mock/app/toc-may/time-off` |
 | `NghiPhepXuLy.dc.html` | MH-40 Xử lý lịch bị ảnh hưởng | **Đã chọn** | `/mock/app/toc-may/time-off/[id]` |
+| `KhachTrangCoSo.dc.html` | MH-11 Trang cơ sở, điện thoại: dịch vụ và giá, thợ với giờ trống sớm nhất, giờ mở cửa, chính sách | **Đã chọn** | `/mock/[tenant]` (Bước 12) |
+| `KhachTrangCoSoDesktop.dc.html` | MH-11 trên máy tính, cột phải cố định có nút Đặt lịch | **Đã chọn** | như trên, từ 900px |
+| `KhachNhieuDichVu.dc.html` | MH-13 Nhiều dịch vụ: giỏ có thứ tự, giờ trống cho cả chuỗi, chọn thợ từng dịch vụ | **Đã chọn** | `/mock/toc-may/book` |
+| `KhachDatNhom.dc.html` | MH-14 Đặt nhóm: nhiều bé (Pawpaw), giờ cùng lúc hoặc lệch nhau; bạn và người đi cùng (Tóc Mây) | **Đã chọn** | `/mock/[tenant]/book` |
+| `KhachTraCoc.dc.html` | MH-15 Trả cọc: QR, đếm ngược giữ chỗ; đã nhận cọc; tiền về sau khi mất chỗ | **Đã chọn** | `/mock/[tenant]/book/pay` |
+| `KhachDangNhap.dc.html` | MH-16 Đăng nhập khách: email, mã 6 số, email chưa có lịch | **Đã chọn** | `/mock/[tenant]/login` |
+| `KhachLichCuaToi.dc.html` | MH-17 Lịch hẹn của khách: sắp tới, đã qua, đặt lại | **Đã chọn** | `/mock/[tenant]/me` |
+| `KhachChiTietLich.dc.html` | MH-18 Chi tiết lịch hẹn: trả lời đề nghị đổi thợ, hủy xem trước tiền hoàn, quá hạn tự đổi | **Đã chọn** | `/mock/[tenant]/me/appointments/[id]` |
+| `KhachBeCuaToi.dc.html` | MH-19 Bé của tôi: danh sách, sửa theo schema ngành | **Đã chọn** | `/mock/pawpaw/me/subjects` |
+| `KhachGoiVaVi.dc.html` | MH-20 Gói và ví | **Đã chọn** | `/mock/[tenant]/me/wallet` |
+| `KhachThongTin.dc.html` | MH-21 Thông tin cá nhân, tin khuyến mãi | **Đã chọn** | `/mock/[tenant]/me/profile` |
+| `KhachEmail.dc.html` | MH-23 Email: mã xác nhận, đã đặt lịch, hỏi ý đổi thợ | **Đã chọn** | `/mock/[tenant]/emails` (chỉ có trong mock) |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-13, BR-14, BR-15, BR-30 đến BR-36, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-13 đến BR-19, BR-23, BR-29, BR-30 đến BR-36, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
