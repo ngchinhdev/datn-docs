@@ -33,6 +33,8 @@ export interface BookingState {
   chosenIds: string[];
   drafts: SubjectDraft[];
   serviceFor: Record<string, string>;
+  /** The services of the only subject, in order (BR-18); `null` until they are picked. */
+  petChain: string[] | null;
   staffByKey: Record<string, string>;
   date: string;
   name: string;

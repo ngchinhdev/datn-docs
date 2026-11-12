@@ -898,6 +898,47 @@ report(
   );
 }
 
+// ---- BR-18 for a subject: one pet, several services in order ----
+
+{
+  const paw = sample('pawpaw');
+  const now = '2026-11-07T03:20:00Z';
+  const refs: BookingItemRef[] = [
+    {
+      key: 'paw-bath',
+      subjectId: 'paw-s-mochi',
+      serviceId: 'paw-bath',
+      variantId: 'paw-bath-small',
+      staffChoice: ANY_STAFF,
+    },
+    {
+      key: 'paw-groom',
+      subjectId: 'paw-s-mochi',
+      serviceId: 'paw-groom',
+      variantId: 'paw-groom-small',
+      staffChoice: ANY_STAFF,
+    },
+  ];
+  const slots = bookingSlots(paw, refs, 'chain', '2026-11-12', now).main;
+  report(
+    slots.length > 0 && slots.every((s) => s.items[1]!.startAt === s.items[0]!.endAt),
+    'BR-18: Mochi Tắm sấy rồi Cắt tỉa, mục sau bắt đầu khi mục trước xong',
+    `${slots.length} giờ`,
+  );
+  const mochi = paw.servedSubjects.find((x) => x.id === 'paw-s-mochi')!;
+  const same = {
+    ...paw.appointments[0]!,
+    items: refs.map((r) => ({
+      serviceVariantId: r.variantId,
+      servedSubjectId: mochi.id,
+      staffResourceId: 'paw-khoa',
+      staffChoice: 'any' as const,
+      priceVnd: 0n,
+    })),
+  };
+  report(modeOf(same) === 'chain', 'BR-18, BR-19: một bé nhiều dịch vụ là chuỗi, nhiều bé là nhóm');
+}
+
 // ---- BR-06 for the customer, none for the receptionist (BR-30) ----
 
 {

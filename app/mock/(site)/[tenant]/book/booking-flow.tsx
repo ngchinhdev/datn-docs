@@ -100,6 +100,8 @@ interface ChainItem {
   key: string;
   /** Name of the subject or person in a group. */
   label?: string;
+  /** The pet or other subject the item is for, when the industry asks for one. */
+  subjectId?: string;
   service: Service;
   variant: ServiceVariant;
 }
@@ -205,6 +207,9 @@ export function BookingFlow({
     saved0?.chosenIds ?? (asksSubject && newCustomer ? ['new-1'] : []),
   );
   const [serviceFor, setServiceFor] = useState<Record<string, string>>(saved0?.serviceFor ?? {});
+  // One subject can have up to four services one after the other (BR-18); `null` until the
+  // customer picks, when the first service that fits is taken.
+  const [petChain, setPetChain] = useState<string[] | null>(saved0?.petChain ?? null);
   // Without a served subject, "Đặt cho nhiều người" turns the booking into a group (BR-19).
   const [people, setPeople] = useState<Person[] | null>(saved0?.people ?? null);
   const [changing, setChanging] = useState<string[]>([]);
@@ -260,6 +265,12 @@ export function BookingFlow({
       null
     );
   };
+  const onlyId = asksSubject && chosenIds.length === 1 ? chosenIds[0]! : null;
+  const onlySubject = onlyId ? subjectOf(onlyId) : null;
+  const petChainIds =
+    onlySubject && onlyId
+      ? (petChain ?? [serviceOf(onlySubject, onlyId)?.id].filter((x): x is string => Boolean(x)))
+      : [];
   const rawItems: ChainItem[] = target
     ? targetItems.map((it) => ({
         key: it.key,
@@ -267,35 +278,43 @@ export function BookingFlow({
         service: it.service,
         variant: it.variant,
       }))
-    : asksSubject
-      ? chosenIds.flatMap((id) => {
-          const subject = subjectOf(id);
-          const sv = subject && serviceOf(subject, id);
-          const v = subject && sv ? sv.variants.find((x) => matches(x, subject)) : undefined;
-          return subject && sv && v
-            ? [{ key: id, label: subject.name, service: sv, variant: v }]
+    : onlyId && onlySubject
+      ? petChainIds.flatMap((serviceId) => {
+          const sv = servicesFor(onlySubject).find((x) => x.id === serviceId);
+          const v = sv?.variants.find((x) => matches(x, onlySubject));
+          return sv && v
+            ? [{ key: sv.id, label: onlySubject.name, subjectId: onlyId, service: sv, variant: v }]
             : [];
         })
-      : people
-        ? people.flatMap((person, i) => {
-            const sv = services.find((x) => x.id === person.pick?.serviceId);
-            const v = sv?.variants.find((x) => x.id === person.pick?.variantId);
-            return sv && v && (i === 0 || person.name.trim())
-              ? [
-                  {
-                    key: person.id,
-                    label: i === 0 ? 'Bạn' : person.name.trim(),
-                    service: sv,
-                    variant: v,
-                  },
-                ]
+      : asksSubject
+        ? chosenIds.flatMap((id) => {
+            const subject = subjectOf(id);
+            const sv = subject && serviceOf(subject, id);
+            const v = subject && sv ? sv.variants.find((x) => matches(x, subject)) : undefined;
+            return subject && sv && v
+              ? [{ key: id, label: subject.name, subjectId: id, service: sv, variant: v }]
               : [];
           })
-        : picks.flatMap((pick) => {
-            const sv = services.find((x) => x.id === pick.serviceId);
-            const v = sv?.variants.find((x) => x.id === pick.variantId);
-            return sv && v ? [{ key: sv.id, service: sv, variant: v }] : [];
-          });
+        : people
+          ? people.flatMap((person, i) => {
+              const sv = services.find((x) => x.id === person.pick?.serviceId);
+              const v = sv?.variants.find((x) => x.id === person.pick?.variantId);
+              return sv && v && (i === 0 || person.name.trim())
+                ? [
+                    {
+                      key: person.id,
+                      label: i === 0 ? 'Bạn' : person.name.trim(),
+                      service: sv,
+                      variant: v,
+                    },
+                  ]
+                : [];
+            })
+          : picks.flatMap((pick) => {
+              const sv = services.find((x) => x.id === pick.serviceId);
+              const v = sv?.variants.find((x) => x.id === pick.variantId);
+              return sv && v ? [{ key: sv.id, service: sv, variant: v }] : [];
+            });
   const itemSig = rawItems
     .map((it) => `${it.key}:${it.label}:${it.service.id}:${it.variant.id}`)
     .join('|');
@@ -303,20 +322,23 @@ export function BookingFlow({
   const items = useMemo(() => rawItems, [itemSig]);
   const wanted = target
     ? targetItems.length
-    : asksSubject
-      ? chosenIds.length
-      : people
-        ? people.length
-        : picks.length;
+    : onlyId
+      ? petChainIds.length
+      : asksSubject
+        ? chosenIds.length
+        : people
+          ? people.length
+          : picks.length;
   /** Every subject or person asked for has a service. */
   const complete = items.length > 0 && items.length === wanted;
   const variant = items[0]?.variant ?? null;
+  // BR-18: one subject, services one after the other; BR-19: several subjects, one service each.
   const group = target
     ? modeOf(target) === 'group'
-    : (asksSubject || people !== null) && items.length > 1;
+    : (asksSubject ? chosenIds.length > 1 : people !== null) && items.length > 1;
   const chain = target
     ? modeOf(target) === 'chain'
-    : !asksSubject && people === null && items.length > 1;
+    : (asksSubject ? chosenIds.length === 1 : people === null) && items.length > 1;
   const unit = vocabulary.subject ?? 'người';
   const choices = items.map((it) => staffByKey[it.key] ?? ANY_STAFF);
   const choiceKey = choices.join('|');
@@ -499,6 +521,27 @@ export function BookingFlow({
     });
     reset();
   }
+  function setPetServices(next: string[]) {
+    setPetChain(next);
+    reset();
+  }
+  function togglePetService(serviceId: string) {
+    setPetServices(
+      petChainIds.includes(serviceId)
+        ? petChainIds.filter((x) => x !== serviceId)
+        : petChainIds.length >= MAX_CHAIN
+          ? petChainIds
+          : [...petChainIds, serviceId],
+    );
+  }
+  function movePetService(serviceId: string, by: -1 | 1) {
+    const at = petChainIds.indexOf(serviceId);
+    const to = at + by;
+    if (at < 0 || to < 0 || to >= petChainIds.length) return;
+    const next = [...petChainIds];
+    [next[at], next[to]] = [next[to]!, next[at]!];
+    setPetServices(next);
+  }
   function togglePet(id: string) {
     setChosenIds((cur) =>
       cur.includes(id) ? cur.filter((x) => x !== id) : cur.length >= MAX_PARTY ? cur : [...cur, id],
@@ -616,6 +659,7 @@ export function BookingFlow({
         chosenIds,
         drafts,
         serviceFor,
+        petChain,
         staffByKey,
         date,
         name,
@@ -625,10 +669,11 @@ export function BookingFlow({
         holdExpiresAt,
       } satisfies BookingState,
       refs: items.map((it, i) => {
-        const fresh = drafts.find((d) => d.id === it.key);
+        const fresh = drafts.find((d) => d.id === (it.subjectId ?? it.key));
         const made = fresh ? draftSubject(fresh) : null;
         return {
           key: it.key,
+          ...(it.subjectId ? { subjectId: it.subjectId } : {}),
           ...(it.label ? { label: it.label } : {}),
           serviceId: it.service.id,
           variantId: it.variant.id,
@@ -1111,7 +1156,54 @@ export function BookingFlow({
             {vocabulary.addSubject}
           </Button>
         </div>
-        {chosenIds.length > 0 && (
+        {onlyId && onlySubject && (
+          <section aria-labelledby="per-subject" className="sp-stack">
+            <h2 id="per-subject" className="heading m-0">
+              Dịch vụ cho {onlySubject.name}
+            </h2>
+            <p className="body-sm m-0 text-(--ink-muted)">
+              Chọn được nhiều dịch vụ, làm lần lượt trong một lần đến, tối đa {MAX_CHAIN}.
+            </p>
+            {petChainIds.length > 0 && (
+              <ServiceCart
+                max={MAX_CHAIN}
+                items={items.map((it, i) => ({
+                  id: it.service.id,
+                  name: it.service.name,
+                  detail: `${it.variant.name} · ${formatMinutes(duration(it.variant))} · ${formatVnd(priceOf(it.variant, it.service.id, choices[i]))}`,
+                }))}
+                onMove={movePetService}
+                onRemove={(serviceId) => togglePetService(serviceId)}
+                note={
+                  chain
+                    ? `Dịch vụ sau bắt đầu ngay khi dịch vụ trước xong. Tổng ${formatMinutes(totalMinutes)}.`
+                    : ''
+                }
+              />
+            )}
+            <ServiceVariantList
+              multiple
+              name={onlySubject.name}
+              selected={petChainIds}
+              onSelect={togglePetService}
+              variants={servicesFor(onlySubject).map((sv) => {
+                const v = sv.variants.find((x) => matches(x, onlySubject))!;
+                return {
+                  id: sv.id,
+                  name: sv.name,
+                  meta: `${v.name} · ${formatMinutes(duration(v))}`,
+                  price: formatVnd(priceOf(v, sv.id)),
+                  disabled: !petChainIds.includes(sv.id) && petChainIds.length >= MAX_CHAIN,
+                };
+              })}
+            />
+            <p className="body-sm m-0 text-(--ink-muted)">
+              Giá theo {factors} của {onlySubject.name}. Đặt cho từ hai {subjectNoun} trở lên thì
+              mỗi {subjectNoun} một dịch vụ.
+            </p>
+          </section>
+        )}
+        {chosenIds.length > 1 && (
           <section aria-labelledby="per-subject" className="sp-stack">
             <h2 id="per-subject" className="heading m-0">
               Dịch vụ cho từng {subjectNoun}
@@ -1153,7 +1245,7 @@ export function BookingFlow({
     cta = {
       title: complete ? formatVnd(anyPrice) : `Chưa chọn ${subjectNoun}`,
       subtitle: complete
-        ? `${items.map((it) => it.label).join(', ')} · ${[...new Set(items.map((it) => it.service.name))].join(', ')}`
+        ? `${[...new Set(items.map((it) => it.label))].join(', ')} · ${[...new Set(items.map((it) => it.service.name))].join(', ')}`
         : undefined,
       label: 'Tiếp tục',
       disabled: !complete,

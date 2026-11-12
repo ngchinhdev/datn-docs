@@ -148,6 +148,8 @@ export interface RebookChoice {
   picks: { serviceId: string; variantId: string }[];
   chosenIds: string[];
   serviceFor: Record<string, string>;
+  /** The services of the only subject, in order (BR-18). */
+  petChain: string[] | null;
   people:
     { id: string; name: string; pick: { serviceId: string; variantId: string } | null }[] | null;
   staffByKey: Record<string, string>;
@@ -162,12 +164,30 @@ export function rebookChoice(
   const mode = modeOf(appt);
   const items = heldItems(fixture, appt, subjects, asksSubject || mode === 'group');
   const pick = (it: HeldItem) => ({ serviceId: it.service.id, variantId: it.variant.id });
-  const empty = { picks: [], chosenIds: [], serviceFor: {}, people: null, staffByKey: {} };
+  const empty = {
+    picks: [],
+    chosenIds: [],
+    serviceFor: {},
+    petChain: null,
+    people: null,
+    staffByKey: {},
+  };
 
   if (asksSubject) {
+    const subjectIds = [...new Set(appt.items.map((i) => i.servedSubjectId))];
+    // One subject with several services is a chain, kept by service (BR-18); several subjects have
+    // one service each (BR-19).
+    if (subjectIds.length === 1) {
+      return {
+        ...empty,
+        chosenIds: subjectIds,
+        petChain: items.map((it) => it.service.id),
+        staffByKey: Object.fromEntries(items.map((it) => [it.service.id, it.staffChoice])),
+      };
+    }
     return {
       ...empty,
-      chosenIds: appt.items.map((i) => i.servedSubjectId),
+      chosenIds: subjectIds,
       serviceFor: Object.fromEntries(
         appt.items.map((i, n) => [i.servedSubjectId, items[n]!.service.id]),
       ),

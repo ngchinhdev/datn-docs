@@ -36,6 +36,8 @@ export interface BookingItemRef {
   key: string;
   /** Name of the subject or person in a group. */
   label?: string;
+  /** The pet or other subject the item is for, saved or typed in (`newSubject`). */
+  subjectId?: string;
   serviceId: string;
   variantId: string;
   /** `ANY_STAFF` or a staff resource id: who the customer asked for (BR-31). */

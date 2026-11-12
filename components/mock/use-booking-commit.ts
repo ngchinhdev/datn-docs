@@ -64,8 +64,12 @@ export function useBookingCommit(tenantSlug: string) {
         }));
     const subjectIds = draft.refs.map((ref, i) => {
       // A pet typed in during the booking, or one the customer already has (BR-17).
-      if (ref.newSubject) return saveSubject(`${tenantId}-s-web${draft.id}-${i}`, ref.newSubject);
-      if (store.servedSubjects.some((x) => x.id === ref.key)) return ref.key;
+      // One id per subject, so the items of a chain share it.
+      if (ref.newSubject) {
+        return saveSubject(`${tenantId}-s-web${draft.id}-${ref.newSubject.id}`, ref.newSubject);
+      }
+      const known = ref.subjectId ?? ref.key;
+      if (store.servedSubjects.some((x) => x.id === known)) return known;
       // A companion is known by name only (BR-19); the booker, and a chain, are the booker.
       if (draft.mode === 'group' && ref.key !== 'p1') {
         return saveSubject(`${tenantId}-s-web${draft.id}-${ref.key}`, {
