@@ -5,7 +5,7 @@
  */
 import { formatVnd } from './format.ts';
 import type { Appointment, ServedSubject, TenantFixture } from './fixtures/types.ts';
-import { SELF_SERVICE_HOURS, refundPercent, refundVnd, replyDeadline } from './policy.ts';
+import { refundPercent, refundVnd, replyDeadline } from './policy.ts';
 import { heldItems, modeOf, openQuestion } from './reschedule.ts';
 import { addMinutes, formatDay, formatTime, localDate } from './time.ts';
 
@@ -108,7 +108,10 @@ export function buildEmails(fixture: TenantFixture, now: string): EmailSample[] 
 
   const policyLine = (appt: Appointment) => {
     const deposit = appt.depositVnd ?? 0n;
-    const selfBy = addMinutes(appt.startAt, -SELF_SERVICE_HOURS * 60);
+    const selfBy = addMinutes(
+      appt.startAt,
+      -fixture.template.defaultPolicies.cancelBeforeHours * 60,
+    );
     const fullBy = addMinutes(appt.startAt, -24 * 60);
     return [
       `Đổi giờ hoặc hủy trên trang lịch hẹn trước ${hhmm(selfBy)} ngày ${dayMonth(selfBy)}.`,

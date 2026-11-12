@@ -3,19 +3,47 @@
  * (BR-08, BR-23, BR-33). Pure; imports nothing, so Node can run it (scripts/check-availability.ts).
  */
 
-/** BR-08, X: a customer changes or cancels by themselves only this many hours before the time. */
-export const SELF_SERVICE_HOURS = 4;
-/** BR-08, N: how many times a customer may change the time of one booking by themselves. */
-export const MAX_SELF_CHANGES = 2;
+/** What the shop allows a customer to do alone: X and N of BR-08. */
+export interface SelfServicePolicy {
+  /** A customer changes or cancels by themselves only this many hours before the time. */
+  cancelBeforeHours: number;
+  /** How many times a customer may change the time of one booking by themselves. */
+  maxReschedules: number;
+}
 
 const HOUR = 3_600_000;
 
 export const hoursLeft = (startAt: string, now: string) =>
   (Date.parse(startAt) - Date.parse(now)) / HOUR;
 
-/** BR-08: false once the booking is closer than `SELF_SERVICE_HOURS`. */
-export const canSelfService = (startAt: string, now: string) =>
-  hoursLeft(startAt, now) >= SELF_SERVICE_HOURS;
+/** BR-08: false once the booking is closer than the hours the shop sets. */
+export const canSelfService = (startAt: string, now: string, cancelBeforeHours: number) =>
+  hoursLeft(startAt, now) >= cancelBeforeHours;
+
+/**
+ * BR-08: why a customer cannot move the time of a booking by themselves right now, or `null`
+ * when they can. Answering a question of the shop is not a change of their own: it counts
+ * neither against the hours nor against the number of times (BR-33).
+ */
+export function selfChangeBlock(
+  appt: { status: string; startAt: string; selfChanges?: number },
+  now: string,
+  policy: SelfServicePolicy,
+  answering: boolean,
+): string | null {
+  if (appt.status !== 'confirmed' && appt.status !== 'checked_in') {
+    return 'Lịch này không còn đổi giờ được.';
+  }
+  if (answering) return null;
+  if (!canSelfService(appt.startAt, now, policy.cancelBeforeHours)) {
+    return `Còn dưới ${policy.cancelBeforeHours} giờ tới giờ hẹn nên không tự đổi giờ được. Bạn gọi tiệm.`;
+  }
+  const used = appt.selfChanges ?? 0;
+  if (used >= policy.maxReschedules) {
+    return `Lịch này đã đổi giờ ${used} lần, hết lượt tự đổi. Bạn gọi tiệm.`;
+  }
+  return null;
+}
 
 /** BR-23, default tiers: 24 hours or more 100%, from 4 to 24 hours 50%, under 4 hours nothing. */
 export function refundPercent(startAt: string, now: string): 0 | 50 | 100 {

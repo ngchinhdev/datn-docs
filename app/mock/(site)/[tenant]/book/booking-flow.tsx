@@ -45,7 +45,7 @@ import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
 import { freeChainSlots, freeGroupSlots, type FreeChainSlot } from '@/mock/availability';
 import { slotKey, type BookingSlot } from '@/mock/booking';
-import { MAX_SELF_CHANGES, bookingWindow } from '@/mock/policy';
+import { bookingWindow, selfChangeBlock } from '@/mock/policy';
 import { heldItems, modeOf, movedAppointment, openQuestion } from '@/mock/reschedule';
 import { matchesAttributes, priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
 import {
@@ -617,6 +617,13 @@ export function BookingFlow({
   /** BR-08, BR-12: the same booking at another time; answering the shop does not count. */
   function confirmReschedule() {
     if (!target || !slot) return;
+    // Checked again at the moment of confirming: the time kept moving while the customer chose.
+    const blocked = selfChangeBlock(target, now, fixture.template.defaultPolicies, answering);
+    if (blocked) {
+      toast({ text: blocked });
+      router.push(`/mock/${tenantSlug}/me/appointments/${target.id}`);
+      return;
+    }
     if (answering) {
       const asked = openQuestion(target.id, store.leaves, store.requeues);
       // The booking moves now, every item of it; the row in the leave request or the list to
@@ -1573,7 +1580,7 @@ export function BookingFlow({
             title: slotLine,
             subtitle: answering
               ? 'Không tính vào số lần đổi giờ'
-              : `Còn ${Math.max(0, MAX_SELF_CHANGES - (target.selfChanges ?? 0) - 1)} lần đổi sau lần này`,
+              : `Còn ${Math.max(0, fixture.template.defaultPolicies.maxReschedules - (target.selfChanges ?? 0) - 1)} lần đổi sau lần này`,
             label: answering ? 'Gửi giờ này cho tiệm' : 'Xác nhận đổi giờ',
             disabled: false,
             onClick: confirmReschedule,

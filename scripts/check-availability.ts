@@ -43,6 +43,7 @@ import {
   refundPercent,
   refundVnd,
   replyDeadline,
+  selfChangeBlock,
   timeLeftText,
 } from '../mock/policy.ts';
 import {
@@ -1057,7 +1058,7 @@ report(
     'BR-23: tiền hoàn là số nguyên đồng (BR-01 của tiền)',
   );
   report(
-    canSelfService(start, ago(4)) && !canSelfService(start, ago(3.99)),
+    canSelfService(start, ago(4), 4) && !canSelfService(start, ago(3.99), 4),
     'BR-08: tự đổi, hủy được khi còn từ 4 giờ trở lên',
   );
   report(
@@ -1079,8 +1080,8 @@ report(
   const appt = fixture.appointments.find((a) => a.id === 'may-a-quyen-dye')!;
   const soon = fixture.appointments.find((a) => a.id === 'may-a-quyen-today-soon')!;
   report(
-    canSelfService(appt.startAt, '2026-11-07T03:20:00Z') &&
-      !canSelfService(soon.startAt, '2026-11-07T03:20:00Z'),
+    canSelfService(appt.startAt, '2026-11-07T03:20:00Z', 4) &&
+      !canSelfService(soon.startAt, '2026-11-07T03:20:00Z', 4),
     'Chị Quyên: lịch 10/11 tự đổi được, lịch hôm nay trong 4 giờ thì không',
   );
   const question = openQuestion(appt.id, fixture.staffTimeOff, []);
@@ -1131,6 +1132,35 @@ report(
       /^TM-\d{4}-\d{4}$/.test(bookingCode(fixture, appt)),
     'Mã lịch có dạng TM-2611-0384',
     bookingCode(fixture, appt),
+  );
+}
+
+// ---- BR-08 again at the moment of confirming a new time ----
+
+{
+  const policy = { cancelBeforeHours: 4, maxReschedules: 2 };
+  const start = '2026-11-10T07:00:00Z';
+  const at = (hoursBefore: number) =>
+    new Date(Date.parse(start) - hoursBefore * 3_600_000).toISOString();
+  const appt = { status: 'confirmed', startAt: start };
+  report(
+    selfChangeBlock(appt, at(10), policy, false) === null,
+    'BR-08: còn đủ giờ và còn lượt thì đổi giờ được',
+  );
+  report(
+    selfChangeBlock(appt, at(3), policy, false) !== null &&
+      selfChangeBlock(appt, at(3), policy, true) === null,
+    'BR-08: lúc xác nhận chỉ còn dưới 4 giờ thì chặn; trả lời tiệm (BR-33) thì không chặn',
+  );
+  report(
+    selfChangeBlock({ ...appt, selfChanges: 2 }, at(10), policy, false) !== null &&
+      selfChangeBlock({ ...appt, selfChanges: 2 }, at(10), policy, true) === null &&
+      selfChangeBlock({ ...appt, selfChanges: 1 }, at(10), policy, false) === null,
+    'BR-08: đã đổi đủ N lần thì chặn; trả lời tiệm không tính; mới đổi một lần thì còn',
+  );
+  report(
+    selfChangeBlock({ ...appt, status: 'cancelled' }, at(10), policy, true) !== null,
+    'Lịch đã hủy không đổi giờ được, kể cả khi trả lời tiệm',
   );
 }
 

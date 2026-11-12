@@ -14,8 +14,6 @@ import { useToast } from '@/components/sapio/toast';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { formatPhone, formatVnd } from '@/mock/format';
 import {
-  MAX_SELF_CHANGES,
-  SELF_SERVICE_HOURS,
   canSelfService,
   refundPercent,
   refundVnd,
@@ -68,9 +66,10 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
   const day = formatDay(localDate(appt.startAt));
   const live = appt.status === 'confirmed' || appt.status === 'checked_in';
   const price = items.reduce((m, it) => m + it.priceVnd, 0n);
-  const selfOk = live && canSelfService(appt.startAt, now);
+  const policy = fixture.template.defaultPolicies;
+  const selfOk = live && canSelfService(appt.startAt, now, policy.cancelBeforeHours);
   const used = appt.selfChanges ?? 0;
-  const left = Math.max(0, MAX_SELF_CHANGES - used);
+  const left = Math.max(0, policy.maxReschedules - used);
   const deposit = appt.depositVnd ?? 0n;
   const percent = refundPercent(appt.startAt, now);
   const refund = refundVnd(deposit, appt.startAt, now);
@@ -264,7 +263,7 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
           )}
           {left === 0 && (
             <p className="body-sm m-0 text-(--ink-muted)">
-              Đã đổi giờ {MAX_SELF_CHANGES} lần. Cần đổi nữa, bạn gọi tiệm.
+              Đã đổi giờ {policy.maxReschedules} lần. Cần đổi nữa, bạn gọi tiệm.
             </p>
           )}
         </div>
@@ -273,8 +272,8 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
       {live && !selfOk && (
         <div className="flex flex-col gap-(--space-3)">
           <p className="body m-0">
-            Còn dưới {SELF_SERVICE_HOURS} giờ tới giờ hẹn nên không tự đổi giờ hay hủy trên trang
-            được. Cần thay đổi, bạn gọi tiệm.
+            Còn dưới {policy.cancelBeforeHours} giờ tới giờ hẹn nên không tự đổi giờ hay hủy trên
+            trang được. Cần thay đổi, bạn gọi tiệm.
           </p>
           <a
             href={`tel:${phone.tel}`}
