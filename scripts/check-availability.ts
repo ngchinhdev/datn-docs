@@ -30,6 +30,13 @@ import {
   visibleRange,
 } from '../mock/occupation.ts';
 import { openingHours } from '../mock/hours.ts';
+import {
+  bookingSlots,
+  buildAppointment,
+  nearestSlots,
+  stillFree,
+  type BookingItemRef,
+} from '../mock/booking.ts';
 import { moveAppointment, validStarts } from '../mock/move.ts';
 import { applyHandling } from '../mock/leave.ts';
 import { localMinutes, staffWindows } from '../mock/shifts.ts';
@@ -805,6 +812,75 @@ report(
   'Tóc Mây 07/11: hai người, hai mục khác thợ, khác ghế',
   `${mayGroup.together.length} giờ`,
 );
+
+// ---- BR-29: is the time still free once the hold is gone ----
+
+{
+  const fixture = sample('toc-may');
+  const refs: BookingItemRef[] = [
+    {
+      key: 'may-cut',
+      serviceId: 'may-cut',
+      variantId: 'may-cut-short',
+      staffChoice: ANY_STAFF,
+    },
+  ];
+  const now = `${DAY}T03:30:00Z`;
+  const first = bookingSlots(fixture, refs, 'single', DAY, now).main[0]!;
+  const taken = buildAppointment({
+    fixture,
+    id: 'other',
+    customerId: null,
+    refs,
+    subjectIds: [''],
+    slot: first,
+    status: 'confirmed',
+  });
+  const held = (expires: string) => ({ ...taken, status: 'held' as const, holdExpiresAt: expires });
+  const free = (appointments: Appointment[]) =>
+    stillFree(fixture, refs, 'single', first, now, { appointments });
+  report(
+    free(fixture.appointments) !== null,
+    'BR-29: giờ không ai đặt thì còn trống sau khi hết giữ chỗ',
+  );
+  report(
+    free([...fixture.appointments, taken]) === null,
+    'BR-29: có người đã đặt đúng giờ và chỗ đó thì không còn trống',
+  );
+  report(
+    free([...fixture.appointments, held(`${DAY}T03:25:00Z`)]) !== null,
+    'BR-29: giữ chỗ của người khác đã hết hạn thì giờ vẫn còn trống (BR-07)',
+  );
+  report(
+    free([...fixture.appointments, held(`${DAY}T03:40:00Z`)]) === null,
+    'BR-29: giữ chỗ của người khác còn hạn thì giờ không còn trống',
+  );
+  const near = nearestSlots(fixture, refs, 'single', first.startAt, now, {
+    appointments: [...fixture.appointments, taken],
+  });
+  report(
+    near.length === 3 && near.every((s) => s.startAt > first.startAt),
+    'BR-29: gợi ý ba giờ gần nhất còn trống, sau giờ đã mất',
+    near.map((s) => local(s.startAt)).join(' '),
+  );
+  const built = buildAppointment({
+    fixture,
+    id: 'mine',
+    customerId: 'c',
+    refs,
+    subjectIds: ['s'],
+    slot: first,
+    status: 'confirmed',
+    depositVnd: 100_000n,
+  });
+  report(
+    built.bookings.length > 0 &&
+      built.items[0]?.priceVnd === 150_000n &&
+      built.items[0]?.staffChoice === 'any' &&
+      built.depositVnd === 100_000n,
+    'Lịch online dựng từ lựa chọn: giá giữ lúc đặt, chọn Bất kỳ ai thì ghi là any (BR-12, BR-31)',
+  );
+}
 
 // ---- Moving by drag (MH-27) on the same day ----
 

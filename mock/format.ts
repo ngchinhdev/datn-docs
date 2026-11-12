@@ -3,8 +3,12 @@ const vnd = new Intl.NumberFormat('vi-VN');
 /** `500.000 ₫`. Money stays an integer VND `bigint`. */
 export const formatVnd = (amount: bigint) => `${vnd.format(amount)} ₫`;
 
-/** `105 phút`. */
-export const formatMinutes = (minutes: number) => `${minutes} phút`;
+/** `1 giờ 45 phút`, `2 giờ`, `45 phút`: a length of time on the customer pages. */
+export const formatMinutes = (minutes: number) => {
+  if (minutes < 60) return `${minutes} phút`;
+  const rest = minutes % 60;
+  return `${Math.floor(minutes / 60)} giờ${rest ? ` ${rest} phút` : ``}`;
+};
 
 /** Vietnamese mobile number to E.164, or `null` (BR-61). Accepts `0912…`, `+84912…`, `84912…`. */
 export function normalizePhone(input: string): string | null {

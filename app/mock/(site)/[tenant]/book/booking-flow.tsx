@@ -1,8 +1,8 @@
 'use client';
 
 import { ArrowLeft } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useQueryState } from '@/components/mock/use-query-state';
 import { BottomBar } from '@/components/sapio/bottom-bar';
 import { Button } from '@/components/sapio/button';
@@ -27,9 +27,21 @@ import {
 } from '@/components/sapio/staff-picker';
 import { StatusBadge } from '@/components/sapio/status-badge';
 import { useToast } from '@/components/sapio/toast';
+import {
+  nextDraftId,
+  useBookingDraft,
+  type BookingDraft,
+  type BookingState,
+  type ChainPick,
+  type Person,
+  type SubjectDraft as Draft,
+} from '@/components/mock/booking-draft';
+import { downloadIcs } from '@/components/mock/download-ics';
+import { useBookingCommit } from '@/components/mock/use-booking-commit';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
 import { freeChainSlots, freeGroupSlots, type FreeChainSlot } from '@/mock/availability';
+import { slotKey, type BookingSlot } from '@/mock/booking';
 import { matchesAttributes, priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
 import {
   tenantFixtures,
@@ -80,10 +92,6 @@ const PARTS: { value: Part; label: string; from: number; to: number }[] = [
 const duration = visibleMinutes;
 const matches = (v: ServiceVariant, subject: ServedSubject) =>
   matchesAttributes(v.match, subject.attributes);
-interface ChainPick {
-  serviceId: string;
-  variantId: string;
-}
 interface ChainItem {
   /** Service id in a chain; subject or person id in a group. */
   key: string;
@@ -92,52 +100,11 @@ interface ChainItem {
   service: Service;
   variant: ServiceVariant;
 }
-/** A subject being typed in: valid once its values follow the industry schema (BR-71). */
-interface Draft {
-  id: string;
-  name: string;
-  values: SubjectValues;
-  touched: string[];
-}
-/** A person of a group at a salon: the booker, then companions with a name only (BR-19). */
-interface Person {
-  id: string;
-  name: string;
-  pick: ChainPick | null;
-}
-type BookingSlot = FreeChainSlot & { staggered?: true };
-const slotKey = (s: BookingSlot) =>
-  `${s.staggered ? 'x' : 't'}${s.items.map((i) => i.startAt).join('/')}`;
 const partOf = (slot: FreeChainSlot) => {
   const hour = Number(formatTime(slot.startAt).slice(0, 2));
   return PARTS.find((p) => hour >= p.from && hour < p.to)?.value ?? 'evening';
 };
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
-
-const icsStamp = (iso: string) => iso.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-
-function downloadIcs(o: { start: string; end: string; title: string; location: string }) {
-  const lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Sapio mock//VI',
-    'BEGIN:VEVENT',
-    `UID:${icsStamp(o.start)}@sapio.mock`,
-    `DTSTAMP:${icsStamp(new Date(MOCK_NOW).toISOString())}`,
-    `DTSTART:${icsStamp(o.start)}`,
-    `DTEND:${icsStamp(o.end)}`,
-    `SUMMARY:${o.title}`,
-    `LOCATION:${o.location.replace(/,/g, '\\,')}`,
-    'END:VEVENT',
-    'END:VCALENDAR',
-  ];
-  const url = URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/calendar' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'lich-hen.ics';
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 interface Cta {
   title: string;
@@ -179,37 +146,55 @@ export function BookingFlow({
     ? ['subject', 'datetime', 'info', 'confirm']
     : ['service', 'datetime', 'info', 'confirm'];
 
-  const now = useMockNow();
+  const router = useRouter();
+  const query = useSearchParams();
+  const { draft: held, setDraft } = useBookingDraft();
+  const { commit, release } = useBookingCommit(tenantSlug);
+  // Coming back from the payment page (`giu=1`) picks the choices up where they were left.
+  const [resume] = useState(
+    query.get('giu') === '1' && held?.tenantSlug === tenantSlug ? held : null,
+  );
+  const saved0 = resume?.state ?? null;
+  const now = useMockNow(resume?.now);
+  const holdAlive = Boolean(
+    saved0?.holdExpiresAt && Date.parse(saved0.holdExpiresAt) > Date.parse(resume?.now ?? MOCK_NOW),
+  );
   const today = localDate(MOCK_NOW);
   const [stepParam, setStepParam] = useQueryState('step', steps[0]!);
-  const preset = useSearchParams().get('service');
+  const preset = query.get('service');
   const presetService = services.find((s) => s.id === preset);
   // Industries without a served subject build a chain of up to four services (BR-18).
   const [picks, setPicks] = useState<ChainPick[]>(
-    !asksSubject && presetService && presetService.variants[0]
-      ? [{ serviceId: presetService.id, variantId: presetService.variants[0].id }]
-      : [],
+    saved0?.picks ??
+      (!asksSubject && presetService && presetService.variants[0]
+        ? [{ serviceId: presetService.id, variantId: presetService.variants[0].id }]
+        : []),
   );
-  const [staffByKey, setStaffByKey] = useState<Record<string, string>>({});
+  const [staffByKey, setStaffByKey] = useState<Record<string, string>>(saved0?.staffByKey ?? {});
   const [perServiceOpen, setPerServiceOpen] = useState(false);
   // Served subjects: a new customer starts with one blank form; a returning one picks saved ones.
   const [drafts, setDrafts] = useState<Draft[]>(
-    asksSubject && newCustomer ? [{ id: 'new-1', name: '', values: {}, touched: [] }] : [],
+    saved0?.drafts ??
+      (asksSubject && newCustomer ? [{ id: 'new-1', name: '', values: {}, touched: [] }] : []),
   );
-  const [chosenIds, setChosenIds] = useState<string[]>(asksSubject && newCustomer ? ['new-1'] : []);
-  const [serviceFor, setServiceFor] = useState<Record<string, string>>({});
+  const [chosenIds, setChosenIds] = useState<string[]>(
+    saved0?.chosenIds ?? (asksSubject && newCustomer ? ['new-1'] : []),
+  );
+  const [serviceFor, setServiceFor] = useState<Record<string, string>>(saved0?.serviceFor ?? {});
   // Without a served subject, "Đặt cho nhiều người" turns the booking into a group (BR-19).
-  const [people, setPeople] = useState<Person[] | null>(null);
+  const [people, setPeople] = useState<Person[] | null>(saved0?.people ?? null);
   const [changing, setChanging] = useState<string[]>([]);
-  const [date, setDate] = useState(today);
+  const [date, setDate] = useState(saved0?.date ?? today);
   const [part, setPart] = useState<Part | null>(null);
-  const [slot, setSlot] = useState<BookingSlot | null>(null);
-  const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [slot, setSlot] = useState<BookingSlot | null>(holdAlive ? (saved0?.slot ?? null) : null);
+  const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(
+    holdAlive ? (saved0?.holdExpiresAt ?? null) : null,
+  );
+  const [notice, setNotice] = useState<string | null>(query.get('het') === '1' ? RELEASED : null);
+  const [name, setName] = useState(saved0?.name ?? '');
+  const [phone, setPhone] = useState(saved0?.phone ?? '');
   const [phoneTouched, setPhoneTouched] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(saved0?.email ?? '');
   const [emailTouched, setEmailTouched] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
@@ -396,7 +381,12 @@ export function BookingFlow({
     [staff, items, group, slotsFor, date, week],
   );
 
+  const heldRef = useRef(held);
+  heldRef.current = held;
+  const releaseRef = useRef(release);
+  releaseRef.current = release;
   const releaseHold = useCallback(() => {
+    if (heldRef.current) releaseRef.current(heldRef.current);
     setSlot(null);
     setHoldExpiresAt(null);
     setConfirmed(false);
@@ -515,6 +505,64 @@ export function BookingFlow({
   function removePick(serviceId: string) {
     setPicks((current) => current.filter((p) => p.serviceId !== serviceId));
     reset();
+  }
+
+  /** BR-29: a booking with a deposit goes to the payment page, keeping the hold it already has. */
+  function confirmBooking() {
+    if (!slot || !holdExpiresAt) return;
+    const next: BookingDraft = {
+      id: held?.tenantSlug === tenantSlug ? held.id : nextDraftId(),
+      tenantSlug,
+      newCustomer,
+      state: {
+        picks,
+        people,
+        chosenIds,
+        drafts,
+        serviceFor,
+        staffByKey,
+        date,
+        name,
+        phone,
+        email,
+        slot,
+        holdExpiresAt,
+      } satisfies BookingState,
+      refs: items.map((it, i) => {
+        const fresh = drafts.find((d) => d.id === it.key);
+        const made = fresh ? draftSubject(fresh) : null;
+        return {
+          key: it.key,
+          ...(it.label ? { label: it.label } : {}),
+          serviceId: it.service.id,
+          variantId: it.variant.id,
+          staffChoice: choices[i] ?? ANY_STAFF,
+          ...(made ? { newSubject: made } : {}),
+        };
+      }),
+      mode: group ? 'group' : chain ? 'chain' : 'single',
+      slot,
+      holdExpiresAt,
+      now,
+      contact: { name: name.trim(), phone: phoneE164 ?? '', email: email.trim() },
+      priceVnd: price,
+      depositVnd: deposit,
+      display: {
+        slotLine,
+        people: peopleNames,
+        plan: planItems,
+        day: formatDay(localDate(slot.startAt)),
+      },
+    };
+    if (deposit > 0n) {
+      commit(next, 'held');
+      setDraft(next);
+      router.push(`/mock/${tenantSlug}/book/pay`);
+      return;
+    }
+    commit(next, 'confirmed');
+    setDraft(null);
+    setConfirmed(true);
   }
 
   const phoneE164 = normalizePhone(phone);
@@ -1331,7 +1379,7 @@ export function BookingFlow({
           subtitle: slotLine,
           label: 'Xác nhận đặt lịch',
           disabled: !bookingOpen,
-          onClick: () => setConfirmed(true),
+          onClick: confirmBooking,
         };
   }
 
