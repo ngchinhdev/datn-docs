@@ -167,7 +167,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
             <>
               <Link
                 href={`/mock/${fixture.tenant.slug}/me`}
-                className="hidden min-[900px]:inline-flex sp-btn sp-btn--ghost text-sm no-underline"
+                className="hidden! min-[900px]:inline-flex! sp-btn sp-btn--ghost text-sm no-underline"
               >
                 Lịch của tôi
               </Link>
@@ -191,7 +191,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
           )}
           <Link
             href={`/mock/${fixture.tenant.slug}/book`}
-            className="hidden min-[900px]:inline-flex sp-btn sp-btn--accent text-sm no-underline"
+            className="hidden! min-[900px]:inline-flex! sp-btn sp-btn--accent text-sm no-underline"
           >
             Đặt lịch
           </Link>

@@ -60,6 +60,7 @@ export interface ScreenLink {
 }
 
 const app = (path: string) => (slug: string) => `/mock/app/${slug}/${path}`;
+const site = (path: string) => (slug: string) => `/mock/${slug}${path}`;
 const firstStaffId = (slug: string) => fixtureBySlug(slug)?.staff[0]?.resourceId ?? '';
 
 /** An appointment already checked in, so its detail has a payment to take. */
@@ -76,6 +77,21 @@ const waitingServiceId = (slug: string) =>
     s.variants.some((v) => v.segments.some((segment) => segment.kind === 'wait')),
   )?.id ?? '';
 
+/** A booking of the customer logged in by default, the one with a question of the shop open if any. */
+const customerAppointmentId = (slug: string) => {
+  const fixture = fixtureBySlug(slug);
+  const asked = fixture?.appointments.find((a) =>
+    fixture.staffTimeOff.some((l) => l.handling?.[a.id]?.kind === 'asked'),
+  );
+  const customerId = slug === 'pawpaw' ? 'paw-c-linh' : 'may-c-quyen';
+  return (
+    asked?.id ??
+    fixture?.appointments.find((a) => a.customerId === customerId && a.status === 'confirmed')
+      ?.id ??
+    ''
+  );
+};
+
 /** Screens that have a mock page, with the links that open them. Everything else is not built. */
 const built: Record<string, ScreenLink[]> = {
   'MH-02': [{ label: 'Đăng ký cơ sở', href: () => '/mock/signup', platform: true }],
@@ -84,7 +100,23 @@ const built: Record<string, ScreenLink[]> = {
   'MH-09': [
     { label: 'Hồ sơ nhân viên', href: (slug) => app(`settings/staff/${firstStaffId(slug)}`)(slug) },
   ],
-  'MH-12': [{ label: 'Đặt lịch', href: (slug) => `/mock/${slug}/book` }],
+  'MH-11': [{ label: 'Trang cơ sở', href: site('') }],
+  'MH-12': [{ label: 'Đặt lịch', href: site('/book') }],
+  'MH-13': [{ label: 'Chọn nhiều dịch vụ', href: site('/book') }],
+  'MH-14': [{ label: 'Đặt nhóm', href: site('/book') }],
+  'MH-15': [{ label: 'Trả cọc (đặt lịch có cọc, tới Xác nhận)', href: site('/book') }],
+  'MH-16': [{ label: 'Đăng nhập', href: site('/login') }],
+  'MH-17': [{ label: 'Lịch hẹn của tôi', href: site('/me') }],
+  'MH-18': [
+    {
+      label: 'Chi tiết lịch hẹn',
+      href: (slug) => site('/me/appointments/' + customerAppointmentId(slug))(slug),
+    },
+  ],
+  'MH-19': [{ label: 'Bé của tôi', href: site('/me/subjects') }],
+  'MH-20': [{ label: 'Gói và ví', href: site('/me/wallet') }],
+  'MH-21': [{ label: 'Thông tin', href: site('/me/profile') }],
+  'MH-23': [{ label: 'Các mẫu email', href: site('/emails') }],
   'MH-24': [
     { label: 'Theo nhân viên', href: app('calendar') },
     { label: 'Theo tài nguyên', href: app('calendar?view=resources') },
@@ -265,7 +297,7 @@ const rows: Row[] = [
     roles: ['customer'],
     wave: 1,
     level: 'Vẽ',
-    routes: [],
+    routes: ['/[tenant]/book'],
     note: 'Thêm dịch vụ vào giỏ, thứ tự làm, cùng hay khác thợ; giờ trống tính cho cả chuỗi (BT1)',
   },
   {
@@ -275,7 +307,7 @@ const rows: Row[] = [
     roles: ['customer'],
     wave: 1,
     level: 'Vẽ',
-    routes: [],
+    routes: ['/[tenant]/book'],
     note: 'Nhiều người hoặc nhiều bé cùng giờ, mỗi đối tượng một dịch vụ; không đủ chỗ thì gợi ý giờ lệch nhau',
   },
   {
@@ -365,7 +397,7 @@ const rows: Row[] = [
     roles: ['customer'],
     wave: 1,
     level: 'Nhẹ',
-    routes: [],
+    routes: ['/[tenant]/emails'],
     note: 'Mã OTP, xác nhận lịch, nhắc 24h và 2h, đã đổi, đã hủy, đã hoàn tiền',
   },
   {
