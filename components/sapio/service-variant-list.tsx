@@ -15,6 +15,8 @@ export interface ServiceVariantListProps {
   selected: string | null | readonly string[];
   onSelect: (variantId: string) => void;
   multiple?: boolean;
+  /** Radio group name; give each list of a page its own. */
+  groupName?: string;
   /** Under the variants, e.g. "Nhuộm có thời gian chờ lên màu". */
   note?: string | undefined;
 }
@@ -25,6 +27,7 @@ export function ServiceVariantList({
   selected,
   onSelect,
   multiple = false,
+  groupName = 'service-variant',
   note,
 }: ServiceVariantListProps) {
   const isSelected = (id: string) =>
@@ -36,7 +39,7 @@ export function ServiceVariantList({
         <label key={variant.id} className="sp-variant">
           <input
             type={multiple ? 'checkbox' : 'radio'}
-            name={multiple ? undefined : 'service-variant'}
+            name={multiple ? undefined : groupName}
             value={variant.id}
             checked={isSelected(variant.id)}
             disabled={variant.disabled}

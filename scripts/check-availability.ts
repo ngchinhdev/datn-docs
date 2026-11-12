@@ -6,11 +6,14 @@
  */
 import {
   findChainSlots,
+  findGroupSlots,
   findSlots,
   freeChainSlots,
+  freeGroupSlots,
   freeSlots,
   type CoreResource,
   type FindChainInput,
+  type FindGroupInput,
   type FindSlotsInput,
 } from '../mock/availability.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
@@ -646,6 +649,162 @@ report(
     'Tóc Mây 07/11: chuỗi một mục cho đúng giờ và người của freeSlots',
   );
 }
+
+// ---- Group of several subjects (BR-19) ----
+
+const bathSmall = variantOf(petServices, 'paw-bath-small');
+const groupInput = (
+  resources: CoreResource[],
+  variants: ServiceVariant[] = [bathSmall, bathLarge],
+): FindGroupInput => ({
+  items: variants.map((variant) => ({ variant, resources })),
+  open: OPEN_B,
+  dayStart,
+  dayEnd: dayStart + 1440,
+  step: 15,
+  ...policy(NOW_A),
+});
+
+/** Minute by minute over every assignment: distinct people, resources shared only without overlap. */
+function bruteGroup(i: FindGroupInput, starts: number[], share: boolean): boolean {
+  const go = (k: number, used: Set<string>, taken: Map<string, Set<number>>): boolean => {
+    if (k === i.items.length) return true;
+    const { variant, resources } = i.items[k]!;
+    const prep = prepMinutes(variant);
+    const [visFrom, visTo] = visibleRange(variant);
+    const origin = starts[k]! - prep;
+    for (let m = origin + visFrom; m < origin + visTo; m++) if (!contains(i.open, m)) return false;
+    const types = resourceTypesOf(variant);
+    const combos = types.reduce<CoreResource[][]>(
+      (acc, typeId) =>
+        acc.flatMap((combo) =>
+          resources.filter((r) => r.typeId === typeId).map((r) => [...combo, r]),
+        ),
+      [[]],
+    );
+    return combos.some((combo) => {
+      if (new Set(combo.map((r) => r.id)).size !== combo.length) return false;
+      if (combo.some((r) => used.has(r.id))) return false;
+      const next = new Map(taken);
+      for (const r of combo) {
+        const mine = new Set(next.get(r.id) ?? []);
+        for (const [from, to] of occupation(variant, r.typeId)) {
+          for (let m = origin + from; m < origin + to; m++) {
+            if (!contains(r.free, m) || mine.has(m)) return false;
+            mine.add(m);
+          }
+        }
+        next.set(r.id, mine);
+      }
+      const nextUsed = new Set(used);
+      for (const r of combo) if (r.isStaff || !share) nextUsed.add(r.id);
+      return go(k + 1, nextUsed, next);
+    });
+  };
+  return go(0, new Set(), new Map());
+}
+
+const startsKey = (starts: number[]) => starts.map(hhmm).join('/');
+const groupStarts = (slot: { items: { item: number; start: number }[] }) =>
+  [...slot.items].sort((a, b) => a.item - b.item).map((x) => x.start);
+
+function bruteGroupSets(i: FindGroupInput) {
+  const together: string[] = [];
+  const staggered = new Set<string>();
+  const last = Math.min(i.dayEnd - 1, i.notAfter);
+  for (let t = i.dayStart; t <= last; t += i.step) {
+    if (t < i.notBefore) continue;
+    if (bruteGroup(i, [t, t], false)) together.push(startsKey([t, t]));
+    for (let d = -60; d <= 60; d += 15) {
+      const other = t + d;
+      if (d === 0 || other < i.notBefore || other > last || other < i.dayStart) continue;
+      if (bruteGroup(i, [t, other], true)) staggered.add(startsKey([t, other]));
+    }
+  }
+  return { together, staggered: [...staggered].sort() };
+}
+
+const groupExample = (name: string, i: FindGroupInput) => {
+  const got = findGroupSlots(i);
+  const want = bruteGroupSets(i);
+  const together = got.together.map((s) => startsKey(groupStarts(s)));
+  const staggered = got.staggered.map((s) => startsKey(groupStarts(s))).sort();
+  report(
+    together.join() === want.together.join(),
+    `${name}: cùng giờ khớp vét cạn`,
+    `${together.length} giờ`,
+  );
+  report(
+    staggered.join() === want.staggered.join(),
+    `${name}: giờ lệch nhau khớp vét cạn`,
+    `${staggered.length} tổ hợp`,
+  );
+  return got;
+};
+
+const twoCages = groupExample(
+  'BR-19 Mochi và Lucky, hai lồng sấy rảnh',
+  groupInput([groomer('Khoa'), groomer('Vy'), bathtub(1), bathtub(2), cage(1), cage(2)]),
+);
+report(
+  startsKey(groupStarts(twoCages.together[0]!)) === '08:00/08:00',
+  'BR-19: hai bé cùng giờ sớm nhất 08:00',
+);
+report(
+  twoCages.together.every(
+    (s) => new Set(s.items.map((x) => x.assignment['paw-rt-groomer'])).size === s.items.length,
+  ),
+  'BR-19: mỗi bé một nhân viên khác nhau',
+);
+
+const oneCage = groupExample(
+  'BR-19 Mochi và Lucky, chỉ còn một lồng sấy rảnh',
+  groupInput([groomer('Khoa'), groomer('Vy'), bathtub(1), bathtub(2), cage(1)]),
+);
+report(oneCage.together.length === 0, 'BR-19: một lồng sấy thì không có giờ cùng lúc');
+report(oneCage.staggered.length > 0, 'BR-19: một lồng sấy thì có giờ lệch nhau');
+report(
+  oneCage.staggered.every((s) => {
+    const starts = groupStarts(s);
+    return Math.max(...starts) - Math.min(...starts) <= 60;
+  }),
+  'BR-19: giờ lệch nhau cách nhau không quá 60 phút',
+);
+report(
+  oneCage.staggered.every((s, k, all) => k === 0 || all[k - 1]!.end <= s.end),
+  'BR-19: giờ lệch nhau xếp theo giờ xong sớm nhất',
+);
+
+const sampleGroup = (slug: string, ids: string[]) => {
+  const fixture = sample(slug);
+  return freeGroupSlots({
+    fixture,
+    date: DAY,
+    items: ids.map((id) => ({ ...sampleVariant(fixture, id), staffResourceId: ANY_STAFF })),
+  });
+};
+const pawGroup = sampleGroup('pawpaw', ['paw-bath-small', 'paw-bath-large']);
+report(
+  pawGroup.together.length + pawGroup.staggered.length > 0 &&
+    pawGroup.staggered.every(
+      (s) => Date.parse(s.items[1]!.startAt) - Date.parse(s.items[0]!.startAt) !== 0,
+    ),
+  'Pawpaw 07/11: Mochi và Lucky Tắm sấy có giờ cùng lúc hoặc lệch nhau',
+  `${pawGroup.together.length} cùng giờ, ${pawGroup.staggered.length} lệch`,
+);
+const mayGroup = sampleGroup('toc-may', ['may-cut-long', 'may-cut-short']);
+report(
+  mayGroup.together.length > 0 &&
+    mayGroup.together.every((s) => {
+      const [a, b] = s.items;
+      return (
+        a!.staffResourceId !== b!.staffResourceId &&
+        a!.assignment['may-rt-chair'] !== b!.assignment['may-rt-chair']
+      );
+    }),
+  'Tóc Mây 07/11: hai người, hai mục khác thợ, khác ghế',
+  `${mayGroup.together.length} giờ`,
+);
 
 // ---- Moving by drag (MH-27) on the same day ----
 

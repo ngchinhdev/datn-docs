@@ -471,3 +471,179 @@ export function freeChainSlots(query: ChainQuery): FreeChainSlot[] {
     }),
   }));
 }
+
+// ---- A group: several subjects, one item each (BR-19) ----
+
+export interface FindGroupInput extends FindChainInput {
+  /** Longest gap between the first and the last start of a staggered suggestion, in minutes. */
+  maxSpread?: number;
+}
+
+export interface GroupSlotItem extends ChainSlotItem {
+  /** Index into `FindGroupInput.items`. */
+  item: number;
+}
+
+export interface GroupSlot {
+  /** Minute the first one arrives. */
+  start: number;
+  /** Minute the last one finishes. */
+  end: number;
+  items: GroupSlotItem[];
+}
+
+const SPREAD_MINUTES = 60;
+
+/**
+ * BR-19: "together" are the times at which every item starts at once, each with its own person
+ * and its own resource of every type. "staggered" are the combinations that start up to
+ * `maxSpread` minutes apart, each person still distinct but a resource other than staff shared
+ * as long as the held times do not meet; they are sorted by the time the last one is done.
+ * Staggered combinations that start together are left out: those are in "together".
+ */
+export function findGroupSlots(input: FindGroupInput): {
+  together: GroupSlot[];
+  staggered: GroupSlot[];
+} {
+  const { items, open } = input;
+  const spread = input.maxSpread ?? SPREAD_MINUTES;
+
+  const place = (starts: readonly number[], shareResources: boolean): GroupSlot | null => {
+    const go = (
+      k: number,
+      held: ReadonlyMap<string, Interval[]>,
+      used: ReadonlySet<string>,
+      out: GroupSlotItem[],
+    ): GroupSlotItem[] | null => {
+      if (k === items.length) return out;
+      const { variant, resources } = items[k]!;
+      const prep = prepMinutes(variant);
+      const [visStart, visEnd] = visibleRange(variant);
+      const origin = starts[k]! - prep;
+      if (!contains(fit(open, [[visStart, visEnd]]), origin)) return null;
+      const types = resourceTypesOf(variant);
+      const walk = (
+        t: number,
+        chosen: CoreResource[],
+        nextHeld: Map<string, Interval[]>,
+      ): GroupSlotItem[] | null => {
+        if (t === types.length) {
+          const nextUsed = new Set(used);
+          for (const r of chosen) if (r.isStaff || !shareResources) nextUsed.add(r.id);
+          const here: GroupSlotItem = {
+            item: k,
+            start: starts[k]!,
+            end: origin + visEnd,
+            assignment: Object.fromEntries(chosen.map((r) => [r.typeId, r.id])),
+          };
+          return go(k + 1, nextHeld, nextUsed, [...out, here]);
+        }
+        const typeId = types[t]!;
+        const ofType = orderedOfType(
+          resources.filter((r) => r.typeId === typeId),
+          new Set(),
+        );
+        for (const r of ofType) {
+          if (used.has(r.id)) continue;
+          const free = subtract(r.free, nextHeld.get(r.id) ?? []);
+          const need = occupation(variant, typeId);
+          if (!contains(fit(free, need), origin)) continue;
+          const after = new Map(nextHeld);
+          after.set(r.id, normalize([...(nextHeld.get(r.id) ?? []), ...shift(need, origin)]));
+          const found = walk(t + 1, [...chosen, r], after);
+          if (found) return found;
+        }
+        return null;
+      };
+      return walk(0, [], new Map(held));
+    };
+    const placed = go(0, new Map(), new Set(), []);
+    if (!placed) return null;
+    return {
+      start: Math.min(...placed.map((p) => p.start)),
+      end: Math.max(...placed.map((p) => p.end)),
+      items: placed,
+    };
+  };
+
+  const together: GroupSlot[] = [];
+  const staggered: GroupSlot[] = [];
+  if (items.length === 0) return { together, staggered };
+
+  const first = Math.max(input.dayStart, input.notBefore);
+  const last = Math.min(input.dayEnd - 1, input.notAfter);
+  const startAt = input.dayStart + Math.ceil((first - input.dayStart) / input.step) * input.step;
+  const steps = Math.floor(spread / input.step);
+
+  for (let t = startAt; t <= last; t += input.step) {
+    const same = place(
+      items.map(() => t),
+      false,
+    );
+    if (same) together.push(same);
+  }
+
+  // Offsets for every item but the first, in steps after `t`; `t` itself is the earliest start.
+  const offsets = (n: number): number[][] =>
+    n === 0
+      ? [[]]
+      : offsets(n - 1).flatMap((rest) => Array.from({ length: steps + 1 }, (_, k) => [...rest, k]));
+  if (items.length > 1) {
+    const combos = offsets(items.length);
+    for (let t = startAt; t <= last; t += input.step) {
+      for (const combo of combos) {
+        if (!combo.includes(0) || combo.every((k) => k === 0)) continue;
+        const starts = combo.map((k) => t + k * input.step);
+        if (starts.some((s) => s > last)) continue;
+        const found = place(starts, true);
+        if (found) staggered.push(found);
+      }
+    }
+    staggered.sort((a, b) => a.end - b.end || a.start - b.start);
+  }
+  return { together, staggered };
+}
+
+export interface FreeGroupSlot extends FreeChainSlot {
+  /** Per item of the query, in the same order. */
+  items: FreeChainItem[];
+}
+
+/** `findGroupSlots` over a tenant fixture. */
+export function freeGroupSlots(query: ChainQuery & { maxSpread?: number }): {
+  together: FreeGroupSlot[];
+  staggered: FreeGroupSlot[];
+} {
+  const day = dayContext(query);
+  if (!day) return { together: [], staggered: [] };
+  const found = findGroupSlots({
+    items: query.items.map((item) => ({
+      variant: item.variant,
+      resources: resourcesFor(query, day, item),
+    })),
+    open: day.open,
+    dayStart: day.dayStart,
+    dayEnd: day.dayEnd,
+    step: query.step ?? STEP_MINUTES,
+    notBefore: query.notBefore ? minutesOf(query.notBefore) : -Infinity,
+    notAfter: query.notAfter ? minutesOf(query.notAfter) : Infinity,
+    ...(query.maxSpread ? { maxSpread: query.maxSpread } : {}),
+  });
+  const convert = (slot: GroupSlot): FreeGroupSlot => ({
+    startAt: isoOf(slot.start),
+    endAt: isoOf(slot.end),
+    items: [...slot.items]
+      .sort((a, b) => a.item - b.item)
+      .map((it) => {
+        const staffTypeId =
+          resourceTypesOf(query.items[it.item]!.variant).find((t) => day.staffTypeIds.has(t)) ?? '';
+        return {
+          startAt: isoOf(it.start),
+          endAt: isoOf(it.end),
+          staffResourceId: it.assignment[staffTypeId] ?? '',
+          assignment: it.assignment,
+        };
+      }),
+  });
+  return { together: found.together.map(convert), staggered: found.staggered.map(convert) };
+}
