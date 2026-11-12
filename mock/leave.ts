@@ -241,6 +241,8 @@ export function applyHandling(
       failed.push({ id, reason: 'Không tìm thấy lịch hẹn.' });
       continue;
     }
+    // The customer already moved or cancelled the booking: nothing is left to carry out.
+    if (h.kind === 'rescheduled' || h.kind === 'customer_cancelled') continue;
     if (h.kind === 'cancel') {
       current = current.map((a) => (a.id === id ? { ...a, status: 'cancelled' as const } : a));
     } else if (h.kind === 'swap' || h.kind === 'agreed' || h.kind === 'move') {

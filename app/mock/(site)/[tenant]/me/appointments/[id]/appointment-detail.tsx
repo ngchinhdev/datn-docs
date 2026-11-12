@@ -80,7 +80,7 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
   const answered: LeaveHandling | undefined = [
     ...store.leaves.map((l) => l.handling?.[appt.id]),
     ...store.requeues.map((r) => r.handling[appt.id]),
-  ].find((h) => h?.kind === 'agreed' || h?.kind === 'move');
+  ].find((h) => h?.kind === 'agreed' || h?.kind === 'rescheduled');
 
   const peopleLine = (() => {
     const names = items.map((it) =>
@@ -208,8 +208,8 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
         <p role="status" className="body m-0 rounded-(--radius-md) bg-(--fill-tonal) p-(--space-4)">
           {answered.kind === 'agreed'
             ? `Bạn đã đồng ý đổi sang ${nameOf(answered.staffResourceId)}. Tiệm sẽ xác nhận khi xử lý xong.`
-            : answered.kind === 'move'
-              ? `Bạn đã chọn giờ mới ${formatTime(answered.startAt)}, ${formatDay(localDate(answered.startAt))}. Tiệm sẽ xác nhận khi xử lý xong.`
+            : answered.kind === 'rescheduled'
+              ? `Bạn đã chọn giờ mới ${formatTime(answered.startAt)}, ${formatDay(localDate(answered.startAt))}. Tiệm đã ghi nhận.`
               : ''}
         </p>
       )}

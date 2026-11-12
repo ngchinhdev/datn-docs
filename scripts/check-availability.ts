@@ -54,7 +54,7 @@ import {
   refsOfItems,
 } from '../mock/reschedule.ts';
 import { moveAppointment, validStarts } from '../mock/move.ts';
-import { applyHandling } from '../mock/leave.ts';
+import { applyHandling, isSettled } from '../mock/leave.ts';
 import { localMinutes, staffWindows } from '../mock/shifts.ts';
 
 let failures = 0;
@@ -947,6 +947,48 @@ report(
       appointments: may.appointments,
     }) !== null,
     'BR-29: tiền về muộn, giờ đã chọn gần hơn mức đặt trước vẫn xác nhận (BR-06 áp lúc chọn giờ)',
+  );
+}
+
+// ---- BR-33: what the customer did on their own is settled, not carried out again ----
+
+{
+  const fixture = sample('toc-may');
+  const appt = fixture.appointments.find((a) => a.id === 'may-a-quyen-dye')!;
+  const other = fixture.appointments.find((a) => a.id === 'may-a-hang')!;
+  const next = bookingSlots(
+    fixture,
+    refsOfItems(
+      heldItems(
+        fixture,
+        fixture.appointments.find((a) => a.id === 'may-a-quyen-upcoming')!,
+        fixture.servedSubjects,
+        false,
+      ),
+    ),
+    'single',
+    '2026-11-21',
+    '2026-11-07T03:20:00Z',
+    { appointments: fixture.appointments },
+  ).main[0]!;
+  const handling = {
+    [appt.id]: { kind: 'rescheduled' as const, staffResourceId: 'may-lan', startAt: next.startAt },
+    [other.id]: { kind: 'customer_cancelled' as const },
+  };
+  const result = applyHandling(fixture, fixture.appointments, handling, '2026-11-07T03:20:00Z');
+  report(
+    result.failed.length === 0 &&
+      result.appointments.find((a) => a.id === appt.id) === appt &&
+      result.appointments.find((a) => a.id === other.id) === other,
+    'BR-33: khách đã chọn giờ mới hoặc đã hủy thì duyệt nghỉ bỏ qua dòng đó, không dời hay hủy lần nữa',
+  );
+  report(
+    isSettled(handling[appt.id]) && isSettled(handling[other.id]),
+    'Khách đã chọn giờ mới và khách đã hủy đều là đã xử lý (MH-40)',
+  );
+  report(
+    openQuestion(appt.id, [{ ...fixture.staffTimeOff[0]!, handling }], []) === null,
+    'Sau khi khách chọn giờ mới thì lịch không còn câu hỏi chờ trả lời',
   );
 }
 

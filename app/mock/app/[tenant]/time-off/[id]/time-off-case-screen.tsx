@@ -74,15 +74,22 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
   );
 
   const affected: Appointment[] = useMemo(() => {
-    if (leave) return affectedByLeave(appointments, leave);
+    // A booking the customer moved or cancelled by themselves stays in the list, as settled.
+    const byCustomer = (a: Appointment) =>
+      handling[a.id]?.kind === 'rescheduled' || handling[a.id]?.kind === 'customer_cancelled';
+    if (leave) {
+      const open = affectedByLeave(appointments, leave);
+      const left = appointments.filter((a) => byCustomer(a) && !open.includes(a));
+      return [...open, ...left].sort((a, b) => a.startAt.localeCompare(b.startAt));
+    }
     if (requeue) {
       return requeue.appointmentIds
         .flatMap((apptId) => appointments.filter((a) => a.id === apptId))
-        .filter((a) => a.status === 'confirmed' || a.status === 'checked_in')
+        .filter((a) => a.status === 'confirmed' || a.status === 'checked_in' || byCustomer(a))
         .sort((a, b) => a.startAt.localeCompare(b.startAt));
     }
     return [];
-  }, [leave, requeue, appointments]);
+  }, [leave, requeue, appointments, handling]);
 
   // The calendar as it will be once the decisions so far are carried out, so one decision
   // cannot take the place another one is counting on.
@@ -228,8 +235,14 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
             ? `Khách đã đồng ý đổi sang ${L.name(h.staffResourceId)}, cùng giờ${afterResources ? `, ${afterResources}` : ''}`
             : h.kind === 'move'
               ? `Đã dời sang ${formatTime(h.startAt)}, ${L.name(h.staffResourceId)}`
-              : `Đã hủy, báo khách${deposit > 0n ? `; hoàn cọc ${formatVnd(deposit)} (BR-24)` : ''}`;
-      return { ...base, fix: text, tone: 'done', done: true, actions: undo };
+              : h.kind === 'rescheduled'
+                ? `Khách đã chọn giờ mới ${formatWhenInline(h.startAt)}, ${L.name(h.staffResourceId)}`
+                : h.kind === 'customer_cancelled'
+                  ? 'Khách đã hủy lịch'
+                  : `Đã hủy, báo khách${deposit > 0n ? `; hoàn cọc ${formatVnd(deposit)} (BR-24)` : ''}`;
+      // What the customer did on their own cannot be taken back from here.
+      const byCustomer = h.kind === 'rescheduled' || h.kind === 'customer_cancelled';
+      return { ...base, fix: text, tone: 'done', done: true, actions: byCustomer ? null : undo };
     }
 
     // Asked the customer, who has not answered.

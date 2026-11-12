@@ -576,8 +576,11 @@ export function BookingFlow({
     if (!target || !slot) return;
     if (answering) {
       const asked = openQuestion(target.id, store.leaves, store.requeues);
+      // The booking moves now, every item of it; the row in the leave request or the list to
+      // rearrange becomes settled (BR-08, BR-33).
+      store.replaceAppointment(movedAppointment(fixture, target, slot, false));
       const chosen: LeaveHandling = {
-        kind: 'move',
+        kind: 'rescheduled',
         staffResourceId: slot.items[0]!.staffResourceId,
         startAt: slot.startAt,
       };
@@ -592,7 +595,7 @@ export function BookingFlow({
           handling: { ...asked.requeue.handling, [target.id]: chosen },
         });
       }
-      toast({ text: 'Đã gửi giờ bạn chọn cho tiệm. Tiệm xác nhận khi xử lý xong.' });
+      toast({ text: `Đã đổi sang ${slotLine}. Không tính vào số lần đổi giờ.` });
     } else {
       store.replaceAppointment(movedAppointment(fixture, target, slot, true));
       toast({ text: `Đã đổi sang ${slotLine}.` });

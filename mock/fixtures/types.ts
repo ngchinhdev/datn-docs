@@ -287,7 +287,11 @@ export type LeaveHandling =
   /** Another time, with a person. */
   | { kind: 'move'; staffResourceId: string; startAt: string }
   /** Cancelled and the customer told; the deposit is refunded in full (BR-24). */
-  | { kind: 'cancel' };
+  | { kind: 'cancel' }
+  /** The customer answered the question by choosing another time; the booking is already there. */
+  | { kind: 'rescheduled'; staffResourceId: string; startAt: string }
+  /** The customer cancelled the booking by themselves while the question was open. */
+  | { kind: 'customer_cancelled' };
 
 /** A request to be off, whole days or a few hours of one day. */
 export interface StaffTimeOff {
