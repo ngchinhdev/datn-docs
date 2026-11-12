@@ -5,9 +5,12 @@
  * Run: pnpm check:availability   (Node 24 runs TypeScript directly)
  */
 import {
+  findChainSlots,
   findSlots,
+  freeChainSlots,
   freeSlots,
   type CoreResource,
+  type FindChainInput,
   type FindSlotsInput,
 } from '../mock/availability.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
@@ -446,6 +449,203 @@ report(
   'Pawpaw 07/11: ba giờ đầu còn trống là 10:00 Vy, 12:00 Khoa, 12:30 Vy',
   lucky,
 );
+
+// ---- Chain of services (BR-18) ----
+
+const chainInput = (
+  items: FindChainInput['items'],
+  open: Interval[],
+  now = NOW_A,
+): FindChainInput => ({
+  items,
+  open,
+  dayStart,
+  dayEnd: dayStart + 1440,
+  step: 15,
+  ...policy(now),
+});
+
+/** Minute by minute, over every assignment of every item: no fit operation, no pick order. */
+function bruteChain(i: FindChainInput): string[] {
+  const free = (r: CoreResource, m: number) => contains(r.free, m);
+  const placeItem = (
+    k: number,
+    arrival: number,
+    prevStaff: Set<string>,
+    used: Map<string, Set<number>>,
+  ): boolean => {
+    const item = i.items[k]!;
+    const prep = prepMinutes(item.variant);
+    const [visFrom, visTo] = visibleRange(item.variant);
+    const types = resourceTypesOf(item.variant);
+    const combos = types.reduce<CoreResource[][]>(
+      (acc, typeId) => {
+        const ofType = item.resources.filter((r) => r.typeId === typeId);
+        return acc.flatMap((combo) => ofType.map((r) => [...combo, r]));
+      },
+      [[]],
+    );
+    return combos.some((combo) => {
+      const staff = new Set(combo.filter((r) => r.isStaff).map((r) => r.id));
+      const same = [...staff].some((id) => prevStaff.has(id));
+      const at = k === 0 ? arrival : arrival + (same ? prep : 0);
+      const origin = at - prep;
+      for (let m = origin + visFrom; m < origin + visTo; m++)
+        if (!contains(i.open, m)) return false;
+      const next = new Map(used);
+      for (const r of combo) {
+        const mine = new Set(next.get(r.id) ?? []);
+        for (const [from, to] of occupation(item.variant, r.typeId)) {
+          for (let m = origin + from; m < origin + to; m++) {
+            if (!free(r, m) || mine.has(m)) return false;
+            mine.add(m);
+          }
+        }
+        next.set(r.id, mine);
+      }
+      return k === i.items.length - 1 || placeItem(k + 1, origin + visTo, staff, next);
+    });
+  };
+  const out: string[] = [];
+  for (let t = i.dayStart; t < i.dayEnd; t += i.step) {
+    if (t < i.notBefore || t > i.notAfter) continue;
+    if (placeItem(0, t, new Set(), new Map())) out.push(hhmm(t));
+  }
+  return out;
+}
+
+const dyeThenCut = (
+  dyers: CoreResource[],
+  cutters: CoreResource[],
+  shared: CoreResource[],
+  order: 'dye-cut' | 'cut-dye' = 'dye-cut',
+) => {
+  const dye = { variant: dyeShort, resources: [...dyers, ...shared, wash()] };
+  const cut = { variant: cutShort, resources: [...cutters, ...shared, wash()] };
+  return order === 'dye-cut' ? [dye, cut] : [cut, dye];
+};
+const lanOnly = () => [lan()];
+const chairs = () => [chair(1), chair(2)];
+
+const startsOfChain = (i: FindChainInput) => findChainSlots(i).map((s) => hhmm(s.start));
+const chainExample = (name: string, i: FindChainInput) => {
+  const got = startsOfChain(i);
+  report(got.length > 0, `${name}: có giờ trống`, `${got.length} giờ`);
+  report(got.join() === bruteChain(i).join(), `${name}: vét cạn khớp`);
+  return findChainSlots(i);
+};
+
+const dyeCutLan = chainExample(
+  'BR-18 Nhuộm rồi Cắt cùng Lan',
+  chainInput(dyeThenCut(lanOnly(), lanOnly(), chairs()), OPEN_A),
+);
+report(
+  dyeCutLan.every((s) => s.items[1]!.start === s.items[0]!.end),
+  'BR-18: Cắt bắt đầu ngay khi phần khách thấy của Nhuộm kết thúc',
+);
+report(
+  dyeCutLan.every((s) => s.items[0]!.end - s.items[0]!.start === 105),
+  'BR-18: phần khách thấy của Nhuộm ngắn là 1 giờ 45, đã gồm 45 phút chờ',
+);
+
+const cutDyeLan = chainExample(
+  'BR-18 Cắt rồi Nhuộm cùng Lan',
+  chainInput(dyeThenCut(lanOnly(), lanOnly(), chairs(), 'cut-dye'), OPEN_A),
+);
+report(
+  cutDyeLan.every((s) => s.items[1]!.start === s.items[0]!.end + 15),
+  'BR-18: Nhuộm lùi 15 phút pha thuốc khi cùng Lan làm sau Cắt',
+);
+
+const cutDyeTwo = chainExample(
+  'BR-18 Cắt rồi Nhuộm, Lan cắt, Mai nhuộm',
+  chainInput(dyeThenCut([mai()], lanOnly(), chairs(), 'cut-dye'), OPEN_A),
+);
+report(
+  cutDyeTwo.every((s) => s.items[1]!.start === s.items[0]!.end),
+  'BR-18: hai người khác nhau thì Mai pha thuốc trong lúc Lan cắt, không phải chờ',
+);
+
+const peer = () =>
+  resource({ id: 'Hà', typeId: STYLIST, level: 2, avail: [span('08:00', '20:00')] });
+const anyChain = chainExample(
+  'BR-18 Bất kỳ ai, Hà và Hùng cùng cấp, cùng ca',
+  chainInput(dyeThenCut([peer(), hung()], [peer(), hung()], chairs(), 'cut-dye'), OPEN_A),
+);
+const solo = new Set(
+  startsOfChain(chainInput(dyeThenCut([peer()], [peer()], chairs(), 'cut-dye'), OPEN_A)),
+);
+report(
+  anyChain
+    .filter((s) => solo.has(hhmm(s.start)))
+    .every((s) => s.items[0]!.assignment[STYLIST] === s.items[1]!.assignment[STYLIST]),
+  'BR-18: Bất kỳ ai, cùng cấp, giờ nào một người làm trọn chuỗi được thì giữ người đó',
+);
+report(
+  anyChain.some((s) => !solo.has(hhmm(s.start))),
+  'BR-18: giờ một người không làm trọn được (Nhuộm lùi 15 phút lấn giờ đóng) vẫn có, nhờ đổi người',
+);
+
+chainExample(
+  'BR-18 Nhuộm rồi Cắt, Lan bận 14:00–15:00 và một ghế bị giữ',
+  chainInput(
+    dyeThenCut(
+      [lan([span('14:00', '15:00')])],
+      [lan([span('14:00', '15:00')])],
+      [chair(1, [span('13:30', '16:00')]), chair(2, [span('16:30', '17:30')])],
+    ),
+    OPEN_A,
+  ),
+);
+
+const one = chainInput(
+  [{ variant: cutShort, resources: [mai(), lan(), hung(), ...chairs()] }],
+  OPEN_A,
+);
+report(
+  startsOfChain(one).join() ===
+    findSlots(input(cutShort, [mai(), lan(), hung(), ...chairs()], OPEN_A))
+      .map((s) => hhmm(s.start))
+      .join(),
+  'BR-18: chuỗi một mục cho đúng các giờ của findSlots',
+);
+
+// Sample day, through the fixture adapter.
+const chainOn = (slug: string, who: string[], ids: string[]) => {
+  const fixture = sample(slug);
+  return freeChainSlots({
+    fixture,
+    date: DAY,
+    items: ids.map((id, n) => ({ ...sampleVariant(fixture, id), staffResourceId: who[n]! })),
+  });
+};
+const mayDyeCut = chainOn('toc-may', [ANY_STAFF, ANY_STAFF], ['may-dye-short', 'may-cut-short']);
+report(
+  mayDyeCut.length > 0 && mayDyeCut.every((s) => s.items[1]!.startAt === s.items[0]!.endAt),
+  'Tóc Mây 07/11: Nhuộm ngắn rồi Cắt ngắn, mọi giờ đều nối liền',
+  `${mayDyeCut.length} giờ`,
+);
+const mayCutDyeLan = chainOn('toc-may', ['may-lan', 'may-lan'], ['may-cut-short', 'may-dye-short']);
+report(
+  mayCutDyeLan.length > 0 &&
+    mayCutDyeLan.every(
+      (s) => Date.parse(s.items[1]!.startAt) - Date.parse(s.items[0]!.endAt) === 15 * 60_000,
+    ),
+  'Tóc Mây 07/11: Cắt rồi Nhuộm cùng Lan, giữa hai mục 15 phút chờ',
+  `${mayCutDyeLan.length} giờ`,
+);
+{
+  const fixture = sample('toc-may');
+  const { variant, serviceId } = sampleVariant(fixture, 'may-dye-short');
+  const direct = freeSlots({ fixture, variant, serviceId, date: DAY, staffResourceId: ANY_STAFF });
+  const chained = chainOn('toc-may', [ANY_STAFF], ['may-dye-short']);
+  report(
+    direct.map((s) => s.startAt).join() === chained.map((s) => s.startAt).join() &&
+      direct.map((s) => s.staffResourceId).join() ===
+        chained.map((s) => s.items[0]!.staffResourceId).join(),
+    'Tóc Mây 07/11: chuỗi một mục cho đúng giờ và người của freeSlots',
+  );
+}
 
 // ---- Moving by drag (MH-27) on the same day ----
 

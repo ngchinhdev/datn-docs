@@ -11,6 +11,7 @@ import {
   intersect,
   length,
   normalize,
+  shift,
   subtract,
   union,
   type Interval,
@@ -172,25 +173,27 @@ export interface AvailabilityQuery {
 const STEP_MINUTES = 15;
 const BLOCKING: Appointment['status'][] = ['held', 'confirmed', 'checked_in', 'completed'];
 
-/**
- * Free start times for one item on one day. Staff work their shifts, or the opening hours on a
- * day without a rota; a person on leave is out for that time. With `ANY_STAFF`, each time carries
- * the person `pick` chooses.
- */
-export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
-  const { fixture, variant, date } = query;
-  const hours = openingHours(fixture, date);
-  if (!hours) return [];
+/** What one day looks like for a tenant: opening hours, the busy times, who works. */
+interface DayContext {
+  open: Interval[];
+  dayStart: number;
+  dayEnd: number;
+  busy: Map<string, Interval[]>;
+  shifts: readonly Shift[];
+  timeOff: readonly StaffTimeOff[];
+  staffTypeIds: Set<string>;
+}
 
+function dayContext(query: Omit<AvailabilityQuery, 'variant' | 'serviceId' | 'staffResourceId'>) {
+  const { fixture, date } = query;
+  const hours = openingHours(fixture, date);
+  if (!hours) return null;
   const open: Interval[] = [[localMinutes(date, hours.open), localMinutes(date, hours.close)]];
   const dayStart = localMinutes(date, '00:00');
-  const dayEnd = dayStart + 1440;
   const now = minutesOf(query.now ?? query.notBefore ?? isoOf(0));
 
   const busy = new Map<string, Interval[]>();
   const state = query.state ?? {};
-  const shifts = state.shifts ?? fixture.shifts;
-  const timeOff = state.staffTimeOff ?? fixture.staffTimeOff;
   for (const appt of state.appointments ?? fixture.appointments) {
     if (query.ignore?.has(appt.id)) continue;
     if (!BLOCKING.includes(appt.status)) continue;
@@ -203,44 +206,82 @@ export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
       busy.set(b.resourceId, list);
     }
   }
+  return {
+    open,
+    dayStart,
+    dayEnd: dayStart + 1440,
+    busy,
+    shifts: state.shifts ?? fixture.shifts,
+    timeOff: state.staffTimeOff ?? fixture.staffTimeOff,
+    staffTypeIds: new Set(fixture.resourceTypes.filter((t) => t.isStaff).map((t) => t.id)),
+  } satisfies DayContext;
+}
 
-  const staffTypeIds = new Set(fixture.resourceTypes.filter((t) => t.isStaff).map((t) => t.id));
-  const typeIds = new Set(resourceTypesOf(variant));
+/** The resources that may serve one item: right type, skill, channel, the person asked for. */
+function resourcesFor(
+  query: Pick<AvailabilityQuery, 'fixture' | 'date' | 'channel' | 'exclude'>,
+  day: DayContext,
+  item: { variant: ServiceVariant; serviceId: string; staffResourceId: string },
+): CoreResource[] {
+  const { fixture, date } = query;
+  const typeIds = new Set(resourceTypesOf(item.variant));
   const resources: CoreResource[] = [];
   for (const r of fixture.resources) {
     if (!typeIds.has(r.resourceTypeId)) continue;
-    const isStaff = staffTypeIds.has(r.resourceTypeId);
+    const isStaff = day.staffTypeIds.has(r.resourceTypeId);
     const member = fixture.staff.find((s) => s.resourceId === r.id);
     if (isStaff) {
       const ok =
         member &&
         (query.channel === 'staff' || member.profile.bookableOnline) &&
-        member.skillServiceIds.includes(query.serviceId) &&
+        member.skillServiceIds.includes(item.serviceId) &&
         !query.exclude?.has(r.id) &&
-        (query.staffResourceId === ANY_STAFF || r.id === query.staffResourceId);
+        (item.staffResourceId === ANY_STAFF || r.id === item.staffResourceId);
       if (!ok) continue;
     }
-    const mine = normalize(busy.get(r.id) ?? []);
+    const mine = normalize(day.busy.get(r.id) ?? []);
     const working = isStaff
-      ? staffWindows({ shifts, timeOff, resourceId: r.id, date, open })
-      : open;
+      ? staffWindows({
+          shifts: day.shifts,
+          timeOff: day.timeOff,
+          resourceId: r.id,
+          date,
+          open: day.open,
+        })
+      : day.open;
     resources.push({
       id: r.id,
       typeId: r.resourceTypeId,
       isStaff,
       level: member?.level ?? 1,
       free: subtract(working, mine),
-      busyToday: length(intersect(mine, [[dayStart, dayEnd]])),
+      busyToday: length(intersect(mine, [[day.dayStart, day.dayEnd]])),
     });
   }
+  return resources;
+}
 
-  const staffTypeId = [...typeIds].find((t) => staffTypeIds.has(t)) ?? '';
+/**
+ * Free start times for one item on one day. Staff work their shifts, or the opening hours on a
+ * day without a rota; a person on leave is out for that time. With `ANY_STAFF`, each time carries
+ * the person `pick` chooses.
+ */
+export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
+  const { variant } = query;
+  const day = dayContext(query);
+  if (!day) return [];
+  const resources = resourcesFor(query, day, {
+    variant,
+    serviceId: query.serviceId,
+    staffResourceId: query.staffResourceId,
+  });
+  const staffTypeId = resourceTypesOf(variant).find((t) => day.staffTypeIds.has(t)) ?? '';
   return findSlots({
     variant,
-    open,
+    open: day.open,
     resources,
-    dayStart,
-    dayEnd,
+    dayStart: day.dayStart,
+    dayEnd: day.dayEnd,
     step: query.step ?? STEP_MINUTES,
     ...(query.prefer ? { prefer: query.prefer } : {}),
     notBefore: query.notBefore ? minutesOf(query.notBefore) : -Infinity,
@@ -249,5 +290,184 @@ export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
     startAt: isoOf(slot.start),
     staffResourceId: slot.assignment[staffTypeId] ?? '',
     assignment: slot.assignment,
+  }));
+}
+
+// ---- A chain of services for one subject (BR-18) ----
+
+export interface ChainItemInput {
+  variant: Pick<ServiceVariant, 'segments' | 'cleanupMinutes'>;
+  /** Resources that may serve this item, as for `findSlots`. */
+  resources: CoreResource[];
+}
+
+export interface FindChainInput {
+  items: ChainItemInput[];
+  open: Interval[];
+  dayStart: number;
+  dayEnd: number;
+  step: number;
+  /** Earliest and latest time the customer may arrive for the first item (BR-06). */
+  notBefore: number;
+  notAfter: number;
+}
+
+export interface ChainSlotItem {
+  /** Minute the customer arrives for this item (the start of its visible part). */
+  start: number;
+  /** Minute the visible part ends. */
+  end: number;
+  assignment: Record<string, string>;
+}
+
+export interface ChainSlot {
+  /** Minute the customer arrives for the first item. */
+  start: number;
+  items: ChainSlotItem[];
+}
+
+/** Resources of one type that can serve an item, in the order BR-57 tries them. */
+function orderedOfType(ofType: readonly CoreResource[], previousStaff: ReadonlySet<string>) {
+  return ofType
+    .map((r, index) => ({ r, index }))
+    .sort(
+      (a, b) =>
+        (a.r.isStaff ? a.r.level - b.r.level : 0) ||
+        (a.r.isStaff
+          ? Number(!previousStaff.has(a.r.id)) - Number(!previousStaff.has(b.r.id))
+          : 0) ||
+        (a.r.isStaff ? a.r.busyToday - b.r.busyToday : 0) ||
+        a.index - b.index,
+    )
+    .map((x) => x.r);
+}
+
+/**
+ * Start times for a chain: each item starts when the customer-visible part of the one before
+ * ends; the same person doing the next item, when it opens with a `prep` part, makes the customer
+ * wait that long (BR-18). Resources go in BR-57 order, the person who did the item before first
+ * among equal levels. Each item takes its own resources out of the free time before the next one
+ * is placed, and the search backs out of a choice that leaves a later item without a place.
+ */
+export function findChainSlots(input: FindChainInput): ChainSlot[] {
+  const { items, open } = input;
+  if (items.length === 0) return [];
+  const slots: ChainSlot[] = [];
+
+  const place = (
+    index: number,
+    previousEnd: number,
+    previousStaff: ReadonlySet<string>,
+    held: ReadonlyMap<string, Interval[]>,
+    first: number,
+  ): ChainSlotItem[] | null => {
+    const item = items[index]!;
+    const { variant, resources } = item;
+    const prep = prepMinutes(variant);
+    const [visStart, visEnd] = visibleRange(variant);
+    const types = resourceTypesOf(variant);
+    const choices = types.map((typeId) =>
+      orderedOfType(
+        resources.filter((r) => r.typeId === typeId),
+        previousStaff,
+      ),
+    );
+
+    const walk = (t: number, chosen: CoreResource[]): ChainSlotItem[] | null => {
+      if (t === types.length) {
+        const staff = new Set(chosen.filter((r) => r.isStaff).map((r) => r.id));
+        const sameStaff = [...staff].some((id) => previousStaff.has(id));
+        const arrival = index === 0 ? first : previousEnd + (sameStaff ? prep : 0);
+        const origin = arrival - prep;
+        if (!contains(fit(open, [[visStart, visEnd]]), origin)) return null;
+        const nextHeld = new Map(held);
+        for (const r of chosen) {
+          const parts = shift(occupation(variant, r.typeId), origin);
+          const free = subtract(r.free, held.get(r.id) ?? []);
+          if (!contains(fit(free, occupation(variant, r.typeId)), origin)) return null;
+          nextHeld.set(r.id, normalize([...(held.get(r.id) ?? []), ...parts]));
+        }
+        const end = origin + visEnd;
+        const here: ChainSlotItem = {
+          start: arrival,
+          end,
+          assignment: Object.fromEntries(chosen.map((r) => [r.typeId, r.id])),
+        };
+        if (index === items.length - 1) return [here];
+        const rest = place(index + 1, end, staff, nextHeld, first);
+        return rest && [here, ...rest];
+      }
+      for (const r of choices[t]!) {
+        const found = walk(t + 1, [...chosen, r]);
+        if (found) return found;
+      }
+      return null;
+    };
+    return walk(0, []);
+  };
+
+  const first = Math.max(input.dayStart, input.notBefore);
+  const last = Math.min(input.dayEnd - 1, input.notAfter);
+  const startAt = input.dayStart + Math.ceil((first - input.dayStart) / input.step) * input.step;
+  for (let t = startAt; t <= last; t += input.step) {
+    const placed = place(0, 0, new Set(), new Map(), t);
+    if (placed) slots.push({ start: t, items: placed });
+  }
+  return slots;
+}
+
+export interface FreeChainItem {
+  /** ISO 8601, UTC: when the customer arrives for this item. */
+  startAt: string;
+  /** ISO 8601, UTC: when the customer-visible part ends. */
+  endAt: string;
+  staffResourceId: string;
+  assignment: Record<string, string>;
+}
+
+export interface FreeChainSlot {
+  /** ISO 8601, UTC: when the customer arrives for the first item. */
+  startAt: string;
+  /** When the last item ends. */
+  endAt: string;
+  items: FreeChainItem[];
+}
+
+export interface ChainQuery extends Omit<
+  AvailabilityQuery,
+  'variant' | 'serviceId' | 'staffResourceId'
+> {
+  items: { variant: ServiceVariant; serviceId: string; staffResourceId: string }[];
+}
+
+/** `findChainSlots` over a tenant fixture; a chain of one gives the same times as `freeSlots`. */
+export function freeChainSlots(query: ChainQuery): FreeChainSlot[] {
+  const day = dayContext(query);
+  if (!day) return [];
+  const slots = findChainSlots({
+    items: query.items.map((item) => ({
+      variant: item.variant,
+      resources: resourcesFor(query, day, item),
+    })),
+    open: day.open,
+    dayStart: day.dayStart,
+    dayEnd: day.dayEnd,
+    step: query.step ?? STEP_MINUTES,
+    notBefore: query.notBefore ? minutesOf(query.notBefore) : -Infinity,
+    notAfter: query.notAfter ? minutesOf(query.notAfter) : Infinity,
+  });
+  return slots.map((slot) => ({
+    startAt: isoOf(slot.start),
+    endAt: isoOf(slot.items.at(-1)!.end),
+    items: slot.items.map((it, i) => {
+      const staffTypeId =
+        resourceTypesOf(query.items[i]!.variant).find((t) => day.staffTypeIds.has(t)) ?? '';
+      return {
+        startAt: isoOf(it.start),
+        endAt: isoOf(it.end),
+        staffResourceId: it.assignment[staffTypeId] ?? '',
+        assignment: it.assignment,
+      };
+    }),
   }));
 }

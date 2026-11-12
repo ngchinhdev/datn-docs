@@ -6,12 +6,15 @@ import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { useQueryState } from '@/components/mock/use-query-state';
 import { BottomBar } from '@/components/sapio/bottom-bar';
 import { Button } from '@/components/sapio/button';
+import { ChainPlan, type PlanItem } from '@/components/sapio/chain-plan';
 import { DateStrip } from '@/components/sapio/date-strip';
 import { Field } from '@/components/sapio/form';
 import { HoldBanner } from '@/components/sapio/hold-banner';
 import { OtpField } from '@/components/sapio/otp-field';
+import { PerServiceStaff } from '@/components/sapio/per-service-staff';
 import { PhoneField } from '@/components/sapio/phone-field';
 import { SegmentedTabs } from '@/components/sapio/segmented';
+import { ServiceCart } from '@/components/sapio/service-cart';
 import { SubjectFields } from '@/components/sapio/subject-fields';
 import { ServiceVariantList } from '@/components/sapio/service-variant-list';
 import { SlotGrid } from '@/components/sapio/slot-grid';
@@ -25,9 +28,14 @@ import { StatusBadge } from '@/components/sapio/status-badge';
 import { useToast } from '@/components/sapio/toast';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
-import { freeSlots, type FreeSlot } from '@/mock/availability';
-import { matchesAttributes, priceFor, visibleMinutes } from '@/mock/occupation';
-import { tenantFixtures, type ServedSubject, type ServiceVariant } from '@/mock/fixtures';
+import { freeChainSlots, type FreeChainSlot } from '@/mock/availability';
+import { matchesAttributes, priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
+import {
+  tenantFixtures,
+  type ServedSubject,
+  type Service,
+  type ServiceVariant,
+} from '@/mock/fixtures';
 import { formatMinutes, formatPhone, formatVnd, normalizePhone } from '@/mock/format';
 import { openingHours } from '@/mock/hours';
 import {
@@ -51,6 +59,10 @@ type Step = 'service' | 'subject' | 'datetime' | 'info' | 'confirm';
 type Part = 'morning' | 'afternoon' | 'evening';
 
 const HOLD_MINUTES = 10;
+/** BR-18: at most four services in one booking. */
+const MAX_CHAIN = 4;
+/** `staffChoice` when the services of a chain have different people. */
+const MIXED = 'mixed';
 const RELEASED = 'Chỗ đã được trả lại. Chọn giờ khác.';
 const NEW_SUBJECT = 'new';
 /** A returning customer has a session, so their saved served subjects show (BR-17). */
@@ -64,7 +76,15 @@ const PARTS: { value: Part; label: string; from: number; to: number }[] = [
 const duration = visibleMinutes;
 const matches = (v: ServiceVariant, subject: ServedSubject) =>
   matchesAttributes(v.match, subject.attributes);
-const partOf = (slot: FreeSlot) => {
+interface ChainPick {
+  serviceId: string;
+  variantId: string;
+}
+interface ChainItem {
+  service: Service;
+  variant: ServiceVariant;
+}
+const partOf = (slot: FreeChainSlot) => {
   const hour = Number(formatTime(slot.startAt).slice(0, 2));
   return PARTS.find((p) => hour >= p.from && hour < p.to)?.value ?? 'evening';
 };
@@ -141,17 +161,21 @@ export function BookingFlow({
   const preset = useSearchParams().get('service');
   const presetService = services.find((s) => s.id === preset);
   const [serviceId, setServiceId] = useState<string | null>(presetService?.id ?? null);
-  const [variantId, setVariantId] = useState<string | null>(
-    !asksSubject ? (presetService?.variants[0]?.id ?? null) : null,
+  // Industries without a served subject build a chain of up to four services (BR-18).
+  const [picks, setPicks] = useState<ChainPick[]>(
+    !asksSubject && presetService && presetService.variants[0]
+      ? [{ serviceId: presetService.id, variantId: presetService.variants[0].id }]
+      : [],
   );
+  const [staffByService, setStaffByService] = useState<Record<string, string>>({});
+  const [perServiceOpen, setPerServiceOpen] = useState(false);
   const [subjectId, setSubjectId] = useState<string | null>(newCustomer ? NEW_SUBJECT : null);
   const [newName, setNewName] = useState('');
   const [newValues, setNewValues] = useState<SubjectValues>({});
   const [subjectTouched, setSubjectTouched] = useState<Set<string>>(new Set());
   const [date, setDate] = useState(today);
   const [part, setPart] = useState<Part | null>(null);
-  const [staffChoice, setStaffChoice] = useState(ANY_STAFF);
-  const [slot, setSlot] = useState<FreeSlot | null>(null);
+  const [slot, setSlot] = useState<FreeChainSlot | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -180,14 +204,27 @@ export function BookingFlow({
   const subject =
     subjectId === NEW_SUBJECT ? newSubject : (saved.find((s) => s.id === subjectId) ?? null);
   // BR-13: when a served subject is asked for, the variant follows its attributes.
-  const variant = asksSubject
-    ? ((subject && service?.variants.find((v) => matches(v, subject))) ?? null)
-    : (service?.variants.find((v) => v.id === variantId) ?? null);
+  const subjectVariant =
+    (asksSubject && subject && service?.variants.find((v) => matches(v, subject))) || null;
+  const items: ChainItem[] = useMemo(() => {
+    if (asksSubject) return service && subjectVariant ? [{ service, variant: subjectVariant }] : [];
+    return picks.flatMap((p) => {
+      const sv = services.find((x) => x.id === p.serviceId);
+      const v = sv?.variants.find((x) => x.id === p.variantId);
+      return sv && v ? [{ service: sv, variant: v }] : [];
+    });
+  }, [asksSubject, service, subjectVariant, picks, services]);
+  const variant = items[0]?.variant ?? null;
+  const chain = items.length > 1;
+  const choices = items.map((it) => staffByService[it.service.id] ?? ANY_STAFF);
+  const choiceKey = choices.join('|');
+  /** One value when everyone asked for is the same, else `MIXED`. */
+  const staffChoice = choices.every((c) => c === choices[0]) ? (choices[0] ?? ANY_STAFF) : MIXED;
   // `?step=` is the source; a link to a step whose choices are missing falls back to the first step.
   const reachable: Record<Step, boolean> = {
     service: true,
     subject: Boolean(service),
-    datetime: Boolean(variant),
+    datetime: items.length > 0,
     info: Boolean(slot),
     confirm: Boolean(slot),
   };
@@ -195,24 +232,32 @@ export function BookingFlow({
   const step: Step = requested && reachable[requested] ? requested : 'service';
   const stepIndex = steps.indexOf(step);
   const staffName = (id: string) => resources.find((r) => r.id === id)?.name ?? '';
-  const price = variant && service ? priceOf(variant, service.id, staffChoice) : 0n;
+  const sum = (xs: bigint[]) => xs.reduce((a, b) => a + b, 0n);
+  /** BR-18, BR-56: the price and the deposit are the sums of the items. */
+  const price = sum(items.map((it, i) => priceOf(it.variant, it.service.id, choices[i])));
+  const anyPrice = sum(items.map((it) => priceOf(it.variant, it.service.id)));
+  const deposit = sum(items.map((it) => it.variant.depositVnd ?? 0n));
+  const totalMinutes = items.reduce((m, it) => m + duration(it.variant), 0);
 
   const week = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(today, i)), [today]);
   const slotsFor = useCallback(
-    (day: string, staffId: string) =>
-      variant && service
-        ? freeSlots({
+    (day: string, who: readonly string[]) =>
+      items.length > 0
+        ? freeChainSlots({
             fixture,
-            variant,
-            serviceId: service.id,
             date: day,
-            staffResourceId: staffId,
             notBefore: MOCK_NOW,
+            items: items.map((it, i) => ({
+              variant: it.variant,
+              serviceId: it.service.id,
+              staffResourceId: who[i] ?? ANY_STAFF,
+            })),
           })
         : [],
-    [fixture, variant, service],
+    [fixture, items],
   );
-  const daySlots = useMemo(() => slotsFor(date, staffChoice), [slotsFor, date, staffChoice]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `choiceKey` stands for `choices`
+  const daySlots = useMemo(() => slotsFor(date, choices), [slotsFor, date, choiceKey]);
   const partCounts = Object.fromEntries(
     PARTS.map((p) => [p.value, daySlots.filter((s) => partOf(s) === p.value).length]),
   ) as Record<Part, number>;
@@ -225,15 +270,19 @@ export function BookingFlow({
     () =>
       staff
         .filter(
-          (s) => s.profile.bookableOnline && serviceId && s.skillServiceIds.includes(serviceId),
+          (s) =>
+            s.profile.bookableOnline &&
+            items.length > 0 &&
+            items.every((it) => s.skillServiceIds.includes(it.service.id)),
         )
         .map((s) => {
-          const first = slotsFor(date, s.resourceId)[0];
+          const own = items.map(() => s.resourceId);
+          const first = slotsFor(date, own)[0];
           const nextDay = first
             ? undefined
             : week
                 .filter((d) => d > date)
-                .map((d) => ({ d, slot: slotsFor(d, s.resourceId)[0] }))
+                .map((d) => ({ d, slot: slotsFor(d, own)[0] }))
                 .find((x) => x.slot);
           return {
             id: s.resourceId,
@@ -241,15 +290,15 @@ export function BookingFlow({
             title: s.profile.title,
             specialty: s.profile.specialty,
             earliest: first ? formatTime(first.startAt) : null,
-            ...(variant && serviceId
-              ? { price: formatVnd(priceFor(variant, s.resourceId, pricedStaff(serviceId))) }
-              : {}),
+            price: formatVnd(
+              sum(items.map((it) => priceOf(it.variant, it.service.id, s.resourceId))),
+            ),
             nextDay: nextDay?.slot
               ? `Sớm nhất ${weekdayShort(nextDay.d)} ${formatDay(nextDay.d).slice(-5)}`
               : undefined,
           };
         }),
-    [staff, serviceId, variant, slotsFor, date, week],
+    [staff, items, slotsFor, date, week],
   );
 
   const releaseHold = useCallback(() => {
@@ -276,10 +325,44 @@ export function BookingFlow({
     setHoldExpiresAt(found && bookingOpen ? addMinutes(now, HOLD_MINUTES) : null);
     setNotice(null);
   }
-  function chooseStaff(v: string) {
-    setStaffChoice(v);
+  const reset = () => {
     setSlot(null);
+    setHoldExpiresAt(null);
     setPart(null);
+  };
+  /** One person for the whole chain. */
+  function chooseStaff(v: string) {
+    setStaffByService(Object.fromEntries(items.map((it) => [it.service.id, v])));
+    reset();
+  }
+  function applyPerService(values: Record<string, string>) {
+    setStaffByService(values);
+    reset();
+  }
+  /** Adding a variant of a service already in the chain replaces it; the limit is BR-18. */
+  function togglePick(serviceId: string, variantId: string) {
+    setPicks((current) => {
+      const same = current.find((p) => p.serviceId === serviceId);
+      if (same?.variantId === variantId) return current.filter((p) => p !== same);
+      if (same) return current.map((p) => (p === same ? { serviceId, variantId } : p));
+      return current.length >= MAX_CHAIN ? current : [...current, { serviceId, variantId }];
+    });
+    reset();
+  }
+  function movePick(serviceId: string, by: -1 | 1) {
+    setPicks((current) => {
+      const at = current.findIndex((p) => p.serviceId === serviceId);
+      const to = at + by;
+      if (at < 0 || to < 0 || to >= current.length) return current;
+      const next = [...current];
+      [next[at], next[to]] = [next[to]!, next[at]!];
+      return next;
+    });
+    reset();
+  }
+  function removePick(serviceId: string) {
+    setPicks((current) => current.filter((p) => p.serviceId !== serviceId));
+    reset();
   }
 
   const phoneE164 = normalizePhone(phone);
@@ -291,29 +374,76 @@ export function BookingFlow({
     name.trim().length > 0 && Boolean(phoneE164) && isEmail(email) && /^\d{6}$/.test(otp);
 
   const slotLine = slot
-    ? `${formatTime(slot.startAt)} · ${formatDay(localDate(slot.startAt))}`
+    ? `${formatTime(slot.startAt)}${chain ? `–${formatTime(slot.endAt)}` : ''} · ${formatDay(localDate(slot.startAt))}`
+    : '';
+  const peopleNames = slot
+    ? [...new Set(slot.items.map((it) => staffName(it.staffResourceId)))].join(', ')
     : '';
   const assignedStaff = slot
-    ? staffChoice === ANY_STAFF
-      ? `${staffName(slot.staffResourceId)}, xếp tự động`
-      : staffName(slot.staffResourceId)
+    ? choices.includes(ANY_STAFF)
+      ? `${peopleNames}, xếp tự động`
+      : peopleNames
     : '';
+  const itemTitle = (it: ChainItem) => `${it.service.name} · ${it.variant.name}`;
 
-  const summary = variant && service && (
-    <div className="flex flex-col gap-(--space-1) rounded-(--radius-md) bg-(--fill-tonal) p-(--space-4)">
-      <div className="flex items-start justify-between gap-(--space-2)">
-        <span className="body font-semibold">
-          {service.name} · {variant.name}
+  /** "Lịch của bạn" (MH-13): the time, the person and the waits of each item. */
+  const planItems: PlanItem[] = slot
+    ? slot.items.map((placed, i) => {
+        const it = items[i]!;
+        const previous = slot.items[i - 1];
+        const gap = previous
+          ? (Date.parse(placed.startAt) - Date.parse(previous.endAt)) / 60_000
+          : 0;
+        const segment = (kind: 'prep' | 'wait') => it.variant.segments.find((x) => x.kind === kind);
+        const wait = it.variant.segments
+          .filter((x) => x.kind === 'wait')
+          .reduce((m, x) => m + x.endMinute - x.startMinute, 0);
+        return {
+          id: it.service.id,
+          time: `${formatTime(placed.startAt)}–${formatTime(placed.endAt)}`,
+          title: itemTitle(it),
+          note: [
+            staffName(placed.staffResourceId),
+            gap > 0 ? `chờ ${gap} phút (${segment('prep')?.name.toLowerCase() ?? 'chuẩn bị'})` : '',
+            wait > 0 ? `có ${wait} phút ${segment('wait')?.name.toLowerCase() ?? 'chờ'}` : '',
+          ]
+            .filter(Boolean)
+            .join(' · '),
+        };
+      })
+    : [];
+  const plan = slot && chain && (
+    <ChainPlan
+      heading={`Lịch của bạn, ${formatDay(localDate(slot.startAt))}`}
+      items={planItems}
+      footer={`Xong khoảng ${formatTime(slot.endAt)}.`}
+    />
+  );
+
+  const summary = items.length > 0 && (
+    <div className="flex flex-col gap-(--space-2) rounded-(--radius-md) bg-(--fill-tonal) p-(--space-4)">
+      {items.map((it, i) => (
+        <div key={it.service.id} className="flex items-start justify-between gap-(--space-2)">
+          <div className="flex min-w-0 flex-col gap-(--space-1)">
+            <span className="body font-semibold">{itemTitle(it)}</span>
+            <span className="body-sm sp-num text-(--ink-muted)">
+              {formatMinutes(duration(it.variant))} ·{' '}
+              {formatVnd(priceOf(it.variant, it.service.id, choices[i]))}
+            </span>
+          </div>
+          {i === 0 && step !== 'service' && !confirmed && (
+            <Button variant="ghost" size="sm" onClick={() => go('service')}>
+              Đổi
+            </Button>
+          )}
+        </div>
+      ))}
+      {chain && (
+        <span className="body-sm sp-num border-t border-(--line) pt-(--space-2) text-(--ink-muted)">
+          Tổng {formatMinutes(totalMinutes)} · {formatVnd(price)}
+          {deposit > 0n && ` · cọc ${formatVnd(deposit)}`}
         </span>
-        {step !== 'service' && !confirmed && (
-          <Button variant="ghost" size="sm" onClick={() => go('service')}>
-            Đổi
-          </Button>
-        )}
-      </div>
-      <span className="body-sm sp-num text-(--ink-muted)">
-        {formatMinutes(duration(variant))} · {formatVnd(price)}
-      </span>
+      )}
       {subject && <span className="body-sm text-(--ink-muted)">Cho {subject.name}</span>}
     </div>
   );
@@ -322,8 +452,55 @@ export function BookingFlow({
     <HoldBanner
       expiresAt={holdExpiresAt}
       now={now}
-      note={`${slotLine} · ${staffName(slot.staffResourceId)}`}
+      note={`${slotLine} · ${peopleNames}`}
       onExpire={releaseHold}
+    />
+  );
+
+  /** The picker's props: the same for the phone row and the desktop list. */
+  const staffPickerProps = {
+    noun: staffNoun,
+    options: staffOptions,
+    value: staffChoice,
+    onChange: chooseStaff,
+    anyEarliest: daySlots[0] ? formatTime(daySlots[0].startAt) : null,
+    anyPrice: items.length > 0 ? formatVnd(anyPrice) : undefined,
+    anyNote: chain ? `Tiệm xếp ${staffNoun.toLowerCase()} cho từng dịch vụ` : undefined,
+  };
+  const perServiceLink = chain && (
+    <button
+      type="button"
+      className="body-sm min-h-11 self-start border-0 bg-transparent p-0 font-medium text-(--accent) hover:underline"
+      onClick={() => setPerServiceOpen(true)}
+    >
+      Chọn {staffNoun.toLowerCase()} riêng cho từng dịch vụ
+    </button>
+  );
+  const perServiceSheet = chain && (
+    <PerServiceStaff
+      open={perServiceOpen}
+      title={`${staffNoun} cho từng dịch vụ`}
+      note={`Chọn người riêng thì giờ trống ít hơn, vì mỗi người phải rảnh đúng lúc dịch vụ của mình bắt đầu.`}
+      onClose={() => setPerServiceOpen(false)}
+      onApply={applyPerService}
+      rows={items.map((it, i) => ({
+        id: it.service.id,
+        label: `${i + 1}. ${itemTitle(it)}`,
+        value: choices[i] ?? ANY_STAFF,
+        ...(i === 0 ? { help: 'Chọn đích danh thì giá theo cấp của người đó.' } : {}),
+        options: [
+          {
+            value: ANY_STAFF,
+            label: `Bất kỳ ai · ${formatVnd(priceOf(it.variant, it.service.id))}`,
+          },
+          ...staff
+            .filter((m) => m.profile.bookableOnline && m.skillServiceIds.includes(it.service.id))
+            .map((m) => ({
+              value: m.resourceId,
+              label: `${m.profile.displayName} · ${formatVnd(priceOf(it.variant, it.service.id, m.resourceId))}`,
+            })),
+        ],
+      }))}
     />
   );
 
@@ -356,36 +533,80 @@ export function BookingFlow({
       />
     ) : (
       <div className="sp-stack">
-        {services.map((s) => (
-          <ServiceVariantList
-            key={s.id}
-            name={s.name}
-            selected={variantId}
-            onSelect={(id) => {
-              setServiceId(s.id);
-              setVariantId(id);
-              setSlot(null);
-            }}
-            variants={s.variants.map((v) => ({
-              id: v.id,
-              name: v.name,
-              meta: formatMinutes(duration(v)),
-              price: formatVnd(priceOf(v, s.id)),
+        <p className="body-sm m-0 text-(--ink-muted)">
+          Chọn được nhiều dịch vụ, làm lần lượt trong một lần đến.
+        </p>
+        {picks.length > 0 && (
+          <ServiceCart
+            max={MAX_CHAIN}
+            items={items.map((it, i) => ({
+              id: it.service.id,
+              name: it.service.name,
+              detail: `${it.variant.name} · ${formatMinutes(duration(it.variant))} · ${formatVnd(priceOf(it.variant, it.service.id, choices[i]))}`,
             }))}
+            onMove={movePick}
+            onRemove={removePick}
+            note={
+              chain
+                ? `Dịch vụ sau bắt đầu ngay khi dịch vụ trước xong. Tổng ${formatMinutes(totalMinutes)}${deposit > 0n ? `, cọc ${formatVnd(deposit)}` : ''}.`
+                : ''
+            }
           />
-        ))}
+        )}
+        {services.map((s) => {
+          const chosen = picks.find((x) => x.serviceId === s.id);
+          const wait = s.variants[0]?.segments.find((x) => x.kind === 'wait');
+          return (
+            <ServiceVariantList
+              key={s.id}
+              multiple
+              name={s.name}
+              selected={chosen ? [chosen.variantId] : []}
+              onSelect={(id) => togglePick(s.id, id)}
+              note={
+                wait
+                  ? `${s.name} có thời gian ${wait.name.toLowerCase()}; ${staffNoun.toLowerCase()} làm cho khách khác trong lúc đó.`
+                  : undefined
+              }
+              variants={s.variants.map((v) => {
+                const [low, high] = priceRange(v, pricedStaff(s.id));
+                return {
+                  id: v.id,
+                  name: v.name,
+                  meta: [
+                    formatMinutes(duration(v)),
+                    v.depositVnd ? `cọc ${formatVnd(v.depositVnd)}` : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' · '),
+                  price: low === high ? formatVnd(low) : `từ ${formatVnd(low)}`,
+                  disabled: !chosen && picks.length >= MAX_CHAIN,
+                };
+              })}
+            />
+          );
+        })}
       </div>
     );
     cta = {
-      title:
-        variant && service
-          ? `${service.name} · ${variant.name}`
-          : service
-            ? service.name
-            : 'Chưa chọn dịch vụ',
-      subtitle: variant ? formatVnd(price) : undefined,
+      title: asksSubject
+        ? service
+          ? service.name
+          : 'Chưa chọn dịch vụ'
+        : items.length === 0
+          ? 'Chưa chọn dịch vụ'
+          : chain
+            ? formatVnd(anyPrice)
+            : itemTitle(items[0]!),
+      subtitle: asksSubject
+        ? undefined
+        : chain
+          ? `${items.length} dịch vụ · ${formatMinutes(totalMinutes)}`
+          : items[0]
+            ? formatVnd(anyPrice)
+            : undefined,
       label: 'Tiếp tục',
-      disabled: !service || (!asksSubject && !variant),
+      disabled: asksSubject ? !service : items.length === 0,
       onClick: () => go(steps[1]!),
     };
   }
@@ -466,10 +687,10 @@ export function BookingFlow({
     };
   }
 
-  if (step === 'datetime' && service && variant) {
+  if (step === 'datetime' && items.length > 0) {
     const nextOpen = daySlots.length
       ? null
-      : week.filter((d) => d > date).find((d) => slotsFor(d, staffChoice).length > 0);
+      : week.filter((d) => d > date).find((d) => slotsFor(d, choices).length > 0);
     title = 'Chọn ngày giờ';
     body = (
       <div className="flex flex-col gap-(--space-5)">
@@ -481,15 +702,12 @@ export function BookingFlow({
         <div className="min-[900px]:hidden">{summary}</div>
         <div className="min-[900px]:hidden">
           <StaffPicker
-            noun={staffNoun}
-            options={staffOptions}
-            value={staffChoice}
-            onChange={chooseStaff}
-            context={`${staffNoun} làm được ${service.name} · ${formatDay(date)}`}
-            anyEarliest={daySlots[0] ? formatTime(daySlots[0].startAt) : null}
-            anyPrice={variant && service ? formatVnd(priceOf(variant, service.id)) : undefined}
+            {...staffPickerProps}
+            mixed={staffChoice === MIXED ? { title: 'Theo từng dịch vụ' } : undefined}
+            context={`${staffNoun} làm được ${items.map((it) => it.service.name).join(', ')} · ${formatDay(date)}`}
           />
         </div>
+        <div className="flex flex-col min-[900px]:hidden">{perServiceLink}</div>
         <div className="flex flex-col gap-(--space-2)">
           <span className="label text-(--ink-muted)">Tháng {Number(date.slice(5, 7))}</span>
           <DateStrip
@@ -537,18 +755,27 @@ export function BookingFlow({
             }
           />
         </div>
+        {plan}
         <p className="body-sm m-0 text-(--ink-muted)">
-          {variant.segments.some((s) => s.kind === 'wait') && 'Thời lượng đã gồm thời gian chờ. '}
+          {items.some((it) => it.variant.segments.some((x) => x.kind === 'wait')) &&
+            'Thời lượng đã gồm thời gian chờ. '}
           Giờ theo giờ Việt Nam.
         </p>
+        {perServiceSheet}
       </div>
     );
     cta = {
-      title: slot ? slotLine : 'Chưa chọn giờ',
+      title: !slot
+        ? 'Chưa chọn giờ'
+        : chain
+          ? `${formatVnd(price)}${deposit > 0n ? ` · cọc ${formatVnd(deposit)}` : ''}`
+          : slotLine,
       subtitle: slot
-        ? staffChoice === ANY_STAFF
-          ? `${staffNoun} được xếp tự động`
-          : staffName(slot.staffResourceId)
+        ? chain
+          ? `${slotLine} · ${peopleNames}`
+          : choices.includes(ANY_STAFF)
+            ? `${staffNoun} được xếp tự động`
+            : peopleNames
         : undefined,
       label: 'Tiếp tục',
       disabled: !slot,
@@ -633,20 +860,28 @@ export function BookingFlow({
     };
   }
 
-  if (step === 'confirm' && service && variant && slot) {
+  if (step === 'confirm' && items.length > 0 && variant && slot) {
     title = confirmed ? 'Đã đặt lịch' : 'Xác nhận';
-    const rows: [string, string][] = [
-      ['Dịch vụ', `${service.name} · ${variant.name}`],
-      ...(subject ? [['Cho', subject.name] as [string, string]] : []),
-      ['Thời gian', `${slotLine} · ${formatMinutes(duration(variant))}`],
-      [staffNoun, assignedStaff],
-      ['Liên hệ', `${name} · ${phoneE164 ? formatPhone(phoneE164) : ''} · ${email.trim()}`],
-      ['Giá', formatVnd(price)],
-      ...(variant.depositVnd
-        ? [['Đặt cọc', formatVnd(variant.depositVnd)] as [string, string]]
-        : []),
+    const contact: [string, string] = [
+      'Liên hệ',
+      `${name} · ${phoneE164 ? formatPhone(phoneE164) : ''} · ${email.trim()}`,
     ];
-    const end = addMinutes(slot.startAt, duration(variant));
+    const rows: [string, string][] = chain
+      ? [
+          contact,
+          ['Giá', formatVnd(price)],
+          ...(deposit > 0n ? [['Đặt cọc', formatVnd(deposit)] as [string, string]] : []),
+        ]
+      : [
+          ['Dịch vụ', itemTitle(items[0]!)],
+          ...(subject ? [['Cho', subject.name] as [string, string]] : []),
+          ['Thời gian', `${slotLine} · ${formatMinutes(duration(variant))}`],
+          [staffNoun, assignedStaff],
+          contact,
+          ['Giá', formatVnd(price)],
+          ...(deposit > 0n ? [['Đặt cọc', formatVnd(deposit)] as [string, string]] : []),
+        ];
+    const end = slot.endAt;
     body = (
       <div className="sp-stack">
         {hold}
@@ -658,6 +893,7 @@ export function BookingFlow({
             </span>
           </div>
         )}
+        {plan}
         <dl className="m-0 flex flex-col rounded-(--radius-lg) bg-(--surface-raised) px-(--space-4) shadow-[0_0_0_1px_var(--line)]">
           {rows.map(([k, v]) => (
             <div
@@ -669,10 +905,10 @@ export function BookingFlow({
             </div>
           ))}
         </dl>
-        {variant.depositVnd && !confirmed && (
+        {deposit > 0n && !confirmed && (
           <p className="body-sm m-0 text-(--ink-muted)">
-            Đặt cọc {formatVnd(variant.depositVnd)} để giữ lịch, trừ vào tiền dịch vụ. Hủy miễn phí
-            trước 24 giờ.
+            Đặt cọc {formatVnd(deposit)} để giữ lịch, trừ vào tiền dịch vụ. Hủy miễn phí trước 24
+            giờ.
           </p>
         )}
         {confirmed && (
@@ -684,7 +920,7 @@ export function BookingFlow({
                 downloadIcs({
                   start: slot.startAt,
                   end,
-                  title: `${service.name} · ${tenant.name}`,
+                  title: `${items.map((it) => it.service.name).join(', ')} · ${tenant.name}`,
                   location: branch.address,
                 })
               }
@@ -713,7 +949,7 @@ export function BookingFlow({
     cta = confirmed
       ? null
       : {
-          title: variant.depositVnd ? `Cọc ${formatVnd(variant.depositVnd)}` : formatVnd(price),
+          title: deposit > 0n ? `Cọc ${formatVnd(deposit)}` : formatVnd(price),
           subtitle: slotLine,
           label: 'Xác nhận đặt lịch',
           disabled: !bookingOpen,
@@ -799,25 +1035,23 @@ export function BookingFlow({
             <span className="body-sm text-(--ink-muted)">{branch.address}</span>
           </div>
           {summary}
-          {step === 'datetime' && variant && (
+          {step === 'datetime' && items.length > 0 && (
             <div className="flex flex-col gap-(--space-2)">
               <span className="label text-(--ink-muted)">{staffNoun}</span>
-              <StaffOptionList
-                compact
-                noun={staffNoun}
-                options={staffOptions}
-                value={staffChoice}
-                onChange={chooseStaff}
-                anyEarliest={daySlots[0] ? formatTime(daySlots[0].startAt) : null}
-                anyPrice={variant && service ? formatVnd(priceOf(variant, service.id)) : undefined}
-              />
+              <StaffOptionList compact {...staffPickerProps} />
+              {staffChoice === MIXED && (
+                <span className="body-sm text-(--ink-muted)">Đang chọn theo từng dịch vụ.</span>
+              )}
+              {perServiceLink}
             </div>
           )}
           {step !== 'datetime' && slot && (
             <div className="flex flex-col gap-0.5">
               <span className="label text-(--ink-muted)">Thời gian</span>
               <span className="body sp-num">{slotLine}</span>
-              <span className="body-sm text-(--ink-muted)">{assignedStaff}</span>
+              <span className="body-sm text-(--ink-muted)">
+                {chain ? peopleNames : assignedStaff}
+              </span>
             </div>
           )}
           {cta && (
