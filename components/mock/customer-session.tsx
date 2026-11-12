@@ -8,11 +8,15 @@ export interface CustomerSessionValue {
   customer: Customer | null;
   customerId: string | null;
   isLoggedIn: boolean;
+  /** The email they logged in with; a customer record may not exist yet (BR-16). */
+  email: string | null;
   subjects: ServedSubject[];
   packages: CustomerPackage[];
   wallet: CustomerWallet;
   login: (email: string) => { ok: boolean; customerId?: string; isNew?: boolean };
   loginWithId: (id: string) => void;
+  /** An email with no booking yet still logs in; its details appear after the first booking. */
+  loginAsGuest: (email: string) => void;
   logout: () => void;
   updateProfile: (data: Partial<Pick<Customer, 'name' | 'phone' | 'email'>>) => void;
 }
@@ -47,6 +51,7 @@ export function CustomerSessionProvider({
   }, [tenantSlug, customers]);
 
   const [currentId, setCurrentId] = useState<string | null>(defaultCustomerId);
+  const [guestEmail, setGuestEmail] = useState<string | null>(null);
 
   const customer = useMemo(() => {
     if (!currentId) return null;
@@ -72,6 +77,7 @@ export function CustomerSessionProvider({
       const found = customers.find((c) => c.email?.toLowerCase() === normalized);
       if (found) {
         setCurrentId(found.id);
+        setGuestEmail(null);
         return { ok: true, customerId: found.id, isNew: false };
       }
       return { ok: false, isNew: true };
@@ -81,10 +87,17 @@ export function CustomerSessionProvider({
 
   const loginWithId = useCallback((id: string) => {
     setCurrentId(id);
+    setGuestEmail(null);
+  }, []);
+
+  const loginAsGuest = useCallback((email: string) => {
+    setCurrentId(null);
+    setGuestEmail(email.trim());
   }, []);
 
   const logout = useCallback(() => {
     setCurrentId(null);
+    setGuestEmail(null);
   }, []);
 
   const updateProfile = useCallback(
@@ -103,16 +116,30 @@ export function CustomerSessionProvider({
     () => ({
       customer,
       customerId: currentId,
-      isLoggedIn: !!customer,
+      isLoggedIn: !!customer || guestEmail !== null,
+      email: customer?.email ?? guestEmail,
       subjects,
       packages,
       wallet,
       login,
       loginWithId,
+      loginAsGuest,
       logout,
       updateProfile,
     }),
-    [customer, currentId, subjects, packages, wallet, login, loginWithId, logout, updateProfile],
+    [
+      customer,
+      currentId,
+      guestEmail,
+      subjects,
+      packages,
+      wallet,
+      login,
+      loginWithId,
+      loginAsGuest,
+      logout,
+      updateProfile,
+    ],
   );
 
   return (

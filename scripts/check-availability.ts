@@ -37,6 +37,21 @@ import {
   stillFree,
   type BookingItemRef,
 } from '../mock/booking.ts';
+import {
+  canSelfService,
+  refundPercent,
+  refundVnd,
+  replyDeadline,
+  timeLeftText,
+} from '../mock/policy.ts';
+import {
+  bookingCode,
+  heldItems,
+  modeOf,
+  movedAppointment,
+  openQuestion,
+  refsOfItems,
+} from '../mock/reschedule.ts';
 import { moveAppointment, validStarts } from '../mock/move.ts';
 import { applyHandling } from '../mock/leave.ts';
 import { localMinutes, staffWindows } from '../mock/shifts.ts';
@@ -879,6 +894,107 @@ report(
       built.items[0]?.staffChoice === 'any' &&
       built.depositVnd === 100_000n,
     'Lịch online dựng từ lựa chọn: giá giữ lúc đặt, chọn Bất kỳ ai thì ghi là any (BR-12, BR-31)',
+  );
+}
+
+// ---- BR-08, BR-23, BR-33: what a customer may do by themselves ----
+
+{
+  const at = (local: string) => new Date(`${local}+07:00`).toISOString();
+  const start = at('2026-11-10T14:00:00');
+  const ago = (hours: number) => new Date(Date.parse(start) - hours * 3_600_000).toISOString();
+  report(
+    refundPercent(start, ago(48)) === 100 && refundPercent(start, ago(24)) === 100,
+    'BR-23: hủy từ 24 giờ trở lên hoàn 100%',
+  );
+  report(
+    refundPercent(start, ago(23.9)) === 50 && refundPercent(start, ago(4)) === 50,
+    'BR-23: hủy từ 4 đến dưới 24 giờ hoàn 50%',
+  );
+  report(
+    refundPercent(start, ago(3.9)) === 0 && refundPercent(start, ago(0)) === 0,
+    'BR-23: hủy dưới 4 giờ không hoàn',
+  );
+  report(
+    refundVnd(100_000n, start, ago(10)) === 50_000n &&
+      refundVnd(33_333n, start, ago(10)) === 16_666n,
+    'BR-23: tiền hoàn là số nguyên đồng (BR-01 của tiền)',
+  );
+  report(
+    canSelfService(start, ago(4)) && !canSelfService(start, ago(3.99)),
+    'BR-08: tự đổi, hủy được khi còn từ 4 giờ trở lên',
+  );
+  report(
+    replyDeadline(at('2026-11-07T09:40:00'), start) === at('2026-11-08T09:40:00'),
+    'BR-33: hạn trả lời là 24 giờ sau khi gửi',
+  );
+  report(
+    replyDeadline(at('2026-11-10T09:00:00'), start) === at('2026-11-10T12:00:00'),
+    'BR-33: hạn trả lời không muộn hơn 2 giờ trước giờ hẹn',
+  );
+  report(
+    timeLeftText(start, ago(52)) === '2 ngày 4 giờ' &&
+      timeLeftText(start, ago(5.5)) === '5 giờ 30 phút' &&
+      timeLeftText(start, ago(0.5)) === '30 phút',
+    'Chữ "còn tới giờ hẹn" tính đúng ngày, giờ, phút',
+  );
+
+  const fixture = sample('toc-may');
+  const appt = fixture.appointments.find((a) => a.id === 'may-a-quyen-dye')!;
+  const soon = fixture.appointments.find((a) => a.id === 'may-a-quyen-today-soon')!;
+  report(
+    canSelfService(appt.startAt, '2026-11-07T03:20:00Z') &&
+      !canSelfService(soon.startAt, '2026-11-07T03:20:00Z'),
+    'Chị Quyên: lịch 10/11 tự đổi được, lịch hôm nay trong 4 giờ thì không',
+  );
+  const question = openQuestion(appt.id, fixture.staffTimeOff, []);
+  report(
+    question?.source === 'leave' &&
+      question.handling.staffResourceId === 'may-mai' &&
+      openQuestion('may-a-hang', fixture.staffTimeOff, []) === null,
+    'Lịch 10/11 của Chị Quyên đang chờ trả lời đổi sang Mai; lịch "Bất kỳ ai" thì không có câu hỏi',
+  );
+  const items = heldItems(fixture, appt, fixture.servedSubjects, false);
+  const refs = refsOfItems(items);
+  const NOW_Q = '2026-11-07T03:20:00Z';
+  const lanOff = bookingSlots(fixture, refs, modeOf(appt), '2026-11-10', NOW_Q, {
+    appointments: fixture.appointments,
+  }).main;
+  report(
+    refs[0]?.staffChoice === 'may-lan' && lanOff.length === 0,
+    'Đổi giờ lịch đích danh: Lan có đơn nghỉ chờ duyệt ngày 10/11 nên ngày đó không có giờ (BR-11)',
+  );
+  const next = fixture.appointments.find((a) => a.id === 'may-a-quyen-upcoming')!;
+  const nextRefs = refsOfItems(heldItems(fixture, next, fixture.servedSubjects, false));
+  const mine = bookingSlots(fixture, nextRefs, 'single', '2026-11-21', NOW_Q, {
+    appointments: fixture.appointments.filter((a) => a.id !== next.id),
+  }).main;
+  const withSelf = bookingSlots(fixture, nextRefs, 'single', '2026-11-21', NOW_Q, {
+    appointments: fixture.appointments,
+  }).main;
+  report(
+    mine.some((s) => s.startAt === next.startAt) &&
+      !withSelf.some((s) => s.startAt === next.startAt),
+    'Đổi giờ: giờ đang giữ chỉ hiện là trống khi bỏ chính lịch này ra khỏi giờ bận',
+  );
+  const moved = movedAppointment(fixture, next, mine[0]!, true);
+  report(
+    moved.items[0]?.priceVnd === next.items[0]?.priceVnd &&
+      moved.depositVnd === next.depositVnd &&
+      moved.selfChanges === 1 &&
+      moved.status === 'confirmed' &&
+      moved.bookings.length > 0,
+    'BR-12, BR-08: đổi giờ giữ giá và cọc, tăng số lần tự đổi',
+  );
+  report(
+    movedAppointment(fixture, next, mine[0]!, false).selfChanges === undefined,
+    'BR-08: chọn lại giờ khi trả lời đề nghị đổi người không tính vào số lần đổi',
+  );
+  report(
+    bookingCode(fixture, appt) === bookingCode(fixture, appt) &&
+      /^TM-\d{4}-\d{4}$/.test(bookingCode(fixture, appt)),
+    'Mã lịch có dạng TM-2611-0384',
+    bookingCode(fixture, appt),
   );
 }
 

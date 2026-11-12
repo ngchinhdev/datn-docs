@@ -65,13 +65,17 @@ export interface BookingDraft {
 interface BookingDraftValue {
   draft: BookingDraft | null;
   setDraft: (draft: BookingDraft | null) => void;
+  /** Choices to start the booking page with, e.g. "Đặt lại" from a past booking. */
+  seed: { tenantSlug: string; state: BookingState } | null;
+  setSeed: (seed: { tenantSlug: string; state: BookingState } | null) => void;
 }
 
 const BookingDraftContext = createContext<BookingDraftValue | null>(null);
 
 export function BookingDraftProvider({ children }: { children: ReactNode }) {
   const [draft, setDraft] = useState<BookingDraft | null>(null);
-  const value = useMemo(() => ({ draft, setDraft }), [draft]);
+  const [seed, setSeed] = useState<BookingDraftValue['seed']>(null);
+  const value = useMemo(() => ({ draft, setDraft, seed, setSeed }), [draft, seed]);
   return <BookingDraftContext.Provider value={value}>{children}</BookingDraftContext.Provider>;
 }
 

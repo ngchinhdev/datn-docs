@@ -36,15 +36,20 @@ import {
   type Person,
   type SubjectDraft as Draft,
 } from '@/components/mock/booking-draft';
+import { useCustomerSession } from '@/components/mock/customer-session';
 import { downloadIcs } from '@/components/mock/download-ics';
+import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useBookingCommit } from '@/components/mock/use-booking-commit';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
 import { freeChainSlots, freeGroupSlots, type FreeChainSlot } from '@/mock/availability';
 import { slotKey, type BookingSlot } from '@/mock/booking';
+import { MAX_SELF_CHANGES } from '@/mock/policy';
+import { heldItems, modeOf, movedAppointment, openQuestion } from '@/mock/reschedule';
 import { matchesAttributes, priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
 import {
   tenantFixtures,
+  type LeaveHandling,
   type ServedSubject,
   type Service,
   type ServiceVariant,
@@ -81,8 +86,6 @@ const MAX_PARTY = 4;
 /** Staggered suggestions shown per part of the day (BR-19). */
 const STAGGERED_PER_PART = 3;
 const RELEASED = 'Chỗ đã được trả lại. Chọn giờ khác.';
-/** A returning customer has a session, so their saved served subjects show (BR-17). */
-const RETURNING_CUSTOMER: Record<string, string> = { may: 'may-c-thu', pawpaw: 'paw-c-linh' };
 const PARTS: { value: Part; label: string; from: number; to: number }[] = [
   { value: 'morning', label: 'Sáng', from: 0, to: 12 },
   { value: 'afternoon', label: 'Chiều', from: 12, to: 17 },
@@ -139,22 +142,39 @@ export function BookingFlow({
     priceFor(v, who, pricedStaff(forService));
   const subjectNoun = vocabulary.subject ?? '';
   const asksSubject = vocabulary.subject !== null;
-  const saved = newCustomer
-    ? []
-    : fixture.servedSubjects.filter((s) => s.customerId === RETURNING_CUSTOMER[tenant.id]);
-  const steps: Step[] = asksSubject
-    ? ['subject', 'datetime', 'info', 'confirm']
-    : ['service', 'datetime', 'info', 'confirm'];
-
   const router = useRouter();
   const query = useSearchParams();
-  const { draft: held, setDraft } = useBookingDraft();
+  const store = useScheduleStore();
+  const session = useCustomerSession();
+  const { draft: held, setDraft, seed } = useBookingDraft();
   const { commit, release } = useBookingCommit(tenantSlug);
-  // Coming back from the payment page (`giu=1`) picks the choices up where they were left.
+  // A session shows the subjects saved at this shop (BR-17); a new customer has none yet.
+  const saved = newCustomer ? [] : session.subjects;
+  // `doi`: changing the time of a booking the customer has (BR-08); `hoi`: as the answer to a
+  // question of the shop, which does not count as a change (BR-32, BR-33).
+  const target =
+    store.appointments.find(
+      (a) => a.id === query.get('doi') && a.customerId === session.customerId,
+    ) ?? null;
+  const rescheduling = target !== null;
+  const answering = rescheduling && query.get('hoi') === '1';
+  const steps: Step[] = rescheduling
+    ? ['datetime', 'confirm']
+    : asksSubject
+      ? ['subject', 'datetime', 'info', 'confirm']
+      : ['service', 'datetime', 'info', 'confirm'];
+
+  // Coming back from the payment page (`giu=1`) picks the choices up where they were left;
+  // "Đặt lại" (`lai=1`) starts from the choices of a past booking.
   const [resume] = useState(
     query.get('giu') === '1' && held?.tenantSlug === tenantSlug ? held : null,
   );
-  const saved0 = resume?.state ?? null;
+  const [seeded] = useState(
+    query.get('lai') === '1' && seed?.tenantSlug === tenantSlug ? seed.state : null,
+  );
+  const saved0 = resume?.state ?? seeded;
+  const heldNamed = asksSubject || (target !== null && modeOf(target) === 'group');
+  const targetItems = target ? heldItems(fixture, target, store.servedSubjects, heldNamed) : [];
   const now = useMockNow(resume?.now);
   const holdAlive = Boolean(
     saved0?.holdExpiresAt && Date.parse(saved0.holdExpiresAt) > Date.parse(resume?.now ?? MOCK_NOW),
@@ -170,7 +190,9 @@ export function BookingFlow({
         ? [{ serviceId: presetService.id, variantId: presetService.variants[0].id }]
         : []),
   );
-  const [staffByKey, setStaffByKey] = useState<Record<string, string>>(saved0?.staffByKey ?? {});
+  const [staffByKey, setStaffByKey] = useState<Record<string, string>>(
+    saved0?.staffByKey ?? Object.fromEntries(targetItems.map((it) => [it.key, it.staffChoice])),
+  );
   const [perServiceOpen, setPerServiceOpen] = useState(false);
   // Served subjects: a new customer starts with one blank form; a returning one picks saved ones.
   const [drafts, setDrafts] = useState<Draft[]>(
@@ -184,17 +206,23 @@ export function BookingFlow({
   // Without a served subject, "Đặt cho nhiều người" turns the booking into a group (BR-19).
   const [people, setPeople] = useState<Person[] | null>(saved0?.people ?? null);
   const [changing, setChanging] = useState<string[]>([]);
-  const [date, setDate] = useState(saved0?.date ?? today);
+  const [date, setDate] = useState(
+    saved0?.date ??
+      (target && localDate(target.startAt) > today ? localDate(target.startAt) : today),
+  );
   const [part, setPart] = useState<Part | null>(null);
   const [slot, setSlot] = useState<BookingSlot | null>(holdAlive ? (saved0?.slot ?? null) : null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(
     holdAlive ? (saved0?.holdExpiresAt ?? null) : null,
   );
   const [notice, setNotice] = useState<string | null>(query.get('het') === '1' ? RELEASED : null);
-  const [name, setName] = useState(saved0?.name ?? '');
-  const [phone, setPhone] = useState(saved0?.phone ?? '');
+  const known = !newCustomer ? session.customer : null;
+  const [name, setName] = useState(saved0?.name ?? known?.name ?? '');
+  const [phone, setPhone] = useState(
+    saved0?.phone ?? (known?.phone ? formatPhone(known.phone) : ''),
+  );
   const [phoneTouched, setPhoneTouched] = useState(false);
-  const [email, setEmail] = useState(saved0?.email ?? '');
+  const [email, setEmail] = useState(saved0?.email ?? known?.email ?? session.email ?? '');
   const [emailTouched, setEmailTouched] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
@@ -230,46 +258,63 @@ export function BookingFlow({
       null
     );
   };
-  const rawItems: ChainItem[] = asksSubject
-    ? chosenIds.flatMap((id) => {
-        const subject = subjectOf(id);
-        const sv = subject && serviceOf(subject, id);
-        const v = subject && sv ? sv.variants.find((x) => matches(x, subject)) : undefined;
-        return subject && sv && v
-          ? [{ key: id, label: subject.name, service: sv, variant: v }]
-          : [];
-      })
-    : people
-      ? people.flatMap((person, i) => {
-          const sv = services.find((x) => x.id === person.pick?.serviceId);
-          const v = sv?.variants.find((x) => x.id === person.pick?.variantId);
-          return sv && v && (i === 0 || person.name.trim())
-            ? [
-                {
-                  key: person.id,
-                  label: i === 0 ? 'Bạn' : person.name.trim(),
-                  service: sv,
-                  variant: v,
-                },
-              ]
+  const rawItems: ChainItem[] = target
+    ? targetItems.map((it) => ({
+        key: it.key,
+        ...(it.label ? { label: it.label } : {}),
+        service: it.service,
+        variant: it.variant,
+      }))
+    : asksSubject
+      ? chosenIds.flatMap((id) => {
+          const subject = subjectOf(id);
+          const sv = subject && serviceOf(subject, id);
+          const v = subject && sv ? sv.variants.find((x) => matches(x, subject)) : undefined;
+          return subject && sv && v
+            ? [{ key: id, label: subject.name, service: sv, variant: v }]
             : [];
         })
-      : picks.flatMap((pick) => {
-          const sv = services.find((x) => x.id === pick.serviceId);
-          const v = sv?.variants.find((x) => x.id === pick.variantId);
-          return sv && v ? [{ key: sv.id, service: sv, variant: v }] : [];
-        });
+      : people
+        ? people.flatMap((person, i) => {
+            const sv = services.find((x) => x.id === person.pick?.serviceId);
+            const v = sv?.variants.find((x) => x.id === person.pick?.variantId);
+            return sv && v && (i === 0 || person.name.trim())
+              ? [
+                  {
+                    key: person.id,
+                    label: i === 0 ? 'Bạn' : person.name.trim(),
+                    service: sv,
+                    variant: v,
+                  },
+                ]
+              : [];
+          })
+        : picks.flatMap((pick) => {
+            const sv = services.find((x) => x.id === pick.serviceId);
+            const v = sv?.variants.find((x) => x.id === pick.variantId);
+            return sv && v ? [{ key: sv.id, service: sv, variant: v }] : [];
+          });
   const itemSig = rawItems
     .map((it) => `${it.key}:${it.label}:${it.service.id}:${it.variant.id}`)
     .join('|');
   // eslint-disable-next-line react-hooks/exhaustive-deps -- `itemSig` stands for `rawItems`
   const items = useMemo(() => rawItems, [itemSig]);
-  const wanted = asksSubject ? chosenIds.length : people ? people.length : picks.length;
+  const wanted = target
+    ? targetItems.length
+    : asksSubject
+      ? chosenIds.length
+      : people
+        ? people.length
+        : picks.length;
   /** Every subject or person asked for has a service. */
   const complete = items.length > 0 && items.length === wanted;
   const variant = items[0]?.variant ?? null;
-  const group = (asksSubject || people !== null) && items.length > 1;
-  const chain = !asksSubject && people === null && items.length > 1;
+  const group = target
+    ? modeOf(target) === 'group'
+    : (asksSubject || people !== null) && items.length > 1;
+  const chain = target
+    ? modeOf(target) === 'chain'
+    : !asksSubject && people === null && items.length > 1;
   const unit = vocabulary.subject ?? 'người';
   const choices = items.map((it) => staffByKey[it.key] ?? ANY_STAFF);
   const choiceKey = choices.join('|');
@@ -289,24 +334,44 @@ export function BookingFlow({
   const staffName = (id: string) => resources.find((r) => r.id === id)?.name ?? '';
   const sum = (xs: bigint[]) => xs.reduce((a, b) => a + b, 0n);
   /** BR-18, BR-56: the price and the deposit are the sums of the items. */
-  const price = sum(items.map((it, i) => priceOf(it.variant, it.service.id, choices[i])));
-  const anyPrice = sum(items.map((it) => priceOf(it.variant, it.service.id)));
-  const deposit = sum(items.map((it) => it.variant.depositVnd ?? 0n));
+  // BR-12: a booking that is moved keeps the price it was made at.
+  const price = target
+    ? sum(targetItems.map((it) => it.priceVnd))
+    : sum(items.map((it, i) => priceOf(it.variant, it.service.id, choices[i])));
+  const anyPrice = target ? price : sum(items.map((it) => priceOf(it.variant, it.service.id)));
+  const deposit = target ? 0n : sum(items.map((it) => it.variant.depositVnd ?? 0n));
   const totalMinutes = items.reduce((m, it) => m + duration(it.variant), 0);
 
-  const week = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(today, i)), [today]);
+  // The days shown start at the booking being moved when it is further ahead than a week.
+  const weekStart = target && localDate(target.startAt) > today ? localDate(target.startAt) : today;
+  const week = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart],
+  );
   const queryFor = useCallback(
     (day: string, who: readonly string[]) => ({
       fixture,
       date: day,
       notBefore: MOCK_NOW,
+      // The calendar the receptionist sees, so a booking made here shows there and the other way
+      // round; the booking being moved, and the customer's own hold, do not block themselves.
+      state: {
+        appointments: store.appointments,
+        shifts: store.shifts,
+        staffTimeOff: store.leaves,
+      },
+      ignore: new Set(
+        [target?.id, held ? `${tenant.id}-a-web${held.id}` : undefined].filter(
+          (x): x is string => x !== undefined,
+        ),
+      ),
       items: items.map((it, i) => ({
         variant: it.variant,
         serviceId: it.service.id,
         staffResourceId: who[i] ?? ANY_STAFF,
       })),
     }),
-    [fixture, items],
+    [fixture, items, store.appointments, store.shifts, store.leaves, target, held, tenant.id],
   );
   /** Times everyone starts at once (a group) or the whole chain fits (BR-18, BR-19). */
   const slotsFor = useCallback(
@@ -351,6 +416,7 @@ export function BookingFlow({
         .filter(
           (s) =>
             !group &&
+            !rescheduling &&
             s.profile.bookableOnline &&
             items.length > 0 &&
             items.every((it) => s.skillServiceIds.includes(it.service.id)),
@@ -378,7 +444,7 @@ export function BookingFlow({
               : undefined,
           };
         }),
-    [staff, items, group, slotsFor, date, week],
+    [staff, items, group, rescheduling, slotsFor, date, week],
   );
 
   const heldRef = useRef(held);
@@ -401,12 +467,13 @@ export function BookingFlow({
   const back = () => {
     const prev = steps[stepIndex - 1];
     if (prev) go(prev);
+    else if (target) router.push(`/mock/${tenantSlug}/me/appointments/${target.id}`);
   };
 
   function pickBookingSlot(found: BookingSlot | null) {
     setSlot(found);
     // BR-07: choosing a time starts a 10-minute hold.
-    setHoldExpiresAt(found && bookingOpen ? addMinutes(now, HOLD_MINUTES) : null);
+    setHoldExpiresAt(found && bookingOpen && !rescheduling ? addMinutes(now, HOLD_MINUTES) : null);
     setNotice(null);
   }
   const pickSlot = (startAt: string) =>
@@ -507,6 +574,35 @@ export function BookingFlow({
     reset();
   }
 
+  /** BR-08, BR-12: the same booking at another time; answering the shop does not count. */
+  function confirmReschedule() {
+    if (!target || !slot) return;
+    if (answering) {
+      const asked = openQuestion(target.id, store.leaves, store.requeues);
+      const chosen: LeaveHandling = {
+        kind: 'move',
+        staffResourceId: slot.items[0]!.staffResourceId,
+        startAt: slot.startAt,
+      };
+      if (asked?.source === 'leave') {
+        store.replaceLeave({
+          ...asked.leave,
+          handling: { ...asked.leave.handling, [target.id]: chosen },
+        });
+      } else if (asked) {
+        store.replaceRequeue({
+          ...asked.requeue,
+          handling: { ...asked.requeue.handling, [target.id]: chosen },
+        });
+      }
+      toast({ text: 'Đã gửi giờ bạn chọn cho tiệm. Tiệm xác nhận khi xử lý xong.' });
+    } else {
+      store.replaceAppointment(movedAppointment(fixture, target, slot, true));
+      toast({ text: `Đã đổi sang ${slotLine}.` });
+    }
+    router.push(`/mock/${tenantSlug}/me/appointments/${target.id}`);
+  }
+
   /** BR-29: a booking with a deposit goes to the payment page, keeping the hold it already has. */
   function confirmBooking() {
     if (!slot || !holdExpiresAt) return;
@@ -560,7 +656,9 @@ export function BookingFlow({
       router.push(`/mock/${tenantSlug}/book/pay`);
       return;
     }
-    commit(next, 'confirmed');
+    const made = commit(next, 'confirmed');
+    // The code sent to their email is a session at this shop (BR-16, BR-17).
+    if (made.customerId) session.loginWithId(made.customerId);
     setDraft(null);
     setConfirmed(true);
   }
@@ -624,7 +722,7 @@ export function BookingFlow({
         };
       })
     : [];
-  const plan = slot && (chain || group) && (
+  const plan = slot && (chain || group || rescheduling) && (
     <ChainPlan
       heading={`Lịch của bạn, ${formatDay(localDate(slot.startAt))}`}
       items={planItems}
@@ -644,7 +742,7 @@ export function BookingFlow({
               {formatVnd(priceOf(it.variant, it.service.id, choices[i]))}
             </span>
           </div>
-          {i === 0 && step !== steps[0] && !confirmed && (
+          {i === 0 && step !== steps[0] && !confirmed && !rescheduling && (
             <Button variant="ghost" size="sm" onClick={() => go(steps[0]!)}>
               Đổi
             </Button>
@@ -1068,7 +1166,7 @@ export function BookingFlow({
       ? null
       : week.filter((d) => d > date).find((d) => slotsFor(d, choices).length > 0);
     const togetherHere = daySlots.filter((x) => partOf(x) === shownPart);
-    title = 'Chọn ngày giờ';
+    title = rescheduling ? 'Chọn giờ mới' : 'Chọn ngày giờ';
     body = (
       <div className="flex flex-col gap-(--space-5)">
         {notice && (
@@ -1077,7 +1175,7 @@ export function BookingFlow({
           </p>
         )}
         <div className="min-[900px]:hidden">{summary}</div>
-        {group ? (
+        {rescheduling ? null : group ? (
           <div className="min-[900px]:hidden">{groupStaffCard}</div>
         ) : (
           <>
@@ -1204,7 +1302,7 @@ export function BookingFlow({
         : undefined,
       label: 'Tiếp tục',
       disabled: !slot,
-      onClick: () => go('info'),
+      onClick: () => go(steps[stepIndex + 1]!),
     };
   }
 
@@ -1286,13 +1384,21 @@ export function BookingFlow({
   }
 
   if (step === 'confirm' && items.length > 0 && variant && slot) {
-    title = confirmed ? 'Đã đặt lịch' : 'Xác nhận';
+    title = rescheduling ? 'Xác nhận đổi giờ' : confirmed ? 'Đã đặt lịch' : 'Xác nhận';
     const contact: [string, string] = [
       'Liên hệ',
       `${name} · ${phoneE164 ? formatPhone(phoneE164) : ''} · ${email.trim()}`,
     ];
-    const rows: [string, string][] =
-      chain || group
+    const rows: [string, string][] = target
+      ? [
+          [
+            'Giờ hiện tại',
+            `${formatTime(target.startAt)}, ${formatDay(localDate(target.startAt))}`,
+          ],
+          ['Giờ mới', slotLine],
+          ['Giá', `${formatVnd(price)} · giữ giá như lúc đặt`],
+        ]
+      : chain || group
         ? [
             contact,
             ['Giá', formatVnd(price)],
@@ -1353,18 +1459,14 @@ export function BookingFlow({
             >
               Thêm vào lịch điện thoại
             </Button>
-            <Button
-              size="lg"
-              block
-              onClick={() => toast({ text: 'Xem lịch hẹn của bạn: chưa có trong mock.' })}
-            >
+            <Button size="lg" block onClick={() => router.push(`/mock/${tenantSlug}/me`)}>
               Xem lịch hẹn của bạn
             </Button>
             <Button
               variant="ghost"
               size="lg"
               block
-              onClick={() => toast({ text: `Trang ${tenant.name}: chưa có trong mock.` })}
+              onClick={() => router.push(`/mock/${tenantSlug}`)}
             >
               Về trang {tenant.name}
             </Button>
@@ -1374,13 +1476,23 @@ export function BookingFlow({
     );
     cta = confirmed
       ? null
-      : {
-          title: deposit > 0n ? `Cọc ${formatVnd(deposit)}` : formatVnd(price),
-          subtitle: slotLine,
-          label: 'Xác nhận đặt lịch',
-          disabled: !bookingOpen,
-          onClick: confirmBooking,
-        };
+      : target
+        ? {
+            title: slotLine,
+            subtitle: answering
+              ? 'Không tính vào số lần đổi giờ'
+              : `Còn ${Math.max(0, MAX_SELF_CHANGES - (target.selfChanges ?? 0) - 1)} lần đổi sau lần này`,
+            label: answering ? 'Gửi giờ này cho tiệm' : 'Xác nhận đổi giờ',
+            disabled: false,
+            onClick: confirmReschedule,
+          }
+        : {
+            title: deposit > 0n ? `Cọc ${formatVnd(deposit)}` : formatVnd(price),
+            subtitle: slotLine,
+            label: 'Xác nhận đặt lịch',
+            disabled: !bookingOpen,
+            onClick: confirmBooking,
+          };
   }
 
   const ctaButton = (c: Cta, block = false) => (
@@ -1415,7 +1527,7 @@ export function BookingFlow({
             variant="ghost"
             aria-label="Quay lại"
             className="size-11! rounded-(--radius-pill)! p-0!"
-            disabled={stepIndex === 0}
+            disabled={stepIndex === 0 && !rescheduling}
             onClick={back}
           >
             <ArrowLeft size={20} aria-hidden="true" />
@@ -1461,8 +1573,8 @@ export function BookingFlow({
             <span className="body-sm text-(--ink-muted)">{branch.address}</span>
           </div>
           {summary}
-          {step === 'datetime' && group && groupStaffCard}
-          {step === 'datetime' && items.length > 0 && !group && (
+          {step === 'datetime' && group && !rescheduling && groupStaffCard}
+          {step === 'datetime' && items.length > 0 && !group && !rescheduling && (
             <div className="flex flex-col gap-(--space-2)">
               <span className="label text-(--ink-muted)">{staffNoun}</span>
               <StaffOptionList compact {...staffPickerProps} />

@@ -1,0 +1,48 @@
+/*
+ * What a customer may do by themselves with a booking, and what a cancellation returns
+ * (BR-08, BR-23, BR-33). Pure; imports nothing, so Node can run it (scripts/check-availability.ts).
+ */
+
+/** BR-08, X: a customer changes or cancels by themselves only this many hours before the time. */
+export const SELF_SERVICE_HOURS = 4;
+/** BR-08, N: how many times a customer may change the time of one booking by themselves. */
+export const MAX_SELF_CHANGES = 2;
+
+const HOUR = 3_600_000;
+
+export const hoursLeft = (startAt: string, now: string) =>
+  (Date.parse(startAt) - Date.parse(now)) / HOUR;
+
+/** BR-08: false once the booking is closer than `SELF_SERVICE_HOURS`. */
+export const canSelfService = (startAt: string, now: string) =>
+  hoursLeft(startAt, now) >= SELF_SERVICE_HOURS;
+
+/** BR-23, default tiers: 24 hours or more 100%, from 4 to 24 hours 50%, under 4 hours nothing. */
+export function refundPercent(startAt: string, now: string): 0 | 50 | 100 {
+  const left = hoursLeft(startAt, now);
+  if (left >= 24) return 100;
+  if (left >= 4) return 50;
+  return 0;
+}
+
+/** Whole VND: `bigint` division, so no fraction is ever created. */
+export const refundVnd = (depositVnd: bigint, startAt: string, now: string) =>
+  (depositVnd * BigInt(refundPercent(startAt, now))) / 100n;
+
+/** BR-33: 24 hours after sending, but no later than 2 hours before the booking. ISO 8601, UTC. */
+export function replyDeadline(sentAt: string, startAt: string): string {
+  const byDay = Date.parse(sentAt) + 24 * HOUR;
+  const byBooking = Date.parse(startAt) - 2 * HOUR;
+  return new Date(Math.min(byDay, byBooking)).toISOString();
+}
+
+/** `2 ngày 4 giờ`, `5 giờ 30 phút`, `40 phút`: how long is left. */
+export function timeLeftText(startAt: string, now: string): string {
+  const minutes = Math.max(0, Math.floor((Date.parse(startAt) - Date.parse(now)) / 60_000));
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const rest = minutes % 60;
+  if (days > 0) return hours > 0 ? `${days} ngày ${hours} giờ` : `${days} ngày`;
+  if (hours > 0) return rest > 0 ? `${hours} giờ ${rest} phút` : `${hours} giờ`;
+  return `${rest} phút`;
+}

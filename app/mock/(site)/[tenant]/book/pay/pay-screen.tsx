@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { paymentCode, useBookingDraft, type BookingDraft } from '@/components/mock/booking-draft';
 import { downloadIcs } from '@/components/mock/download-ics';
+import { useCustomerSession } from '@/components/mock/customer-session';
 import { useBookingCommit } from '@/components/mock/use-booking-commit';
 import { Button } from '@/components/sapio/button';
 import { ChainPlan } from '@/components/sapio/chain-plan';
@@ -50,6 +51,7 @@ export function PayScreen({ tenantSlug }: { tenantSlug: string }) {
   const { draft, setDraft } = useBookingDraft();
   const router = useRouter();
   const toast = useToast();
+  const session = useCustomerSession();
   const { commit, release, rival, appointments, fixture } = useBookingCommit(tenantSlug);
   const { tenant } = fixture;
   const branch = fixture.branches[0]!;
@@ -172,11 +174,7 @@ export function PayScreen({ tenantSlug }: { tenantSlug: string }) {
             >
               Thêm vào lịch điện thoại
             </Button>
-            <Button
-              size="lg"
-              block
-              onClick={() => toast({ text: 'Xem lịch hẹn của bạn: chưa có trong mock.' })}
-            >
+            <Button size="lg" block onClick={() => router.push(`/mock/${tenantSlug}/me`)}>
               Xem lịch hẹn của bạn
             </Button>
           </div>
@@ -295,7 +293,8 @@ export function PayScreen({ tenantSlug }: { tenantSlug: string }) {
   /** The mock gateway: the money arrives while the hold still runs. */
   function payInTime() {
     const d = draft!;
-    commit(d, 'confirmed');
+    const made = commit(d, 'confirmed');
+    if (made.customerId) session.loginWithId(made.customerId);
     setOutcome({ draft: d, late: false, paidAt: now, slot: d.slot, nearest: [] });
     setPhase('paid');
     setDraft(null);
@@ -310,7 +309,8 @@ export function PayScreen({ tenantSlug }: { tenantSlug: string }) {
     if (rivalBooks) others.push(rival(d));
     const found = stillFree(fixture, d.refs, d.mode, d.slot, paidAt, { appointments: others });
     if (found) {
-      commit(d, 'confirmed', found);
+      const made = commit(d, 'confirmed', found);
+      if (made.customerId) session.loginWithId(made.customerId);
       setOutcome({ draft: d, late: true, paidAt, slot: found, nearest: [] });
       setPhase('paid');
     } else {

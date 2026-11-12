@@ -251,6 +251,8 @@ export interface Appointment {
   /** Paid in full; a completed appointment without it waits for payment. */
   settled?: boolean;
   note?: string;
+  /** Times the customer moved it by themselves; capped by BR-08 (answering a question of the shop does not count). */
+  selfChanges?: number;
 }
 
 /** One block of a working day of one person; a day may have several (BR-35). */

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { useLiveFixture } from '@/components/mock/use-live-fixture';
+import { branchPhone } from '@/mock/site';
 import { useCustomerSession } from '@/components/mock/customer-session';
 import { freeSlots } from '@/mock/availability';
 import { formatDuration, formatVnd } from '@/mock/format';
@@ -141,6 +142,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
   const staffLabel = fixture.template.vocabulary.staff;
 
   const isPawpaw = fixture.tenant.slug === 'pawpaw';
+  const phone = branchPhone(fixture.tenant.slug);
 
   return (
     <div className={`${tenantClass} w-full text-(--ink) font-(--font-sans)`}>
@@ -262,7 +264,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
               </span>
             </span>
             <a
-              href={`tel:${isPawpaw ? '02873005678' : '02839301234'}`}
+              href={`tel:${phone.tel}`}
               className="sp-num flex items-center gap-1.5 text-sm leading-5 text-(--ink) no-underline"
             >
               <svg
@@ -278,7 +280,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
               >
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
               </svg>
-              <span>{isPawpaw ? '028 7300 5678' : '028 3930 1234'}</span>
+              <span>{phone.display}</span>
             </a>
           </div>
 
@@ -469,7 +471,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
             <span>{branch.address}</span>
           </a>
           <a
-            href={`tel:${isPawpaw ? '02873005678' : '02839301234'}`}
+            href={`tel:${phone.tel}`}
             className="sp-num flex gap-2 text-sm leading-5 text-(--ink) no-underline items-center"
           >
             <svg
@@ -486,7 +488,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
             >
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
             </svg>
-            <span>{isPawpaw ? '028 7300 5678' : '028 3930 1234'}</span>
+            <span>{phone.display}</span>
           </a>
           <div className="h-[1px] bg-(--line)" />
           <div>
