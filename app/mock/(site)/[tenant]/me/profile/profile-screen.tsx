@@ -10,11 +10,10 @@ import { PhoneField } from '@/components/sapio/phone-field';
 import { Sheet } from '@/components/sapio/sheet';
 import { useToast } from '@/components/sapio/toast';
 import { formatPhone, normalizePhone } from '@/mock/format';
+import { MOCK_CODE } from '@/mock/emails';
 import { fixtureBySlug } from '@/mock/selection';
 import { localDate } from '@/mock/time';
 
-/** The code the mock accepts, as on the login page (BR-16). */
-const MOCK_CODE = '482193';
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
 
 /** MH-21: name, phone, email, offers, and logging out. */

@@ -10,10 +10,9 @@ import { Field } from '@/components/sapio/form';
 import { OtpField } from '@/components/sapio/otp-field';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
+import { MOCK_CODE } from '@/mock/emails';
 import { fixtureBySlug } from '@/mock/selection';
 
-/** The code the mock accepts; a real one is random and sent by email (BR-16). */
-const MOCK_CODE = '482193';
 /** BR-16, N: wrong codes allowed before a new one is needed. */
 const MAX_WRONG = 5;
 const RESEND_SECONDS = 60;

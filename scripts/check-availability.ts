@@ -37,6 +37,7 @@ import {
   stillFree,
   type BookingItemRef,
 } from '../mock/booking.ts';
+import { buildEmails } from '../mock/emails.ts';
 import {
   canSelfService,
   refundPercent,
@@ -996,6 +997,43 @@ report(
     'Mã lịch có dạng TM-2611-0384',
     bookingCode(fixture, appt),
   );
+}
+
+// ---- MH-23: the emails come from the sample bookings ----
+
+{
+  const fixture = sample('toc-may');
+  const emails = buildEmails(fixture, '2026-11-07T03:20:00Z');
+  const byId = (id: string) => emails.find((e) => e.id === id);
+  report(
+    ['code', 'booked', 'remind24', 'remind2', 'moved', 'cancelled', 'refunded', 'asked'].every(
+      (id) => byId(id) !== undefined,
+    ),
+    'Email: đủ tám mẫu (mã, đã đặt, nhắc 24 giờ, nhắc 2 giờ, đã đổi, đã hủy, đã hoàn cọc, hỏi ý)',
+    emails.map((e) => e.id).join(' '),
+  );
+  const booked = byId('booked')!;
+  report(
+    (booked.notes[0]?.includes('trước 10:00 ngày 10/11') ?? false) &&
+      booked.notes[0]?.includes('trước 14:00 ngày 09/11 hoàn đủ cọc') === true,
+    'Email đã đặt lịch: hạn tự đổi 4 giờ và hạn hoàn đủ cọc 24 giờ tính từ giờ hẹn 10/11 14:00',
+    booked.notes[0],
+  );
+  const asked = byId('asked')!;
+  report(
+    asked.subject.includes('Lan nghỉ 10/11') &&
+      asked.subject.includes('Mai') &&
+      asked.notes[0]?.includes('trước 09:40, Chủ Nhật 08/11') === true,
+    'Email hỏi ý: đúng người nghỉ, người thay và hạn trả lời BR-33',
+    asked.subject,
+  );
+  report(
+    byId('refunded')?.rows.some(([k, v]) => k === 'Hoàn lại' && v.includes('100.000 ₫ (100%)')) ===
+      true,
+    'Email đã hoàn cọc: 100% khi còn hơn 24 giờ (BR-23)',
+  );
+  const paw = buildEmails(sample('pawpaw'), '2026-11-07T03:20:00Z');
+  report(paw.length >= 7, 'Email Pawpaw: dựng được từ lịch mẫu của Chị Linh', `${paw.length} mẫu`);
 }
 
 // ---- Moving by drag (MH-27) on the same day ----
