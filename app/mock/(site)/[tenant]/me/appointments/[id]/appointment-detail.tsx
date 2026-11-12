@@ -117,6 +117,21 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
 
   function cancel() {
     store.replaceAppointment({ ...appt!, status: 'cancelled' });
+    // A question of the shop still open for this booking is settled by the cancellation.
+    if (question) {
+      const cancelled: LeaveHandling = { kind: 'customer_cancelled' };
+      if (question.source === 'leave') {
+        store.replaceLeave({
+          ...question.leave,
+          handling: { ...question.leave.handling, [appt!.id]: cancelled },
+        });
+      } else {
+        store.replaceRequeue({
+          ...question.requeue,
+          handling: { ...question.requeue.handling, [appt!.id]: cancelled },
+        });
+      }
+    }
     setCancelling(false);
     toast({
       text:
