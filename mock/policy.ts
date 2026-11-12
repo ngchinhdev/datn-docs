@@ -46,3 +46,15 @@ export function timeLeftText(startAt: string, now: string): string {
   if (hours > 0) return rest > 0 ? `${hours} giờ ${rest} phút` : `${hours} giờ`;
   return `${rest} phút`;
 }
+
+/** BR-06: the earliest and the latest time a customer may ask to start, from the shop's policy. */
+export function bookingWindow(
+  policy: { minNoticeHours: number; maxAdvanceDays: number },
+  now: string,
+): { notBefore: string; notAfter: string } {
+  const at = Date.parse(now);
+  return {
+    notBefore: new Date(at + policy.minNoticeHours * HOUR).toISOString(),
+    notAfter: new Date(at + policy.maxAdvanceDays * 24 * HOUR).toISOString(),
+  };
+}

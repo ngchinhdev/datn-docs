@@ -45,7 +45,7 @@ import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
 import { freeChainSlots, freeGroupSlots, type FreeChainSlot } from '@/mock/availability';
 import { slotKey, type BookingSlot } from '@/mock/booking';
-import { MAX_SELF_CHANGES } from '@/mock/policy';
+import { MAX_SELF_CHANGES, bookingWindow } from '@/mock/policy';
 import { heldItems, modeOf, movedAppointment, openQuestion } from '@/mock/reschedule';
 import { matchesAttributes, priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
 import {
@@ -354,7 +354,9 @@ export function BookingFlow({
     (day: string, who: readonly string[]) => ({
       fixture,
       date: day,
-      notBefore: MOCK_NOW,
+      now: MOCK_NOW,
+      // BR-06, from the policy of the shop; the receptionist has no such limit (BR-30).
+      ...bookingWindow(fixture.template.defaultPolicies, MOCK_NOW),
       ignore: new Set(
         [target?.id, held ? `${tenant.id}-a-web${held.id}` : undefined].filter(
           (x): x is string => x !== undefined,

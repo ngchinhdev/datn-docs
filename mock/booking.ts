@@ -21,6 +21,7 @@ import type {
   TenantFixture,
 } from './fixtures/types.ts';
 import { priceFor } from './occupation.ts';
+import { bookingWindow } from './policy.ts';
 import { addDays, localDate } from './time.ts';
 
 /** A slot of a chain or a group; `staggered` marks a group combination that starts apart (BR-19). */
@@ -58,13 +59,16 @@ const queryOf = (
   fixture: TenantFixture,
   refs: readonly BookingItemRef[],
   date: string,
-  notBefore: string,
-  state?: State,
+  now: string,
+  state: State | undefined,
+  applyPolicy: boolean,
 ): ChainQuery => ({
   fixture,
   date,
-  notBefore,
-  now: notBefore,
+  // BR-06: a customer books no sooner than the notice and no further than the advance the shop
+  // allows; `now` stays the real time, for the holds that have run out (BR-07).
+  ...(applyPolicy ? bookingWindow(fixture.template.defaultPolicies, now) : { notBefore: now }),
+  now,
   ...(state ? { state } : {}),
   items: refs.map((ref) => ({
     variant: lookup(fixture, ref).variant,
@@ -74,19 +78,21 @@ const queryOf = (
 });
 
 /**
- * Times a booking can start on one day: the whole chain fitting, or everyone starting at once;
- * for a group, the staggered combinations after them.
+ * Times a customer can start a booking on one day: the whole chain fitting, or everyone starting
+ * at once; for a group, the staggered combinations after them. `applyPolicy` is off only for a
+ * time the customer already chose (BR-29).
  */
 export function bookingSlots(
   fixture: TenantFixture,
   refs: readonly BookingItemRef[],
   mode: BookingMode,
   date: string,
-  notBefore: string,
+  now: string,
   state?: State,
+  applyPolicy = true,
 ): { main: BookingSlot[]; staggered: BookingSlot[] } {
   if (refs.length === 0) return { main: [], staggered: [] };
-  const query = queryOf(fixture, refs, date, notBefore, state);
+  const query = queryOf(fixture, refs, date, now, state, applyPolicy);
   if (mode === 'group') {
     const { together, staggered } = freeGroupSlots(query);
     return {
@@ -111,7 +117,8 @@ export function stillFree(
   state: State,
 ): BookingSlot | null {
   const date = localDate(chosen.startAt);
-  const { main, staggered } = bookingSlots(fixture, refs, mode, date, now, state);
+  // The time was inside the notice when it was chosen (BR-06); only whether it is free matters now.
+  const { main, staggered } = bookingSlots(fixture, refs, mode, date, now, state, false);
   const pool = chosen.staggered ? staggered : main;
   return pool.find((s) => slotKey(s) === slotKey(chosen)) ?? null;
 }

@@ -898,6 +898,58 @@ report(
   );
 }
 
+// ---- BR-06 for the customer, none for the receptionist (BR-30) ----
+
+{
+  const now = '2026-11-07T03:20:00Z'; // 10:20 local
+  const refsOf = (serviceId: string, variantId: string): BookingItemRef[] => [
+    { key: serviceId, serviceId, variantId, staffChoice: ANY_STAFF },
+  ];
+  const may = sample('toc-may');
+  const online = bookingSlots(may, refsOf('may-cut', 'may-cut-short'), 'single', DAY, now).main;
+  report(
+    online.length > 0 && online.every((s) => s.startAt >= '2026-11-07T05:20:00Z'),
+    'BR-06: khách chỉ thấy giờ từ 2 giờ sau giờ hiện tại (đặt trước ít nhất)',
+    online[0] ? local(online[0].startAt) : '',
+  );
+  const { variant, serviceId } = sampleVariant(may, 'may-cut-short');
+  const desk = freeSlots({
+    fixture: may,
+    variant,
+    serviceId,
+    date: DAY,
+    staffResourceId: ANY_STAFF,
+    channel: 'staff',
+    now,
+    notBefore: now,
+  });
+  report(
+    desk.some((s) => s.startAt < '2026-11-07T05:20:00Z'),
+    'BR-30: lễ tân đặt được giờ sớm hơn mức đặt trước của khách',
+    desk[0] ? local(desk[0].startAt) : '',
+  );
+  const paw = sample('pawpaw');
+  const pawRefs = refsOf('paw-bath', 'paw-bath-small');
+  const at = (date: string) => bookingSlots(paw, pawRefs, 'single', date, now).main.length;
+  report(
+    at('2026-12-05') > 0 && at('2026-12-08') === 0,
+    'BR-06: Pawpaw nhận đặt xa nhất 30 ngày, ngày 08/12 chưa mở',
+    `05/12: ${at('2026-12-05')} giờ, 08/12: ${at('2026-12-08')} giờ`,
+  );
+  report(
+    bookingSlots(may, refsOf('may-cut', 'may-cut-short'), 'single', '2026-12-08', now).main
+      .length === 0,
+    'BR-06: Tóc Mây nhận đặt xa nhất 30 ngày, ngày 08/12 chưa mở',
+  );
+  const chosen = online[0]!;
+  report(
+    stillFree(may, refsOf('may-cut', 'may-cut-short'), 'single', chosen, '2026-11-07T05:00:00Z', {
+      appointments: may.appointments,
+    }) !== null,
+    'BR-29: tiền về muộn, giờ đã chọn gần hơn mức đặt trước vẫn xác nhận (BR-06 áp lúc chọn giờ)',
+  );
+}
+
 // ---- BR-08, BR-23, BR-33: what a customer may do by themselves ----
 
 {

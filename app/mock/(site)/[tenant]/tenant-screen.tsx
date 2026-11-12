@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 import { useLiveFixture } from '@/components/mock/use-live-fixture';
+import { bookingWindow } from '@/mock/policy';
 import { branchPhone } from '@/mock/site';
 import { useCustomerSession } from '@/components/mock/customer-session';
 import { freeSlots } from '@/mock/availability';
@@ -102,7 +103,8 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
         staffResourceId: s.resourceId,
         channel: 'online',
         now: MOCK_NOW,
-        notBefore: MOCK_NOW,
+        // BR-06: the times shown are the ones a customer may book.
+        ...bookingWindow(fixture.template.defaultPolicies, MOCK_NOW),
       });
       map[s.resourceId] = slots[0] ? formatTime(slots[0].startAt) : null;
     }
