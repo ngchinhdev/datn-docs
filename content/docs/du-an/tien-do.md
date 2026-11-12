@@ -21,7 +21,10 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - Pawpaw bỏ bước "Dịch vụ" riêng; bước "Cho bé nào?" chọn cả bé lẫn dịch vụ (theo bảng MH-14, 4 bước).
   - Trang trả cọc thêm một ô tick "có khách khác đặt giờ này" để có đủ ba kết quả với hai nút giả lập.
   - Lưu ý cho nhân viên của bé nằm ngoài schema ngành (`ServedSubject.note`); lỗi cân nặng lấy từ `checkSubject` ("lớn hơn 0"), chưa có khoảng 0,5–80 kg như bảng vẽ.
-  - "Chọn lại giờ" ghi cách xử lý `move` vào đơn nghỉ, lịch đổi khi duyệt; không tăng số lần tự đổi.
+  - "Chọn lại giờ" dời lịch ngay, không tăng số lần tự đổi; dòng của lịch trong đơn nghỉ hoặc "Cần xếp lại" thành cách xử lý mới "khách đã chọn giờ mới" (đã xử lý, duyệt bỏ qua). Khách hủy lịch đang chờ trả lời thì dòng đó thành "khách đã hủy".
+  - Giờ trống phía khách áp BR-06 theo chính sách của cơ sở; lễ tân không áp (BR-30).
+  - Một bé có tối đa 4 dịch vụ làm lần lượt (BR-18); từ hai bé trở lên mỗi bé một dịch vụ (BR-19).
+  - Khách ghép theo email đã xác thực (BR-16), cùng số điện thoại khác email là khách mới.
   - Pawpaw không có lịch mẫu có cọc nên thiếu mẫu email "đã hoàn cọc".
 - **Ghi chú cho ERD:**
   - `appointments.self_changes`; `served_subjects.note`.
