@@ -100,7 +100,6 @@ export function ShiftGrid({
                   <td
                     key={cell.date}
                     {...(isSelected ? { 'aria-current': true, 'data-selected': '' } : {})}
-                    className="data-selected:bg-(--fill-tonal) data-selected:shadow-[inset_0_0_0_1.5px_var(--brand)]"
                   >
                     {cell.fixed ? (
                       <span

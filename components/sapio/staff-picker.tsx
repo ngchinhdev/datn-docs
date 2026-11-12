@@ -36,6 +36,10 @@ export interface StaffPickerProps {
   anyPrice?: string | undefined;
   /** Word for staff in this tenant, e.g. "Thợ". */
   noun: string;
+  /** Under "Bất kỳ ai" instead of the default line, e.g. when each service has its own person. */
+  anyNote?: string | undefined;
+  /** Shown in the row instead of a person when each service has its own person ("Theo từng dịch vụ"). */
+  mixed?: { title: string; sub?: string } | undefined;
 }
 
 /** Avatar tints cycle through the status soft colors; they carry no meaning here. */
@@ -70,10 +74,11 @@ export function StaffOptionList({
   anyEarliest,
   anyPrice,
   noun,
+  anyNote,
   compact = false,
 }: Pick<
   StaffPickerProps,
-  'options' | 'value' | 'onChange' | 'anyEarliest' | 'anyPrice' | 'noun'
+  'options' | 'value' | 'onChange' | 'anyEarliest' | 'anyPrice' | 'noun' | 'anyNote'
 > & {
   compact?: boolean;
 }) {
@@ -82,9 +87,10 @@ export function StaffOptionList({
       id: ANY_STAFF,
       name: 'Bất kỳ ai',
       sub: [
-        compact
-          ? `Xếp ${noun.toLowerCase()} trống sớm nhất`
-          : `Xếp ${noun.toLowerCase()} trống sớm nhất, nhiều giờ để chọn nhất`,
+        anyNote ??
+          (compact
+            ? `Xếp ${noun.toLowerCase()} trống sớm nhất`
+            : `Xếp ${noun.toLowerCase()} trống sớm nhất, nhiều giờ để chọn nhất`),
         anyPrice,
       ]
         .filter(Boolean)
@@ -176,6 +182,8 @@ export function StaffPicker({
   anyEarliest,
   anyPrice,
   noun,
+  anyNote,
+  mixed,
 }: StaffPickerProps) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -223,11 +231,17 @@ export function StaffPicker({
           </span>
         )}
         <span className="flex min-w-0 grow flex-col">
-          <span className="body font-semibold">{chosen ? chosen.displayName : 'Bất kỳ ai'}</span>
+          <span className="body font-semibold">
+            {mixed ? mixed.title : chosen ? chosen.displayName : 'Bất kỳ ai'}
+          </span>
           <span className="body-sm text-(--ink-muted)">
-            {chosen
-              ? [chosen.title, chosen.specialty, chosen.price].filter(Boolean).join(' · ')
-              : [`Xếp ${noun.toLowerCase()} trống sớm nhất`, anyPrice].filter(Boolean).join(' · ')}
+            {mixed
+              ? mixed.sub
+              : chosen
+                ? [chosen.title, chosen.specialty, chosen.price].filter(Boolean).join(' · ')
+                : [anyNote ?? `Xếp ${noun.toLowerCase()} trống sớm nhất`, anyPrice]
+                    .filter(Boolean)
+                    .join(' · ')}
           </span>
         </span>
         <span className="body-sm flex items-center gap-0.5 font-semibold text-(--accent)">
@@ -267,6 +281,7 @@ export function StaffPicker({
               onChange={setDraft}
               anyEarliest={anyEarliest}
               anyPrice={anyPrice}
+              anyNote={anyNote}
               noun={noun}
             />
             <Button

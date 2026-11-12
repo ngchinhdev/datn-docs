@@ -1,17 +1,21 @@
 'use client';
 
 import { ArrowLeft } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useQueryState } from '@/components/mock/use-query-state';
 import { BottomBar } from '@/components/sapio/bottom-bar';
 import { Button } from '@/components/sapio/button';
+import { ChainPlan, type PlanItem } from '@/components/sapio/chain-plan';
 import { DateStrip } from '@/components/sapio/date-strip';
 import { Field } from '@/components/sapio/form';
 import { HoldBanner } from '@/components/sapio/hold-banner';
 import { OtpField } from '@/components/sapio/otp-field';
+import { PerServiceStaff } from '@/components/sapio/per-service-staff';
 import { PhoneField } from '@/components/sapio/phone-field';
+import { QuantityInput } from '@/components/sapio/quantity-input';
 import { SegmentedTabs } from '@/components/sapio/segmented';
+import { ServiceCart } from '@/components/sapio/service-cart';
 import { SubjectFields } from '@/components/sapio/subject-fields';
 import { ServiceVariantList } from '@/components/sapio/service-variant-list';
 import { SlotGrid } from '@/components/sapio/slot-grid';
@@ -23,11 +27,33 @@ import {
 } from '@/components/sapio/staff-picker';
 import { StatusBadge } from '@/components/sapio/status-badge';
 import { useToast } from '@/components/sapio/toast';
+import {
+  nextDraftId,
+  useBookingDraft,
+  type BookingDraft,
+  type BookingState,
+  type ChainPick,
+  type Person,
+  type SubjectDraft as Draft,
+} from '@/components/mock/booking-draft';
+import { useCustomerSession } from '@/components/mock/customer-session';
+import { downloadIcs } from '@/components/mock/download-ics';
+import { useScheduleStore } from '@/components/mock/schedule-store';
+import { useLiveFixture } from '@/components/mock/use-live-fixture';
+import { useBookingCommit } from '@/components/mock/use-booking-commit';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
-import { freeSlots, type FreeSlot } from '@/mock/availability';
-import { matchesAttributes, priceFor, visibleMinutes } from '@/mock/occupation';
-import { tenantFixtures, type ServedSubject, type ServiceVariant } from '@/mock/fixtures';
+import { freeChainSlots, freeGroupSlots, type FreeChainSlot } from '@/mock/availability';
+import { slotKey, type BookingSlot } from '@/mock/booking';
+import { bookingWindow, selfChangeBlock } from '@/mock/policy';
+import { heldItems, modeOf, movedAppointment, openQuestion } from '@/mock/reschedule';
+import { matchesAttributes, priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
+import {
+  type LeaveHandling,
+  type ServedSubject,
+  type Service,
+  type ServiceVariant,
+} from '@/mock/fixtures';
 import { formatMinutes, formatPhone, formatVnd, normalizePhone } from '@/mock/format';
 import { openingHours } from '@/mock/hours';
 import {
@@ -51,10 +77,15 @@ type Step = 'service' | 'subject' | 'datetime' | 'info' | 'confirm';
 type Part = 'morning' | 'afternoon' | 'evening';
 
 const HOLD_MINUTES = 10;
+/** BR-18: at most four services in one booking. */
+const MAX_CHAIN = 4;
+/** `staffChoice` when the services of a chain have different people. */
+const MIXED = 'mixed';
+/** BR-19: at most four subjects in one booking. */
+const MAX_PARTY = 4;
+/** Staggered suggestions shown per part of the day (BR-19). */
+const STAGGERED_PER_PART = 3;
 const RELEASED = 'Chỗ đã được trả lại. Chọn giờ khác.';
-const NEW_SUBJECT = 'new';
-/** A returning customer has a session, so their saved served subjects show (BR-17). */
-const RETURNING_CUSTOMER: Record<string, string> = { may: 'may-c-thu', pawpaw: 'paw-c-linh' };
 const PARTS: { value: Part; label: string; from: number; to: number }[] = [
   { value: 'morning', label: 'Sáng', from: 0, to: 12 },
   { value: 'afternoon', label: 'Chiều', from: 12, to: 17 },
@@ -64,36 +95,21 @@ const PARTS: { value: Part; label: string; from: number; to: number }[] = [
 const duration = visibleMinutes;
 const matches = (v: ServiceVariant, subject: ServedSubject) =>
   matchesAttributes(v.match, subject.attributes);
-const partOf = (slot: FreeSlot) => {
+interface ChainItem {
+  /** Service id in a chain; subject or person id in a group. */
+  key: string;
+  /** Name of the subject or person in a group. */
+  label?: string;
+  /** The pet or other subject the item is for, when the industry asks for one. */
+  subjectId?: string;
+  service: Service;
+  variant: ServiceVariant;
+}
+const partOf = (slot: FreeChainSlot) => {
   const hour = Number(formatTime(slot.startAt).slice(0, 2));
   return PARTS.find((p) => hour >= p.from && hour < p.to)?.value ?? 'evening';
 };
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
-
-const icsStamp = (iso: string) => iso.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-
-function downloadIcs(o: { start: string; end: string; title: string; location: string }) {
-  const lines = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Sapio mock//VI',
-    'BEGIN:VEVENT',
-    `UID:${icsStamp(o.start)}@sapio.mock`,
-    `DTSTAMP:${icsStamp(new Date(MOCK_NOW).toISOString())}`,
-    `DTSTART:${icsStamp(o.start)}`,
-    `DTEND:${icsStamp(o.end)}`,
-    `SUMMARY:${o.title}`,
-    `LOCATION:${o.location.replace(/,/g, '\\,')}`,
-    'END:VEVENT',
-    'END:VCALENDAR',
-  ];
-  const url = URL.createObjectURL(new Blob([lines.join('\r\n')], { type: 'text/calendar' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'lich-hen.ics';
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 interface Cta {
   title: string;
@@ -113,7 +129,9 @@ export function BookingFlow({
   /** `false` while the tenant is on trial (BR-81): the page can be walked through, not booked. */
   bookingOpen?: boolean;
 }) {
-  const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
+  // The calendar and the staff as the shop has them now, so a booking made here shows there and
+  // the other way round (a moved booking and the customer's own hold do not block themselves).
+  const fixture = useLiveFixture(tenantSlug);
   const { tenant, services, staff, resources } = fixture;
   const branch = fixture.branches[0]!;
   const toast = useToast();
@@ -128,96 +146,286 @@ export function BookingFlow({
     priceFor(v, who, pricedStaff(forService));
   const subjectNoun = vocabulary.subject ?? '';
   const asksSubject = vocabulary.subject !== null;
-  const saved = newCustomer
-    ? []
-    : fixture.servedSubjects.filter((s) => s.customerId === RETURNING_CUSTOMER[tenant.id]);
-  const steps: Step[] = asksSubject
-    ? ['service', 'subject', 'datetime', 'info', 'confirm']
-    : ['service', 'datetime', 'info', 'confirm'];
+  const router = useRouter();
+  const query = useSearchParams();
+  const store = useScheduleStore();
+  const session = useCustomerSession();
+  const { draft: held, setDraft, seed } = useBookingDraft();
+  const { commit, release } = useBookingCommit(tenantSlug);
+  // A session shows the subjects saved at this shop (BR-17); a new customer has none yet.
+  const saved = newCustomer ? [] : session.subjects;
+  // `doi`: changing the time of a booking the customer has (BR-08); `hoi`: as the answer to a
+  // question of the shop, which does not count as a change (BR-32, BR-33).
+  const target =
+    store.appointments.find(
+      (a) => a.id === query.get('doi') && a.customerId === session.customerId,
+    ) ?? null;
+  const rescheduling = target !== null;
+  const answering = rescheduling && query.get('hoi') === '1';
+  const steps: Step[] = rescheduling
+    ? ['datetime', 'confirm']
+    : asksSubject
+      ? ['subject', 'datetime', 'info', 'confirm']
+      : ['service', 'datetime', 'info', 'confirm'];
 
-  const now = useMockNow();
-  const today = localDate(MOCK_NOW);
-  const [stepParam, setStepParam] = useQueryState('step', 'service');
-  const preset = useSearchParams().get('service');
-  const presetService = services.find((s) => s.id === preset);
-  const [serviceId, setServiceId] = useState<string | null>(presetService?.id ?? null);
-  const [variantId, setVariantId] = useState<string | null>(
-    !asksSubject ? (presetService?.variants[0]?.id ?? null) : null,
+  // Coming back from the payment page (`giu=1`) picks the choices up where they were left;
+  // "Đặt lại" (`lai=1`) starts from the choices of a past booking.
+  const [resume] = useState(
+    query.get('giu') === '1' && held?.tenantSlug === tenantSlug ? held : null,
   );
-  const [subjectId, setSubjectId] = useState<string | null>(newCustomer ? NEW_SUBJECT : null);
-  const [newName, setNewName] = useState('');
-  const [newValues, setNewValues] = useState<SubjectValues>({});
-  const [subjectTouched, setSubjectTouched] = useState<Set<string>>(new Set());
-  const [date, setDate] = useState(today);
+  const [seeded] = useState(
+    query.get('lai') === '1' && seed?.tenantSlug === tenantSlug ? seed.state : null,
+  );
+  const saved0 = resume?.state ?? seeded;
+  const heldNamed = asksSubject || (target !== null && modeOf(target) === 'group');
+  const targetItems = target ? heldItems(fixture, target, store.servedSubjects, heldNamed) : [];
+  const now = useMockNow(resume?.now);
+  const holdAlive = Boolean(
+    saved0?.holdExpiresAt && Date.parse(saved0.holdExpiresAt) > Date.parse(resume?.now ?? MOCK_NOW),
+  );
+  const today = localDate(MOCK_NOW);
+  const [stepParam, setStepParam] = useQueryState('step', steps[0]!);
+  const preset = query.get('service');
+  const presetService = services.find((s) => s.id === preset);
+  // Industries without a served subject build a chain of up to four services (BR-18).
+  const [picks, setPicks] = useState<ChainPick[]>(
+    saved0?.picks ??
+      (!asksSubject && presetService && presetService.variants[0]
+        ? [{ serviceId: presetService.id, variantId: presetService.variants[0].id }]
+        : []),
+  );
+  const [staffByKey, setStaffByKey] = useState<Record<string, string>>(
+    saved0?.staffByKey ?? Object.fromEntries(targetItems.map((it) => [it.key, it.staffChoice])),
+  );
+  const [perServiceOpen, setPerServiceOpen] = useState(false);
+  // Served subjects: a new customer starts with one blank form; a returning one picks saved ones.
+  const [drafts, setDrafts] = useState<Draft[]>(
+    saved0?.drafts ??
+      (asksSubject && newCustomer ? [{ id: 'new-1', name: '', values: {}, touched: [] }] : []),
+  );
+  const [chosenIds, setChosenIds] = useState<string[]>(
+    saved0?.chosenIds ?? (asksSubject && newCustomer ? ['new-1'] : []),
+  );
+  const [serviceFor, setServiceFor] = useState<Record<string, string>>(saved0?.serviceFor ?? {});
+  // One subject can have up to four services one after the other (BR-18); `null` until the
+  // customer picks, when the first service that fits is taken.
+  const [petChain, setPetChain] = useState<string[] | null>(saved0?.petChain ?? null);
+  // Without a served subject, "Đặt cho nhiều người" turns the booking into a group (BR-19).
+  const [people, setPeople] = useState<Person[] | null>(saved0?.people ?? null);
+  const [changing, setChanging] = useState<string[]>([]);
+  const [date, setDate] = useState(
+    saved0?.date ??
+      (target && localDate(target.startAt) > today ? localDate(target.startAt) : today),
+  );
   const [part, setPart] = useState<Part | null>(null);
-  const [staffChoice, setStaffChoice] = useState(ANY_STAFF);
-  const [slot, setSlot] = useState<FreeSlot | null>(null);
-  const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [slot, setSlot] = useState<BookingSlot | null>(holdAlive ? (saved0?.slot ?? null) : null);
+  const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(
+    holdAlive ? (saved0?.holdExpiresAt ?? null) : null,
+  );
+  const [notice, setNotice] = useState<string | null>(query.get('het') === '1' ? RELEASED : null);
+  const known = !newCustomer ? session.customer : null;
+  const [name, setName] = useState(saved0?.name ?? known?.name ?? '');
+  const [phone, setPhone] = useState(
+    saved0?.phone ?? (known?.phone ? formatPhone(known.phone) : ''),
+  );
   const [phoneTouched, setPhoneTouched] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(saved0?.email ?? known?.email ?? session.email ?? '');
   const [emailTouched, setEmailTouched] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
   const [confirmed, setConfirmed] = useState(false);
 
-  const service = services.find((s) => s.id === serviceId) ?? null;
-  // BR-71: the new subject only exists once its values follow the schema of the industry.
-  const subjectCheck = checkSubject(subjectSchema, subjectNoun, newName, newValues);
-  const newSubject: ServedSubject | null =
-    Object.keys(subjectCheck.errors).length === 0
+  const checks = Object.fromEntries(
+    drafts.map((d) => [d.id, checkSubject(subjectSchema, subjectNoun, d.name, d.values)]),
+  );
+  const draftSubject = (d: Draft): ServedSubject | null =>
+    Object.keys(checks[d.id]!.errors).length === 0
       ? {
-          id: NEW_SUBJECT,
+          id: d.id,
           tenantId: tenant.id,
           customerId: '',
           kind: 'other',
-          name: newName.trim(),
-          attributes: subjectCheck.attributes,
+          name: d.name.trim(),
+          attributes: checks[d.id]!.attributes,
         }
       : null;
-  const subject =
-    subjectId === NEW_SUBJECT ? newSubject : (saved.find((s) => s.id === subjectId) ?? null);
-  // BR-13: when a served subject is asked for, the variant follows its attributes.
-  const variant = asksSubject
-    ? ((subject && service?.variants.find((v) => matches(v, subject))) ?? null)
-    : (service?.variants.find((v) => v.id === variantId) ?? null);
+  const subjectOf = (id: string) =>
+    saved.find((x) => x.id === id) ??
+    drafts.filter((d) => d.id === id).map(draftSubject)[0] ??
+    null;
+  /** BR-13: the variant of a service follows the attributes of the subject. */
+  const servicesFor = (subject: ServedSubject) =>
+    services.filter((sv) => sv.variants.some((v) => matches(v, subject)));
+  const serviceOf = (subject: ServedSubject, id: string) => {
+    const matching = servicesFor(subject);
+    return (
+      matching.find((sv) => sv.id === serviceFor[id]) ??
+      matching.find((sv) => sv.id === presetService?.id) ??
+      matching[0] ??
+      null
+    );
+  };
+  const onlyId = asksSubject && chosenIds.length === 1 ? chosenIds[0]! : null;
+  const onlySubject = onlyId ? subjectOf(onlyId) : null;
+  const petChainIds =
+    onlySubject && onlyId
+      ? (petChain ?? [serviceOf(onlySubject, onlyId)?.id].filter((x): x is string => Boolean(x)))
+      : [];
+  const rawItems: ChainItem[] = target
+    ? targetItems.map((it) => ({
+        key: it.key,
+        ...(it.label ? { label: it.label } : {}),
+        service: it.service,
+        variant: it.variant,
+      }))
+    : onlyId && onlySubject
+      ? petChainIds.flatMap((serviceId) => {
+          const sv = servicesFor(onlySubject).find((x) => x.id === serviceId);
+          const v = sv?.variants.find((x) => matches(x, onlySubject));
+          return sv && v
+            ? [{ key: sv.id, label: onlySubject.name, subjectId: onlyId, service: sv, variant: v }]
+            : [];
+        })
+      : asksSubject
+        ? chosenIds.flatMap((id) => {
+            const subject = subjectOf(id);
+            const sv = subject && serviceOf(subject, id);
+            const v = subject && sv ? sv.variants.find((x) => matches(x, subject)) : undefined;
+            return subject && sv && v
+              ? [{ key: id, label: subject.name, subjectId: id, service: sv, variant: v }]
+              : [];
+          })
+        : people
+          ? people.flatMap((person, i) => {
+              const sv = services.find((x) => x.id === person.pick?.serviceId);
+              const v = sv?.variants.find((x) => x.id === person.pick?.variantId);
+              return sv && v && (i === 0 || person.name.trim())
+                ? [
+                    {
+                      key: person.id,
+                      label: i === 0 ? 'Bạn' : person.name.trim(),
+                      service: sv,
+                      variant: v,
+                    },
+                  ]
+                : [];
+            })
+          : picks.flatMap((pick) => {
+              const sv = services.find((x) => x.id === pick.serviceId);
+              const v = sv?.variants.find((x) => x.id === pick.variantId);
+              return sv && v ? [{ key: sv.id, service: sv, variant: v }] : [];
+            });
+  const itemSig = rawItems
+    .map((it) => `${it.key}:${it.label}:${it.service.id}:${it.variant.id}`)
+    .join('|');
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `itemSig` stands for `rawItems`
+  const items = useMemo(() => rawItems, [itemSig]);
+  const wanted = target
+    ? targetItems.length
+    : onlyId
+      ? petChainIds.length
+      : asksSubject
+        ? chosenIds.length
+        : people
+          ? people.length
+          : picks.length;
+  /** Every subject or person asked for has a service. */
+  const complete = items.length > 0 && items.length === wanted;
+  const variant = items[0]?.variant ?? null;
+  // BR-18: one subject, services one after the other; BR-19: several subjects, one service each.
+  const group = target
+    ? modeOf(target) === 'group'
+    : (asksSubject ? chosenIds.length > 1 : people !== null) && items.length > 1;
+  const chain = target
+    ? modeOf(target) === 'chain'
+    : (asksSubject ? chosenIds.length === 1 : people === null) && items.length > 1;
+  const unit = vocabulary.subject ?? 'người';
+  const choices = items.map((it) => staffByKey[it.key] ?? ANY_STAFF);
+  const choiceKey = choices.join('|');
+  /** One value when everyone asked for is the same, else `MIXED`. */
+  const staffChoice = choices.every((c) => c === choices[0]) ? (choices[0] ?? ANY_STAFF) : MIXED;
   // `?step=` is the source; a link to a step whose choices are missing falls back to the first step.
   const reachable: Record<Step, boolean> = {
     service: true,
-    subject: Boolean(service),
-    datetime: Boolean(variant),
+    subject: true,
+    datetime: complete,
     info: Boolean(slot),
     confirm: Boolean(slot),
   };
-  const requested = steps.find((s) => s === stepParam);
-  const step: Step = requested && reachable[requested] ? requested : 'service';
+  const requested = steps.find((st) => st === stepParam);
+  const step: Step = requested && reachable[requested] ? requested : steps[0]!;
   const stepIndex = steps.indexOf(step);
   const staffName = (id: string) => resources.find((r) => r.id === id)?.name ?? '';
-  const price = variant && service ? priceOf(variant, service.id, staffChoice) : 0n;
+  const sum = (xs: bigint[]) => xs.reduce((a, b) => a + b, 0n);
+  /** BR-18, BR-56: the price and the deposit are the sums of the items. */
+  // BR-12: a booking that is moved keeps the price it was made at.
+  const price = target
+    ? sum(targetItems.map((it) => it.priceVnd))
+    : sum(items.map((it, i) => priceOf(it.variant, it.service.id, choices[i])));
+  const anyPrice = target ? price : sum(items.map((it) => priceOf(it.variant, it.service.id)));
+  const deposit = target ? 0n : sum(items.map((it) => it.variant.depositVnd ?? 0n));
+  const totalMinutes = items.reduce((m, it) => m + duration(it.variant), 0);
 
-  const week = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(today, i)), [today]);
-  const slotsFor = useCallback(
-    (day: string, staffId: string) =>
-      variant && service
-        ? freeSlots({
-            fixture,
-            variant,
-            serviceId: service.id,
-            date: day,
-            staffResourceId: staffId,
-            notBefore: MOCK_NOW,
-          })
-        : [],
-    [fixture, variant, service],
+  // The days shown start at the booking being moved when it is further ahead than a week.
+  const weekStart = target && localDate(target.startAt) > today ? localDate(target.startAt) : today;
+  const week = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart],
   );
-  const daySlots = useMemo(() => slotsFor(date, staffChoice), [slotsFor, date, staffChoice]);
+  const queryFor = useCallback(
+    (day: string, who: readonly string[]) => ({
+      fixture,
+      date: day,
+      now: MOCK_NOW,
+      // BR-06, from the policy of the shop; the receptionist has no such limit (BR-30).
+      ...bookingWindow(fixture.template.defaultPolicies, MOCK_NOW),
+      ignore: new Set(
+        [target?.id, held ? `${tenant.id}-a-web${held.id}` : undefined].filter(
+          (x): x is string => x !== undefined,
+        ),
+      ),
+      items: items.map((it, i) => ({
+        variant: it.variant,
+        serviceId: it.service.id,
+        staffResourceId: who[i] ?? ANY_STAFF,
+      })),
+    }),
+    [fixture, items, target, held, tenant.id],
+  );
+  /** Times everyone starts at once (a group) or the whole chain fits (BR-18, BR-19). */
+  const slotsFor = useCallback(
+    (day: string, who: readonly string[]): BookingSlot[] =>
+      items.length === 0
+        ? []
+        : group
+          ? freeGroupSlots(queryFor(day, who)).together
+          : freeChainSlots(queryFor(day, who)),
+    [items, group, queryFor],
+  );
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `choiceKey` stands for `choices`
+  const daySlots = useMemo(() => slotsFor(date, choices), [slotsFor, date, choiceKey]);
+  // BR-19: without a common time, combinations that start up to 60 minutes apart.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `choiceKey` stands for `choices`
+  const staggeredSlots: BookingSlot[] = useMemo(
+    () =>
+      group
+        ? freeGroupSlots(queryFor(date, choices)).staggered.map((x) => ({
+            ...x,
+            staggered: true as const,
+          }))
+        : [],
+    [group, queryFor, date, choiceKey],
+  );
+  const staggeredIn = (value: Part) =>
+    staggeredSlots.filter((x) => partOf(x) === value).slice(0, STAGGERED_PER_PART);
   const partCounts = Object.fromEntries(
-    PARTS.map((p) => [p.value, daySlots.filter((s) => partOf(s) === p.value).length]),
+    PARTS.map((pt) => [
+      pt.value,
+      daySlots.filter((x) => partOf(x) === pt.value).length + staggeredIn(pt.value).length,
+    ]),
   ) as Record<Part, number>;
   // D-14: default to the earliest part of day that still has slots.
-  const firstPart = PARTS.find((p) => partCounts[p.value] > 0)?.value ?? 'morning';
+  const firstPart = PARTS.find((pt) => partCounts[pt.value] > 0)?.value ?? 'morning';
   const shownPart = part && partCounts[part] > 0 ? part : firstPart;
 
   // BR-14: only online-bookable staff who can do the service.
@@ -225,15 +433,21 @@ export function BookingFlow({
     () =>
       staff
         .filter(
-          (s) => s.profile.bookableOnline && serviceId && s.skillServiceIds.includes(serviceId),
+          (s) =>
+            !group &&
+            !rescheduling &&
+            s.profile.bookableOnline &&
+            items.length > 0 &&
+            items.every((it) => s.skillServiceIds.includes(it.service.id)),
         )
         .map((s) => {
-          const first = slotsFor(date, s.resourceId)[0];
+          const own = items.map(() => s.resourceId);
+          const first = slotsFor(date, own)[0];
           const nextDay = first
             ? undefined
             : week
                 .filter((d) => d > date)
-                .map((d) => ({ d, slot: slotsFor(d, s.resourceId)[0] }))
+                .map((d) => ({ d, slot: slotsFor(d, own)[0] }))
                 .find((x) => x.slot);
           return {
             id: s.resourceId,
@@ -241,18 +455,23 @@ export function BookingFlow({
             title: s.profile.title,
             specialty: s.profile.specialty,
             earliest: first ? formatTime(first.startAt) : null,
-            ...(variant && serviceId
-              ? { price: formatVnd(priceFor(variant, s.resourceId, pricedStaff(serviceId))) }
-              : {}),
+            price: formatVnd(
+              sum(items.map((it) => priceOf(it.variant, it.service.id, s.resourceId))),
+            ),
             nextDay: nextDay?.slot
               ? `Sớm nhất ${weekdayShort(nextDay.d)} ${formatDay(nextDay.d).slice(-5)}`
               : undefined,
           };
         }),
-    [staff, serviceId, variant, slotsFor, date, week],
+    [staff, items, group, rescheduling, slotsFor, date, week],
   );
 
+  const heldRef = useRef(held);
+  heldRef.current = held;
+  const releaseRef = useRef(release);
+  releaseRef.current = release;
   const releaseHold = useCallback(() => {
+    if (heldRef.current) releaseRef.current(heldRef.current);
     setSlot(null);
     setHoldExpiresAt(null);
     setConfirmed(false);
@@ -267,19 +486,233 @@ export function BookingFlow({
   const back = () => {
     const prev = steps[stepIndex - 1];
     if (prev) go(prev);
+    else if (target) router.push(`/mock/${tenantSlug}/me/appointments/${target.id}`);
   };
 
-  function pickSlot(startAt: string) {
-    const found = daySlots.find((s) => s.startAt === startAt) ?? null;
+  function pickBookingSlot(found: BookingSlot | null) {
     setSlot(found);
     // BR-07: choosing a time starts a 10-minute hold.
-    setHoldExpiresAt(found && bookingOpen ? addMinutes(now, HOLD_MINUTES) : null);
+    setHoldExpiresAt(found && bookingOpen && !rescheduling ? addMinutes(now, HOLD_MINUTES) : null);
     setNotice(null);
   }
-  function chooseStaff(v: string) {
-    setStaffChoice(v);
+  const pickSlot = (startAt: string) =>
+    pickBookingSlot(daySlots.find((x) => x.startAt === startAt) ?? null);
+  const reset = () => {
     setSlot(null);
+    setHoldExpiresAt(null);
     setPart(null);
+  };
+  /** One person for the whole chain. */
+  function chooseStaff(v: string) {
+    setStaffByKey(Object.fromEntries(items.map((it) => [it.key, v])));
+    reset();
+  }
+  function applyPerService(values: Record<string, string>) {
+    setStaffByKey(values);
+    reset();
+  }
+  /** Adding a variant of a service already in the chain replaces it; the limit is BR-18. */
+  function togglePick(serviceId: string, variantId: string) {
+    setPicks((current) => {
+      const same = current.find((x) => x.serviceId === serviceId);
+      if (same?.variantId === variantId) return current.filter((x) => x !== same);
+      if (same) return current.map((x) => (x === same ? { serviceId, variantId } : x));
+      return current.length >= MAX_CHAIN ? current : [...current, { serviceId, variantId }];
+    });
+    reset();
+  }
+  function setPetServices(next: string[]) {
+    setPetChain(next);
+    reset();
+  }
+  function togglePetService(serviceId: string) {
+    setPetServices(
+      petChainIds.includes(serviceId)
+        ? petChainIds.filter((x) => x !== serviceId)
+        : petChainIds.length >= MAX_CHAIN
+          ? petChainIds
+          : [...petChainIds, serviceId],
+    );
+  }
+  function movePetService(serviceId: string, by: -1 | 1) {
+    const at = petChainIds.indexOf(serviceId);
+    const to = at + by;
+    if (at < 0 || to < 0 || to >= petChainIds.length) return;
+    const next = [...petChainIds];
+    [next[at], next[to]] = [next[to]!, next[at]!];
+    setPetServices(next);
+  }
+  function togglePet(id: string) {
+    setChosenIds((cur) =>
+      cur.includes(id) ? cur.filter((x) => x !== id) : cur.length >= MAX_PARTY ? cur : [...cur, id],
+    );
+    reset();
+  }
+  function addDraft() {
+    if (chosenIds.length >= MAX_PARTY) return;
+    const id = `new-${drafts.reduce((m, d) => Math.max(m, Number(d.id.slice(4))), 0) + 1}`;
+    setDrafts((cur) => [...cur, { id, name: '', values: {}, touched: [] }]);
+    setChosenIds((cur) => [...cur, id]);
+    reset();
+  }
+  function removeDraft(id: string) {
+    setDrafts((cur) => cur.filter((d) => d.id !== id));
+    setChosenIds((cur) => cur.filter((x) => x !== id));
+    reset();
+  }
+  function patchDraft(id: string, patch: (d: Draft) => Draft) {
+    setDrafts((cur) => cur.map((d) => (d.id === id ? patch(d) : d)));
+    reset();
+  }
+  function startGroup() {
+    const first = picks[0] ?? null;
+    setPeople([
+      { id: 'p1', name: 'Bạn', pick: first },
+      { id: 'p2', name: '', pick: null },
+    ]);
+    setChanging(first ? ['p2'] : ['p1', 'p2']);
+    reset();
+  }
+  function endGroup() {
+    const first = people?.[0]?.pick;
+    setPicks(first ? [first] : []);
+    setPeople(null);
+    reset();
+  }
+  function setPartySize(n: number) {
+    if (!people) return;
+    const more = Array.from({ length: Math.max(0, n - people.length) }, (_, k) => ({
+      id: `p${people.length + k + 1}`,
+      name: '',
+      pick: null as ChainPick | null,
+    }));
+    setPeople([...people.slice(0, n), ...more]);
+    setChanging((c) => [...c, ...more.map((m) => m.id)]);
+    reset();
+  }
+  function patchPerson(id: string, patch: Partial<Person>) {
+    setPeople((cur) => cur && cur.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+    reset();
+  }
+  function pickForPerson(id: string, serviceId: string, variantId: string) {
+    patchPerson(id, { pick: { serviceId, variantId } });
+    setChanging((c) => c.filter((x) => x !== id));
+  }
+  function movePick(serviceId: string, by: -1 | 1) {
+    setPicks((current) => {
+      const at = current.findIndex((p) => p.serviceId === serviceId);
+      const to = at + by;
+      if (at < 0 || to < 0 || to >= current.length) return current;
+      const next = [...current];
+      [next[at], next[to]] = [next[to]!, next[at]!];
+      return next;
+    });
+    reset();
+  }
+  function removePick(serviceId: string) {
+    setPicks((current) => current.filter((p) => p.serviceId !== serviceId));
+    reset();
+  }
+
+  /** BR-08, BR-12: the same booking at another time; answering the shop does not count. */
+  function confirmReschedule() {
+    if (!target || !slot) return;
+    // Checked again at the moment of confirming: the time kept moving while the customer chose.
+    const blocked = selfChangeBlock(target, now, fixture.template.defaultPolicies, answering);
+    if (blocked) {
+      toast({ text: blocked });
+      router.push(`/mock/${tenantSlug}/me/appointments/${target.id}`);
+      return;
+    }
+    if (answering) {
+      const asked = openQuestion(target.id, store.leaves, store.requeues);
+      // The booking moves now, every item of it; the row in the leave request or the list to
+      // rearrange becomes settled (BR-08, BR-33).
+      store.replaceAppointment(movedAppointment(fixture, target, slot, false));
+      const chosen: LeaveHandling = {
+        kind: 'rescheduled',
+        staffResourceId: slot.items[0]!.staffResourceId,
+        startAt: slot.startAt,
+      };
+      if (asked?.source === 'leave') {
+        store.replaceLeave({
+          ...asked.leave,
+          handling: { ...asked.leave.handling, [target.id]: chosen },
+        });
+      } else if (asked) {
+        store.replaceRequeue({
+          ...asked.requeue,
+          handling: { ...asked.requeue.handling, [target.id]: chosen },
+        });
+      }
+      toast({ text: `Đã đổi sang ${slotLine}. Không tính vào số lần đổi giờ.` });
+    } else {
+      store.replaceAppointment(movedAppointment(fixture, target, slot, true));
+      toast({ text: `Đã đổi sang ${slotLine}.` });
+    }
+    router.push(`/mock/${tenantSlug}/me/appointments/${target.id}`);
+  }
+
+  /** BR-29: a booking with a deposit goes to the payment page, keeping the hold it already has. */
+  function confirmBooking() {
+    if (!slot || !holdExpiresAt) return;
+    const next: BookingDraft = {
+      id: held?.tenantSlug === tenantSlug ? held.id : nextDraftId(),
+      tenantSlug,
+      newCustomer,
+      state: {
+        picks,
+        people,
+        chosenIds,
+        drafts,
+        serviceFor,
+        petChain,
+        staffByKey,
+        date,
+        name,
+        phone,
+        email,
+        slot,
+        holdExpiresAt,
+      } satisfies BookingState,
+      refs: items.map((it, i) => {
+        const fresh = drafts.find((d) => d.id === (it.subjectId ?? it.key));
+        const made = fresh ? draftSubject(fresh) : null;
+        return {
+          key: it.key,
+          ...(it.subjectId ? { subjectId: it.subjectId } : {}),
+          ...(it.label ? { label: it.label } : {}),
+          serviceId: it.service.id,
+          variantId: it.variant.id,
+          staffChoice: choices[i] ?? ANY_STAFF,
+          ...(made ? { newSubject: made } : {}),
+        };
+      }),
+      mode: group ? 'group' : chain ? 'chain' : 'single',
+      slot,
+      holdExpiresAt,
+      now,
+      contact: { name: name.trim(), phone: phoneE164 ?? '', email: email.trim() },
+      priceVnd: price,
+      depositVnd: deposit,
+      display: {
+        slotLine,
+        people: peopleNames,
+        plan: planItems,
+        day: formatDay(localDate(slot.startAt)),
+      },
+    };
+    if (deposit > 0n) {
+      commit(next, 'held');
+      setDraft(next);
+      router.push(`/mock/${tenantSlug}/book/pay`);
+      return;
+    }
+    const made = commit(next, 'confirmed');
+    // The code sent to their email is a session at this shop (BR-16, BR-17).
+    if (made.customerId) session.loginWithId(made.customerId);
+    setDraft(null);
+    setConfirmed(true);
   }
 
   const phoneE164 = normalizePhone(phone);
@@ -290,31 +723,91 @@ export function BookingFlow({
   const infoReady =
     name.trim().length > 0 && Boolean(phoneE164) && isEmail(email) && /^\d{6}$/.test(otp);
 
+  /** "Mochi 10:00 · Lucky 10:30", in the order they start. */
+  const comboLabel = (x: BookingSlot) =>
+    x.items
+      .map((it, i) => ({ label: items[i]?.label ?? '', at: it.startAt }))
+      .sort((a, b) => a.at.localeCompare(b.at))
+      .map((o) => `${o.label} ${formatTime(o.at)}`)
+      .join(' · ');
   const slotLine = slot
-    ? `${formatTime(slot.startAt)} · ${formatDay(localDate(slot.startAt))}`
+    ? slot.staggered
+      ? `${comboLabel(slot)} · ${formatDay(localDate(slot.startAt))}`
+      : `${formatTime(slot.startAt)}${chain ? `–${formatTime(slot.endAt)}` : ''} · ${formatDay(localDate(slot.startAt))}`
+    : '';
+  const peopleNames = slot
+    ? [...new Set(slot.items.map((it) => staffName(it.staffResourceId)))].join(', ')
     : '';
   const assignedStaff = slot
-    ? staffChoice === ANY_STAFF
-      ? `${staffName(slot.staffResourceId)}, xếp tự động`
-      : staffName(slot.staffResourceId)
+    ? choices.includes(ANY_STAFF)
+      ? `${peopleNames}, xếp tự động`
+      : peopleNames
     : '';
+  const itemTitle = (it: ChainItem) =>
+    it.label ? `${it.label} · ${it.service.name}` : `${it.service.name} · ${it.variant.name}`;
+  const serviceTitle = (it: ChainItem) => `${it.service.name} · ${it.variant.name}`;
 
-  const summary = variant && service && (
-    <div className="flex flex-col gap-(--space-1) rounded-(--radius-md) bg-(--fill-tonal) p-(--space-4)">
-      <div className="flex items-start justify-between gap-(--space-2)">
-        <span className="body font-semibold">
-          {service.name} · {variant.name}
+  /** "Lịch của bạn" (MH-13, MH-14): the time, the person and the waits of each item. */
+  const planItems: PlanItem[] = slot
+    ? slot.items.map((placed, i) => {
+        const it = items[i]!;
+        const previous = slot.items[i - 1];
+        const gap =
+          chain && previous
+            ? (Date.parse(placed.startAt) - Date.parse(previous.endAt)) / 60_000
+            : 0;
+        const segment = (kind: 'prep' | 'wait') => it.variant.segments.find((x) => x.kind === kind);
+        const wait = it.variant.segments
+          .filter((x) => x.kind === 'wait')
+          .reduce((m, x) => m + x.endMinute - x.startMinute, 0);
+        return {
+          id: it.key,
+          time: `${formatTime(placed.startAt)}–${formatTime(placed.endAt)}`,
+          title: itemTitle(it),
+          note: [
+            staffName(placed.staffResourceId),
+            gap > 0 ? `chờ ${gap} phút (${segment('prep')?.name.toLowerCase() ?? 'chuẩn bị'})` : '',
+            wait > 0 ? `có ${wait} phút ${segment('wait')?.name.toLowerCase() ?? 'chờ'}` : '',
+          ]
+            .filter(Boolean)
+            .join(' · '),
+        };
+      })
+    : [];
+  const plan = slot && (chain || group || rescheduling) && (
+    <ChainPlan
+      heading={`Lịch của bạn, ${formatDay(localDate(slot.startAt))}`}
+      items={planItems}
+      footer={`Xong khoảng ${formatTime(slot.endAt)}.`}
+    />
+  );
+
+  const summary = items.length > 0 && (
+    <div className="flex flex-col gap-(--space-2) rounded-(--radius-md) bg-(--fill-tonal) p-(--space-4)">
+      {items.map((it, i) => (
+        <div key={it.key} className="flex items-start justify-between gap-(--space-2)">
+          <div className="flex min-w-0 flex-col gap-(--space-1)">
+            <span className="body font-semibold">{itemTitle(it)}</span>
+            <span className="body-sm sp-num text-(--ink-muted)">
+              {it.label ? `${it.variant.name} · ` : ''}
+              {formatMinutes(duration(it.variant))} ·{' '}
+              {formatVnd(priceOf(it.variant, it.service.id, choices[i]))}
+            </span>
+          </div>
+          {i === 0 && step !== steps[0] && !confirmed && !rescheduling && (
+            <Button variant="ghost" size="sm" onClick={() => go(steps[0]!)}>
+              Đổi
+            </Button>
+          )}
+        </div>
+      ))}
+      {(chain || group) && (
+        <span className="body-sm sp-num border-t border-(--line) pt-(--space-2) text-(--ink-muted)">
+          Tổng {chain && `${formatMinutes(totalMinutes)} · `}
+          {formatVnd(price)}
+          {deposit > 0n && ` · cọc ${formatVnd(deposit)}`}
         </span>
-        {step !== 'service' && !confirmed && (
-          <Button variant="ghost" size="sm" onClick={() => go('service')}>
-            Đổi
-          </Button>
-        )}
-      </div>
-      <span className="body-sm sp-num text-(--ink-muted)">
-        {formatMinutes(duration(variant))} · {formatVnd(price)}
-      </span>
-      {subject && <span className="body-sm text-(--ink-muted)">Cho {subject.name}</span>}
+      )}
     </div>
   );
 
@@ -322,8 +815,76 @@ export function BookingFlow({
     <HoldBanner
       expiresAt={holdExpiresAt}
       now={now}
-      note={`${slotLine} · ${staffName(slot.staffResourceId)}`}
+      note={`${slotLine} · ${peopleNames}`}
       onExpire={releaseHold}
+    />
+  );
+
+  /** The picker's props: the same for the phone row and the desktop list. */
+  const staffPickerProps = {
+    noun: staffNoun,
+    options: staffOptions,
+    value: staffChoice,
+    onChange: chooseStaff,
+    anyEarliest: daySlots[0] ? formatTime(daySlots[0].startAt) : null,
+    anyPrice: items.length > 0 ? formatVnd(anyPrice) : undefined,
+    anyNote: chain ? `Tiệm xếp ${staffNoun.toLowerCase()} cho từng dịch vụ` : undefined,
+  };
+  const perServiceLink = chain && (
+    <button
+      type="button"
+      className="body-sm min-h-11 self-start border-0 bg-transparent p-0 font-medium text-(--accent) hover:underline"
+      onClick={() => setPerServiceOpen(true)}
+    >
+      Chọn {staffNoun.toLowerCase()} riêng cho từng dịch vụ
+    </button>
+  );
+  /** BR-19: each subject has its own person; the row opens the same sheet as a chain. */
+  const groupStaffCard = group && (
+    <div className="flex items-center justify-between gap-(--space-3) rounded-(--radius-lg) bg-(--surface-raised) px-(--space-4) py-(--space-3) shadow-[0_0_0_1px_var(--line)]">
+      <span className="flex min-w-0 flex-col">
+        <span className="body-sm text-(--ink-muted)">{staffNoun}</span>
+        <span className="body font-semibold">
+          {choices.every((c) => c === ANY_STAFF) ? 'Bất kỳ ai' : 'Chọn riêng từng ' + unit}
+        </span>
+        <span className="body-sm text-(--ink-muted)">
+          Mỗi {unit} một {staffNoun.toLowerCase()}, làm cùng lúc
+        </span>
+      </span>
+      <Button variant="ghost" size="sm" onClick={() => setPerServiceOpen(true)}>
+        Đổi
+      </Button>
+    </div>
+  );
+  const perServiceSheet = (chain || group) && (
+    <PerServiceStaff
+      open={perServiceOpen}
+      title={group ? `${staffNoun} cho từng ${unit}` : `${staffNoun} cho từng dịch vụ`}
+      note={
+        group
+          ? `Mỗi ${unit} một ${staffNoun.toLowerCase()} khác nhau. Chọn trùng người thì không có giờ cùng lúc.`
+          : 'Chọn người riêng thì giờ trống ít hơn, vì mỗi người phải rảnh đúng lúc dịch vụ của mình bắt đầu.'
+      }
+      onClose={() => setPerServiceOpen(false)}
+      onApply={applyPerService}
+      rows={items.map((it, i) => ({
+        id: it.key,
+        label: `${i + 1}. ${itemTitle(it)}`,
+        value: choices[i] ?? ANY_STAFF,
+        ...(i === 0 ? { help: 'Chọn đích danh thì giá theo cấp của người đó.' } : {}),
+        options: [
+          {
+            value: ANY_STAFF,
+            label: `Bất kỳ ai · ${formatVnd(priceOf(it.variant, it.service.id))}`,
+          },
+          ...staff
+            .filter((m) => m.profile.bookableOnline && m.skillServiceIds.includes(it.service.id))
+            .map((m) => ({
+              value: m.resourceId,
+              label: `${m.profile.displayName} · ${formatVnd(priceOf(it.variant, it.service.id, m.resourceId))}`,
+            })),
+        ],
+      }))}
     />
   );
 
@@ -331,146 +892,380 @@ export function BookingFlow({
   let body: ReactNode = null;
   let cta: Cta | null = null;
 
-  if (step === 'service') {
-    title = 'Chọn dịch vụ';
-    body = asksSubject ? (
-      <ServiceVariantList
-        name="Dịch vụ"
-        selected={serviceId}
-        onSelect={(id) => {
-          setServiceId(id);
-          setSlot(null);
-        }}
-        variants={services.map((s) => {
-          const min = s.variants.reduce(
-            (m, v) => (v.priceVnd < m ? v.priceVnd : m),
-            s.variants[0]!.priceVnd,
-          );
-          return {
-            id: s.id,
-            name: s.name,
-            meta: `Giá theo ${priceFactors(subjectSchema, s)}`,
-            price: `từ ${formatVnd(min)}`,
-          };
-        })}
-      />
-    ) : (
+  if (step === 'service' && people) {
+    title = 'Đi mấy người?';
+    body = (
       <div className="sp-stack">
-        {services.map((s) => (
-          <ServiceVariantList
-            key={s.id}
-            name={s.name}
-            selected={variantId}
-            onSelect={(id) => {
-              setServiceId(s.id);
-              setVariantId(id);
-              setSlot(null);
-            }}
-            variants={s.variants.map((v) => ({
-              id: v.id,
-              name: v.name,
-              meta: formatMinutes(duration(v)),
-              price: formatVnd(priceOf(v, s.id)),
-            }))}
+        <p className="body-sm m-0 text-(--ink-muted)">
+          Đặt chung cho bạn và người đi cùng, tối đa {MAX_PARTY} người.
+        </p>
+        <div className="flex items-center justify-between rounded-(--radius-lg) bg-(--surface-raised) px-(--space-4) py-(--space-3) shadow-[0_0_0_1px_var(--line)]">
+          <label htmlFor="party-size" className="body font-medium">
+            Số người
+          </label>
+          <QuantityInput
+            id="party-size"
+            noun="người"
+            value={people.length}
+            min={2}
+            max={MAX_PARTY}
+            onChange={setPartySize}
           />
-        ))}
+        </div>
+        {people.map((person, i) => {
+          const sv = services.find((x) => x.id === person.pick?.serviceId);
+          const v = sv?.variants.find((x) => x.id === person.pick?.variantId);
+          const open = changing.includes(person.id) || !sv || !v;
+          return (
+            <div key={person.id} className="sp-service gap-(--space-3) p-(--space-4)">
+              <span className="sp-service__name">{i === 0 ? 'Bạn' : `Người thứ ${i + 1}`}</span>
+              {i > 0 && (
+                <Field
+                  id={`person-${person.id}`}
+                  size="md"
+                  label="Tên người đi cùng"
+                  help="Để thợ gọi tên. Không cần số điện thoại."
+                >
+                  <input
+                    id={`person-${person.id}`}
+                    autoComplete="off"
+                    value={person.name}
+                    onChange={(e) => patchPerson(person.id, { name: e.target.value })}
+                  />
+                </Field>
+              )}
+              {open ? (
+                services.map((svc) => (
+                  <ServiceVariantList
+                    key={svc.id}
+                    groupName={`person-${person.id}`}
+                    name={svc.name}
+                    selected={person.pick?.serviceId === svc.id ? person.pick.variantId : null}
+                    onSelect={(vid) => pickForPerson(person.id, svc.id, vid)}
+                    variants={svc.variants.map((x) => ({
+                      id: x.id,
+                      name: x.name,
+                      meta: formatMinutes(duration(x)),
+                      price: formatVnd(priceOf(x, svc.id)),
+                    }))}
+                  />
+                ))
+              ) : (
+                <>
+                  <div className="flex items-baseline justify-between gap-(--space-3)">
+                    <span className="flex flex-col">
+                      <span className="body font-medium">
+                        {sv.name} · {v.name}
+                      </span>
+                      <span className="body-sm sp-num text-(--ink-muted)">
+                        {formatMinutes(duration(v))}
+                      </span>
+                    </span>
+                    <span className="body sp-num">{formatVnd(priceOf(v, sv.id))}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="self-start"
+                    onClick={() => setChanging((c) => [...c, person.id])}
+                  >
+                    Đổi dịch vụ
+                  </Button>
+                </>
+              )}
+            </div>
+          );
+        })}
+        <p className="body-sm m-0 text-(--ink-muted)">
+          Mỗi người một {staffNoun.toLowerCase()}, bắt đầu cùng giờ hoặc lệch nhau không quá 60
+          phút. Bạn nhận một email xác nhận cho cả nhóm.
+        </p>
+        <Button variant="ghost" className="self-start" onClick={endGroup}>
+          Chỉ mình tôi
+        </Button>
+      </div>
+    );
+    cta = {
+      title: complete ? formatVnd(anyPrice) : 'Chưa chọn đủ dịch vụ',
+      subtitle: complete
+        ? `${people.length} người · ${[...new Set(items.map((it) => it.service.name))].join(', ')}`
+        : undefined,
+      label: 'Tiếp tục',
+      disabled: !complete,
+      onClick: () => go('datetime'),
+    };
+  } else if (step === 'service') {
+    title = 'Chọn dịch vụ';
+    body = (
+      <div className="sp-stack">
+        <p className="body-sm m-0 text-(--ink-muted)">
+          Chọn được nhiều dịch vụ, làm lần lượt trong một lần đến.
+        </p>
+        <Button variant="ghost" className="self-start" onClick={startGroup}>
+          Đặt cho nhiều người
+        </Button>
+        {picks.length > 0 && (
+          <ServiceCart
+            max={MAX_CHAIN}
+            items={items.map((it, i) => ({
+              id: it.key,
+              name: it.service.name,
+              detail: `${it.variant.name} · ${formatMinutes(duration(it.variant))} · ${formatVnd(priceOf(it.variant, it.service.id, choices[i]))}`,
+            }))}
+            onMove={movePick}
+            onRemove={removePick}
+            note={
+              chain
+                ? `Dịch vụ sau bắt đầu ngay khi dịch vụ trước xong. Tổng ${formatMinutes(totalMinutes)}${deposit > 0n ? `, cọc ${formatVnd(deposit)}` : ''}.`
+                : ''
+            }
+          />
+        )}
+        {services.map((sv) => {
+          const chosen = picks.find((x) => x.serviceId === sv.id);
+          const wait = sv.variants[0]?.segments.find((x) => x.kind === 'wait');
+          return (
+            <ServiceVariantList
+              key={sv.id}
+              multiple
+              name={sv.name}
+              selected={chosen ? [chosen.variantId] : []}
+              onSelect={(id) => togglePick(sv.id, id)}
+              note={
+                wait
+                  ? `${sv.name} có thời gian ${wait.name.toLowerCase()}; ${staffNoun.toLowerCase()} làm cho khách khác trong lúc đó.`
+                  : undefined
+              }
+              variants={sv.variants.map((v) => {
+                const [low, high] = priceRange(v, pricedStaff(sv.id));
+                return {
+                  id: v.id,
+                  name: v.name,
+                  meta: [
+                    formatMinutes(duration(v)),
+                    v.depositVnd ? `cọc ${formatVnd(v.depositVnd)}` : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' · '),
+                  price: low === high ? formatVnd(low) : `từ ${formatVnd(low)}`,
+                  disabled: !chosen && picks.length >= MAX_CHAIN,
+                };
+              })}
+            />
+          );
+        })}
       </div>
     );
     cta = {
       title:
-        variant && service
-          ? `${service.name} · ${variant.name}`
-          : service
-            ? service.name
-            : 'Chưa chọn dịch vụ',
-      subtitle: variant ? formatVnd(price) : undefined,
+        items.length === 0
+          ? 'Chưa chọn dịch vụ'
+          : chain
+            ? formatVnd(anyPrice)
+            : serviceTitle(items[0]!),
+      subtitle: chain
+        ? `${items.length} dịch vụ · ${formatMinutes(totalMinutes)}`
+        : items[0]
+          ? formatVnd(anyPrice)
+          : undefined,
       label: 'Tiếp tục',
-      disabled: !service || (!asksSubject && !variant),
+      disabled: items.length === 0,
       onClick: () => go(steps[1]!),
     };
   }
 
-  if (step === 'subject' && service) {
-    const options = saved.filter((s) => service.variants.some((v) => matches(v, s)));
-    const newVariant = newSubject && service.variants.find((v) => matches(v, newSubject));
-    const factors = priceFactors(subjectSchema, service);
-    const touch = (key: string) => setSubjectTouched((t) => new Set(t).add(key));
-    const error = (key: string) => (subjectTouched.has(key) ? subjectCheck.errors[key] : undefined);
-    const setValue = (key: string, value: string) => setNewValues((v) => ({ ...v, [key]: value }));
+  if (step === 'subject') {
+    const factors = priceFactors(subjectSchema, services[0]!);
     title = vocabulary.subjectQuestion ?? '';
     body = (
       <div className="sp-stack">
-        <ServiceVariantList
-          name={service.name}
-          selected={subjectId}
-          onSelect={(id) => {
-            setSubjectId(id);
-            setSlot(null);
-          }}
-          variants={[
-            ...options.map((s) => {
-              const v = service.variants.find((x) => matches(x, s))!;
-              return {
-                id: s.id,
-                name: s.name,
-                meta: `${describeSubject(subjectSchema, s)} · ${v.name} · ${formatMinutes(duration(v))}`,
-                price: formatVnd(priceOf(v, service.id)),
-              };
-            }),
-            {
-              id: NEW_SUBJECT,
-              name: vocabulary.addSubject ?? '',
-              meta: newVariant
-                ? `${newSubject.name} · ${newVariant.name} · ${formatMinutes(duration(newVariant))}`
-                : askedFields(fixture),
-              price: newVariant ? formatVnd(priceOf(newVariant, service.id)) : '',
-            },
-          ]}
-        />
-        {subjectId === NEW_SUBJECT && (
-          <div className="sp-stack rounded-(--radius-lg) bg-(--surface-raised) p-(--space-4) shadow-[0_0_0_1px_var(--line)]">
-            <SubjectFields
-              idPrefix="subject"
-              schema={subjectSchema}
-              noun={subjectNoun}
-              nameExample={vocabulary.subjectExample}
-              name={newName}
-              values={newValues}
-              onName={setNewName}
-              onValue={setValue}
-              error={error}
-              touch={touch}
-            />
-            <p className="body-sm m-0 text-(--ink-muted)" aria-live="polite">
-              {newSubject
-                ? newVariant
-                  ? `Giá cho ${newSubject.name}: ${newVariant.name}, ${formatVnd(priceOf(newVariant, service.id))}.`
-                  : `${service.name} chưa nhận ${subjectNoun} này. Chọn dịch vụ khác.`
-                : `Giá theo ${factors}, hiện ngay khi nhập.`}
+        <p className="body-sm m-0 text-(--ink-muted)">
+          Chọn nhiều {subjectNoun} để đặt chung một lần, tối đa {MAX_PARTY}.
+        </p>
+        <div className="flex flex-col gap-(--space-2)" role="group" aria-label={subjectNoun}>
+          {saved.map((sv) => {
+            const checked = chosenIds.includes(sv.id);
+            return (
+              <label
+                key={sv.id}
+                className="sp-variant"
+                style={{ gridTemplateColumns: 'auto auto 1fr' }}
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  disabled={!checked && chosenIds.length >= MAX_PARTY}
+                  onChange={() => togglePet(sv.id)}
+                />
+                <span className="sp-avatar sp-avatar--sm" aria-hidden="true">
+                  {sv.name.charAt(0)}
+                </span>
+                <span className="flex flex-col">
+                  <span className="sp-variant__name">{sv.name}</span>
+                  <span className="sp-variant__meta">{describeSubject(subjectSchema, sv)}</span>
+                </span>
+              </label>
+            );
+          })}
+          {drafts.map((d) => {
+            const made = draftSubject(d);
+            return (
+              <div
+                key={d.id}
+                className="sp-stack rounded-(--radius-lg) bg-(--surface-raised) p-(--space-4) shadow-[0_0_0_1px_var(--line)]"
+              >
+                <SubjectFields
+                  idPrefix={`subject-${d.id}`}
+                  schema={subjectSchema}
+                  noun={subjectNoun}
+                  nameExample={vocabulary.subjectExample}
+                  name={d.name}
+                  values={d.values}
+                  onName={(v) => patchDraft(d.id, (x) => ({ ...x, name: v }))}
+                  onValue={(k, v) =>
+                    patchDraft(d.id, (x) => ({ ...x, values: { ...x.values, [k]: v } }))
+                  }
+                  error={(k) => (d.touched.includes(k) ? checks[d.id]!.errors[k] : undefined)}
+                  touch={(k) =>
+                    setDrafts((cur) =>
+                      cur.map((x) =>
+                        x.id === d.id && !x.touched.includes(k)
+                          ? { ...x, touched: [...x.touched, k] }
+                          : x,
+                      ),
+                    )
+                  }
+                />
+                <p className="body-sm m-0 text-(--ink-muted)" aria-live="polite">
+                  {made
+                    ? servicesFor(made).length > 0
+                      ? `Giá của ${made.name} hiện ở mục dịch vụ bên dưới.`
+                      : `Chưa có dịch vụ nào nhận ${subjectNoun} này.`
+                    : `Giá theo ${factors}, hiện ngay khi nhập.`}
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="self-start"
+                  onClick={() => removeDraft(d.id)}
+                >
+                  Bỏ {subjectNoun} này
+                </Button>
+              </div>
+            );
+          })}
+          <Button
+            variant="ghost"
+            className="h-12 justify-start"
+            disabled={chosenIds.length >= MAX_PARTY}
+            onClick={addDraft}
+          >
+            {vocabulary.addSubject}
+          </Button>
+        </div>
+        {onlyId && onlySubject && (
+          <section aria-labelledby="per-subject" className="sp-stack">
+            <h2 id="per-subject" className="heading m-0">
+              Dịch vụ cho {onlySubject.name}
+            </h2>
+            <p className="body-sm m-0 text-(--ink-muted)">
+              Chọn được nhiều dịch vụ, làm lần lượt trong một lần đến, tối đa {MAX_CHAIN}.
             </p>
-          </div>
+            {petChainIds.length > 0 && (
+              <ServiceCart
+                max={MAX_CHAIN}
+                items={items.map((it, i) => ({
+                  id: it.service.id,
+                  name: it.service.name,
+                  detail: `${it.variant.name} · ${formatMinutes(duration(it.variant))} · ${formatVnd(priceOf(it.variant, it.service.id, choices[i]))}`,
+                }))}
+                onMove={movePetService}
+                onRemove={(serviceId) => togglePetService(serviceId)}
+                note={
+                  chain
+                    ? `Dịch vụ sau bắt đầu ngay khi dịch vụ trước xong. Tổng ${formatMinutes(totalMinutes)}.`
+                    : ''
+                }
+              />
+            )}
+            <ServiceVariantList
+              multiple
+              name={onlySubject.name}
+              selected={petChainIds}
+              onSelect={togglePetService}
+              variants={servicesFor(onlySubject).map((sv) => {
+                const v = sv.variants.find((x) => matches(x, onlySubject))!;
+                return {
+                  id: sv.id,
+                  name: sv.name,
+                  meta: `${v.name} · ${formatMinutes(duration(v))}`,
+                  price: formatVnd(priceOf(v, sv.id)),
+                  disabled: !petChainIds.includes(sv.id) && petChainIds.length >= MAX_CHAIN,
+                };
+              })}
+            />
+            <p className="body-sm m-0 text-(--ink-muted)">
+              Giá theo {factors} của {onlySubject.name}. Đặt cho từ hai {subjectNoun} trở lên thì
+              mỗi {subjectNoun} một dịch vụ.
+            </p>
+          </section>
         )}
-        {subject && subjectId !== NEW_SUBJECT && (
-          <p className="body-sm m-0 text-(--ink-muted)">
-            Giá theo {factors} của {subject.name}.
-          </p>
+        {chosenIds.length > 1 && (
+          <section aria-labelledby="per-subject" className="sp-stack">
+            <h2 id="per-subject" className="heading m-0">
+              Dịch vụ cho từng {subjectNoun}
+            </h2>
+            {chosenIds.map((id) => {
+              const subject = subjectOf(id);
+              if (!subject) return null;
+              const current = serviceOf(subject, id);
+              return (
+                <ServiceVariantList
+                  key={id}
+                  groupName={`service-${id}`}
+                  name={subject.name}
+                  selected={current?.id ?? null}
+                  onSelect={(serviceId) => {
+                    setServiceFor((c) => ({ ...c, [id]: serviceId }));
+                    reset();
+                  }}
+                  variants={servicesFor(subject).map((sv) => {
+                    const v = sv.variants.find((x) => matches(x, subject))!;
+                    return {
+                      id: sv.id,
+                      name: sv.name,
+                      meta: `${v.name} · ${formatMinutes(duration(v))}`,
+                      price: formatVnd(priceOf(v, sv.id)),
+                    };
+                  })}
+                />
+              );
+            })}
+            <p className="body-sm m-0 text-(--ink-muted)">
+              Giá theo {factors} của từng {subjectNoun}. Mỗi {subjectNoun} một dịch vụ trong lần đặt
+              này.
+            </p>
+          </section>
         )}
       </div>
     );
     cta = {
-      title: subject && variant ? `${subject.name} · ${service.name}` : `Chưa chọn ${subjectNoun}`,
-      subtitle: variant ? formatVnd(price) : undefined,
+      title: complete ? formatVnd(anyPrice) : `Chưa chọn ${subjectNoun}`,
+      subtitle: complete
+        ? `${[...new Set(items.map((it) => it.label))].join(', ')} · ${[...new Set(items.map((it) => it.service.name))].join(', ')}`
+        : undefined,
       label: 'Tiếp tục',
-      disabled: !variant,
+      disabled: !complete,
       onClick: () => go('datetime'),
     };
   }
 
-  if (step === 'datetime' && service && variant) {
+  if (step === 'datetime' && items.length > 0) {
     const nextOpen = daySlots.length
       ? null
-      : week.filter((d) => d > date).find((d) => slotsFor(d, staffChoice).length > 0);
-    title = 'Chọn ngày giờ';
+      : week.filter((d) => d > date).find((d) => slotsFor(d, choices).length > 0);
+    const togetherHere = daySlots.filter((x) => partOf(x) === shownPart);
+    title = rescheduling ? 'Chọn giờ mới' : 'Chọn ngày giờ';
     body = (
       <div className="flex flex-col gap-(--space-5)">
         {notice && (
@@ -479,17 +1274,20 @@ export function BookingFlow({
           </p>
         )}
         <div className="min-[900px]:hidden">{summary}</div>
-        <div className="min-[900px]:hidden">
-          <StaffPicker
-            noun={staffNoun}
-            options={staffOptions}
-            value={staffChoice}
-            onChange={chooseStaff}
-            context={`${staffNoun} làm được ${service.name} · ${formatDay(date)}`}
-            anyEarliest={daySlots[0] ? formatTime(daySlots[0].startAt) : null}
-            anyPrice={variant && service ? formatVnd(priceOf(variant, service.id)) : undefined}
-          />
-        </div>
+        {rescheduling ? null : group ? (
+          <div className="min-[900px]:hidden">{groupStaffCard}</div>
+        ) : (
+          <>
+            <div className="min-[900px]:hidden">
+              <StaffPicker
+                {...staffPickerProps}
+                mixed={staffChoice === MIXED ? { title: 'Theo từng dịch vụ' } : undefined}
+                context={`${staffNoun} làm được ${items.map((it) => it.service.name).join(', ')} · ${formatDay(date)}`}
+              />
+            </div>
+            <div className="flex flex-col min-[900px]:hidden">{perServiceLink}</div>
+          </>
+        )}
         <div className="flex flex-col gap-(--space-2)">
           <span className="label text-(--ink-muted)">Tháng {Number(date.slice(5, 7))}</span>
           <DateStrip
@@ -502,7 +1300,7 @@ export function BookingFlow({
             }}
           />
         </div>
-        {daySlots.length > 0 && (
+        {Object.values(partCounts).some((n) => n > 0) && (
           <SegmentedTabs
             label="Buổi"
             size="lg"
@@ -518,41 +1316,92 @@ export function BookingFlow({
             }))}
           />
         )}
-        <div id="booking-slots" role="tabpanel">
-          <SlotGrid
-            groups={[
-              {
-                label: `Buổi ${PARTS.find((p) => p.value === shownPart)?.label.toLowerCase()}`,
-                slots: daySlots
-                  .filter((s) => partOf(s) === shownPart)
-                  .map((s) => ({ value: s.startAt, label: formatTime(s.startAt) })),
-              },
-            ]}
-            selected={slot?.startAt ?? null}
-            onSelect={pickSlot}
-            emptyMessage={
-              nextOpen
-                ? `Hết giờ trống ngày này. Ngày gần nhất còn trống: ${formatDay(nextOpen)}.`
-                : 'Hết giờ trống trong 7 ngày tới. Chọn người khác?'
-            }
-          />
+        <div id="booking-slots" role="tabpanel" className="flex flex-col gap-(--space-4)">
+          {(!group || togetherHere.length > 0 || partCounts[shownPart] === 0) && (
+            <SlotGrid
+              groups={[
+                {
+                  label: group
+                    ? `${items.length} ${unit} cùng giờ`
+                    : `Buổi ${PARTS.find((x) => x.value === shownPart)?.label.toLowerCase()}`,
+                  slots: togetherHere.map((x) => ({
+                    value: x.startAt,
+                    label: formatTime(x.startAt),
+                  })),
+                },
+              ]}
+              selected={slot && !slot.staggered ? slot.startAt : null}
+              onSelect={pickSlot}
+              emptyMessage={
+                nextOpen
+                  ? `Hết giờ trống ngày này. Ngày gần nhất còn trống: ${formatDay(nextOpen)}.`
+                  : 'Hết giờ trống trong 7 ngày tới. Chọn người khác?'
+              }
+            />
+          )}
+          {group && staggeredIn(shownPart).length > 0 && (
+            <section className="flex flex-col gap-(--space-2)" aria-labelledby="staggered-title">
+              <h2 id="staggered-title" className="body m-0 font-semibold">
+                Giờ lệch nhau
+              </h2>
+              <p className="body-sm m-0 text-(--ink-muted)">
+                {togetherHere.length > 0
+                  ? 'Hoặc để mỗi'
+                  : `Không đủ chỗ cho ${items.length} ${unit} cùng lúc buổi này. Mỗi`}{' '}
+                {unit} bắt đầu một lúc, cách nhau không quá 60 phút.
+              </p>
+              <div
+                className="flex flex-col gap-(--space-2)"
+                role="radiogroup"
+                aria-label="Giờ lệch nhau"
+              >
+                {staggeredIn(shownPart).map((x) => (
+                  <label key={slotKey(x)} className="sp-variant">
+                    <input
+                      type="radio"
+                      name="combo"
+                      checked={slot ? slotKey(slot) === slotKey(x) : false}
+                      onChange={() => pickBookingSlot(x)}
+                    />
+                    <span className="flex flex-col">
+                      <span className="sp-variant__name sp-num">{comboLabel(x)}</span>
+                      <span className="sp-variant__meta sp-num">
+                        Xong lúc {formatTime(x.endAt)}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
+        {plan}
         <p className="body-sm m-0 text-(--ink-muted)">
-          {variant.segments.some((s) => s.kind === 'wait') && 'Thời lượng đã gồm thời gian chờ. '}
+          {items.some((it) => it.variant.segments.some((x) => x.kind === 'wait')) &&
+            'Thời lượng đã gồm thời gian chờ. '}
           Giờ theo giờ Việt Nam.
         </p>
+        {perServiceSheet}
       </div>
     );
     cta = {
-      title: slot ? slotLine : 'Chưa chọn giờ',
+      title: !slot
+        ? 'Chưa chọn giờ'
+        : chain || group
+          ? `${formatVnd(price)}${deposit > 0n ? ` · cọc ${formatVnd(deposit)}` : ''}`
+          : slotLine,
       subtitle: slot
-        ? staffChoice === ANY_STAFF
-          ? `${staffNoun} được xếp tự động`
-          : staffName(slot.staffResourceId)
+        ? group
+          ? slotLine
+          : chain
+            ? `${slotLine} · ${peopleNames}`
+            : choices.includes(ANY_STAFF)
+              ? `${staffNoun} được xếp tự động`
+              : peopleNames
         : undefined,
       label: 'Tiếp tục',
       disabled: !slot,
-      onClick: () => go('info'),
+      onClick: () => go(steps[stepIndex + 1]!),
     };
   }
 
@@ -633,20 +1482,37 @@ export function BookingFlow({
     };
   }
 
-  if (step === 'confirm' && service && variant && slot) {
-    title = confirmed ? 'Đã đặt lịch' : 'Xác nhận';
-    const rows: [string, string][] = [
-      ['Dịch vụ', `${service.name} · ${variant.name}`],
-      ...(subject ? [['Cho', subject.name] as [string, string]] : []),
-      ['Thời gian', `${slotLine} · ${formatMinutes(duration(variant))}`],
-      [staffNoun, assignedStaff],
-      ['Liên hệ', `${name} · ${phoneE164 ? formatPhone(phoneE164) : ''} · ${email.trim()}`],
-      ['Giá', formatVnd(price)],
-      ...(variant.depositVnd
-        ? [['Đặt cọc', formatVnd(variant.depositVnd)] as [string, string]]
-        : []),
+  if (step === 'confirm' && items.length > 0 && variant && slot) {
+    title = rescheduling ? 'Xác nhận đổi giờ' : confirmed ? 'Đã đặt lịch' : 'Xác nhận';
+    const contact: [string, string] = [
+      'Liên hệ',
+      `${name} · ${phoneE164 ? formatPhone(phoneE164) : ''} · ${email.trim()}`,
     ];
-    const end = addMinutes(slot.startAt, duration(variant));
+    const rows: [string, string][] = target
+      ? [
+          [
+            'Giờ hiện tại',
+            `${formatTime(target.startAt)}, ${formatDay(localDate(target.startAt))}`,
+          ],
+          ['Giờ mới', slotLine],
+          ['Giá', `${formatVnd(price)} · giữ giá như lúc đặt`],
+        ]
+      : chain || group
+        ? [
+            contact,
+            ['Giá', formatVnd(price)],
+            ...(deposit > 0n ? [['Đặt cọc', formatVnd(deposit)] as [string, string]] : []),
+          ]
+        : [
+            ['Dịch vụ', serviceTitle(items[0]!)],
+            ...(items[0]!.label ? [['Cho', items[0]!.label] as [string, string]] : []),
+            ['Thời gian', `${slotLine} · ${formatMinutes(duration(variant))}`],
+            [staffNoun, assignedStaff],
+            contact,
+            ['Giá', formatVnd(price)],
+            ...(deposit > 0n ? [['Đặt cọc', formatVnd(deposit)] as [string, string]] : []),
+          ];
+    const end = slot.endAt;
     body = (
       <div className="sp-stack">
         {hold}
@@ -658,6 +1524,7 @@ export function BookingFlow({
             </span>
           </div>
         )}
+        {plan}
         <dl className="m-0 flex flex-col rounded-(--radius-lg) bg-(--surface-raised) px-(--space-4) shadow-[0_0_0_1px_var(--line)]">
           {rows.map(([k, v]) => (
             <div
@@ -669,10 +1536,10 @@ export function BookingFlow({
             </div>
           ))}
         </dl>
-        {variant.depositVnd && !confirmed && (
+        {deposit > 0n && !confirmed && (
           <p className="body-sm m-0 text-(--ink-muted)">
-            Đặt cọc {formatVnd(variant.depositVnd)} để giữ lịch, trừ vào tiền dịch vụ. Hủy miễn phí
-            trước 24 giờ.
+            Đặt cọc {formatVnd(deposit)} để giữ lịch, trừ vào tiền dịch vụ. Hủy miễn phí trước 24
+            giờ.
           </p>
         )}
         {confirmed && (
@@ -684,25 +1551,21 @@ export function BookingFlow({
                 downloadIcs({
                   start: slot.startAt,
                   end,
-                  title: `${service.name} · ${tenant.name}`,
+                  title: `${items.map((it) => it.service.name).join(', ')} · ${tenant.name}`,
                   location: branch.address,
                 })
               }
             >
               Thêm vào lịch điện thoại
             </Button>
-            <Button
-              size="lg"
-              block
-              onClick={() => toast({ text: 'Xem lịch hẹn của bạn: chưa có trong mock.' })}
-            >
+            <Button size="lg" block onClick={() => router.push(`/mock/${tenantSlug}/me`)}>
               Xem lịch hẹn của bạn
             </Button>
             <Button
               variant="ghost"
               size="lg"
               block
-              onClick={() => toast({ text: `Trang ${tenant.name}: chưa có trong mock.` })}
+              onClick={() => router.push(`/mock/${tenantSlug}`)}
             >
               Về trang {tenant.name}
             </Button>
@@ -712,13 +1575,23 @@ export function BookingFlow({
     );
     cta = confirmed
       ? null
-      : {
-          title: variant.depositVnd ? `Cọc ${formatVnd(variant.depositVnd)}` : formatVnd(price),
-          subtitle: slotLine,
-          label: 'Xác nhận đặt lịch',
-          disabled: !bookingOpen,
-          onClick: () => setConfirmed(true),
-        };
+      : target
+        ? {
+            title: slotLine,
+            subtitle: answering
+              ? 'Không tính vào số lần đổi giờ'
+              : `Còn ${Math.max(0, fixture.template.defaultPolicies.maxReschedules - (target.selfChanges ?? 0) - 1)} lần đổi sau lần này`,
+            label: answering ? 'Gửi giờ này cho tiệm' : 'Xác nhận đổi giờ',
+            disabled: false,
+            onClick: confirmReschedule,
+          }
+        : {
+            title: deposit > 0n ? `Cọc ${formatVnd(deposit)}` : formatVnd(price),
+            subtitle: slotLine,
+            label: 'Xác nhận đặt lịch',
+            disabled: !bookingOpen,
+            onClick: confirmBooking,
+          };
   }
 
   const ctaButton = (c: Cta, block = false) => (
@@ -753,7 +1626,7 @@ export function BookingFlow({
             variant="ghost"
             aria-label="Quay lại"
             className="size-11! rounded-(--radius-pill)! p-0!"
-            disabled={stepIndex === 0}
+            disabled={stepIndex === 0 && !rescheduling}
             onClick={back}
           >
             <ArrowLeft size={20} aria-hidden="true" />
@@ -799,25 +1672,24 @@ export function BookingFlow({
             <span className="body-sm text-(--ink-muted)">{branch.address}</span>
           </div>
           {summary}
-          {step === 'datetime' && variant && (
+          {step === 'datetime' && group && !rescheduling && groupStaffCard}
+          {step === 'datetime' && items.length > 0 && !group && !rescheduling && (
             <div className="flex flex-col gap-(--space-2)">
               <span className="label text-(--ink-muted)">{staffNoun}</span>
-              <StaffOptionList
-                compact
-                noun={staffNoun}
-                options={staffOptions}
-                value={staffChoice}
-                onChange={chooseStaff}
-                anyEarliest={daySlots[0] ? formatTime(daySlots[0].startAt) : null}
-                anyPrice={variant && service ? formatVnd(priceOf(variant, service.id)) : undefined}
-              />
+              <StaffOptionList compact {...staffPickerProps} />
+              {staffChoice === MIXED && (
+                <span className="body-sm text-(--ink-muted)">Đang chọn theo từng dịch vụ.</span>
+              )}
+              {perServiceLink}
             </div>
           )}
           {step !== 'datetime' && slot && (
             <div className="flex flex-col gap-0.5">
               <span className="label text-(--ink-muted)">Thời gian</span>
               <span className="body sp-num">{slotLine}</span>
-              <span className="body-sm text-(--ink-muted)">{assignedStaff}</span>
+              <span className="body-sm text-(--ink-muted)">
+                {chain || group ? peopleNames : assignedStaff}
+              </span>
             </div>
           )}
           {cta && (

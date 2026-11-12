@@ -141,18 +141,51 @@ export interface Service {
   variants: ServiceVariant[];
 }
 
+export interface CustomerPackage {
+  id: string;
+  name: string;
+  totalSessions: number;
+  usedSessions: number;
+  remainingSessions: number;
+  expiresAt: string;
+  serviceVariantId?: string;
+  note?: string;
+}
+
+export interface WalletTransaction {
+  id: string;
+  date: string;
+  description: string;
+  amountText: string;
+  isPositive?: boolean;
+}
+
+export interface CustomerWallet {
+  balanceVnd: bigint;
+  realVnd: bigint;
+  bonusVnd: bigint;
+  history: WalletTransaction[];
+}
+
 export interface Customer {
   id: string;
   tenantId: string;
   name: string;
   /** E.164, normalized (BR-61). */
   phone: string;
+  email?: string;
   /** How staff address them on the calendar, e.g. "Chị Hà". */
   callName: string;
   /** Visits so far, including today. */
   visitCount?: number;
   /** Internal note; never shown to the customer (BR-62). */
   note?: string;
+  packages?: CustomerPackage[];
+  wallet?: CustomerWallet;
+  /** Agreed to email offers, a choice of its own; off by default (BR-64). */
+  marketingOptIn?: boolean;
+  /** ISO 8601, UTC: when they agreed to the processing of their data, at the first booking (BR-64). */
+  consentAt?: string;
 }
 
 export interface ServedSubject {
@@ -163,6 +196,8 @@ export interface ServedSubject {
   kind: 'self' | 'other';
   name: string;
   attributes: Record<string, string>;
+  /** A line for the staff written by the customer, e.g. "Sợ máy sấy to, cần dỗ." */
+  note?: string;
 }
 
 export type AppointmentStatus =
@@ -222,6 +257,8 @@ export interface Appointment {
   /** Paid in full; a completed appointment without it waits for payment. */
   settled?: boolean;
   note?: string;
+  /** Times the customer moved it by themselves; capped by BR-08 (answering a question of the shop does not count). */
+  selfChanges?: number;
 }
 
 /** One block of a working day of one person; a day may have several (BR-35). */
@@ -250,7 +287,11 @@ export type LeaveHandling =
   /** Another time, with a person. */
   | { kind: 'move'; staffResourceId: string; startAt: string }
   /** Cancelled and the customer told; the deposit is refunded in full (BR-24). */
-  | { kind: 'cancel' };
+  | { kind: 'cancel' }
+  /** The customer answered the question by choosing another time; the booking is already there. */
+  | { kind: 'rescheduled'; staffResourceId: string; startAt: string }
+  /** The customer cancelled the booking by themselves while the question was open. */
+  | { kind: 'customer_cancelled' };
 
 /** A request to be off, whole days or a few hours of one day. */
 export interface StaffTimeOff {

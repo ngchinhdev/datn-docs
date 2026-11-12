@@ -88,6 +88,8 @@ const regulars: Customer[] = [
     name: 'Phạm Khánh Linh',
     callName: 'Chị Linh',
     phone: '+84909111222',
+    email: 'linh@example.com',
+    consentAt: '2026-10-12T03:00:00Z',
   },
   { id: 'paw-c-duc', tenantId, name: 'Võ Minh Đức', callName: 'Anh Đức', phone: '+84938333444' },
 ];
@@ -108,6 +110,7 @@ const regularSubjects: ServedSubject[] = [
     kind: 'other',
     name: 'Lucky',
     attributes: { species: 'dog', breed: 'Corgi', weightKg: '12' },
+    note: 'Sợ máy sấy to, cần dỗ.',
   },
   {
     id: 'paw-s-bong',
@@ -379,6 +382,14 @@ const ahead: Appointment[] = [
       subjectId: 'paw-s-ngan-1',
       resourceIds: ['paw-vy', 'paw-bath-1', 'paw-dryer-1'],
       staffChoice: 'chosen',
+    },
+  ]),
+  // Saturday 14/11: Lucky has an appointment so it cannot be deleted in MH-19.
+  appointment('paw-a-lucky-14', 'paw-c-linh', atDay('2026-11-14', '10:00'), 'confirmed', [
+    {
+      variantId: 'paw-bath-large',
+      subjectId: 'paw-s-lucky',
+      resourceIds: ['paw-khoa', 'paw-bath-1', 'paw-dryer-1'],
     },
   ]),
 ];

@@ -11,7 +11,7 @@ import {
   type StaffTimeOff,
 } from '@/mock/fixtures';
 
-interface ScheduleStore {
+export interface ScheduleStore {
   appointments: Appointment[];
   /** Replaces one appointment by id. */
   replaceAppointment: (appt: Appointment) => void;
@@ -22,8 +22,10 @@ interface ScheduleStore {
   servedSubjects: ServedSubject[];
   /** A customer or pet made while creating an appointment; `remove*` is the undo. */
   addCustomer: (customer: Customer) => void;
+  replaceCustomer: (customer: Customer) => void;
   removeCustomer: (id: string) => void;
   addSubject: (subject: ServedSubject) => void;
+  replaceSubject: (subject: ServedSubject) => void;
   removeSubject: (id: string) => void;
   shifts: Shift[];
   setShifts: (shifts: Shift[]) => void;
@@ -41,7 +43,66 @@ interface ScheduleStore {
   setStaffSeesCustomerPhone: (value: boolean) => void;
 }
 
+interface TenantScheduleData {
+  appointments: Appointment[];
+  customers: Customer[];
+  servedSubjects: ServedSubject[];
+  shifts: Shift[];
+  leaves: StaffTimeOff[];
+  requeues: Requeue[];
+  staffSeesCustomerPhone: boolean;
+}
+
+interface ScheduleRootContextValue {
+  tenants: Record<string, TenantScheduleData>;
+  updateTenant: (
+    tenantSlug: string,
+    updater: (prev: TenantScheduleData) => TenantScheduleData,
+  ) => void;
+}
+
+const ScheduleRootContext = createContext<ScheduleRootContextValue | null>(null);
 const ScheduleContext = createContext<ScheduleStore | null>(null);
+
+function initialTenantData(slug: string): TenantScheduleData {
+  const fixture = tenantFixtures.find((f) => f.tenant.slug === slug) ?? tenantFixtures[0]!;
+  return {
+    appointments: fixture.appointments,
+    customers: fixture.customers,
+    servedSubjects: fixture.servedSubjects,
+    shifts: fixture.shifts,
+    leaves: fixture.staffTimeOff,
+    requeues: [],
+    staffSeesCustomerPhone: fixture.staffSeesCustomerPhone,
+  };
+}
+
+export function ScheduleRootProvider({ children }: { children: ReactNode }) {
+  const [tenants, setTenants] = useState<Record<string, TenantScheduleData>>(() => {
+    const init: Record<string, TenantScheduleData> = {};
+    for (const f of tenantFixtures) {
+      init[f.tenant.slug] = initialTenantData(f.tenant.slug);
+    }
+    return init;
+  });
+
+  const updateTenant = useCallback(
+    (tenantSlug: string, updater: (prev: TenantScheduleData) => TenantScheduleData) => {
+      setTenants((prev) => {
+        const current = prev[tenantSlug] ?? initialTenantData(tenantSlug);
+        return {
+          ...prev,
+          [tenantSlug]: updater(current),
+        };
+      });
+    },
+    [],
+  );
+
+  const value = useMemo(() => ({ tenants, updateTenant }), [tenants, updateTenant]);
+
+  return <ScheduleRootContext.Provider value={value}>{children}</ScheduleRootContext.Provider>;
+}
 
 /**
  * The calendar of the tenant being viewed, so a change on one screen shows on every other: nothing
@@ -54,100 +115,221 @@ export function ScheduleStoreProvider({
   tenantSlug: string;
   children: ReactNode;
 }) {
-  const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
-  const [appointments, setAppointments] = useState<Appointment[]>(fixture.appointments);
-  const [customers, setCustomers] = useState<Customer[]>(fixture.customers);
-  const [servedSubjects, setSubjects] = useState<ServedSubject[]>(fixture.servedSubjects);
-  const [shifts, setShifts] = useState<Shift[]>(fixture.shifts);
-  const [leaves, setLeaves] = useState<StaffTimeOff[]>(fixture.staffTimeOff);
-  const [requeues, setRequeues] = useState<Requeue[]>([]);
-  const [staffSeesCustomerPhone, setStaffSeesCustomerPhone] = useState(
-    fixture.staffSeesCustomerPhone,
+  const root = useContext(ScheduleRootContext);
+
+  // Fallback local state if ScheduleRootProvider is not present above
+  const [localData, setLocalData] = useState<TenantScheduleData>(() =>
+    initialTenantData(tenantSlug),
   );
 
-  const replaceAppointment = useCallback((appt: Appointment) => {
-    setAppointments((list) => list.map((a) => (a.id === appt.id ? appt : a)));
-  }, []);
-  const addAppointment = useCallback((appt: Appointment) => {
-    setAppointments((list) => [...list, appt]);
-  }, []);
-  const removeAppointment = useCallback((id: string) => {
-    setAppointments((list) => list.filter((a) => a.id !== id));
-  }, []);
-  const addLeaves = useCallback((added: StaffTimeOff[]) => {
-    setLeaves((list) => [...list, ...added]);
-  }, []);
-  const replaceLeave = useCallback((leave: StaffTimeOff) => {
-    setLeaves((list) => list.map((l) => (l.id === leave.id ? leave : l)));
-  }, []);
-  const addRequeues = useCallback((added: Requeue[]) => {
-    setRequeues((list) => [...list, ...added]);
-  }, []);
-  const replaceRequeue = useCallback((requeue: Requeue) => {
-    setRequeues((list) => list.map((r) => (r.id === requeue.id ? requeue : r)));
-  }, []);
-  const removeRequeue = useCallback((id: string) => {
-    setRequeues((list) => list.filter((r) => r.id !== id));
-  }, []);
-  const addCustomer = useCallback((customer: Customer) => {
-    setCustomers((list) => [...list, customer]);
-  }, []);
-  const removeCustomer = useCallback((id: string) => {
-    setCustomers((list) => list.filter((c) => c.id !== id));
-  }, []);
-  const addSubject = useCallback((subject: ServedSubject) => {
-    setSubjects((list) => [...list, subject]);
-  }, []);
-  const removeSubject = useCallback((id: string) => {
-    setSubjects((list) => list.filter((s) => s.id !== id));
-  }, []);
+  const data = root ? (root.tenants[tenantSlug] ?? initialTenantData(tenantSlug)) : localData;
+
+  const update = useCallback(
+    (updater: (prev: TenantScheduleData) => TenantScheduleData) => {
+      if (root) {
+        root.updateTenant(tenantSlug, updater);
+      } else {
+        setLocalData(updater);
+      }
+    },
+    [root, tenantSlug],
+  );
+
+  const replaceAppointment = useCallback(
+    (appt: Appointment) => {
+      update((prev) => ({
+        ...prev,
+        appointments: prev.appointments.map((a) => (a.id === appt.id ? appt : a)),
+      }));
+    },
+    [update],
+  );
+
+  const addAppointment = useCallback(
+    (appt: Appointment) => {
+      update((prev) => ({
+        ...prev,
+        appointments: [...prev.appointments, appt],
+      }));
+    },
+    [update],
+  );
+
+  const removeAppointment = useCallback(
+    (id: string) => {
+      update((prev) => ({
+        ...prev,
+        appointments: prev.appointments.filter((a) => a.id !== id),
+      }));
+    },
+    [update],
+  );
+
+  const addCustomer = useCallback(
+    (customer: Customer) => {
+      update((prev) => ({
+        ...prev,
+        customers: [...prev.customers, customer],
+      }));
+    },
+    [update],
+  );
+
+  const replaceCustomer = useCallback(
+    (customer: Customer) => {
+      update((prev) => ({
+        ...prev,
+        customers: prev.customers.map((c) => (c.id === customer.id ? customer : c)),
+      }));
+    },
+    [update],
+  );
+
+  const removeCustomer = useCallback(
+    (id: string) => {
+      update((prev) => ({
+        ...prev,
+        customers: prev.customers.filter((c) => c.id !== id),
+      }));
+    },
+    [update],
+  );
+
+  const addSubject = useCallback(
+    (subject: ServedSubject) => {
+      update((prev) => ({
+        ...prev,
+        servedSubjects: [...prev.servedSubjects, subject],
+      }));
+    },
+    [update],
+  );
+
+  const replaceSubject = useCallback(
+    (subject: ServedSubject) => {
+      update((prev) => ({
+        ...prev,
+        servedSubjects: prev.servedSubjects.map((s) => (s.id === subject.id ? subject : s)),
+      }));
+    },
+    [update],
+  );
+
+  const removeSubject = useCallback(
+    (id: string) => {
+      update((prev) => ({
+        ...prev,
+        servedSubjects: prev.servedSubjects.filter((s) => s.id !== id),
+      }));
+    },
+    [update],
+  );
+
+  const setShifts = useCallback(
+    (shifts: Shift[]) => {
+      update((prev) => ({ ...prev, shifts }));
+    },
+    [update],
+  );
+
+  const addLeaves = useCallback(
+    (added: StaffTimeOff[]) => {
+      update((prev) => ({ ...prev, leaves: [...prev.leaves, ...added] }));
+    },
+    [update],
+  );
+
+  const replaceLeave = useCallback(
+    (leave: StaffTimeOff) => {
+      update((prev) => ({
+        ...prev,
+        leaves: prev.leaves.map((l) => (l.id === leave.id ? leave : l)),
+      }));
+    },
+    [update],
+  );
+
+  const addRequeues = useCallback(
+    (added: Requeue[]) => {
+      update((prev) => ({ ...prev, requeues: [...prev.requeues, ...added] }));
+    },
+    [update],
+  );
+
+  const replaceRequeue = useCallback(
+    (requeue: Requeue) => {
+      update((prev) => ({
+        ...prev,
+        requeues: prev.requeues.map((r) => (r.id === requeue.id ? requeue : r)),
+      }));
+    },
+    [update],
+  );
+
+  const removeRequeue = useCallback(
+    (id: string) => {
+      update((prev) => ({
+        ...prev,
+        requeues: prev.requeues.filter((r) => r.id !== id),
+      }));
+    },
+    [update],
+  );
+
+  const setStaffSeesCustomerPhone = useCallback(
+    (value: boolean) => {
+      update((prev) => ({ ...prev, staffSeesCustomerPhone: value }));
+    },
+    [update],
+  );
 
   const value = useMemo(
     () => ({
-      appointments,
+      appointments: data.appointments,
       replaceAppointment,
       addAppointment,
       removeAppointment,
-      customers,
-      servedSubjects,
+      customers: data.customers,
+      servedSubjects: data.servedSubjects,
       addCustomer,
+      replaceCustomer,
       removeCustomer,
       addSubject,
+      replaceSubject,
       removeSubject,
-      shifts,
+      shifts: data.shifts,
       setShifts,
-      leaves,
+      leaves: data.leaves,
       addLeaves,
       replaceLeave,
-      requeues,
+      requeues: data.requeues,
       addRequeues,
       replaceRequeue,
       removeRequeue,
-      staffSeesCustomerPhone,
+      staffSeesCustomerPhone: data.staffSeesCustomerPhone,
       setStaffSeesCustomerPhone,
     }),
     [
-      appointments,
+      data,
       replaceAppointment,
       addAppointment,
       removeAppointment,
-      customers,
-      servedSubjects,
       addCustomer,
+      replaceCustomer,
       removeCustomer,
       addSubject,
+      replaceSubject,
       removeSubject,
-      shifts,
-      leaves,
+      setShifts,
       addLeaves,
       replaceLeave,
-      requeues,
       addRequeues,
       replaceRequeue,
       removeRequeue,
-      staffSeesCustomerPhone,
+      setStaffSeesCustomerPhone,
     ],
   );
+
   return <ScheduleContext.Provider value={value}>{children}</ScheduleContext.Provider>;
 }
 

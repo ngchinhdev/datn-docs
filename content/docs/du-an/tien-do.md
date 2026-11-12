@@ -7,7 +7,33 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 12/11/2026: mock phía khách (Bước 12, đợt B)
+
+- **Đã làm** (nhánh `feat/mock-customer`, mỗi mục 12a–12h một commit):
+  - Trang cơ sở MH-11; nhiều dịch vụ MH-13 (`findChainSlots`); đặt nhóm MH-14 (`findGroupSlots`: cùng giờ, giờ lệch không quá 60 phút).
+  - Trả cọc MH-15: đếm ngược giữ chỗ liền mạch, ba kết quả (kịp, muộn còn trống, muộn đã mất kèm hoàn đủ và ba giờ gần nhất).
+  - Đăng nhập MH-16, lịch hẹn MH-17, chi tiết MH-18 (đồng ý đổi người, chọn lại giờ, đổi giờ, hủy theo BR-23); bé MH-19, gói và ví MH-20, thông tin MH-21; email MH-23 (tám mẫu).
+  - Lịch của khách và lịch lễ tân dùng chung một store: khách đồng ý đổi người thì MH-40 hiện "Khách đã đồng ý".
+  - `check:availability` thêm: chuỗi, nhóm (đều có đối chứng vét cạn), BR-29, BR-08, BR-23, BR-33, email.
+  - axe 0 serious/critical trên 40 màn và trạng thái, hai theme, 390px và 1280px; không cuộn ngang ở 390px.
+- **Sửa trên đường làm:** trang cơ sở thiếu `StaffStoreProvider` nên lỗi ở client; nút header của trang cơ sở tràn 9px ở 390px (Pawpaw).
+- **Tự quyết:**
+  - Pawpaw bỏ bước "Dịch vụ" riêng; bước "Cho bé nào?" chọn cả bé lẫn dịch vụ (theo bảng MH-14, 4 bước).
+  - Trang trả cọc thêm một ô tick "có khách khác đặt giờ này" để có đủ ba kết quả với hai nút giả lập.
+  - Lưu ý cho nhân viên của bé nằm ngoài schema ngành (`ServedSubject.note`); lỗi cân nặng lấy từ `checkSubject` ("lớn hơn 0"), chưa có khoảng 0,5–80 kg như bảng vẽ.
+  - "Chọn lại giờ" dời lịch ngay, không tăng số lần tự đổi; dòng của lịch trong đơn nghỉ hoặc "Cần xếp lại" thành cách xử lý mới "khách đã chọn giờ mới" (đã xử lý, duyệt bỏ qua). Khách hủy lịch đang chờ trả lời thì dòng đó thành "khách đã hủy".
+  - Giờ trống phía khách áp BR-06 theo chính sách của cơ sở; lễ tân không áp (BR-30).
+  - Một bé có tối đa 4 dịch vụ làm lần lượt (BR-18); từ hai bé trở lên mỗi bé một dịch vụ (BR-19).
+  - Khách ghép theo email đã xác thực (BR-16), cùng số điện thoại khác email là khách mới.
+  - Pawpaw không có lịch mẫu có cọc nên thiếu mẫu email "đã hoàn cọc".
+- **Ghi chú cho ERD:**
+  - `appointments.self_changes`; `served_subjects.note`.
+  - `customers.consent_at`, `customers.marketing_opt_in`.
+  - Hoàn cọc tự động ghi mã hoàn riêng.
+- **Tiếp theo:** phiên claude.ai vẽ đợt C (tiền: MH-29, MH-30, MH-31, MH-33, MH-34).
+
 ### 10/11/2026 (tối): chốt đợt B, phía khách
+
 - **Đã làm:**
   - Vẽ và chốt đợt B (12 bảng):
     - MH-11 trang cơ sở, điện thoại và máy tính;
@@ -42,6 +68,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - Phiên claude.ai vẽ đợt C (tiền: MH-29, MH-30, MH-31, MH-33, MH-34).
 
 ### 10/11/2026: review và merge PR #6 (Bước 11)
+
 - **Đã làm:**
   - Review PR #6. Sửa trên cùng nhánh rồi người dùng merge:
     - Lúc duyệt nghỉ, kiểm lại từng cách xử lý; cách không còn hợp lệ thì lịch về "chưa xử lý".
@@ -74,6 +101,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 ## Tuần 1 (02/11 – 08/11/2026)
 
 ### 08/11/2026 (khuya): mock Bước 11, nghiệp vụ lịch
+
 - **Đã làm:** Bước 11 (11a–11g) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-11-đợt-a-nghiệp-vụ-lịch-mh-26-mh-27-mh-28-mh-35-mh-36-mh-38-mh-39-mh-40) trên nhánh `feat/mock-scheduling-ops`.
   - 11a: mỗi mục lịch ghi khách chọn đích danh hay "Bất kỳ ai" (BR-31); ca làm nhiều khung mỗi ngày; đơn nghỉ có trạng thái, giờ, lý do, cách xử lý từng lịch. `findSlots` đọc ca và đơn nghỉ thay cho giờ mở cửa. Cài đặt "Kỹ thuật viên thấy số điện thoại khách" ở Chính sách (BR-36). `ScheduleStore` giữ lịch, khách, ca, đơn nghỉ giữa các màn.
   - 11b MH-26: bấm ô trống hoặc "Tạo lịch hẹn" mở `SidePanel`, kiểm bằng `findSlots` từng phút (giờ lệch lưới được), gợi ý ba giờ gần nhất, khách vãng lai, khách mới, thêm bé.
@@ -90,6 +118,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 - **Tiếp theo:** review PR; phiên claude.ai vẽ đợt B (phía khách).
 
 ### 08/11/2026 (tối): chốt đợt A, nghiệp vụ lịch
+
 - **Đã làm:**
   - Review và người dùng merge PR #5 (Bước 10). Sau review chỉ còn hai chỗ sửa: bảng vừa khung ở 1280–1600px, và trên điện thoại chỉ giữ nút quay lại.
   - Thống nhất lộ trình: vẽ đủ mọi màn theo đợt A–H (kể cả quản trị nền tảng) trước, người dùng rà một lượt rồi mới làm DB.
@@ -113,6 +142,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - Phiên claude.ai vẽ đợt B (phía khách: MH-11, MH-13 đến MH-21, MH-23).
 
 ### 08/11/2026 (đêm): mock Bước 10, cấu hình dịch vụ và gói cấu hình ngành
+
 - **Đã làm:** Bước 10 (10a–10f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-10-cấu-hình-dịch-vụ-mh-44-mh-45-gói-cấu-hình-ngành-mh-59-và-thanh-cuộn) trên nhánh `feat/mock-services`.
   - Dữ liệu và hàm thuần: đoạn `prep`, `work`, `wait`, dọn dẹp theo từng loại tài nguyên, giá theo cấp, `variantSelection` theo dịch vụ. `mock/occupation.ts` (mẫu chiếm dụng, khoảng khách thấy, phút bận, giá, kiểm phủ đủ không trùng) và `mock/availability.ts` (phép vừa theo mục 3 của trang thuật toán) là mẫu để chép sang `scheduling-core`.
   - `pnpm check:availability`: 10 ví dụ ở mục 4 khớp, mỗi ví dụ còn khớp một bản vét cạn từng phút; lịch mẫu của hai cơ sở có 0 đoạn chồng nhau (BR-01) và nằm trong giờ mở cửa (BR-54). Không có ví dụ nào mâu thuẫn với thiết kế.
@@ -130,6 +160,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 - **Tiếp theo:** review PR; báo cô MH-45 và MH-59; phiên claude.ai chốt 5 câu hỏi của ERD.
 
 ### 08/11/2026 (chiều): chốt cấu hình dịch vụ, gói cấu hình ngành, thuật toán giờ trống
+
 - **Đã làm:**
   - Review PR #4 (Bước 9), người dùng đã merge sau khi sửa ba điểm: một đồng hồ chung cho mock, giá trung bình mỗi tháng, ngày gia hạn trên trang khóa.
   - Vẽ và chốt MH-45 Chi tiết dịch vụ (Tóc Mây, Pawpaw, điện thoại) và MH-59 Gói cấu hình ngành (danh sách, chi tiết) trên canvas.
@@ -148,6 +179,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
   Các ý trên ghi thành BR-50 đến BR-59. BR-12, BR-14, BR-70 sửa theo; gói ngành có bản nháp và xuất bản.
   - [T-05](../ky-thuat/quyet-dinh-ky-thuat.md#t-05-packagesscheduling-core-thuật-toán-thuần) đổi sang phút từ mốc Unix (UTC).
+
 - **Vướng:** dữ liệu mẫu Tóc Mây cho Hùng làm nhuộm, Lan thì không. Thiết kế giữ cả ba thợ làm được nhuộm (thêm kỹ năng cho Lan) để "Bất kỳ ai" có giá 500.000 ₫.
 - **Sau đó:** viết bản 1 của [Mô hình dữ liệu](../thiet-ke/erd.md).
   - Gồm khoảng 50 bảng theo phân hệ, khóa ngoại kèm `tenant_id`, exclusion constraint, trigger chỉ thêm, bảng trạng thái lịch hẹn, và bảng "mỗi BR nằm ở đâu". Không có bảng riêng cho ngành nào.
@@ -160,6 +192,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - Viết sequence cho đặt lịch có cọc, webhook thanh toán, hoàn thành lịch → outbox.
 
 ### 07/11/2026 (đêm khuya): mock Bước 8, khung ứng dụng, danh sách và form
+
 - **Đã làm:** Bước 8 (8a–8f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-8-route-tiếng-anh-khung-ứng-dụng-mẫu-danh-sách-và-form), mỗi mục một commit trên nhánh `feat/mock-app-shell`.
   - Route theo [T-15](../ky-thuat/quyet-dinh-ky-thuat.md#t-15-route-của-web-tiếng-anh-slug-cơ-sở-trong-url): `/mock/[tenant]/book`, `/mock/app/[tenant]/…`; URL cũ chuyển hướng 308; trạng thái xem nằm trong query.
   - `AppShell` (MH-07): thanh bên 240px, dải icon 68px, thanh tab dưới 768px; menu đổi chi nhánh và cơ sở dùng bàn phím; thêm vai trò kỹ thuật viên và quản lý.
@@ -175,6 +208,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 - **Tiếp theo:** review PR; chốt hai màn MH-07, MH-08, MH-09 với cô; phiên claude.ai vẽ MH-02 Đăng ký cơ sở có chọn ngành.
 
 ### 08/11/2026 (tối): mock Bước 9, đăng ký cơ sở, dùng thử và gói Sapio
+
 - **Đã làm:** Bước 9 (9a–9f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-9-đăng-ký-cơ-sở-dùng-thử-và-gói-sapio) trên nhánh `feat/mock-signup-plan`.
   - Component mới: `SignupLayout`, `ChoiceCards`, `QuantityInput`, `OtpField` (`InputOTP` của shadcn/ui, thư viện `input-otp@1.5.0`), `Banner`, `Checklist`, `PlanCards`, `LockIcon`; ô mã ở trang đặt lịch dùng `OtpField`.
   - MH-02 `/mock/signup?step=…`: 5 bước, mật khẩu theo BR-73 (331 mật khẩu phổ biến), mã `000000` cho trạng thái lỗi, địa chỉ `*.sapio.vn` theo BR-72, bảng xem trước đọc từ `IndustryTemplate`.
@@ -188,6 +222,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 - **Tiếp theo:** review PR; báo cô phần dùng thử và gói Sapio (D-15); phiên claude.ai vẽ MH-45 và MH-59.
 
 ### 08/11/2026: chốt đăng ký cơ sở, tên miền con, dùng thử và gói Sapio
+
 - **Đã làm:**
   - Review PR #3 (Bước 8). Người dùng đã merge sau khi Claude Code sửa 3 điểm: chữ cái của cơ sở, tìm theo đầu từ, bỏ `?tenant=` khi chuyển hướng.
   - Tiêu đề cột bảng viết hoa theo ý người dùng, đã đưa vào Sapio.
@@ -205,6 +240,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - Phiên claude.ai vẽ MH-45 Chi tiết dịch vụ (các đoạn chiếm dụng) và MH-59 Gói cấu hình ngành.
 
 ### 07/11/2026 (đêm): chốt khung ứng dụng, mẫu danh sách và mẫu form
+
 - **Đã làm:**
   - Review lại PR #2 (Bước 7): đạt. Người dùng đã merge.
   - Sửa hover của nút chính trong Sapio: đậm hơn thay vì mờ đi, tương phản từ 6,3:1 trở lên.
@@ -222,44 +258,52 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - Phiên claude.ai vẽ MH-02 Đăng ký cơ sở có chọn ngành.
 
 ### 07/11/2026 (khuya): sửa mock theo review PR #2
+
 - **Đã làm:** Bước 7 (7a–7f) của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md#bước-7-sửa-theo-review-pr-2), mỗi mục một commit trên PR #2. ConfirmDialog, Toast (có Hoàn tác), Segmented; giờ trống theo buổi; cột trái sticky có danh sách thợ ở máy tính; OTP qua email (BR-16); "Thêm bé" và `?khach=moi` (BR-17); thu tiền, không đến, hủy lịch qua hộp hỏi, check-in có Hoàn tác (D-14); dữ liệu 02/11–08/11 cho hai cơ sở sinh bằng seed (`mock/fixtures/generate.ts`); nút sáng/tối, vai trò theo route, thanh chọn gọn trên điện thoại. Kiểm bằng Playwright và axe-core: 28 trang và bước, hai theme, 0 lỗi serious/critical; `pnpm build` xanh.
 - **Vướng:** `.sp-btn--accent:hover { opacity: 0.9 }` trong Sapio hạ tương phản nút cam của Pawpaw xuống 3,94:1 khi rê chuột; cần sửa trong Design System (bản chép `app/sapio/` không sửa tại chỗ).
 - **Tiếp theo:** review lại PR #2; sửa hover của nút nhấn trong Sapio; chốt hai màn hình với cô.
 
 ### 07/11/2026 (tối, sau đó): review PR #2 của mock
+
 - **Đã làm:** review [PR #2 của datn-docs](https://github.com/ngchinhdev/datn-docs/pull/2): đọc code và xem bản deploy trên trình duyệt ở 390px, 1024px, 1280px, 1440px, hai theme, đi hết luồng của cả hai cơ sở. Bản này sát canvas, code sạch (không màu viết cứng, không `Date.now()`). Cần sửa: OTP ghi "tin nhắn" trái với roadmap; Pawpaw thiếu "Thêm bé" nên khách mới bị kẹt; trang khách trên máy tính không có danh sách thợ ở cột trái và nút Tiếp tục bị đẩy khỏi màn hình; thu tiền chạy ngay không hỏi; bộ chọn vai trò không theo trang; `<div>` trong `<button>`, lưới ARIA thiếu dòng. Người dùng góp thêm: hộp xác nhận cho thao tác quan trọng, dữ liệu đa dạng hơn một ngày, nút sáng/tối.
 - **Chốt:** OTP gửi qua email, khách vẫn nhập số điện thoại ([D-13](./quyet-dinh.md#d-13-otp-của-khách-gửi-qua-email-không-qua-sms), BR-16, BR-17); ba mức xác nhận và giờ trống hiện theo buổi ([D-14](./quyet-dinh.md#d-14-mẫu-xác-nhận-thao-tác-và-cách-hiện-giờ-trống)). Sapio Design System thêm ConfirmDialog, Toast, Segmented và token `fill-selected`; bản sao trong `design/sapio/` và `app/sapio/` đã cập nhật.
 - **Ghi chú cho ERD:** ghép đối tượng được phục vụ của khách mới với hồ sơ cũ sau khi xác thực OTP (trùng email, trùng tên bé) chưa có quy tắc; quyết định khi thiết kế bảng `served_subjects`.
 - **Tiếp theo:** Claude Code làm [Bước 7 của kế hoạch](../ky-thuat/ke-hoach-ui-mock.md#bước-7-sửa-theo-review-pr-2) trên cùng nhánh; review lại rồi mới merge.
 
 ### 07/11/2026 (tối): code giao diện mock
+
 - **Đã làm:** 6 bước của [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md) trên nhánh `feat/ui-mock`. Token Sapio và font Be Vietnam Pro cho cả `/docs` lẫn `/mock`; fixtures ngày 07/11 có đoạn chiếm dụng, `StaffProfile` hai lớp, `ServedSubject.kind` là `'self' | 'other'`; 11 component trong `components/sapio/` (ví dụ ở `/mock/components`); `/mock/dat-lich` cho hai cơ sở; `/mock/le-tan`, `/mock/le-tan/tai-nguyen`, `/mock/hom-nay`. Kiểm bằng Playwright headless: đi hết luồng khách chỉ bằng bàn phím ở 390px và 1280px; lịch lễ tân ở 1440px, 1024px, 390px không lỗi, không cuộn ngang.
 - **Vướng:** `pnpm dev` (Turbopack) giữ bản cũ của module phía server khi file đổi export, gây lỗi `is not a function` và lỗi hydration; khởi động lại dev server là hết. Class trong `components.css` không nằm trong `@layer`, nên muốn utility Tailwind đè lên `.sp-btn` phải thêm `!`.
 - **Tiếp theo:** review pull request; chốt hai màn hình với cô; ERD giai đoạn 1.
 
 ### 07/11/2026 (chiều): bàn giao giao diện cho Claude Code
+
 - **Đã làm:** chốt UI hai màn hình đầu (D-12; BR-14, BR-15). Chép Design System và các màn hình đã vẽ vào `design/` để Claude Code đọc offline. Viết [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md) 6 bước.
 - **Cách làm từ đây:** phiên claude.ai lo phân tích, thiết kế, review; Claude Code trên máy code theo kế hoạch trên nhánh `feat/ui-mock`, mở pull request để review.
 - **Tiếp theo:** Claude Code làm kế hoạch UI mock; giai đoạn 0 còn: dùng thử SimplyBook.me và một phần mềm Việt Nam, sửa đề cương nếu cô góp ý.
 
 ### 07/11/2026 (trưa): tên sản phẩm và hệ thống thiết kế
+
 - **Đã làm:** chốt tên **Sapio** và hướng thiết kế "ấm và chính xác" ([D-11](./quyet-dinh.md#d-11-tên-sản-phẩm-sapio-và-hệ-thống-thiết-kế)). Dựng "Sapio Design System" trên Claude Design: tokens sáng/tối (đã kiểm tương phản), font Be Vietnam Pro, màu trạng thái, màu hai cơ sở, 8 component có preview. Docs chạy cổng 3100 để không trùng web 3000. Phiên claude.ai đã liên kết với máy (thư mục `D:\UITProgress\DoAn\source`).
 - **Sau đó:** làm mềm Design System (bỏ viền đậm, nền `fill-tonal`, bóng mềm, góc tròn hơn), đổi màu Pawpaw sang cam quýt. Vẽ canvas "Sapio · Màn hình đầu tiên": 3 hướng trang khách, 2 hướng lịch lễ tân, cùng bản máy tính, iPad, điện thoại; chốt hướng ([D-12](./quyet-dinh.md#d-12-hướng-giao-diện-hai-màn-hình-đầu)).
 - **Tiếp theo:** đưa token Sapio vào `datn-docs` và `apps/web` (thay theme shadcn mặc định); code luồng đặt lịch của khách (A) và lịch lễ tân (A) vào `/mock` theo canvas; tách màn "Trang đặt lịch của khách" thành "Trang cơ sở" và "Luồng đặt lịch".
 
 ### 07/11/2026: review Phần B
+
 - **Đã làm:** review app docs + mock. CI (thêm qua [PR #1 của datn-docs](https://github.com/ngchinhdev/datn-docs/pull/1)) xanh: Prettier, typecheck, build 16 trang (`/docs` tĩnh, `/mock` động, `/api/search`), lockfile 584 gói qua kiểm tra chuỗi cung ứng của pnpm. Không gói nào nằm trong danh sách bị chiếm quyền (Shai-Hulud, `keyv`/`cacheable`, `chalk`/`debug`, các gói độc tháng 10–11/2026). `pnpm audit`: 0 high/critical; 1 moderate (`minimatch`) + 1 low (`deepmerge`), cùng hai lỗ hổng đã biết từ `datn-saas`, đến từ CLI `shadcn`, không chạy khi xem trang.
 - **Ghi chú cho ERD (giai đoạn 1):** `ServedSubject.kind` trong fixtures là `'self' | 'pet'`, tức là từ khóa ngành nằm trong kiểu dữ liệu. Khi thiết kế bảng thật, loại đối tượng được phục vụ nên do `industryTemplate` khai báo (dữ liệu), lõi chỉ phân biệt "chính khách hàng" hay "đối tượng khác" (quy tắc 5).
 - **B3 xong:** deploy lên Vercel tại https://datn-docs.vercel.app (Hobby, biến môi trường `ENABLE_EXPERIMENTAL_COREPACK=1` để Vercel dùng pnpm 11 theo `packageManager`, Node 24). `/`, `/docs` (đủ 11 trang) và `/mock` mở được. PR #1 (CI) đã merge. Phần B của kế hoạch dựng base hoàn tất.
 - **Tiếp theo:** giai đoạn 0 còn lại: dùng thử SimplyBook.me và một phần mềm Việt Nam, sửa đề cương nếu cô góp ý. Sau đó giai đoạn 1: ERD và hai màn hình mock đầu tiên (trang đặt lịch của khách, lịch lễ tân).
 
 ### 05/11/2026 (tối): app docs + mock `datn-docs`
+
 - **Đã làm:** Phần B, bước B1 và B2 của [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base.md). B1: Next.js 16.4.5 + Fumadocs 16.17 (cài thủ công, API `fumadocs-mdx/macro`), tài liệu ở `/docs`, tìm kiếm tiếng Việt chạy được, đọc thẳng file `.md`; pnpm 11.28.11 với `minimumReleaseAge` và `allowBuilds` giống `datn-saas` (`esbuild: false`). Link tải đề cương `.docx` ở trang Đề cương. B2: shadcn `base-nova` cùng `components.json` với `apps/web`, Fumadocs dùng preset `shadcn.css` nên tài liệu và mock chung một theme; `/mock` có bộ chọn tenant và vai trò trên query string (`/mock?tenant=pawpaw&role=receptionist`), danh sách 4 màn hình của roadmap, fixtures cho Salon Tóc Mây và Spa thú cưng Pawpaw.
 - **Phát hiện:** Fumadocs chỉ đổi link sang URL khi link trỏ tới file có đuôi `.md`; link không đuôi làm gãy các link ở trang `/docs`. Đã đổi mọi link tương đối sang dạng `./trang.md` và ghi quy ước vào `CLAUDE.md`. Mục lục roadmap có một anchor sai (`#7-quy-tắc-nghiệp-vụ-ban-đầu`), đã sửa. `minimumReleaseAge` chặn bản Fumadocs vừa ra trong ngày, pnpm tự chọn bản trước đó.
 - **Ghi chú cho sau:** fixtures dùng ID dễ đọc (`may-mai`) thay cho UUIDv7 để dễ đối chiếu. Trạng thái lịch hẹn trong fixtures (`confirmed`, `checked_in`, `completed`, `cancelled`, `no_show`) là giả định, cần chốt khi thiết kế ERD. `assets/de-cuong-chi-tiet.docx` và `public/files/` là hai bản, sửa đề cương thì cập nhật cả hai.
 - **Tiếp theo:** B3 (kết nối Vercel, kiểm `/docs` và `/mock` trên link deploy); giai đoạn 0: dùng thử SimplyBook.me và một phần mềm Việt Nam.
 
 ### 05/11/2026: review base `datn-saas`
+
 - **Đã làm:** review toàn bộ base. CI trên GitHub của `main` xanh (03/11), nên A7 xong. Mở [PR #1](https://github.com/ngchinhdev/datn-saas/pull/1), CI xanh đủ các bước: bật `erasableSyntaxOnly` cho `shared` và `scheduling-core`; thêm `createPool()` có `pool.on('error')` để API không chết khi Postgres khởi động lại (có unit test); `CLAUDE.md` nhắc đọc `apps/web/AGENTS.md` và commit nhỏ.
 - **Ghi chú cho sau:** (1) khi thiết kế thuật toán giờ trống (BT1), chốt lõi tính trên mốc thời gian tuyệt đối, chỉ đổi sang giờ địa phương ở rìa (hiện `Interval` là phút từ đầu ngày địa phương); (2) khi làm xác thực, kiểm tra chống CSRF của Nest với request POST từ server Next (không có header `Origin`); (3) oxlint còn nhiều cảnh báo nhiễu `react-in-jsx-scope`, có thể tắt rule này.
 - **Bổ sung:** PR #1 gộp còn một commit, thêm sửa lint (tắt `react-in-jsx-scope`, cho phép import CSS). CI xanh, 0 cảnh báo.
@@ -268,12 +312,14 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 - **Tiếp theo:** merge PR #1 và PR #2; trên máy chạy `pnpm install` (Corepack tự tải pnpm 11); xóa nhánh `claude/audit-tmp` trên GitHub; Phần B (app docs + mock); giai đoạn 0: dùng thử SimplyBook.me và một phần mềm Việt Nam.
 
 ### 03/11/2026 (tối): dựng base `datn-saas`
+
 - **Đã làm:** Phần A của [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base.md), bước A1 đến A6 và A8: monorepo pnpm + Turborepo; Docker Compose (Postgres 18, Redis 8, Mailpit); `shared` (BR-61 `normalizePhone`); `scheduling-core` (phép toán khoảng, property test, coverage 100%); API NestJS 12 (config Zod, Drizzle 1.0.0-rc.5, `withTenant`, migration `btree_gist` và grant, Problem Details, Swagger, `/v1/health`); web Next.js 16.4 (shadcn, TanStack Query, trang `/` hiển thị health); script chặn từ khóa ngành; workflow CI. Mọi bước CI chạy xanh trên máy.
 - **Phát hiện:** spike RLS cho thấy policy phải dùng `nullif(current_setting(...), '')` ([T-07](../ky-thuat/quyet-dinh-ky-thuat.md#t-07-cô-lập-dữ-liệu-rls-hai-lớp)); 20 transaction đồng thời chỉ 1 giữ được chỗ (bằng chứng sớm cho BT2). Chốt Node 24 thay cho 26 ([T-01](../ky-thuat/quyet-dinh-ky-thuat.md#t-01-runtime-nodejs-24-lts)), TypeScript 6.0, pnpm 9.15.
 - **Vướng:** máy dev có sẵn PostgreSQL Windows chiếm cổng 5432; compose cho đổi cổng bằng `POSTGRES_PORT`.
 - **Tiếp theo:** đẩy `datn-saas` lên GitHub và kiểm tra CI xanh (A7); Phần B (app docs + mock).
 
 ### 03/11/2026
+
 - **Đã làm:** gửi đề cương cho cô Thùy Trâm. Tạo 2 repo `ngchinhdev/datn-docs` và `ngchinhdev/datn-saas`. Đưa đề cương, roadmap, nhật ký quyết định, quy tắc nghiệp vụ, thuật ngữ vào `datn-docs`. Nghiên cứu phiên bản và pattern hiện hành của Next.js, NestJS, Drizzle, Node.js; viết [Quyết định kỹ thuật](../ky-thuat/quyet-dinh-ky-thuat.md), [Chiến lược kiểm thử](../ky-thuat/chien-luoc-kiem-thu.md), [Kế hoạch dựng base source](../ky-thuat/ke-hoach-dung-base.md).
 - **Phát hiện:** payOS không có môi trường test → đổi sang provider giả lập ([D-09](./quyet-dinh.md#d-09-thanh-toán-payos-không-có-môi-trường-test)).
 - **Tiếp theo:** dựng base source trên máy bằng Claude Code theo kế hoạch; song song dùng thử SimplyBook.me và một phần mềm Việt Nam (giai đoạn 0).

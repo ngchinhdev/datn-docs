@@ -112,7 +112,7 @@ export function useMoveFlow(args: {
         <ConfirmDialog
           open
           title={`Đổi ${inSentence(swap.appt)} sang ${staffName(swap.target.columnId)}?`}
-          body={`${L.who(swap.appt)} chọn đích danh ${staffName(swap.appt.items[0]?.staffResourceId ?? '')} khi đặt. Đổi người thì cần báo khách (BR-11).`}
+          body={`${L.who(swap.appt)} chọn đích danh ${staffName(swap.appt.items[0]?.staffResourceId ?? '')} khi đặt. Đổi người thì cần báo khách (BR-32).`}
           facts={[
             {
               term: 'Giờ',
