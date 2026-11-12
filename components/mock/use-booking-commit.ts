@@ -12,8 +12,8 @@ import { useScheduleStore } from './schedule-store';
 
 /**
  * Puts an online booking on the calendar of the tenant, where the receptionist sees it: first as a
- * hold while the customer pays, then confirmed (BR-07, BR-29). The customer is matched by phone or
- * email, else made; a new subject is saved with them (BR-17).
+ * hold while the customer pays, then confirmed (BR-07, BR-29). The customer is matched by the
+ * email they confirmed (BR-16), else made; a new subject is saved with them (BR-17).
  */
 export function useBookingCommit(tenantSlug: string) {
   const store = useScheduleStore();
@@ -27,9 +27,9 @@ export function useBookingCommit(tenantSlug: string) {
   ): Appointment {
     const { contact } = draft;
     const email = contact.email.trim().toLowerCase();
-    const found = store.customers.find(
-      (c) => c.phone === contact.phone || (c.email && c.email.toLowerCase() === email),
-    );
+    // BR-16: the email is what the customer proved with the code, so it is what identifies them;
+    // the same phone under another email is another customer.
+    const found = store.customers.find((c) => c.email?.toLowerCase() === email);
     const customerId = found?.id ?? `${tenantId}-c-web${draft.id}`;
     if (!found && !store.customers.some((c) => c.id === customerId)) {
       const customer: Customer = {
