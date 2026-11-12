@@ -96,3 +96,4 @@ Lệnh của `datn-saas` xem `datn-saas/CLAUDE.md`.
 - Giao diện theo hệ thống thiết kế **Sapio** (`design/sapio/`): chỉ dùng biến trong `tokens.css` và class trong `components.css`, không tự đặt màu; không nền đen ở đâu. Màn hình tham chiếu ở `design/screens/`.
 - Chia việc: phiên claude.ai lo phân tích, thiết kế, review; Claude Code trên máy lo code theo kế hoạch, làm trên nhánh riêng và mở pull request để review, không tự merge.
 - Mock là bản phác để chốt luồng với giảng viên; khi chốt, đổi trạng thái màn hình thành "đã chốt".
+- **Kiểm trên máy chỉ chạy** `pnpm check:availability`, `pnpm typecheck`, `pnpm build`, `prettier --check`. Không tự viết script Playwright hay axe, không mở trình duyệt, không tạo file trong thư mục tạm của hệ điều hành; người dùng tự kiểm giao diện. Mục "Xong khi" trong kế hoạch là danh sách để người dùng kiểm, không phải việc Claude Code phải chạy.
