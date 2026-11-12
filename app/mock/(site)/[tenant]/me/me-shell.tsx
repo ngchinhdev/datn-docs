@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { CustomerHeader } from '@/components/mock/customer-header';
 import { useCustomerSession } from '@/components/mock/customer-session';
 import { cn } from '@/lib/utils';
 import { fixtureBySlug } from '@/mock/selection';
 
-/** Pages of the account that exist; the tab bar shows these. */
-const BUILT = new Set(['']);
+/** Pages of the account that exist; the tab bar lists these. */
+const BUILT = new Set(['', '/subjects', '/wallet', '/profile']);
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -23,8 +23,12 @@ export function MeShell({ tenantSlug, children }: { tenantSlug: string; children
   const base = `/mock/${tenantSlug}/me`;
   const subject = template.vocabulary.subject;
 
+  // Sent to the login only when the page opens without a session: a page that logs out goes
+  // wherever it likes.
+  const hadSession = useRef(isLoggedIn);
   useEffect(() => {
-    if (!isLoggedIn) router.replace(`/mock/${tenantSlug}/login`);
+    if (isLoggedIn) hadSession.current = true;
+    else if (!hadSession.current) router.replace(`/mock/${tenantSlug}/login`);
   }, [isLoggedIn, router, tenantSlug]);
 
   const tabs = [

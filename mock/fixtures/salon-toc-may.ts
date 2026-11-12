@@ -363,6 +363,7 @@ const others = (
       ...(isQuyen
         ? {
             email: 'quyen@example.com',
+            consentAt: '2026-10-15T03:00:00Z',
             packages: [
               {
                 id: 'may-pkg-quyen-1',

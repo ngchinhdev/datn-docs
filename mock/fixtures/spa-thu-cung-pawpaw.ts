@@ -89,6 +89,7 @@ const regulars: Customer[] = [
     callName: 'Chị Linh',
     phone: '+84909111222',
     email: 'linh@example.com',
+    consentAt: '2026-10-12T03:00:00Z',
   },
   { id: 'paw-c-duc', tenantId, name: 'Võ Minh Đức', callName: 'Anh Đức', phone: '+84938333444' },
 ];
@@ -109,6 +110,7 @@ const regularSubjects: ServedSubject[] = [
     kind: 'other',
     name: 'Lucky',
     attributes: { species: 'dog', breed: 'Corgi', weightKg: '12' },
+    note: 'Sợ máy sấy to, cần dỗ.',
   },
   {
     id: 'paw-s-bong',

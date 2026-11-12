@@ -18,7 +18,9 @@ export interface CustomerSessionValue {
   /** An email with no booking yet still logs in; its details appear after the first booking. */
   loginAsGuest: (email: string) => void;
   logout: () => void;
-  updateProfile: (data: Partial<Pick<Customer, 'name' | 'phone' | 'email'>>) => void;
+  updateProfile: (
+    data: Partial<Pick<Customer, 'name' | 'phone' | 'email' | 'marketingOptIn'>>,
+  ) => void;
 }
 
 const CustomerSessionContext = createContext<CustomerSessionValue | null>(null);
@@ -101,7 +103,7 @@ export function CustomerSessionProvider({
   }, []);
 
   const updateProfile = useCallback(
-    (data: Partial<Pick<Customer, 'name' | 'phone' | 'email'>>) => {
+    (data: Partial<Pick<Customer, 'name' | 'phone' | 'email' | 'marketingOptIn'>>) => {
       if (!customer) return;
       const updated: Customer = {
         ...customer,

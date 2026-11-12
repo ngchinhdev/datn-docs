@@ -182,6 +182,10 @@ export interface Customer {
   note?: string;
   packages?: CustomerPackage[];
   wallet?: CustomerWallet;
+  /** Agreed to email offers, a choice of its own; off by default (BR-64). */
+  marketingOptIn?: boolean;
+  /** ISO 8601, UTC: when they agreed to the processing of their data, at the first booking (BR-64). */
+  consentAt?: string;
 }
 
 export interface ServedSubject {
@@ -192,6 +196,8 @@ export interface ServedSubject {
   kind: 'self' | 'other';
   name: string;
   attributes: Record<string, string>;
+  /** A line for the staff written by the customer, e.g. "Sợ máy sấy to, cần dỗ." */
+  note?: string;
 }
 
 export type AppointmentStatus =

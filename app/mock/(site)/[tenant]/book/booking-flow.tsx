@@ -39,6 +39,7 @@ import {
 import { useCustomerSession } from '@/components/mock/customer-session';
 import { downloadIcs } from '@/components/mock/download-ics';
 import { useScheduleStore } from '@/components/mock/schedule-store';
+import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { useBookingCommit } from '@/components/mock/use-booking-commit';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
@@ -48,7 +49,6 @@ import { MAX_SELF_CHANGES } from '@/mock/policy';
 import { heldItems, modeOf, movedAppointment, openQuestion } from '@/mock/reschedule';
 import { matchesAttributes, priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
 import {
-  tenantFixtures,
   type LeaveHandling,
   type ServedSubject,
   type Service,
@@ -127,7 +127,9 @@ export function BookingFlow({
   /** `false` while the tenant is on trial (BR-81): the page can be walked through, not booked. */
   bookingOpen?: boolean;
 }) {
-  const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
+  // The calendar and the staff as the shop has them now, so a booking made here shows there and
+  // the other way round (a moved booking and the customer's own hold do not block themselves).
+  const fixture = useLiveFixture(tenantSlug);
   const { tenant, services, staff, resources } = fixture;
   const branch = fixture.branches[0]!;
   const toast = useToast();
@@ -353,13 +355,6 @@ export function BookingFlow({
       fixture,
       date: day,
       notBefore: MOCK_NOW,
-      // The calendar the receptionist sees, so a booking made here shows there and the other way
-      // round; the booking being moved, and the customer's own hold, do not block themselves.
-      state: {
-        appointments: store.appointments,
-        shifts: store.shifts,
-        staffTimeOff: store.leaves,
-      },
       ignore: new Set(
         [target?.id, held ? `${tenant.id}-a-web${held.id}` : undefined].filter(
           (x): x is string => x !== undefined,
@@ -371,7 +366,7 @@ export function BookingFlow({
         staffResourceId: who[i] ?? ANY_STAFF,
       })),
     }),
-    [fixture, items, store.appointments, store.shifts, store.leaves, target, held, tenant.id],
+    [fixture, items, target, held, tenant.id],
   );
   /** Times everyone starts at once (a group) or the whole chain fits (BR-18, BR-19). */
   const slotsFor = useCallback(

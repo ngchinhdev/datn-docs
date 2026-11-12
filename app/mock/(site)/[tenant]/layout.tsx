@@ -4,6 +4,8 @@ import { fixtureBySlug } from '@/mock/selection';
 import { ScheduleStoreProvider } from '@/components/mock/schedule-store';
 import { CustomerSessionProvider } from '@/components/mock/customer-session';
 import { BookingDraftProvider } from '@/components/mock/booking-draft';
+import { ServiceStoreProvider } from '@/components/mock/service-store';
+import { StaffStoreProvider } from '@/components/mock/staff-store';
 
 export function generateStaticParams() {
   return tenantFixtures.map((f) => ({ tenant: f.tenant.slug }));
@@ -17,10 +19,14 @@ export default async function CustomerTenantLayout({
   if (!fixtureBySlug(tenant)) notFound();
 
   return (
-    <ScheduleStoreProvider tenantSlug={tenant}>
-      <CustomerSessionProvider tenantSlug={tenant}>
-        <BookingDraftProvider>{children}</BookingDraftProvider>
-      </CustomerSessionProvider>
-    </ScheduleStoreProvider>
+    <StaffStoreProvider tenantSlug={tenant}>
+      <ServiceStoreProvider tenantSlug={tenant}>
+        <ScheduleStoreProvider tenantSlug={tenant}>
+          <CustomerSessionProvider tenantSlug={tenant}>
+            <BookingDraftProvider>{children}</BookingDraftProvider>
+          </CustomerSessionProvider>
+        </ScheduleStoreProvider>
+      </ServiceStoreProvider>
+    </StaffStoreProvider>
   );
 }
