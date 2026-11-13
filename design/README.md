@@ -75,5 +75,14 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `KhachGoiVaVi.dc.html` | MH-20 Gói và ví | **Đã chọn** | `/mock/[tenant]/me/wallet` |
 | `KhachThongTin.dc.html` | MH-21 Thông tin cá nhân, tin khuyến mãi | **Đã chọn** | `/mock/[tenant]/me/profile` |
 | `KhachEmail.dc.html` | MH-23 Email: mã xác nhận, đã đặt lịch, hỏi ý đổi thợ | **Đã chọn** | `/mock/[tenant]/emails` (chỉ có trong mock) |
+| `ThuTien.dc.html` | MH-29 Thu tiền: dòng dịch vụ và bán lẻ, giảm tay, trừ cọc, ví cộng tiền mặt | **Đã chọn** | `/mock/app/toc-may/checkout/[appointmentId]` (Bước 13) |
+| `ThuTienQR.dc.html` | MH-29 Thu tiền: dùng buổi gói, chuyển khoản QR chờ cổng báo | **Đã chọn** | như trên |
+| `BanGoi.dc.html` | MH-30 Bán gói | **Đã chọn** | `/mock/app/[tenant]/sales/new?type=package` |
+| `NapVi.dc.html` | MH-30 Nạp ví, mức tặng | **Đã chọn** | `/mock/app/[tenant]/sales/new?type=wallet` |
+| `HoaDonDanhSach.dc.html` | MH-31 Hóa đơn | **Đã chọn** | `/mock/app/[tenant]/invoices` |
+| `HoaDonChiTiet.dc.html` | MH-31 Chi tiết hóa đơn: dòng, khoản thanh toán, lịch sử | **Đã chọn** | `/mock/app/[tenant]/invoices/[id]` |
+| `HoSoKhach.dc.html` | MH-33 Hồ sơ khách: lịch sử, sổ ví, ghi chú nội bộ, bắt buộc cọc | **Đã chọn** | `/mock/app/[tenant]/customers/[id]` |
+| `HoanTien.dc.html` | MH-34 Hoàn tiền: danh sách, bảng duyệt | **Đã chọn** | `/mock/app/[tenant]/refunds` |
+| `HoanTienTao.dc.html` | MH-34 Tạo yêu cầu hoàn tiền từ hóa đơn | **Đã chọn** | `/mock/app/[tenant]/invoices/[id]` |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-13 đến BR-19, BR-23, BR-29, BR-30 đến BR-36, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-13 đến BR-36, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
