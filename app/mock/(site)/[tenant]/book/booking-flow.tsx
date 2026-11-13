@@ -378,7 +378,7 @@ export function BookingFlow({
       date: day,
       now: MOCK_NOW,
       // BR-06, from the policy of the shop; the receptionist has no such limit (BR-30).
-      ...bookingWindow(fixture.template.defaultPolicies, MOCK_NOW),
+      ...bookingWindow(fixture.policies, MOCK_NOW),
       ignore: new Set(
         [target?.id, held ? `${tenant.id}-a-web${held.id}` : undefined].filter(
           (x): x is string => x !== undefined,
@@ -618,7 +618,7 @@ export function BookingFlow({
   function confirmReschedule() {
     if (!target || !slot) return;
     // Checked again at the moment of confirming: the time kept moving while the customer chose.
-    const blocked = selfChangeBlock(target, now, fixture.template.defaultPolicies, answering);
+    const blocked = selfChangeBlock(target, now, fixture.policies, answering);
     if (blocked) {
       toast({ text: blocked });
       router.push(`/mock/${tenantSlug}/me/appointments/${target.id}`);
@@ -1580,7 +1580,7 @@ export function BookingFlow({
             title: slotLine,
             subtitle: answering
               ? 'Không tính vào số lần đổi giờ'
-              : `Còn ${Math.max(0, fixture.template.defaultPolicies.maxReschedules - (target.selfChanges ?? 0) - 1)} lần đổi sau lần này`,
+              : `Còn ${Math.max(0, fixture.policies.maxReschedules - (target.selfChanges ?? 0) - 1)} lần đổi sau lần này`,
             label: answering ? 'Gửi giờ này cho tiệm' : 'Xác nhận đổi giờ',
             disabled: false,
             onClick: confirmReschedule,

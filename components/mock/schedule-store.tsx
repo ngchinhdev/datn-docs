@@ -5,11 +5,14 @@ import {
   tenantFixtures,
   type Appointment,
   type Customer,
+  type MoneyState,
   type Requeue,
   type ServedSubject,
   type Shift,
   type StaffTimeOff,
+  type TemplatePolicies,
 } from '@/mock/fixtures';
+import type { World } from '@/mock/money-ops';
 
 export interface ScheduleStore {
   appointments: Appointment[];
@@ -41,6 +44,15 @@ export interface ScheduleStore {
   /** Technicians see customers' phone numbers (BR-36). */
   staffSeesCustomerPhone: boolean;
   setStaffSeesCustomerPhone: (value: boolean) => void;
+  /** The tenant's booking policies (BR-06, BR-08, BR-09, BR-10); the customer pages read them. */
+  policies: TemplatePolicies;
+  setPolicies: (policies: TemplatePolicies) => void;
+  /** Invoices, payments, wallet, refunds, commission of the tenant. */
+  money: MoneyState;
+  /** Replaces the money state; the pure functions of `mock/money-ops` build the next one. */
+  setMoney: (next: MoneyState | ((prev: MoneyState) => MoneyState)) => void;
+  /** One action that touches money, customers and appointments together (collect, refund). */
+  applyWorld: (fn: (prev: World) => World) => void;
 }
 
 interface TenantScheduleData {
@@ -51,6 +63,8 @@ interface TenantScheduleData {
   leaves: StaffTimeOff[];
   requeues: Requeue[];
   staffSeesCustomerPhone: boolean;
+  policies: TemplatePolicies;
+  money: MoneyState;
 }
 
 interface ScheduleRootContextValue {
@@ -74,6 +88,8 @@ function initialTenantData(slug: string): TenantScheduleData {
     leaves: fixture.staffTimeOff,
     requeues: [],
     staffSeesCustomerPhone: fixture.staffSeesCustomerPhone,
+    policies: fixture.policies,
+    money: fixture.money,
   };
 }
 
@@ -283,6 +299,42 @@ export function ScheduleStoreProvider({
     [update],
   );
 
+  const setPolicies = useCallback(
+    (policies: TemplatePolicies) => {
+      update((prev) => ({ ...prev, policies }));
+    },
+    [update],
+  );
+
+  const setMoney = useCallback(
+    (next: MoneyState | ((prev: MoneyState) => MoneyState)) => {
+      update((prev) => ({
+        ...prev,
+        money: typeof next === 'function' ? next(prev.money) : next,
+      }));
+    },
+    [update],
+  );
+
+  const applyWorld = useCallback(
+    (fn: (prev: World) => World) => {
+      update((prev) => {
+        const next = fn({
+          money: prev.money,
+          customers: prev.customers,
+          appointments: prev.appointments,
+        });
+        return {
+          ...prev,
+          money: next.money,
+          customers: next.customers,
+          appointments: next.appointments,
+        };
+      });
+    },
+    [update],
+  );
+
   const value = useMemo(
     () => ({
       appointments: data.appointments,
@@ -308,6 +360,11 @@ export function ScheduleStoreProvider({
       removeRequeue,
       staffSeesCustomerPhone: data.staffSeesCustomerPhone,
       setStaffSeesCustomerPhone,
+      policies: data.policies,
+      setPolicies,
+      money: data.money,
+      setMoney,
+      applyWorld,
     }),
     [
       data,
@@ -327,6 +384,9 @@ export function ScheduleStoreProvider({
       replaceRequeue,
       removeRequeue,
       setStaffSeesCustomerPhone,
+      setPolicies,
+      setMoney,
+      applyWorld,
     ],
   );
 

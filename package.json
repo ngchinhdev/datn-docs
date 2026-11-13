@@ -12,6 +12,7 @@
     "start": "next start --port 3100",
     "typecheck": "next typegen && tsc --noEmit",
     "check:availability": "node scripts/check-availability.ts",
+    "check:money": "node scripts/check-money.ts",
     "format": "prettier --write app components lib mock"
   },
   "dependencies": {

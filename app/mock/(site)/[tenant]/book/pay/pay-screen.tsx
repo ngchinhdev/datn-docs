@@ -7,6 +7,7 @@ import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { paymentCode, useBookingDraft, type BookingDraft } from '@/components/mock/booking-draft';
 import { downloadIcs } from '@/components/mock/download-ics';
 import { useCustomerSession } from '@/components/mock/customer-session';
+import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useBookingCommit } from '@/components/mock/use-booking-commit';
 import { Button } from '@/components/sapio/button';
 import { ChainPlan } from '@/components/sapio/chain-plan';
@@ -16,6 +17,7 @@ import { useToast } from '@/components/sapio/toast';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { cn } from '@/lib/utils';
 import { nearestSlots, stillFree, type BookingSlot } from '@/mock/booking';
+import { addAutoRefund } from '@/mock/money-refunds';
 import { formatDay, formatTime, localDate, addMinutes } from '@/mock/time';
 import { formatPhone, formatVnd } from '@/mock/format';
 
@@ -52,6 +54,7 @@ export function PayScreen({ tenantSlug }: { tenantSlug: string }) {
   const router = useRouter();
   const toast = useToast();
   const session = useCustomerSession();
+  const { setMoney } = useScheduleStore();
   const { commit, release, rival, appointments, fixture } = useBookingCommit(tenantSlug);
   const { tenant } = fixture;
   const branch = fixture.branches[0]!;
@@ -315,6 +318,15 @@ export function PayScreen({ tenantSlug }: { tenantSlug: string }) {
       setPhase('paid');
     } else {
       release(d);
+      // BR-29: the time is gone, so the deposit goes back in full without anyone approving it.
+      setMoney((m) =>
+        addAutoRefund(m, {
+          key: d.id,
+          amountVnd: d.depositVnd,
+          slotLabel: formatTime(d.slot.startAt),
+          at: paidAt,
+        }),
+      );
       const nearest = nearestSlots(fixture, d.refs, d.mode, d.slot.startAt, paidAt, {
         appointments: others,
       });

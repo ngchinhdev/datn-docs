@@ -108,10 +108,7 @@ export function buildEmails(fixture: TenantFixture, now: string): EmailSample[] 
 
   const policyLine = (appt: Appointment) => {
     const deposit = appt.depositVnd ?? 0n;
-    const selfBy = addMinutes(
-      appt.startAt,
-      -fixture.template.defaultPolicies.cancelBeforeHours * 60,
-    );
+    const selfBy = addMinutes(appt.startAt, -fixture.policies.cancelBeforeHours * 60);
     const fullBy = addMinutes(appt.startAt, -24 * 60);
     return [
       `Đổi giờ hoặc hủy trên trang lịch hẹn trước ${hhmm(selfBy)} ngày ${dayMonth(selfBy)}.`,

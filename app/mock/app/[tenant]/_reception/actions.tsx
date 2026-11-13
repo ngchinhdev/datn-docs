@@ -1,7 +1,9 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useSubscription } from '@/components/mock/subscription-store';
+import { useAppHref } from '@/components/mock/use-app-href';
 import { ConfirmDialog } from '@/components/sapio/confirm-dialog';
 import { useToast } from '@/components/sapio/toast';
 import type { Appointment, TenantFixture } from '@/mock/fixtures';
@@ -9,11 +11,8 @@ import { formatVnd } from '@/mock/format';
 import { appointmentDetail, lookups } from '@/mock/reception';
 import { formatTime, minutesBetween } from '@/mock/time';
 
-type Pending = { kind: 'collect' | 'no-show' | 'cancel'; id: string } | null;
-type Method = 'cash' | 'transfer';
+type Pending = { kind: 'no-show' | 'cancel'; id: string } | null;
 type Canceller = 'customer' | 'business';
-
-const METHOD_LABEL: Record<Method, string> = { cash: 'tiền mặt', transfer: 'chuyển khoản' };
 
 /** "Chị Hà" inside a sentence reads "chị Hà". */
 const inSentence = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
@@ -44,10 +43,11 @@ export function useAppointmentActions(
 ) {
   const L = lookups(fixture);
   const toast = useToast();
+  const router = useRouter();
+  const appHref = useAppHref(fixture.tenant.slug);
   // On trial nobody can be checked in (BR-81): the appointments are sample data to configure around.
   const { canBook } = useSubscription();
   const [pending, setPending] = useState<Pending>(null);
-  const [method, setMethod] = useState<Method>('cash');
   const [canceller, setCanceller] = useState<Canceller>('customer');
   const target = pending ? appointments.find((a) => a.id === pending.id) : undefined;
 
@@ -72,7 +72,6 @@ export function useAppointmentActions(
   }
 
   const ask = (kind: NonNullable<Pending>['kind'], a: Appointment) => {
-    setMethod('cash');
     setCanceller('customer');
     setPending({ kind, id: a.id });
   };
@@ -84,39 +83,7 @@ export function useAppointmentActions(
     const d = appointmentDetail(fixture, target);
     const staff = [...new Set(target.items.map((i) => L.name(i.staffResourceId)))].join(', ');
     const time = formatTime(target.startAt);
-    if (pending.kind === 'collect') {
-      dialog = (
-        <ConfirmDialog
-          open
-          title={`Thu ${formatVnd(d.due)} của ${who}?`}
-          facts={[
-            ...d.items.map((i) => ({ term: i.title, value: i.price })),
-            ...(d.deposit > 0n ? [{ term: 'Đã cọc', value: `−${formatVnd(d.deposit)}` }] : []),
-            { term: 'Còn phải thu', value: formatVnd(d.due), total: true },
-          ]}
-          confirmLabel={`Thu ${formatVnd(d.due)}`}
-          pendingLabel="Đang thu…"
-          onClose={close}
-          onConfirm={() => {
-            replace({ ...target, status: 'completed', settled: true });
-            close();
-            toast({
-              text: `Đã thu ${formatVnd(d.due)} ${METHOD_LABEL[method]}. Lịch hẹn hoàn thành.`,
-            });
-          }}
-        >
-          <Choice
-            label="Hình thức"
-            value={method}
-            onChange={setMethod}
-            options={[
-              ['cash', 'Tiền mặt'],
-              ['transfer', 'Chuyển khoản'],
-            ]}
-          />
-        </ConfirmDialog>
-      );
-    } else if (pending.kind === 'no-show') {
+    if (pending.kind === 'no-show') {
       dialog = (
         <ConfirmDialog
           open
@@ -181,7 +148,8 @@ export function useAppointmentActions(
     /** `false` while the plan does not take bookings. */
     bookingOpen: canBook,
     checkIn,
-    collect: (a: Appointment) => ask('collect', a),
+    /** MH-29: the invoice of the appointment is collected on its own page. */
+    collect: (a: Appointment) => router.push(appHref(`checkout/${a.id}`)),
     noShow: (a: Appointment) => ask('no-show', a),
     cancel: (a: Appointment) => ask('cancel', a),
     dialog,

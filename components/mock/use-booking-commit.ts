@@ -1,14 +1,10 @@
 'use client';
 
-import {
-  tenantFixtures,
-  type Appointment,
-  type Customer,
-  type ServedSubject,
-} from '@/mock/fixtures';
+import type { Appointment, Customer, ServedSubject } from '@/mock/fixtures';
 import { buildAppointment, type BookingSlot } from '@/mock/booking';
 import type { BookingDraft } from './booking-draft';
 import { useScheduleStore } from './schedule-store';
+import { useLiveFixture } from './use-live-fixture';
 
 /**
  * Puts an online booking on the calendar of the tenant, where the receptionist sees it: first as a
@@ -17,7 +13,7 @@ import { useScheduleStore } from './schedule-store';
  */
 export function useBookingCommit(tenantSlug: string) {
   const store = useScheduleStore();
-  const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
+  const fixture = useLiveFixture(tenantSlug);
   const tenantId = fixture.tenant.id;
 
   function commit(

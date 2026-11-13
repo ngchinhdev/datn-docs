@@ -52,11 +52,11 @@ const FIRST_DIR: Record<SortKey, 'asc' | 'desc'> = {
 
 export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
   const base = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
-  const { customers, appointments } = useScheduleStore();
+  const { customers, appointments, policies } = useScheduleStore();
   // Customers made at the counter this session show here too.
   const fixture = useMemo(
-    () => ({ ...base, customers, appointments }),
-    [base, customers, appointments],
+    () => ({ ...base, customers, appointments, policies }),
+    [base, customers, appointments, policies],
   );
   const branch = fixture.branches[0]!;
   const router = useRouter();

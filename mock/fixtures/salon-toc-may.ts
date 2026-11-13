@@ -1,6 +1,7 @@
 import { appointmentBuilder } from './bookings.ts';
 import { dateRange, generateWeek } from './generate.ts';
 import { generatePeople, withVisitCounts } from './people.ts';
+import { salonMoney } from './salon-money.ts';
 import { salonServices as services } from './salon-services.ts';
 import { hairSalonTemplate } from './templates.ts';
 import type {
@@ -110,6 +111,19 @@ const regulars: Customer[] = [
     callName: 'Anh Bảo An',
     phone: '+84987654321',
     visitCount: 2,
+    packages: [
+      {
+        id: 'may-pkg-an-1',
+        name: 'Gói 5 lần gội sấy',
+        totalSessions: 5,
+        usedSessions: 3,
+        remainingSessions: 2,
+        expiresAt: '30/01/2027',
+        serviceVariantId: 'may-wash-std',
+        priceVnd: 380_000n,
+        unitPriceVnd: 80_000n,
+      },
+    ],
   },
   {
     id: 'may-c-ha',
@@ -117,7 +131,11 @@ const regulars: Customer[] = [
     name: 'Lê Thu Hà',
     callName: 'Chị Hà',
     phone: '+84934567890',
+    email: 'ha.le@example.com',
     visitCount: 6,
+    note: 'Da đầu nhạy cảm, thử thuốc trước khi nhuộm. Thích nói chuyện ít.',
+    marketingOptIn: false,
+    consentAt: '2026-09-02T03:00:00Z',
   },
   {
     id: 'may-c-tuan',
@@ -150,6 +168,19 @@ const regulars: Customer[] = [
     callName: 'Anh Phúc',
     phone: '+84903444555',
     visitCount: 2,
+    packages: [
+      {
+        id: 'may-pkg-phuc-1',
+        name: 'Gói 10 lần gội sấy',
+        totalSessions: 10,
+        usedSessions: 3,
+        remainingSessions: 7,
+        expiresAt: '28/04/2027',
+        serviceVariantId: 'may-wash-std',
+        priceVnd: 700_000n,
+        unitPriceVnd: 80_000n,
+      },
+    ],
   },
   {
     id: 'may-c-van',
@@ -198,6 +229,8 @@ const saturday: Appointment[] = [
     {
       checkedInAt: '2026-11-07T01:56:00Z',
       depositVnd: 100_000n,
+      depositRef: 'PG-7K2Q9',
+      depositPaidAt: '2026-11-05T14:14:00Z',
       note: 'Da đầu nhạy cảm, dùng thuốc không amoniac.',
     },
   ),
@@ -372,35 +405,12 @@ const others = (
                 usedSessions: 4,
                 remainingSessions: 6,
                 expiresAt: '31/03/2027',
+                serviceVariantId: 'may-wash-std',
+                priceVnd: 700_000n,
+                unitPriceVnd: 80_000n,
                 note: 'Đặt Gội sấy thì buổi trong gói được trừ khi bạn làm xong.',
               },
             ],
-            wallet: {
-              balanceVnd: 350_000n,
-              realVnd: 300_000n,
-              bonusVnd: 50_000n,
-              history: [
-                {
-                  id: 'tx-1',
-                  date: '15/10',
-                  description: 'Cắt tóc, trả bằng ví',
-                  amountText: '−150.000 ₫',
-                },
-                {
-                  id: 'tx-2',
-                  date: '02/10',
-                  description: 'Dùng 1 buổi gói gội sấy',
-                  amountText: '−1 buổi',
-                },
-                {
-                  id: 'tx-3',
-                  date: '01/10',
-                  description: 'Nạp ví ở quầy, tặng 10%',
-                  amountText: '+500.000 ₫ · +50.000 ₫',
-                  isPositive: true,
-                },
-              ],
-            },
           }
         : {}),
     } satisfies Customer,
@@ -909,4 +919,35 @@ export const salonTocMay: TenantFixture = {
   customers: withVisitCounts(everyone, appointments),
   servedSubjects: allSubjects,
   appointments,
+  policies: hairSalonTemplate.defaultPolicies,
+  packageCatalog: [
+    {
+      id: 'may-pkg-10',
+      name: 'Gói 10 lần gội sấy',
+      serviceVariantId: 'may-wash-std',
+      totalSessions: 10,
+      validDays: 180,
+      priceVnd: 700_000n,
+    },
+    {
+      id: 'may-pkg-5',
+      name: 'Gói 5 lần gội sấy',
+      serviceVariantId: 'may-wash-std',
+      totalSessions: 5,
+      validDays: 90,
+      priceVnd: 380_000n,
+    },
+    {
+      id: 'may-pkg-dye-3',
+      name: 'Gói 3 lần nhuộm phủ bạc',
+      serviceVariantId: 'may-dye-short',
+      totalSessions: 3,
+      validDays: 365,
+      priceVnd: 1_350_000n,
+    },
+  ],
+  topupBonusTiers: [{ minVnd: 1_000_000n, percent: 10 }],
+  commissionPercent: 10,
+  actors: { receptionist: 'Lan', manager: 'Hùng', owner: 'Chủ cơ sở' },
+  money: salonMoney(services, appointments),
 };

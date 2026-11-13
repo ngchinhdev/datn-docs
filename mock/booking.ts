@@ -69,7 +69,7 @@ const queryOf = (
   date,
   // BR-06: a customer books no sooner than the notice and no further than the advance the shop
   // allows; `now` stays the real time, for the holds that have run out (BR-07).
-  ...(applyPolicy ? bookingWindow(fixture.template.defaultPolicies, now) : { notBefore: now }),
+  ...(applyPolicy ? bookingWindow(fixture.policies, now) : { notBefore: now }),
   now,
   ...(state ? { state } : {}),
   items: refs.map((ref) => ({
