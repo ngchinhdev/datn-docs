@@ -423,6 +423,12 @@ export function CheckoutScreen({ tenantSlug, target }: { tenantSlug: string; tar
                     <dd className="sp-num">−{formatVnd(totals.depositApplied)}</dd>
                   </>
                 )}
+                {totals.depositUnused > 0n && customer && (
+                  <>
+                    <dt>Cọc thừa</dt>
+                    <dd className="sp-num">{formatVnd(totals.depositUnused)} chuyển vào ví</dd>
+                  </>
+                )}
                 <dt className="border-t border-(--line) pt-2 font-semibold text-(--ink)">
                   Còn phải thu
                 </dt>

@@ -774,6 +774,62 @@ for (const f of tenantFixtures) {
       pkg ? pkg.expiresAt : '',
     );
   } else report(false, 'Bán gói', sold.kind);
+  // BR-22: a deposit of 100.000 ₫ on an invoice of 80.000 ₫ leaves 20.000 ₫ for the wallet.
+  const smallId = idOf('HĐ-0187');
+  const small = editInvoice(start, smallId, (i) => ({
+    ...i,
+    lines: i.lines.map((l) => ({ ...l, unitPriceVnd: 80_000n })),
+  }));
+  const excessTotals = invoiceTotals(
+    small.money.invoices.find((i) => i.id === smallId)!.lines,
+    undefined,
+    100_000n,
+  );
+  report(
+    excessTotals.depositApplied === 80_000n &&
+      excessTotals.depositUnused === 20_000n &&
+      excessTotals.due === 0n,
+    'BR-22: cọc 100.000 ₫, hóa đơn 80.000 ₫ → trừ 80.000 ₫, thừa 20.000 ₫, còn phải thu 0 ₫',
+    show(excessTotals),
+  );
+  const settled = collect(small, smallId, [], ctx);
+  if (settled.kind === 'paid') {
+    const w = settled.world;
+    const e = w.money.walletEntries.filter((x) => x.kind === 'deposit_excess');
+    report(
+      e.length === 1 &&
+        e[0]!.customerId === 'may-c-ha' &&
+        e[0]!.realVnd === 20_000n &&
+        e[0]!.bonusVnd === 0n &&
+        e[0]!.invoiceId === smallId,
+      'BR-22: cọc thừa 20.000 ₫ vào ví chị Hà thành bút toán deposit_excess, toàn tiền thật',
+      show(e),
+    );
+    const bal = walletBalance(w.money.walletEntries, 'may-c-ha');
+    report(
+      bal.realVnd === 170_000n && bal.bonusVnd === 100_000n,
+      'BR-25: ví chị Hà 150.000 ₫ + 20.000 ₫ thật, 100.000 ₫ tặng, cọc thừa rút được',
+      show(bal),
+    );
+    const again = collect(w, smallId, [], ctx);
+    report(
+      again.kind === 'duplicate' &&
+        again.world.money.walletEntries.filter((x) => x.kind === 'deposit_excess').length === 1,
+      'BR-21: bấm Thu lần hai không ghi cọc thừa lần nữa',
+    );
+    const dep = w.money.payments.find((p) => p.invoiceId === smallId && p.purpose === 'deposit')!;
+    const inv = w.money.invoices.find((i) => i.id === smallId)!;
+    report(
+      refundable(inv, dep, w.money.refunds).maxVnd === 0n,
+      'BR-28: phần cọc thừa đã vào ví nên khoản cọc không hoàn lần nữa',
+    );
+    report(
+      collectedVnd(inv, w.money.payments) === 0n,
+      'Hóa đơn thu 0 ₫: cọc không tính là tiền thu của hóa đơn',
+    );
+  } else report(false, 'Thu hóa đơn có cọc thừa', settled.kind);
+  const noExcess = collect(start, idOf('HĐ-0186'), [], ctx);
+  report(noExcess.kind !== 'paid', 'Hóa đơn đã thu không thu lại');
   const drafted = ensureDraft(
     start,
     salon.appointments.find((a) => a.id === 'may-a-ha')!,

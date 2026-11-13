@@ -169,6 +169,16 @@ export function refundable(
   if (payment.purpose === 'deposit') {
     usable -= invoiceTotals(invoice.lines, invoice.discount, invoice.depositVnd).depositApplied;
   }
+  // Once the invoice is collected, what the deposit did not cover is already in the wallet.
+  if (payment.purpose === 'deposit' && invoice.paidAt) {
+    return {
+      maxVnd: 0n,
+      blocked:
+        usable < payment.amountVnd && invoice.depositVnd > usable
+          ? 'Cọc đã trừ vào dịch vụ, phần thừa đã chuyển vào ví; hoàn qua khoản khác.'
+          : 'Cọc đã trừ vào dịch vụ đã làm; hoàn qua khoản khác.',
+    };
+  }
   const left = max(0n, usable - held);
   if (left > 0n) return { maxVnd: left, blocked: null };
   return {
@@ -332,15 +342,13 @@ export const invoiceStatusBadge: Record<InvoiceStatus, string> = {
   refunded: 'cancelled',
 };
 
-/** What the customer paid at the desk or online and the invoice kept: payments that came in, minus the deposit taken off. */
+/** What the customer paid for the invoice itself: the payments that came in, not the deposit. */
 export function collectedVnd(invoice: Invoice, payments: readonly Payment[]): bigint {
-  const paid = sum(
+  return sum(
     payments
-      .filter((p) => p.invoiceId === invoice.id && p.status === 'paid')
+      .filter((p) => p.invoiceId === invoice.id && p.purpose === 'invoice' && p.status === 'paid')
       .map((p) => p.amountVnd),
   );
-  const { depositApplied } = invoiceTotals(invoice.lines, invoice.discount, invoice.depositVnd);
-  return max(0n, paid - depositApplied);
 }
 
 export function invoiceStatus(

@@ -92,6 +92,9 @@ export function InvoiceDetail({ tenantSlug, id }: { tenantSlug: string; id: stri
   const pendingTransfer = payments.some(
     (p) => p.purpose === 'invoice' && p.method === 'transfer' && p.status === 'pending',
   );
+  const excess = money.walletEntries.find(
+    (e) => e.invoiceId === invoice.id && e.kind === 'deposit_excess',
+  );
   const given = refunds
     .filter((r) => r.status === 'approved' || r.status === 'auto')
     .reduce((m, r) => m + r.amountVnd, 0n);
@@ -309,6 +312,12 @@ export function InvoiceDetail({ tenantSlug, id }: { tenantSlug: string; id: stri
                 <>
                   <dt>Đã cọc</dt>
                   <dd className="sp-num">−{formatVnd(totals.depositApplied)}</dd>
+                </>
+              )}
+              {excess && (
+                <>
+                  <dt>Cọc thừa</dt>
+                  <dd className="sp-num">{formatVnd(excess.realVnd)} chuyển vào ví</dd>
                 </>
               )}
               <dt className="border-t border-(--line) pt-2 font-semibold text-(--ink)">

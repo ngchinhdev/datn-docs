@@ -255,6 +255,20 @@ function finalize(
       });
     }
   }
+  // BR-22: a deposit bigger than the invoice is real money the customer can take out of the wallet.
+  if (totals.depositUnused > 0n && invoice.customerId) {
+    entries.push({
+      id: `wl-${invoice.id}-deposit-excess`,
+      customerId: invoice.customerId,
+      at: ctx.now,
+      realVnd: totals.depositUnused,
+      bonusVnd: 0n,
+      kind: 'deposit_excess',
+      memo: `Cọc thừa ${invoice.number} chuyển vào ví`,
+      invoiceId: invoice.id,
+      idempotencyKey: `deposit-excess:${invoice.id}`,
+    });
+  }
   if (customer && packages !== customer.packages) {
     customers = customers.map((c) => (c.id === customer.id ? { ...c, packages } : c));
   }

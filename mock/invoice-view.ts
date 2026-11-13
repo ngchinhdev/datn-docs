@@ -109,6 +109,15 @@ export function invoiceHistory(
       at: invoice.paidAt,
       text: `${invoice.collectedBy ?? 'Nhân viên'} thu ${formatVnd(totals.due)}`,
     });
+    const excess = money.walletEntries.find(
+      (e) => e.invoiceId === invoice.id && e.kind === 'deposit_excess',
+    );
+    if (excess) {
+      out.push({
+        at: invoice.paidAt,
+        text: `Cọc thừa ${formatVnd(excess.realVnd)} chuyển vào ví của khách`,
+      });
+    }
     const period = money.commission.find((c) => c.invoiceId === invoice.id && c.kind === 'earn');
     const label = money.periods.find((p) => p.id === period?.periodId)?.label;
     for (const c of money.commission.filter(

@@ -616,7 +616,7 @@ export interface WalletEntry {
   realVnd: bigint;
   /** Signed integer VND. */
   bonusVnd: bigint;
-  kind: 'topup' | 'payment' | 'refund' | 'withdraw';
+  kind: 'topup' | 'payment' | 'refund' | 'withdraw' | 'deposit_excess';
   memo: string;
   invoiceId?: string;
   idempotencyKey: string;
