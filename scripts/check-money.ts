@@ -13,6 +13,7 @@ import {
   editInvoice,
   ensureDraft,
   newDraft,
+  requestRefund,
   usablePackage,
   type Ctx,
   type World,
@@ -613,6 +614,37 @@ for (const f of tenantFixtures) {
     report(
       again.kind === 'duplicate' && pay(again.world, 'HĐ-0187').length === pay(w, 'HĐ-0187').length,
       'BR-21: bấm Thu lần hai chỉ ghi một khoản',
+    );
+    const cashPay = pay(w, 'HĐ-0187').find((p) => p.method === 'cash')!;
+    const depPay = pay(w, 'HĐ-0187').find((p) => p.purpose === 'deposit')!;
+    const ask = (amountVnd: bigint, reason: string, paymentId = cashPay.id) =>
+      requestRefund(w, { invoiceId: haId, paymentId, amountVnd, reason, lineId: 'retail-1' }, ctx);
+    const ok = ask(120_000n, 'Khách trả lại chai chưa mở');
+    report(
+      ok.error === null && ok.world.money.refunds.at(-1)?.status === 'pending',
+      'BR-28: yêu cầu hoàn 120.000 ₫ từ khoản tiền mặt của HĐ-0187 chờ duyệt',
+    );
+    report(
+      invoiceStatus(
+        ok.world.money.invoices.find((i) => i.id === haId)!,
+        ok.world.money.payments,
+        ok.world.money.refunds,
+      ) === 'refund_pending',
+      'Hóa đơn có yêu cầu hoàn chờ duyệt thì thành Chờ duyệt hoàn',
+    );
+    report(ask(120_000n, '   ').error !== null, 'BR-28: lý do bắt buộc');
+    report(ask(330_000n, 'x').error !== null, 'BR-28: hoàn không vượt số đã thu (320.000 ₫)');
+    report(
+      requestRefund(
+        ok.world,
+        { invoiceId: haId, paymentId: cashPay.id, amountVnd: 250_000n, reason: 'x' },
+        ctx,
+      ).error !== null,
+      'BR-28: yêu cầu thứ hai không vượt phần còn lại sau yêu cầu đang chờ (200.000 ₫)',
+    );
+    report(
+      ask(50_000n, 'x', depPay.id).error !== null,
+      'BR-28: cọc đã trừ vào dịch vụ không hoàn được',
     );
     const edited = editInvoice(w, haId, (i) => ({ ...i, lines: [] }));
     report(

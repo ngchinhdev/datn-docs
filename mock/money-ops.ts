@@ -16,6 +16,7 @@ import type {
   Payment,
   PaymentMethod,
   PlannedPayment,
+  RefundRequest,
   Service,
   WalletEntry,
 } from './fixtures/types.ts';
@@ -27,6 +28,7 @@ import {
   nextInvoiceNumber,
   packageExpiry,
   packageUsable,
+  refundable,
   splitWallet,
   walletBalance,
 } from './money.ts';
@@ -389,4 +391,91 @@ export function cancelTransfer(world: World, invoiceId: string): World {
 /** A package of the customer that can take a session of this service now (BR-26). */
 export function usablePackage(customer: Customer | undefined, variantId: string, now: string) {
   return customer?.packages?.find((p) => packageUsable(p, variantId, now));
+}
+
+export interface RefundInput {
+  invoiceId: string;
+  paymentId: string;
+  amountVnd: bigint;
+  reason: string;
+  /** The invoice line the refund is about. */
+  lineId?: string;
+  /** A package sale being given back, and the fee taken off (BR-27). */
+  packageId?: string;
+  feeVnd?: bigint;
+}
+
+/**
+ * BR-28: a request to give money back from one payment. It needs a reason and cannot be more than
+ * the payment still holds; the manager decides it later. A line that used a package session
+ * asks for the session back and may carry no money.
+ */
+export function requestRefund(
+  world: World,
+  input: RefundInput,
+  ctx: Ctx,
+): { world: World; error: string | null } {
+  const invoice = world.money.invoices.find((i) => i.id === input.invoiceId);
+  const payment = world.money.payments.find(
+    (p) => p.id === input.paymentId && p.invoiceId === input.invoiceId,
+  );
+  if (!invoice || !payment || !invoice.paidAt) {
+    return { world, error: 'Chỉ hóa đơn đã thu mới hoàn tiền được.' };
+  }
+  if (input.reason.trim() === '') return { world, error: 'Lý do là bắt buộc.' };
+  const line = invoice.lines.find((l) => l.id === input.lineId);
+  const returnSession = Boolean(line?.packageId);
+  const limit = refundable(invoice, payment, world.money.refunds);
+  if (input.amountVnd < 0n || (input.amountVnd === 0n && !returnSession)) {
+    return { world, error: 'Nhập số tiền lớn hơn 0.' };
+  }
+  if (input.amountVnd > limit.maxVnd) {
+    return { world, error: limit.blocked ?? `Tối đa ${formatVnd(limit.maxVnd)}.` };
+  }
+
+  const customer = world.customers.find((c) => c.id === invoice.customerId);
+  const pkg = input.packageId
+    ? customer?.packages?.find((p) => p.id === input.packageId)
+    : undefined;
+  const sameInvoice = world.money.refunds.filter((r) => r.invoiceId === invoice.id).length;
+  const base = (line?.description ?? invoice.lines[0]?.description ?? '').split(' · ')[0];
+  const request: RefundRequest = {
+    id: `rf-${digits(invoice.number)}-${sameInvoice + 1}`,
+    invoiceId: invoice.id,
+    paymentId: payment.id,
+    customerId: invoice.customerId,
+    who: customer?.callName ?? invoice.customerName ?? 'Khách lẻ',
+    what: pkg
+      ? `${invoice.number} · ${pkg.name}, dùng ${pkg.usedSessions}`
+      : `${invoice.number} · ${base}`,
+    amountVnd: input.amountVnd,
+    method: payment.method,
+    reason: input.reason.trim(),
+    createdBy: ctx.actor,
+    createdAt: ctx.now,
+    status: 'pending',
+    ...(input.lineId ? { lineId: input.lineId } : {}),
+    ...(input.packageId ? { packageId: input.packageId } : {}),
+    ...(input.feeVnd !== undefined ? { feeVnd: input.feeVnd } : {}),
+    ...(returnSession ? { returnSession: true } : {}),
+  };
+  return {
+    world: {
+      ...world,
+      money: {
+        ...world.money,
+        refunds: [...world.money.refunds, request],
+        audit: [
+          ...world.money.audit,
+          {
+            id: `au-${request.id}`,
+            at: ctx.now,
+            by: ctx.actor,
+            text: `Yêu cầu hoàn ${formatVnd(request.amountVnd)} cho ${invoice.number}: ${request.reason}`,
+          },
+        ],
+      },
+    },
+    error: null,
+  };
 }

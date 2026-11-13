@@ -442,3 +442,6 @@ export function draftInvoice(
     payments,
   };
 }
+
+/** The fee taken off a package that is given back (BR-27), until the settings page sets it. */
+export const PACKAGE_CANCEL_FEE = 50_000n;

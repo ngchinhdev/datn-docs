@@ -256,333 +256,340 @@ export function CheckoutScreen({ tenantSlug, target }: { tenantSlug: string; tar
 
   return (
     <>
-      <PageHeader
-        crumbs={crumbs}
-        title={`Thu tiền · ${who}`}
-        {...(sub ? { sub } : {})}
-        actions={
-          <Button variant="ghost" onClick={() => window.print()}>
-            In tạm tính
-          </Button>
-        }
-      />
-      <div className="sp-detail">
-        <div className="sp-detail__main flex min-w-0 flex-[1_1_560px] flex-col gap-5">
-          <section className="sp-panel" aria-labelledby="ck-lines">
-            <h2 className="sp-panel__title" id="ck-lines">
-              Hóa đơn nháp {invoice.number}
-            </h2>
-            <div
-              className="sp-table-wrap"
-              tabIndex={0}
-              role="region"
-              aria-label="Các dòng của hóa đơn, cuộn được"
-            >
-              <table className="sp-table">
-                <caption className="sp-sr-only">Các dòng của hóa đơn</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Dòng</th>
-                    <th scope="col">Người làm</th>
-                    <th scope="col" className="sp-table__num">
-                      SL
-                    </th>
-                    <th scope="col" className="sp-table__num">
-                      Đơn giá
-                    </th>
-                    <th scope="col" className="sp-table__num">
-                      Thành tiền
-                    </th>
-                    <th scope="col">
-                      <span className="sp-sr-only">Thao tác</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lines.map((line) => {
-                    const pkg = line.packageId
-                      ? customer?.packages?.find((p) => p.id === line.packageId)
-                      : undefined;
-                    const usable =
-                      line.kind === 'service' && line.serviceVariantId && !locked
-                        ? usablePackage(customer, line.serviceVariantId, ctx().now)
+      <div className="print-area">
+        <PageHeader
+          crumbs={crumbs}
+          title={`Thu tiền · ${who}`}
+          {...(sub ? { sub } : {})}
+          actions={
+            <Button variant="ghost" className="print:hidden" onClick={() => window.print()}>
+              In tạm tính
+            </Button>
+          }
+        />
+        <div className="sp-detail">
+          <div className="sp-detail__main flex min-w-0 flex-[1_1_560px] flex-col gap-5">
+            <section className="sp-panel" aria-labelledby="ck-lines">
+              <h2 className="sp-panel__title" id="ck-lines">
+                Hóa đơn nháp {invoice.number}
+              </h2>
+              <div
+                className="sp-table-wrap"
+                tabIndex={0}
+                role="region"
+                aria-label="Các dòng của hóa đơn, cuộn được"
+              >
+                <table className="sp-table">
+                  <caption className="sp-sr-only">Các dòng của hóa đơn</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Dòng</th>
+                      <th scope="col">Người làm</th>
+                      <th scope="col" className="sp-table__num">
+                        SL
+                      </th>
+                      <th scope="col" className="sp-table__num">
+                        Đơn giá
+                      </th>
+                      <th scope="col" className="sp-table__num">
+                        Thành tiền
+                      </th>
+                      <th scope="col">
+                        <span className="sp-sr-only">Thao tác</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lines.map((line) => {
+                      const pkg = line.packageId
+                        ? customer?.packages?.find((p) => p.id === line.packageId)
                         : undefined;
-                    return (
-                      <tr key={line.id}>
-                        <td>
-                          <span className="flex flex-col">
-                            <span className="font-medium">
-                              {line.description}
-                              {line.packageId && (
-                                <>
-                                  {' '}
-                                  <span className="sp-badge sp-badge--confirmed">Gói</span>
-                                </>
-                              )}
+                      const usable =
+                        line.kind === 'service' && line.serviceVariantId && !locked
+                          ? usablePackage(customer, line.serviceVariantId, ctx().now)
+                          : undefined;
+                      return (
+                        <tr key={line.id}>
+                          <td>
+                            <span className="flex flex-col">
+                              <span className="font-medium">
+                                {line.description}
+                                {line.packageId && (
+                                  <>
+                                    {' '}
+                                    <span className="sp-badge sp-badge--confirmed">Gói</span>
+                                  </>
+                                )}
+                              </span>
+                              <span className="sp-table__secondary">
+                                {pkg
+                                  ? `${line.detail ?? ''} · dùng 1 buổi "${pkg.name}", còn ${pkg.remainingSessions - 1} sau lần này`
+                                  : line.detail}
+                              </span>
                             </span>
-                            <span className="sp-table__secondary">
-                              {pkg
-                                ? `${line.detail ?? ''} · dùng 1 buổi "${pkg.name}", còn ${pkg.remainingSessions - 1} sau lần này`
-                                : line.detail}
-                            </span>
-                          </span>
-                        </td>
-                        <td>{line.staffResourceId ? L.name(line.staffResourceId) : ''}</td>
-                        <td className="sp-table__num sp-num">{line.quantity}</td>
-                        <td className="sp-table__num sp-num">{formatVnd(line.unitPriceVnd)}</td>
-                        <td className="sp-table__num sp-num">{formatVnd(lineAmount(line))}</td>
-                        <td>
-                          {locked ? null : line.packageId ? (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                const { packageId: _p, ...rest } = line;
-                                edit((i) => ({
-                                  ...i,
-                                  lines: i.lines.map((l) => (l.id === line.id ? rest : l)),
-                                }));
-                              }}
-                            >
-                              Bỏ dùng gói
-                            </Button>
-                          ) : usable ? (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => setLine(line.id, { packageId: usable.id })}
-                            >
-                              Dùng buổi gói
-                            </Button>
-                          ) : line.kind === 'retail' ? (
-                            <button
-                              type="button"
-                              className="sp-icon-btn"
-                              aria-label={`Bỏ dòng ${line.description}`}
-                              onClick={() => removeLine(line.id)}
-                            >
-                              <X size={16} aria-hidden="true" />
-                            </button>
-                          ) : null}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {!locked && !sale && <RetailForm onAdd={addRetail} />}
-            <p className="sp-panel__note">
-              Giá dịch vụ giữ như lúc đặt (BR-12).
-              {customer && !lines.some((l) => l.packageId) && !customer.packages?.length
-                ? ' Khách không có gói áp dụng.'
-                : ''}
-            </p>
-          </section>
-
-          {!sale && (
-            <DiscountPanel
-              invoice={invoice}
-              locked={locked}
-              canManage={canManage}
-              onChange={(discount) =>
-                edit((i) => {
-                  const { discount: _d, ...rest } = i;
-                  return discount ? { ...rest, discount } : rest;
-                })
-              }
-              actor={desk.actor}
-            />
-          )}
-        </div>
-
-        <aside className="sp-detail__side flex-[0_0_380px]" aria-label="Thanh toán">
-          <section className="sp-panel gap-1" aria-labelledby="ck-pay">
-            <h2 className="sp-panel__title" id="ck-pay">
-              Thanh toán
-            </h2>
-            <dl className="sp-kv">
-              <dt>Tạm tính</dt>
-              <dd className="sp-num">{formatVnd(totals.subtotal)}</dd>
-              {totals.packageUsed > 0n && (
-                <>
-                  <dt>Dùng gói</dt>
-                  <dd className="sp-num">−{formatVnd(totals.packageUsed)}</dd>
-                </>
-              )}
-              {!sale && (
-                <>
-                  <dt>Giảm giá</dt>
-                  <dd className="sp-num">{formatVnd(totals.discount)}</dd>
-                </>
-              )}
-              {totals.depositApplied > 0n && (
-                <>
-                  <dt>Đã cọc online</dt>
-                  <dd className="sp-num">−{formatVnd(totals.depositApplied)}</dd>
-                </>
-              )}
-              <dt className="border-t border-(--line) pt-2 font-semibold text-(--ink)">
-                Còn phải thu
-              </dt>
-              <dd className="sp-num border-t border-(--line) pt-2 text-[17px] font-bold">
-                {formatVnd(totals.due)}
-              </dd>
-            </dl>
-
-            {pending ? (
-              <div className="flex flex-col gap-(--space-2) border-t border-(--line) py-3">
-                <p className="sp-num m-0 text-sm leading-5">
-                  Chuyển khoản {formatVnd(pending.amountVnd)} đang chờ ngân hàng báo ({pending.code}
-                  ).
-                </p>
-                <Button variant="primary" block onClick={() => setQrOpen(true)}>
-                  Hiện mã QR
-                </Button>
+                          </td>
+                          <td>{line.staffResourceId ? L.name(line.staffResourceId) : ''}</td>
+                          <td className="sp-table__num sp-num">{line.quantity}</td>
+                          <td className="sp-table__num sp-num">{formatVnd(line.unitPriceVnd)}</td>
+                          <td className="sp-table__num sp-num">{formatVnd(lineAmount(line))}</td>
+                          <td>
+                            {locked ? null : line.packageId ? (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  const { packageId: _p, ...rest } = line;
+                                  edit((i) => ({
+                                    ...i,
+                                    lines: i.lines.map((l) => (l.id === line.id ? rest : l)),
+                                  }));
+                                }}
+                              >
+                                Bỏ dùng gói
+                              </Button>
+                            ) : usable ? (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => setLine(line.id, { packageId: usable.id })}
+                              >
+                                Dùng buổi gói
+                              </Button>
+                            ) : line.kind === 'retail' ? (
+                              <button
+                                type="button"
+                                className="sp-icon-btn"
+                                aria-label={`Bỏ dòng ${line.description}`}
+                                onClick={() => removeLine(line.id)}
+                              >
+                                <X size={16} aria-hidden="true" />
+                              </button>
+                            ) : null}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            ) : (
-              <>
-                {rows.map((row, i) => {
-                  const amount = amounts[i] ?? 0n;
-                  const split =
-                    row.method === 'wallet'
-                      ? splitWallet(amount, balance.realVnd, balance.bonusVnd)
-                      : null;
-                  const tendered =
-                    row.method === 'cash' && row.tendered.trim() !== ''
-                      ? (parseVnd(row.tendered) ?? 0n)
-                      : null;
-                  const label = row.method === 'wallet' ? 'Ví của khách' : METHOD_LABEL[row.method];
-                  return (
-                    <div
-                      key={row.method}
-                      className="grid grid-cols-[auto_1fr_auto_auto] items-start gap-[10px] border-t border-(--line) py-3"
-                    >
-                      <span className="flex size-8 items-center justify-center rounded-lg bg-(--fill-tonal)">
-                        {ICON[row.method as keyof typeof ICON]}
-                      </span>
-                      <span className="flex min-w-0 flex-col gap-[6px]">
-                        <span className="text-sm leading-5 font-medium">{label}</span>
-                        {row.method === 'wallet' && split && (
-                          <span className="sp-num text-[13px] leading-[18px] text-(--ink-muted)">
-                            Số dư {formatVnd(balance.balanceVnd)}: trừ tiền thật{' '}
-                            {formatVnd(split.realVnd)} trước
-                            {split.bonusVnd > 0n
-                              ? `, rồi ${formatVnd(split.bonusVnd)} tiền tặng`
-                              : ''}
-                          </span>
-                        )}
-                        {row.method === 'transfer' && (
-                          <span className="text-[13px] leading-[18px] text-(--ink-muted)">
-                            QR có xác nhận tự động
-                          </span>
-                        )}
-                        {row.method === 'card' && (
-                          <span className="text-[13px] leading-[18px] text-(--ink-muted)">
-                            Chỉ ghi tay, không nối máy quẹt
-                          </span>
-                        )}
-                        {row.method === 'cash' && (
-                          <>
-                            <Field id={`ck-cash-${i}`} label="Khách đưa" suffix="₫">
+              {!locked && !sale && <RetailForm onAdd={addRetail} />}
+              <p className="sp-panel__note">
+                Giá dịch vụ giữ như lúc đặt (BR-12).
+                {customer && !lines.some((l) => l.packageId) && !customer.packages?.length
+                  ? ' Khách không có gói áp dụng.'
+                  : ''}
+              </p>
+            </section>
+
+            {!sale && (
+              <DiscountPanel
+                invoice={invoice}
+                locked={locked}
+                canManage={canManage}
+                onChange={(discount) =>
+                  edit((i) => {
+                    const { discount: _d, ...rest } = i;
+                    return discount ? { ...rest, discount } : rest;
+                  })
+                }
+                actor={desk.actor}
+              />
+            )}
+          </div>
+
+          <aside className="sp-detail__side flex-[0_0_380px]" aria-label="Thanh toán">
+            <section className="sp-panel gap-1" aria-labelledby="ck-pay">
+              <h2 className="sp-panel__title" id="ck-pay">
+                Thanh toán
+              </h2>
+              <dl className="sp-kv">
+                <dt>Tạm tính</dt>
+                <dd className="sp-num">{formatVnd(totals.subtotal)}</dd>
+                {totals.packageUsed > 0n && (
+                  <>
+                    <dt>Dùng gói</dt>
+                    <dd className="sp-num">−{formatVnd(totals.packageUsed)}</dd>
+                  </>
+                )}
+                {!sale && (
+                  <>
+                    <dt>Giảm giá</dt>
+                    <dd className="sp-num">{formatVnd(totals.discount)}</dd>
+                  </>
+                )}
+                {totals.depositApplied > 0n && (
+                  <>
+                    <dt>Đã cọc online</dt>
+                    <dd className="sp-num">−{formatVnd(totals.depositApplied)}</dd>
+                  </>
+                )}
+                <dt className="border-t border-(--line) pt-2 font-semibold text-(--ink)">
+                  Còn phải thu
+                </dt>
+                <dd className="sp-num border-t border-(--line) pt-2 text-[17px] font-bold">
+                  {formatVnd(totals.due)}
+                </dd>
+              </dl>
+
+              {pending ? (
+                <div className="flex flex-col gap-(--space-2) border-t border-(--line) py-3">
+                  <p className="sp-num m-0 text-sm leading-5">
+                    Chuyển khoản {formatVnd(pending.amountVnd)} đang chờ ngân hàng báo (
+                    {pending.code}
+                    ).
+                  </p>
+                  <Button variant="primary" block onClick={() => setQrOpen(true)}>
+                    Hiện mã QR
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  {rows.map((row, i) => {
+                    const amount = amounts[i] ?? 0n;
+                    const split =
+                      row.method === 'wallet'
+                        ? splitWallet(amount, balance.realVnd, balance.bonusVnd)
+                        : null;
+                    const tendered =
+                      row.method === 'cash' && row.tendered.trim() !== ''
+                        ? (parseVnd(row.tendered) ?? 0n)
+                        : null;
+                    const label =
+                      row.method === 'wallet' ? 'Ví của khách' : METHOD_LABEL[row.method];
+                    return (
+                      <div
+                        key={row.method}
+                        className="grid grid-cols-[auto_1fr_auto_auto] items-start gap-[10px] border-t border-(--line) py-3"
+                      >
+                        <span className="flex size-8 items-center justify-center rounded-lg bg-(--fill-tonal)">
+                          {ICON[row.method as keyof typeof ICON]}
+                        </span>
+                        <span className="flex min-w-0 flex-col gap-[6px]">
+                          <span className="text-sm leading-5 font-medium">{label}</span>
+                          {row.method === 'wallet' && split && (
+                            <span className="sp-num text-[13px] leading-[18px] text-(--ink-muted)">
+                              Số dư {formatVnd(balance.balanceVnd)}: trừ tiền thật{' '}
+                              {formatVnd(split.realVnd)} trước
+                              {split.bonusVnd > 0n
+                                ? `, rồi ${formatVnd(split.bonusVnd)} tiền tặng`
+                                : ''}
+                            </span>
+                          )}
+                          {row.method === 'transfer' && (
+                            <span className="text-[13px] leading-[18px] text-(--ink-muted)">
+                              QR có xác nhận tự động
+                            </span>
+                          )}
+                          {row.method === 'card' && (
+                            <span className="text-[13px] leading-[18px] text-(--ink-muted)">
+                              Chỉ ghi tay, không nối máy quẹt
+                            </span>
+                          )}
+                          {row.method === 'cash' && (
+                            <>
+                              <Field id={`ck-cash-${i}`} label="Khách đưa" suffix="₫">
+                                <input
+                                  id={`ck-cash-${i}`}
+                                  inputMode="numeric"
+                                  placeholder={num(amount)}
+                                  value={row.tendered}
+                                  onChange={(e) =>
+                                    patchRow('cash', {
+                                      tendered: e.target.value.replace(/[^\d.]/g, ''),
+                                    })
+                                  }
+                                />
+                              </Field>
+                              {tendered !== null && tendered >= amount && (
+                                <span className="sp-num text-[13px] leading-[18px] text-(--ink-muted)">
+                                  Thối lại{' '}
+                                  <strong className="text-(--ink)">
+                                    {formatVnd(tendered - amount)}
+                                  </strong>
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </span>
+                        {rows.length > 1 ? (
+                          <span className="sp-field sp-field--sm w-[120px]">
+                            <span className="sp-field__control">
                               <input
-                                id={`ck-cash-${i}`}
+                                aria-label={`Số tiền ${label}`}
                                 inputMode="numeric"
-                                placeholder={num(amount)}
-                                value={row.tendered}
+                                value={row.amount ?? num(amount)}
                                 onChange={(e) =>
-                                  patchRow('cash', {
-                                    tendered: e.target.value.replace(/[^\d.]/g, ''),
+                                  patchRow(row.method, {
+                                    amount: e.target.value.replace(/[^\d.]/g, ''),
                                   })
                                 }
                               />
-                            </Field>
-                            {tendered !== null && tendered >= amount && (
-                              <span className="sp-num text-[13px] leading-[18px] text-(--ink-muted)">
-                                Thối lại{' '}
-                                <strong className="text-(--ink)">
-                                  {formatVnd(tendered - amount)}
-                                </strong>
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </span>
-                      {rows.length > 1 ? (
-                        <span className="sp-field sp-field--sm w-[120px]">
-                          <span className="sp-field__control">
-                            <input
-                              aria-label={`Số tiền ${label}`}
-                              inputMode="numeric"
-                              value={row.amount ?? num(amount)}
-                              onChange={(e) =>
-                                patchRow(row.method, {
-                                  amount: e.target.value.replace(/[^\d.]/g, ''),
-                                })
-                              }
-                            />
+                            </span>
                           </span>
-                        </span>
-                      ) : (
-                        <span className="sp-num text-[15px] leading-[22px] font-semibold whitespace-nowrap">
-                          {formatVnd(amount)}
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        className="sp-icon-btn"
-                        aria-label={`Bỏ ${label}`}
-                        onClick={() => removeRow(row.method)}
-                      >
-                        <X size={16} aria-hidden="true" />
-                      </button>
-                    </div>
-                  );
-                })}
+                        ) : (
+                          <span className="sp-num text-[15px] leading-[22px] font-semibold whitespace-nowrap">
+                            {formatVnd(amount)}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          className="sp-icon-btn"
+                          aria-label={`Bỏ ${label}`}
+                          onClick={() => removeRow(row.method)}
+                        >
+                          <X size={16} aria-hidden="true" />
+                        </button>
+                      </div>
+                    );
+                  })}
 
-                <div className="flex flex-wrap gap-2 border-t border-(--line) py-3">
-                  {METHODS.filter((m) => !rows.some((r) => r.method === m))
-                    .filter((m) => m !== 'wallet' || (customer && balance.balanceVnd > 0n && !sale))
-                    .map((m) => (
-                      <Button key={m} size="sm" onClick={() => addMethod(m)}>
-                        {m === 'wallet' ? 'Ví' : METHOD_LABEL[m]}
-                      </Button>
-                    ))}
-                </div>
+                  <div className="flex flex-wrap gap-2 border-t border-(--line) py-3">
+                    {METHODS.filter((m) => !rows.some((r) => r.method === m))
+                      .filter(
+                        (m) => m !== 'wallet' || (customer && balance.balanceVnd > 0n && !sale),
+                      )
+                      .map((m) => (
+                        <Button key={m} size="sm" onClick={() => addMethod(m)}>
+                          {m === 'wallet' ? 'Ví' : METHOD_LABEL[m]}
+                        </Button>
+                      ))}
+                  </div>
 
-                {rows.length > 0 && (
-                  <p
-                    role="status"
-                    className={`sp-fit ${gap.kind === 'ok' && !blocker ? 'sp-fit--ok' : 'sp-fit--bad'}`}
+                  {rows.length > 0 && (
+                    <p
+                      role="status"
+                      className={`sp-fit ${gap.kind === 'ok' && !blocker ? 'sp-fit--ok' : 'sp-fit--bad'}`}
+                    >
+                      <span>
+                        {blocker
+                          ? blocker
+                          : gap.kind === 'ok'
+                            ? `Đủ ${formatVnd(totals.due)} từ ${rows.length} phương thức.`
+                            : gap.kind === 'short'
+                              ? `Còn thiếu ${formatVnd(gap.gapVnd)}.`
+                              : `Thừa ${formatVnd(gap.gapVnd)}.`}
+                      </span>
+                    </p>
+                  )}
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    block
+                    className="mt-2"
+                    disabled={!ready}
+                    onClick={submit}
                   >
-                    <span>
-                      {blocker
-                        ? blocker
-                        : gap.kind === 'ok'
-                          ? `Đủ ${formatVnd(totals.due)} từ ${rows.length} phương thức.`
-                          : gap.kind === 'short'
-                            ? `Còn thiếu ${formatVnd(gap.gapVnd)}.`
-                            : `Thừa ${formatVnd(gap.gapVnd)}.`}
-                    </span>
-                  </p>
-                )}
-                <Button
-                  variant="primary"
-                  size="lg"
-                  block
-                  className="mt-2"
-                  disabled={!ready}
-                  onClick={submit}
-                >
-                  {withTransfer ? 'Hiện mã QR' : `Thu ${formatVnd(totals.due)}`}
-                </Button>
-              </>
-            )}
-            <p className="sp-panel__note">
-              Bấm hai lần vẫn chỉ ghi một khoản (BR-21). Thu xong, hóa đơn khóa; sửa bằng hoàn tiền.
-            </p>
-          </section>
-        </aside>
+                    {withTransfer ? 'Hiện mã QR' : `Thu ${formatVnd(totals.due)}`}
+                  </Button>
+                </>
+              )}
+              <p className="sp-panel__note">
+                Bấm hai lần vẫn chỉ ghi một khoản (BR-21). Thu xong, hóa đơn khóa; sửa bằng hoàn
+                tiền.
+              </p>
+            </section>
+          </aside>
+        </div>
       </div>
 
       {pending && (
