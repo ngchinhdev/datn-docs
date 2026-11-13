@@ -1,8 +1,6 @@
 import type { Customer, TenantFixture } from './fixtures';
 import { normalizePhone } from './format';
 
-/** K of BR-10: no-shows in the last six months after which the next booking needs a deposit. */
-export const NO_SHOW_DEPOSIT_THRESHOLD = 2;
 const SIX_MONTHS_MS = 183 * 86_400_000;
 const DAY_MS = 86_400_000;
 
@@ -23,6 +21,10 @@ export interface CustomerRow {
   depositRequired: boolean;
   hasNote: boolean;
 }
+
+/** BR-10: K no-shows in six months turn the deposit on, unless a person decided otherwise. */
+export const depositRequired = (customer: Customer, noShows: number, k: number) =>
+  customer.depositOverride ? customer.depositOverride.on : noShows >= k;
 
 const KEPT_AS_VISIT = new Set(['completed', 'checked_in']);
 
@@ -72,7 +74,7 @@ export function customerRows(fixture: TenantFixture, now: string): CustomerRow[]
       lastVisitAt,
       nextAt: upcoming[0] ?? null,
       preferredStaffId: top && topCount && topCount >= 2 ? top : null,
-      depositRequired: noShows >= NO_SHOW_DEPOSIT_THRESHOLD,
+      depositRequired: depositRequired(c, noShows, fixture.policies.depositAfterNoShows),
       hasNote: Boolean(c.note),
     };
   });

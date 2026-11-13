@@ -479,3 +479,42 @@ export function requestRefund(
     error: null,
   };
 }
+
+/**
+ * BR-25: taking money out of the wallet gives back the real money that is left, never the bonus.
+ * The entry is written like any other (BR-20) and the action goes to the log (BR-63).
+ */
+export function withdrawReal(world: World, customerId: string, ctx: Ctx): World {
+  const { realVnd } = walletBalance(world.money.walletEntries, customerId);
+  if (realVnd <= 0n) return world;
+  const n = world.money.walletEntries.filter(
+    (e) => e.customerId === customerId && e.kind === 'withdraw',
+  ).length;
+  const entry: WalletEntry = {
+    id: `wl-${customerId}-withdraw-${n + 1}`,
+    customerId,
+    at: ctx.now,
+    realVnd: -realVnd,
+    bonusVnd: 0n,
+    kind: 'withdraw',
+    memo: 'Rút tiền thật',
+    idempotencyKey: `withdraw:${customerId}:${n + 1}`,
+  };
+  const customer = world.customers.find((c) => c.id === customerId);
+  return {
+    ...world,
+    money: {
+      ...world.money,
+      walletEntries: [...world.money.walletEntries, entry],
+      audit: [
+        ...world.money.audit,
+        {
+          id: `au-${entry.id}`,
+          at: ctx.now,
+          by: ctx.actor,
+          text: `Rút ${formatVnd(realVnd)} tiền thật từ ví của ${customer?.name ?? customerId}`,
+        },
+      ],
+    },
+  };
+}
