@@ -229,6 +229,55 @@ export function accentStyle(tenantId: string, hex: string): Record<string, strin
 /** Days an old address keeps leading to the new one (BR-65). */
 export const REDIRECT_DAYS = 90;
 
+// ---- Packages and payments (BR-25, BR-26, BR-27, BR-38) ----
+
+/**
+ * What a package saves against paying per session: the price of one session, rounded down, and how
+ * much cheaper it is than the retail price in tenths of a percent (`125` is 12,5%). Negative when
+ * the package costs more.
+ */
+export function packageSaving(priceVnd: bigint, sessions: number, retailVnd: bigint) {
+  const perSession = sessions > 0 ? priceVnd / BigInt(sessions) : 0n;
+  const percentTenths = retailVnd > 0n ? Number(((retailVnd - perSession) * 1000n) / retailVnd) : 0;
+  return { perSession, percentTenths };
+}
+
+/** `12,5`, `5`: tenths of a percent as the page writes it. */
+export const percentText = (tenths: number) =>
+  (tenths / 10).toFixed(tenths % 10 === 0 ? 0 : 1).replace('.', ',');
+
+/** How many packages customers hold from a product, refunded ones included. */
+export const soldCount = (
+  customers: readonly { packages?: readonly { productId?: string }[] }[],
+  productId: string,
+) =>
+  customers.reduce(
+    (n, c) => n + (c.packages?.filter((p) => p.productId === productId).length ?? 0),
+    0,
+  );
+
+/**
+ * BR-25: tiers must be real amounts, whole percents from 0 to 100, one tier for each starting
+ * amount. The page says what is wrong; `null` when all is well.
+ */
+export function tiersProblem(tiers: readonly { minVnd: bigint; percent: number }[]): string | null {
+  for (const t of tiers) {
+    if (t.minVnd <= 0n) return 'Mức nạp phải lớn hơn 0.';
+    if (!Number.isInteger(t.percent) || t.percent < 0 || t.percent > 100) {
+      return 'Tiền tặng là số nguyên từ 0 đến 100 %.';
+    }
+  }
+  const seen = new Set(tiers.map((t) => t.minVnd));
+  return seen.size === tiers.length ? null : 'Hai mức không được có cùng số tiền nạp.';
+}
+
+/** The last four characters of the secret key of version `version`; the mock has no real key. */
+export function keyTailFor(version: number): string {
+  let h = 2166136261;
+  for (const ch of `sapio-pay-${version}`) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+  return h.toString(16).padStart(8, '0').slice(-4);
+}
+
 // ---- What a save changes (BR-63) ----
 
 export interface BranchChange {

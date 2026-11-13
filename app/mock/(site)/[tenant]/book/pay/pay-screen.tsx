@@ -54,7 +54,7 @@ export function PayScreen({ tenantSlug }: { tenantSlug: string }) {
   const router = useRouter();
   const toast = useToast();
   const session = useCustomerSession();
-  const { setMoney } = useScheduleStore();
+  const { setMoney, saveSettings, config } = useScheduleStore();
   const { commit, release, rival, appointments, fixture } = useBookingCommit(tenantSlug);
   const { tenant } = fixture;
   const branch = fixture.branches[0]!;
@@ -293,9 +293,31 @@ export function PayScreen({ tenantSlug }: { tenantSlug: string }) {
     </div>
   );
 
+  /** The gateway reports the deposit: a line in its history (Cài đặt › Thanh toán). */
+  function logDeposit(d: BookingDraft, late: boolean) {
+    const events = config.gateway.events;
+    saveSettings({
+      config: {
+        gateway: {
+          ...config.gateway,
+          events: [
+            ...events,
+            {
+              id: `gw-${events.length + 1}`,
+              at: now,
+              text: `Báo cọc ${code}, ${formatVnd(d.depositVnd)}${late ? ' (sau khi hết giữ chỗ)' : ''}, đúng chữ ký`,
+              ok: true,
+            },
+          ],
+        },
+      },
+    });
+  }
+
   /** The mock gateway: the money arrives while the hold still runs. */
   function payInTime() {
     const d = draft!;
+    logDeposit(d, false);
     const made = commit(d, 'confirmed');
     if (made.customerId) session.loginWithId(made.customerId);
     setOutcome({ draft: d, late: false, paidAt: now, slot: d.slot, nearest: [] });
@@ -306,6 +328,7 @@ export function PayScreen({ tenantSlug }: { tenantSlug: string }) {
   /** The mock gateway: the money arrives after the hold ran out (BR-29). */
   function payLate() {
     const d = draft!;
+    logDeposit(d, true);
     const paidAt = addMinutes(d.holdExpiresAt, 1);
     const heldId = `${tenant.id}-a-web${d.id}`;
     const others = appointments.filter((a) => a.id !== heldId);

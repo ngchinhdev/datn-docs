@@ -242,6 +242,7 @@ export function CheckoutScreen({ tenantSlug, target }: { tenantSlug: string; tar
     const outcome = confirmTransfer(world, invoice.id, ctx());
     if (outcome.kind !== 'paid') return;
     apply(() => outcome.world);
+    desk.logGateway(`Báo ${invoice.number}, ${formatVnd(totals.due)}, đúng chữ ký`);
     setQrOpen(false);
     toast({ text: `Tiền về. ${invoice.number} đã thu ${formatVnd(totals.due)}.` });
     router.push(appHref(`invoices/${invoice.id}`));

@@ -24,7 +24,9 @@ export function SalesScreen({ tenantSlug }: { tenantSlug: string }) {
   const [type, setType] = useQueryState('type', 'package');
   const [customerId, setCustomerId] = useQueryState('customer', '');
   const [query, setQuery] = useState('');
-  const [packageId, setPackageId] = useState(fixture.packageCatalog[0]?.id ?? '');
+  const [packageId, setPackageId] = useState(
+    fixture.packageCatalog.find((p) => p.selling)?.id ?? '',
+  );
   const [amountText, setAmountText] = useState('1.000.000');
 
   const customer = world.customers.find((c) => c.id === customerId);
@@ -36,7 +38,9 @@ export function SalesScreen({ tenantSlug }: { tenantSlug: string }) {
     [world.customers, query],
   );
   const wallet = isWallet(type);
-  const product = fixture.packageCatalog.find((p) => p.id === packageId);
+  // BR-38: a package taken off sale is not sold any more.
+  const onSale = fixture.packageCatalog.filter((p) => p.selling);
+  const product = onSale.find((p) => p.id === packageId);
   const variantOf = (id: string) =>
     fixture.services.flatMap((s) => s.variants.map((v) => ({ v, s }))).find((x) => x.v.id === id);
   const amount = parseVnd(amountText);
@@ -206,11 +210,11 @@ export function SalesScreen({ tenantSlug }: { tenantSlug: string }) {
               <h2 className="sp-panel__title" id="s-pk">
                 Chọn gói
               </h2>
-              {fixture.packageCatalog.length === 0 ? (
+              {onSale.length === 0 ? (
                 <p className="sp-empty m-0">Cơ sở chưa có gói nào để bán.</p>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {fixture.packageCatalog.map((p) => {
+                  {onSale.map((p) => {
                     const info = variantOf(p.serviceVariantId);
                     const selected = p.id === packageId;
                     return (

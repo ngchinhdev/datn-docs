@@ -42,7 +42,27 @@ export function useDesk(tenantSlug: string) {
     [fixture, actor, role, now],
   );
 
+  /** The gateway reported a payment: a line in its history (Cài đặt › Thanh toán). */
+  const logGateway = useCallback(
+    (text: string) => {
+      const gateway = store.config.gateway;
+      store.saveSettings({
+        config: {
+          gateway: {
+            ...gateway,
+            events: [
+              ...gateway.events,
+              { id: `gw-${gateway.events.length + 1}`, at: now(), text, ok: true },
+            ],
+          },
+        },
+      });
+    },
+    [store, now],
+  );
+
   return {
+    logGateway,
     fixture,
     role,
     canManage,

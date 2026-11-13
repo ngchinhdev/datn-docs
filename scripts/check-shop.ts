@@ -8,8 +8,14 @@ import { tenantFixtures } from '../mock/fixtures/index.ts';
 import type { TenantFixture } from '../mock/fixtures/types.ts';
 import { openingHours, openingWindows } from '../mock/hours.ts';
 import { localTimeOf } from '../mock/shifts.ts';
+import { topupBonus } from '../mock/money.ts';
 import {
   ACCENT_SUGGESTIONS,
+  keyTailFor,
+  packageSaving,
+  percentText,
+  soldCount,
+  tiersProblem,
   accentProblem,
   accentStyle,
   contrastText,
@@ -471,6 +477,68 @@ const inRange = (times: string[], from: string, to: string) =>
     'Trang khách nhận màu đã chọn qua ba biến của cơ sở',
   );
   report(REDIRECT_DAYS === 90, 'BR-65: link cũ chuyển hướng 90 ngày');
+}
+
+// ---- BR-25, BR-26, BR-27, BR-38: packages and payments ----
+
+{
+  const saving = packageSaving(700_000n, 10, 80_000n);
+  report(
+    saving.perSession === 70_000n &&
+      saving.percentTenths === 125 &&
+      percentText(saving.percentTenths) === '12,5',
+    'BR-26: gói 700.000 ₫ / 10 buổi = 70.000 ₫ mỗi buổi, rẻ hơn giá lẻ 80.000 ₫ là 12,5%',
+    JSON.stringify([String(saving.perSession), saving.percentTenths]),
+  );
+  report(
+    packageSaving(900_000n, 10, 80_000n).percentTenths < 0 && percentText(50) === '5',
+    'Gói đắt hơn giá lẻ thì phần tiết kiệm âm; 5,0% viết là 5%',
+  );
+  const tiers = [
+    { minVnd: 1_000_000n, percent: 10 },
+    { minVnd: 3_000_000n, percent: 15 },
+  ];
+  report(
+    topupBonus(1_500_000n, tiers) === 150_000n && topupBonus(3_000_000n, tiers) === 450_000n,
+    'BR-25: thêm mức nạp 3.000.000 ₫ tặng 15% thì nạp 3.000.000 ₫ tặng 450.000 ₫, nạp 1.500.000 ₫ vẫn tặng 150.000 ₫',
+  );
+  report(
+    tiersProblem(tiers) === null &&
+      tiersProblem([{ minVnd: 0n, percent: 10 }]) !== null &&
+      tiersProblem([{ minVnd: 1_000_000n, percent: 101 }]) !== null &&
+      tiersProblem([{ minVnd: 1_000_000n, percent: -1 }]) !== null &&
+      tiersProblem([
+        { minVnd: 1_000_000n, percent: 5 },
+        { minVnd: 1_000_000n, percent: 10 },
+      ]) !== null &&
+      tiersProblem([]) === null,
+    'BR-25: mức tặng sai (nạp 0 ₫, trên 100%, âm, trùng số nạp) bị từ chối; không có mức nào là hợp lệ',
+  );
+  const sold = [
+    { packages: [{ productId: 'a' }, { productId: 'b' }] },
+    { packages: [{ productId: 'a' }] },
+    {},
+  ];
+  report(
+    soldCount(sold, 'a') === 2 && soldCount(sold, 'z') === 0,
+    'Cột "Đã bán" đếm gói khách đang giữ theo sản phẩm',
+  );
+  const catalog = salon.packageCatalog;
+  report(
+    catalog.some((p) => !p.selling) && catalog.some((p) => p.selling),
+    'BR-38: gói ngừng bán vẫn nằm trong danh sách để sửa, MH-30 chỉ liệt kê gói đang bán',
+  );
+  const an = salon.customers.find((c) => c.id === 'may-c-an')!.packages![0]!;
+  report(
+    an.productId === 'may-pkg-5' && an.priceVnd === 380_000n,
+    'BR-38: gói khách đã mua giữ giá lúc mua dù gói trong danh sách đổi giá',
+  );
+  report(
+    keyTailFor(1) !== keyTailFor(2) &&
+      keyTailFor(2) === keyTailFor(2) &&
+      /^[0-9a-f]{4}$/.test(keyTailFor(7)),
+    'Khóa mới có 4 ký tự cuối khác khóa cũ, cùng phiên bản thì cùng kết quả',
+  );
 }
 
 console.log(failures === 0 ? '\nTất cả đạt.' : `\n${failures} mục không đạt.`);

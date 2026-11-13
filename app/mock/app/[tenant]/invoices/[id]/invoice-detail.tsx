@@ -112,6 +112,7 @@ export function InvoiceDetail({ tenantSlug, id }: { tenantSlug: string; id: stri
     const outcome = confirmTransfer(world, invoice!.id, ctx());
     if (outcome.kind !== 'paid') return;
     apply(() => outcome.world);
+    desk.logGateway(`Báo ${invoice!.number}, ${formatVnd(totals.due)}, đúng chữ ký`);
     toast({ text: `Tiền về. ${invoice!.number} đã thu ${formatVnd(totals.due)}.` });
   }
 
