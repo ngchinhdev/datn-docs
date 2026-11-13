@@ -12,6 +12,7 @@ import {
   type StaffTimeOff,
   type TemplatePolicies,
 } from '@/mock/fixtures';
+import type { World } from '@/mock/money-ops';
 
 export interface ScheduleStore {
   appointments: Appointment[];
@@ -50,6 +51,8 @@ export interface ScheduleStore {
   money: MoneyState;
   /** Replaces the money state; the pure functions of `mock/money-ops` build the next one. */
   setMoney: (next: MoneyState | ((prev: MoneyState) => MoneyState)) => void;
+  /** One action that touches money, customers and appointments together (collect, refund). */
+  applyWorld: (fn: (prev: World) => World) => void;
 }
 
 interface TenantScheduleData {
@@ -313,6 +316,25 @@ export function ScheduleStoreProvider({
     [update],
   );
 
+  const applyWorld = useCallback(
+    (fn: (prev: World) => World) => {
+      update((prev) => {
+        const next = fn({
+          money: prev.money,
+          customers: prev.customers,
+          appointments: prev.appointments,
+        });
+        return {
+          ...prev,
+          money: next.money,
+          customers: next.customers,
+          appointments: next.appointments,
+        };
+      });
+    },
+    [update],
+  );
+
   const value = useMemo(
     () => ({
       appointments: data.appointments,
@@ -342,6 +364,7 @@ export function ScheduleStoreProvider({
       setPolicies,
       money: data.money,
       setMoney,
+      applyWorld,
     }),
     [
       data,
@@ -363,6 +386,7 @@ export function ScheduleStoreProvider({
       setStaffSeesCustomerPhone,
       setPolicies,
       setMoney,
+      applyWorld,
     ],
   );
 

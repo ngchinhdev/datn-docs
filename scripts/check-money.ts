@@ -7,6 +7,17 @@
 import { tenantFixtures } from '../mock/fixtures/index.ts';
 import type { Invoice, InvoiceLine, Payment, RefundRequest } from '../mock/fixtures/types.ts';
 import {
+  cancelTransfer,
+  collect,
+  confirmTransfer,
+  editInvoice,
+  ensureDraft,
+  newDraft,
+  usablePackage,
+  type Ctx,
+  type World,
+} from '../mock/money-ops.ts';
+import {
   collectedVnd,
   commissionClawback,
   commissionEarned,
@@ -520,6 +531,217 @@ for (const f of tenantFixtures) {
     m.refunds.length === 4 && m.refunds.filter((r) => r.createdBy === 'Tự động').length === 1,
     'Mẫu: 4 yêu cầu hoàn tiền, một yêu cầu "Tự động" (BR-29)',
   );
+}
+
+// ---- Collecting at the desk (BR-21, BR-22, BR-25, BR-26, BR-40) ----
+
+{
+  const NOW = '2026-11-07T03:48:00Z';
+  const ctx: Ctx = {
+    services: salon.services,
+    catalog: salon.packageCatalog,
+    commissionPercent: salon.commissionPercent,
+    now: NOW,
+    actor: 'Lan',
+  };
+  const start: World = {
+    money: salon.money,
+    customers: salon.customers,
+    appointments: salon.appointments,
+  };
+  const idOf = (no: string) => start.money.invoices.find((i) => i.number === no)!.id;
+  const pay = (w: World, no: string) => w.money.payments.filter((p) => p.invoiceId === idOf(no));
+
+  // Chị Hà: a retail line of 120.000, wallet 200.000 and cash 320.000 (khách đưa 500.000).
+  const retail = {
+    id: 'retail-1',
+    kind: 'retail' as const,
+    description: 'Dầu xả giữ màu 250 ml',
+    quantity: 1,
+    unitPriceVnd: 120_000n,
+    staffResourceId: 'may-mai',
+  };
+  const haId = idOf('HĐ-0187');
+  const withRetail = editInvoice(start, haId, (i) => ({ ...i, lines: [...i.lines, retail] }));
+  const plan = [
+    { method: 'wallet' as const, amountVnd: 200_000n },
+    { method: 'cash' as const, amountVnd: 320_000n, tenderedVnd: 500_000n },
+  ];
+  const bad = collect(withRetail, haId, [{ method: 'cash', amountVnd: 100_000n }], ctx);
+  report(
+    bad.kind === 'error',
+    'BR-21: tổng các khoản chưa đúng số còn phải thu thì không thu được',
+    bad.kind === 'error' ? bad.message : '',
+  );
+  const first = collect(withRetail, haId, plan, ctx);
+  report(first.kind === 'paid', 'Thu HĐ-0187 bằng ví và tiền mặt');
+  if (first.kind === 'paid') {
+    const w = first.world;
+    const wl = pay(w, 'HĐ-0187').find((p) => p.method === 'wallet')!;
+    report(
+      wl.realVnd === 150_000n && wl.bonusVnd === 50_000n,
+      'BR-25: ví trừ 150.000 ₫ tiền thật và 50.000 ₫ tiền tặng',
+      show(wl),
+    );
+    const bal = walletBalance(w.money.walletEntries, 'may-c-ha');
+    report(
+      bal.realVnd === 0n && bal.bonusVnd === 50_000n,
+      'BR-25: ví chị Hà còn 50.000 ₫ tiền tặng',
+      show(bal),
+    );
+    const cash = pay(w, 'HĐ-0187').find((p) => p.method === 'cash')!;
+    report(
+      cash.tenderedVnd === 500_000n && cash.tenderedVnd! - cash.amountVnd === 180_000n,
+      'BR-21: khách đưa 500.000 ₫ thì thối 180.000 ₫',
+    );
+    const inv = w.money.invoices.find((i) => i.id === haId)!;
+    report(Boolean(inv.paidAt) && inv.collectedBy === 'Lan', 'BR-21: hóa đơn khóa sau khi thu');
+    report(
+      w.appointments.find((a) => a.id === 'may-a-ha')!.settled === true,
+      'Lịch của chị Hà thành đã thanh toán',
+    );
+    const com = w.money.commission.filter((c) => c.invoiceId === haId);
+    report(
+      com.length === 1 &&
+        com[0]!.staffResourceId === 'may-mai' &&
+        com[0]!.amountVnd === 62_000n &&
+        com[0]!.periodId === '2026-11',
+      'BR-40: hoa hồng của Mai 62.000 ₫ vào kỳ 11/2026',
+      show(com),
+    );
+    const again = collect(w, haId, plan, ctx);
+    report(
+      again.kind === 'duplicate' && pay(again.world, 'HĐ-0187').length === pay(w, 'HĐ-0187').length,
+      'BR-21: bấm Thu lần hai chỉ ghi một khoản',
+    );
+    const edited = editInvoice(w, haId, (i) => ({ ...i, lines: [] }));
+    report(
+      edited.money.invoices.find((i) => i.id === haId)!.lines.length === 2,
+      'BR-21: hóa đơn đã thu không sửa được',
+    );
+  }
+
+  // Anh Bảo An: one session of the package, the rest by transfer.
+  const an = start.customers.find((c) => c.id === 'may-c-an');
+  const washPkg = usablePackage(an, 'may-wash-std', NOW);
+  report(washPkg?.id === 'may-pkg-an-1', 'BR-26: anh Bảo An có gói áp dụng cho Gội sấy');
+  const anId = idOf('HĐ-0188');
+  const used = editInvoice(start, anId, (i) => ({
+    ...i,
+    lines: i.lines.map((l) =>
+      l.serviceVariantId === 'may-wash-std' ? { ...l, packageId: washPkg!.id } : l,
+    ),
+  }));
+  const waiting = collect(used, anId, [{ method: 'transfer', amountVnd: 150_000n }], ctx);
+  report(waiting.kind === 'awaiting', 'BR-21: chuyển khoản chờ ngân hàng báo');
+  if (waiting.kind === 'awaiting') {
+    const w = waiting.world;
+    const inv = w.money.invoices.find((i) => i.id === anId)!;
+    report(
+      !inv.paidAt && invoiceStatus(inv, w.money.payments, w.money.refunds) === 'awaiting_transfer',
+      'Hóa đơn ở trạng thái Chờ tiền về',
+    );
+    const locked = editInvoice(w, anId, (i) => ({ ...i, lines: [] }));
+    report(
+      locked.money.invoices.find((i) => i.id === anId)!.lines.length === 2,
+      'Hóa đơn chờ tiền về không sửa được',
+    );
+    report(
+      w.customers.find((c) => c.id === 'may-c-an')!.packages![0]!.remainingSessions === 2,
+      'Buổi gói chưa trừ khi tiền chưa về',
+    );
+    const done = confirmTransfer(w, anId, ctx);
+    report(done.kind === 'paid', 'Tiền về thì hóa đơn thành Đã thu');
+    if (done.kind === 'paid') {
+      const pkg = done.world.customers.find((c) => c.id === 'may-c-an')!.packages![0]!;
+      report(
+        pkg.remainingSessions === 1 && pkg.usedSessions === 4,
+        'BR-26: gói còn 1 buổi sau khi tiền về',
+      );
+      const twice = confirmTransfer(done.world, anId, ctx);
+      report(
+        twice.kind === 'duplicate' && pay(twice.world, 'HĐ-0188').length === 1,
+        'BR-21: cổng báo hai lần vẫn chỉ ghi một khoản',
+      );
+      const com = done.world.money.commission.filter((c) => c.invoiceId === anId);
+      report(
+        com.length === 1 && com[0]!.amountVnd === 15_000n,
+        'BR-40: hoa hồng tính trên 150.000 ₫ thực thu, buổi gói không có hoa hồng',
+        show(com),
+      );
+    }
+    const back = cancelTransfer(w, anId);
+    report(
+      pay(back, 'HĐ-0188').length === 0 &&
+        back.money.invoices.find((i) => i.id === anId)!.held === undefined,
+      'Đổi phương thức bỏ mã chuyển khoản',
+    );
+  }
+
+  // A top-up and a package sale go through the same desk.
+  const topup = newDraft(
+    start,
+    {
+      customerId: 'may-c-ha',
+      lines: [
+        {
+          kind: 'wallet_topup',
+          description: 'Nạp ví',
+          quantity: 1,
+          unitPriceVnd: 1_000_000n,
+          bonusVnd: topupBonus(1_000_000n, salon.topupBonusTiers),
+        },
+      ],
+    },
+    ctx,
+  );
+  const topped = collect(
+    topup.world,
+    topup.invoice.id,
+    [{ method: 'cash', amountVnd: 1_000_000n }],
+    ctx,
+  );
+  if (topped.kind === 'paid') {
+    const bal = walletBalance(topped.world.money.walletEntries, 'may-c-ha');
+    report(
+      bal.realVnd === 1_150_000n && bal.bonusVnd === 200_000n,
+      'BR-25: nạp 1.000.000 ₫ cho chị Hà thêm 100.000 ₫ tiền tặng',
+      show(bal),
+    );
+  } else report(false, 'Nạp ví', topped.kind);
+  const sale = newDraft(
+    start,
+    {
+      customerId: 'may-c-ha',
+      lines: [
+        {
+          kind: 'package_sale',
+          description: 'Gói 10 lần gội sấy',
+          quantity: 1,
+          unitPriceVnd: 700_000n,
+          productId: 'may-pkg-10',
+        },
+      ],
+    },
+    ctx,
+  );
+  const sold = collect(sale.world, sale.invoice.id, [{ method: 'card', amountVnd: 700_000n }], ctx);
+  if (sold.kind === 'paid') {
+    const pkg = sold.world.customers.find((c) => c.id === 'may-c-ha')!.packages?.[0];
+    report(
+      pkg?.remainingSessions === 10 &&
+        pkg.unitPriceVnd === 80_000n &&
+        pkg.expiresAt === '06/05/2027',
+      'BR-26: bán gói 10 lần cho chị Hà, hạn 180 ngày (06/05/2027), giá lẻ lúc mua 80.000 ₫',
+      pkg ? pkg.expiresAt : '',
+    );
+  } else report(false, 'Bán gói', sold.kind);
+  const drafted = ensureDraft(
+    start,
+    salon.appointments.find((a) => a.id === 'may-a-ha')!,
+    ctx,
+  );
+  report(drafted === start, 'Mỗi lịch chỉ một hóa đơn nháp');
 }
 
 console.log(failures === 0 ? '\nTất cả đạt.' : `\n${failures} mục không đạt.`);

@@ -571,6 +571,17 @@ export interface Invoice {
   paidAt?: string;
   /** Who collected, e.g. "Lan". */
   collectedBy?: string;
+  /** While a transfer waits for the bank: the other payments, recorded together with it when it arrives (BR-21). */
+  held?: PlannedPayment[];
+}
+
+/** A payment chosen at the desk and not yet recorded. */
+export interface PlannedPayment {
+  method: PaymentMethod;
+  /** Integer VND counted towards the invoice. */
+  amountVnd: bigint;
+  /** Cash only: what the customer hands over. */
+  tenderedVnd?: bigint;
 }
 
 export interface Payment {
