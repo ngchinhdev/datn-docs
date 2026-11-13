@@ -19,6 +19,12 @@ import {
   type World,
 } from '../mock/money-ops.ts';
 import {
+  addAutoRefund,
+  approvalEffects,
+  approveRefund,
+  rejectRefund,
+} from '../mock/money-refunds.ts';
+import {
   collectedVnd,
   commissionClawback,
   commissionEarned,
@@ -774,6 +780,222 @@ for (const f of tenantFixtures) {
     ctx,
   );
   report(drafted === start, 'Mỗi lịch chỉ một hóa đơn nháp');
+}
+
+// ---- Deciding a refund (BR-27, BR-28, BR-29, BR-42, BR-63) ----
+
+{
+  const NOW = '2026-11-07T04:10:00Z';
+  const ctx: Ctx = {
+    services: salon.services,
+    catalog: salon.packageCatalog,
+    commissionPercent: salon.commissionPercent,
+    now: NOW,
+    actor: 'Hùng',
+  };
+  const start: World = {
+    money: salon.money,
+    customers: salon.customers,
+    appointments: salon.appointments,
+  };
+  const idOf = (no: string) => start.money.invoices.find((i) => i.number === no)!.id;
+
+  // HĐ-0184: the pending request of 80.000 ₫ cash by Lan.
+  const pending = start.money.refunds.find((r) => r.id === 'rf-0184')!;
+  const fx = approvalEffects(start, pending, ctx.commissionPercent);
+  report(
+    fx.clawback.length === 1 &&
+      fx.clawback[0]!.staffResourceId === 'may-lan' &&
+      fx.clawback[0]!.amountVnd === -8_000n &&
+      fx.periodLabel === '11/2026' &&
+      fx.status === 'refunded',
+    'BR-42: duyệt hoàn 80.000 ₫ của HĐ-0184 thu hồi −8.000 ₫ hoa hồng của Lan vào kỳ 11/2026, hóa đơn thành Đã hoàn',
+    show(fx),
+  );
+  const done = approveRefund(start, 'rf-0184', ctx);
+  report(done.error === null, 'Quản lý duyệt yêu cầu hoàn của HĐ-0184');
+  const w = done.world;
+  const inv = w.money.invoices.find((i) => i.id === idOf('HĐ-0184'))!;
+  report(
+    invoiceStatus(inv, w.money.payments, w.money.refunds) === 'refunded',
+    'BR-28: duyệt xong hóa đơn thành Đã hoàn',
+  );
+  report(
+    w.money.commission.some((c) => c.id === 'com-rf-0184-may-lan' && c.amountVnd === -8_000n),
+    'BR-42: có một dòng thu hồi hoa hồng',
+  );
+  report(
+    w.money.audit.some((a) => a.text.includes('Duyệt hoàn') && a.by === 'Hùng'),
+    'BR-63: duyệt hoàn tiền được ghi nhật ký',
+  );
+  report(
+    approveRefund(w, 'rf-0184', ctx).world === w,
+    'Duyệt hai lần: yêu cầu đã xử lý thì không đổi gì',
+  );
+
+  const bad = rejectRefund(start, 'rf-0184', '  ', ctx);
+  report(bad.error !== null, 'BR-28: từ chối cần ghi chú');
+  const no = rejectRefund(start, 'rf-0184', 'Khách đã nhận lại tiền ở quầy', ctx);
+  report(
+    no.error === null &&
+      no.world.money.refunds.find((r) => r.id === 'rf-0184')!.status === 'rejected' &&
+      !no.world.money.commission.some((c) => c.id.startsWith('com-rf-0184')),
+    'Từ chối không thu hồi hoa hồng và không trả tiền',
+  );
+
+  // A wallet payment goes back to the wallet in the same ratio (BR-28).
+  const wallet: Payment = {
+    id: 'pay-w',
+    invoiceId: 'inv-0184',
+    purpose: 'invoice',
+    method: 'wallet',
+    amountVnd: 80_000n,
+    realVnd: 60_000n,
+    bonusVnd: 20_000n,
+    code: 'WL-0184',
+    at: NOW,
+    status: 'paid',
+    idempotencyKey: 'k-wallet',
+  };
+  const walletWorld: World = {
+    ...start,
+    money: {
+      ...start.money,
+      payments: [...start.money.payments, wallet],
+      refunds: start.money.refunds.map((r) =>
+        r.id === 'rf-0184' ? { ...r, paymentId: 'pay-w', method: 'wallet' as const } : r,
+      ),
+    },
+  };
+  const back = approveRefund(walletWorld, 'rf-0184', ctx).world;
+  const ledgerEntry = back.money.walletEntries.find((e) => e.id === 'wl-rf-0184')!;
+  report(
+    ledgerEntry.realVnd === 60_000n &&
+      ledgerEntry.bonusVnd === 20_000n &&
+      ledgerEntry.kind === 'refund',
+    'BR-28: hoàn khoản trả bằng ví thì ví nhận lại 60.000 ₫ thật, 20.000 ₫ tặng',
+    show(ledgerEntry),
+  );
+
+  // BR-29: a deposit that came late is given back at once, once.
+  const auto = addAutoRefund(start.money, {
+    key: 'x1',
+    amountVnd: 100_000n,
+    slotLabel: '14:00',
+    at: NOW,
+  });
+  const last = auto.refunds.at(-1)!;
+  report(
+    last.status === 'auto' && last.createdBy === 'Tự động' && last.invoiceId === null,
+    'BR-29: cọc về muộn, giờ đã mất → yêu cầu "Tự động", không cần duyệt',
+  );
+  report(
+    addAutoRefund(auto, { key: 'x1', amountVnd: 100_000n, slotLabel: '14:00', at: NOW }) === auto,
+    'BR-29: một lịch chỉ một lần hoàn tự động',
+  );
+
+  // Giving a package session back (BR-28): a refund about a line that used one.
+  const sessionWorld = (() => {
+    const base = collect(
+      editInvoice(start, idOf('HĐ-0188'), (i) => ({
+        ...i,
+        lines: i.lines.map((l) =>
+          l.serviceVariantId === 'may-wash-std' ? { ...l, packageId: 'may-pkg-an-1' } : l,
+        ),
+      })),
+      idOf('HĐ-0188'),
+      [{ method: 'cash', amountVnd: 150_000n }],
+      { ...ctx, actor: 'Lan' },
+    );
+    return base.kind === 'paid' ? base.world : null;
+  })();
+  if (sessionWorld) {
+    const lineId = sessionWorld.money.invoices
+      .find((i) => i.id === idOf('HĐ-0188'))!
+      .lines.find((l) => l.packageId)!.id;
+    const payment = sessionWorld.money.payments.find(
+      (p) => p.invoiceId === idOf('HĐ-0188') && p.method === 'cash',
+    )!;
+    const asked = requestRefund(
+      sessionWorld,
+      {
+        invoiceId: idOf('HĐ-0188'),
+        paymentId: payment.id,
+        amountVnd: 0n,
+        reason: 'Xin lại buổi',
+        lineId,
+      },
+      ctx,
+    );
+    report(asked.error === null, 'BR-28: dòng dùng buổi gói xin lại buổi, không kèm tiền');
+    const id = asked.world.money.refunds.at(-1)!.id;
+    const approved = approveRefund(asked.world, id, ctx).world;
+    const pkg = approved.customers.find((c) => c.id === 'may-c-an')!.packages![0]!;
+    report(
+      pkg.remainingSessions === 2 && pkg.usedSessions === 3,
+      'BR-28: duyệt thì buổi gói được trả lại (còn 2 buổi như trước khi dùng)',
+      show(pkg),
+    );
+  } else report(false, 'Thu HĐ-0188 bằng tiền mặt để thử hoàn buổi gói');
+
+  // BR-27: giving a package sale back.
+  const sale = newDraft(
+    start,
+    {
+      customerId: 'may-c-ha',
+      lines: [
+        {
+          kind: 'package_sale',
+          description: 'Gói 10 lần gội sấy',
+          quantity: 1,
+          unitPriceVnd: 700_000n,
+          productId: 'may-pkg-10',
+        },
+      ],
+    },
+    ctx,
+  );
+  const paidSale = collect(
+    sale.world,
+    sale.invoice.id,
+    [{ method: 'transfer', amountVnd: 700_000n }],
+    ctx,
+  );
+  if (paidSale.kind === 'awaiting') {
+    const got = confirmTransfer(paidSale.world, sale.invoice.id, ctx);
+    if (got.kind === 'paid') {
+      const pay = got.world.money.payments.find((p) => p.invoiceId === sale.invoice.id)!;
+      const pkg = got.world.customers.find((c) => c.id === 'may-c-ha')!.packages!.at(-1)!;
+      const amount = packageRefund(pkg.priceVnd!, pkg.unitPriceVnd!, 0, 50_000n);
+      const ask = requestRefund(
+        got.world,
+        {
+          invoiceId: sale.invoice.id,
+          paymentId: pay.id,
+          amountVnd: amount,
+          reason: 'Đổi ý',
+          packageId: pkg.id,
+          feeVnd: 50_000n,
+        },
+        ctx,
+      );
+      const rid = ask.world.money.refunds.at(-1)!.id;
+      const fin = approveRefund(ask.world, rid, ctx).world;
+      report(
+        amount === 650_000n &&
+          fin.customers.find((c) => c.id === 'may-c-ha')!.packages!.at(-1)!.refunded === true,
+        'BR-27: hoàn gói chưa dùng buổi nào, phí 50.000 ₫ → 650.000 ₫, gói không dùng được nữa',
+      );
+      report(
+        usablePackage(
+          fin.customers.find((c) => c.id === 'may-c-ha'),
+          'may-wash-std',
+          NOW,
+        ) === undefined,
+        'Gói đã hoàn không còn áp dụng được cho dịch vụ',
+      );
+    }
+  }
 }
 
 console.log(failures === 0 ? '\nTất cả đạt.' : `\n${failures} mục không đạt.`);

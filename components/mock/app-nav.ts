@@ -46,7 +46,6 @@ const refunds: NavEntry = {
   label: 'Hoàn tiền',
   path: 'refunds',
   icon: Undo2,
-  badge: 1,
 };
 const shifts: NavEntry = {
   id: 'shifts',

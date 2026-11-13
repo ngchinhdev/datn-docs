@@ -47,7 +47,9 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   const toast = useToast();
   const router = useRouter();
   const { staff } = useStaffStore();
-  const { leaves, requeues } = useScheduleStore();
+  const { leaves, requeues, money } = useScheduleStore();
+  /** Refund requests waiting for a manager (BR-28). */
+  const pendingRefunds = money.refunds.filter((r) => r.status === 'pending').length;
   /** Requests waiting for a decision, and shifts cut short that left appointments to place. */
   const waiting = leaves.filter((l) => l.status === 'pending').length + requeues.length;
   const { entitlements: plan, daysLeft, can } = useSubscription();
@@ -68,15 +70,16 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
       ? pathname === base
       : pathname === `${base}/${path}` || pathname.startsWith(`${base}/${path}/`);
 
+  const badgeOf = (entry: (typeof navByRole)[StaffRole][number]) =>
+    entry.id === 'time-off' ? waiting : entry.id === 'refunds' ? pendingRefunds : entry.badge;
+
   const items: ShellNavItem[] = navByRole[role].map((entry) => ({
     id: entry.id,
     label: entry.label,
     href: appHref(entry.path),
     icon: entry.icon,
     ...(entry.group ? { group: entry.group } : {}),
-    ...((entry.id === 'time-off' ? waiting : entry.badge)
-      ? { badge: entry.id === 'time-off' ? waiting : entry.badge! }
-      : {}),
+    ...(badgeOf(entry) ? { badge: badgeOf(entry) } : {}),
     ...(entry.feature && !can(entry.feature) ? { locked: true } : {}),
     current: isCurrent(entry.path),
   }));
