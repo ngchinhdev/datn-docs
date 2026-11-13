@@ -27,10 +27,13 @@ import {
   invoiceTotals,
   nextInvoiceNumber,
   packageExpiry,
+  packageSessionCommission,
   packageUsable,
   refundable,
+  sessionRevenue,
   splitWallet,
   walletBalance,
+  type StaffAmount,
 } from './money.ts';
 
 /** Everything an action can change at once: money, the customers' packages, the appointments. */
@@ -65,6 +68,17 @@ export const METHOD_LABEL: Record<PaymentMethod, string> = {
   card: 'Thẻ',
   wallet: 'Ví',
   gateway: 'Cọc qua cổng (giả lập)',
+};
+
+/** Adds the amounts of the same person together. */
+const mergeStaff = (...lists: StaffAmount[][]): StaffAmount[] => {
+  const out: StaffAmount[] = [];
+  for (const e of lists.flat()) {
+    const found = out.find((x) => x.staffResourceId === e.staffResourceId);
+    if (found) found.amountVnd += e.amountVnd;
+    else out.push({ ...e });
+  }
+  return out;
 };
 
 const digits = (text: string) => text.replace(/\D/g, '');
@@ -213,6 +227,15 @@ function finalize(
   // What the lines do beyond the money: sessions used, a package sold, a wallet topped up.
   const customer = customers.find((c) => c.id === invoice.customerId);
   let packages = customer?.packages ?? [];
+  // BR-26: each package session earns its share of the package price when it is used.
+  const taken = new Map<string, number>();
+  const lines = invoice.lines.map((l) => {
+    const pkg = l.packageId ? customer?.packages?.find((p) => p.id === l.packageId) : undefined;
+    if (!pkg?.priceVnd) return l;
+    const nth = (taken.get(pkg.id) ?? pkg.usedSessions) + 1;
+    taken.set(pkg.id, nth);
+    return { ...l, sessionRevenueVnd: sessionRevenue(pkg.priceVnd, pkg.totalSessions, nth) };
+  });
   for (const l of invoice.lines) {
     if (l.packageId) {
       packages = packages.map((p) =>
@@ -282,7 +305,10 @@ function finalize(
   // BR-40, BR-42: commission on what was really collected, in the open period.
   const period = money.periods.find((p) => p.status === 'open');
   const commission: CommissionEntry[] = period
-    ? commissionEarned(invoice.lines, totals.discount, ctx.commissionPercent).map((e) => ({
+    ? mergeStaff(
+        commissionEarned(lines, totals.discount, ctx.commissionPercent),
+        packageSessionCommission(lines, ctx.commissionPercent),
+      ).map((e) => ({
         id: `com-${invoice.id}-${e.staffResourceId}`,
         staffResourceId: e.staffResourceId,
         periodId: period.id,
@@ -309,7 +335,7 @@ function finalize(
     invoices: money.invoices.map((i) => {
       if (i.id !== invoice.id) return i;
       const { held: _held, ...rest } = i;
-      return { ...rest, paidAt: ctx.now, collectedBy: ctx.actor };
+      return { ...rest, lines, paidAt: ctx.now, collectedBy: ctx.actor };
     }),
     payments: [
       ...money.payments.map((p) =>

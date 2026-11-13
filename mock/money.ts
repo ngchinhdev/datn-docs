@@ -288,6 +288,22 @@ export function commissionEarned(
 }
 
 /**
+ * BR-26, BR-40: a package session is worth its revenue, `price / sessions`; the person who did it
+ * earns commission on that, not on the 0 ₫ the line is collected for.
+ */
+export function packageSessionCommission(
+  lines: readonly InvoiceLine[],
+  percent: number,
+): StaffAmount[] {
+  const out: StaffAmount[] = [];
+  for (const line of lines) {
+    if (!line.packageId || !line.staffResourceId || !line.sessionRevenueVnd) continue;
+    addTo(out, line.staffResourceId, (line.sessionRevenueVnd * BigInt(percent)) / 100n);
+  }
+  return out;
+}
+
+/**
  * BR-28, BR-42: a refund takes commission back as a negative posting in the open period, never in
  * a period that is closed. A refund about one line takes it from that line's person; otherwise
  * from everyone in proportion to what they earned.

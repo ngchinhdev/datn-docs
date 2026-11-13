@@ -18,6 +18,7 @@ import {
   invoiceTotals,
   lineAmount,
   parseVnd,
+  sessionRevenue,
   settlementGap,
   splitWallet,
   walletBalance,
@@ -373,6 +374,22 @@ export function CheckoutScreen({ tenantSlug, target }: { tenantSlug: string; tar
                 </table>
               </div>
               {!locked && !sale && <RetailForm onAdd={addRetail} />}
+              {lines
+                .filter((l) => l.packageId)
+                .map((l) => {
+                  const pkg = customer?.packages?.find((p) => p.id === l.packageId);
+                  return pkg?.priceVnd ? (
+                    <p key={l.id} className="sp-panel__note">
+                      Buổi gói tính doanh thu khi dùng:{' '}
+                      {formatVnd(
+                        sessionRevenue(pkg.priceVnd, pkg.totalSessions, pkg.usedSessions + 1),
+                      )}{' '}
+                      ({formatVnd(pkg.priceVnd)} ÷ {pkg.totalSessions} buổi); hoa hồng của{' '}
+                      {l.staffResourceId ? L.name(l.staffResourceId) : 'người làm'} tính trên số này
+                      (BR-26, BR-40).
+                    </p>
+                  ) : null;
+                })}
               <p className="sp-panel__note">
                 Giá dịch vụ giữ như lúc đặt (BR-12).
                 {customer && !lines.some((l) => l.packageId) && !customer.packages?.length

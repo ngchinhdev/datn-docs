@@ -109,6 +109,12 @@ export function invoiceHistory(
       at: invoice.paidAt,
       text: `${invoice.collectedBy ?? 'Nhân viên'} thu ${formatVnd(totals.due)}`,
     });
+    for (const l of invoice.lines.filter((x) => x.sessionRevenueVnd)) {
+      out.push({
+        at: invoice.paidAt,
+        text: `Doanh thu buổi gói ${formatVnd(l.sessionRevenueVnd!)} ghi cho ${l.description} (BR-26)`,
+      });
+    }
     const excess = money.walletEntries.find(
       (e) => e.invoiceId === invoice.id && e.kind === 'deposit_excess',
     );

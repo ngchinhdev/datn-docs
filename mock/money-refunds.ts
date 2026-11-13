@@ -22,6 +22,8 @@ export interface ApprovalEffects {
   wallet: { realVnd: bigint; bonusVnd: bigint } | null;
   /** A package session goes back to the package. */
   returnSession: boolean;
+  /** The revenue the session earned when it was used, taken back with it (BR-26). */
+  sessionRevenueVnd: bigint | null;
   /** The package sold is given back and can no longer be used (BR-27). */
   packageRefunded: boolean;
   /** What the invoice becomes. */
@@ -41,6 +43,7 @@ export function approvalEffects(
     periodLabel: open?.label ?? null,
     wallet: null,
     returnSession: Boolean(request.returnSession),
+    sessionRevenueVnd: null,
     packageRefunded: Boolean(request.packageId),
     status: null,
   };
@@ -55,6 +58,15 @@ export function approvalEffects(
       ...(request.lineId ? { lineId: request.lineId } : {}),
       periods: world.money.periods,
     }).entries.filter((e) => e.amountVnd !== 0n);
+  }
+  // BR-26, BR-40: a session given back takes back the commission it earned.
+  const line = invoice.lines.find((l) => l.id === request.lineId);
+  if (open && request.returnSession && line?.staffResourceId && line.sessionRevenueVnd) {
+    const back = -((line.sessionRevenueVnd * BigInt(percent)) / 100n);
+    const found = effects.clawback.find((e) => e.staffResourceId === line.staffResourceId);
+    if (found) found.amountVnd += back;
+    else effects.clawback.push({ staffResourceId: line.staffResourceId, amountVnd: back });
+    effects.sessionRevenueVnd = line.sessionRevenueVnd;
   }
   if (payment?.method === 'wallet') {
     effects.wallet = splitWalletRefund(payment, world.money.refunds, request.amountVnd);

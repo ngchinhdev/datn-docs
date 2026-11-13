@@ -201,7 +201,15 @@ export function RefundsScreen({ tenantSlug }: { tenantSlug: string }) {
                   kỳ {fx.periodLabel} đang mở (BR-42).
                 </li>
               ))}
-              {fx.returnSession && <li>Trả lại 1 buổi gói cho khách.</li>}
+              {fx.returnSession && (
+                <li>
+                  Trả lại 1 buổi gói cho khách
+                  {fx.sessionRevenueVnd
+                    ? `, doanh thu buổi đó ${formatVnd(fx.sessionRevenueVnd)} bị đảo (BR-26)`
+                    : ''}
+                  .
+                </li>
+              )}
               {fx.packageRefunded && <li>Gói bị hoàn, khách không dùng được nữa (BR-27).</li>}
               <li>Ghi nhật ký thao tác (BR-63).</li>
             </ul>

@@ -703,9 +703,21 @@ for (const f of tenantFixtures) {
       );
       const com = done.world.money.commission.filter((c) => c.invoiceId === anId);
       report(
-        com.length === 1 && com[0]!.amountVnd === 15_000n,
-        'BR-40: hoa hồng tính trên 150.000 ₫ thực thu, buổi gói không có hoa hồng',
+        com.length === 1 && com[0]!.amountVnd === 22_600n,
+        'BR-40: hoa hồng của Hùng = 10% × 150.000 ₫ thực thu + 10% × 76.000 ₫ doanh thu buổi gói = 22.600 ₫',
         show(com),
+      );
+      const line = done.world.money.invoices
+        .find((i) => i.id === anId)!
+        .lines.find((l) => l.packageId)!;
+      report(
+        line.sessionRevenueVnd === 76_000n,
+        'BR-26: buổi thứ 4 của gói 380.000 ₫ / 5 buổi ghi doanh thu 76.000 ₫ vào dòng',
+        show(line.sessionRevenueVnd),
+      );
+      report(
+        done.world.money.commission.filter((c) => c.invoiceId === anId).length === 1,
+        'BR-40: hoa hồng của một người trên một hóa đơn chỉ một dòng, gộp cả phần buổi gói',
       );
     }
     const back = cancelTransfer(w, anId);
@@ -991,6 +1003,20 @@ for (const f of tenantFixtures) {
       pkg.remainingSessions === 2 && pkg.usedSessions === 3,
       'BR-28: duyệt thì buổi gói được trả lại (còn 2 buổi như trước khi dùng)',
       show(pkg),
+    );
+    const back = approved.money.commission.find((c) => c.id === `com-${id}-may-hung`);
+    report(
+      back?.amountVnd === -7_600n && back.kind === 'clawback' && back.periodId === '2026-11',
+      'BR-26, BR-42: hoàn buổi gói thu hồi đúng 7.600 ₫ hoa hồng của phần doanh thu 76.000 ₫, vào kỳ đang mở',
+      show(back),
+    );
+    const earned = approved.money.commission
+      .filter((c) => c.invoiceId === idOf('HĐ-0188'))
+      .reduce((m, c) => m + c.amountVnd, 0n);
+    report(
+      earned === 15_000n,
+      'Sau khi hoàn buổi gói, hoa hồng của hóa đơn còn lại 15.000 ₫ (phần tiền thực thu)',
+      show(earned),
     );
   } else report(false, 'Thu HĐ-0188 bằng tiền mặt để thử hoàn buổi gói');
 

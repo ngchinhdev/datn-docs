@@ -195,7 +195,18 @@ export function InvoiceDetail({ tenantSlug, id }: { tenantSlug: string; id: stri
                             <span className="sp-badge sp-badge--confirmed">Gói</span>
                           </>
                         )}
-                        {l.detail && <span className="sp-table__secondary">{l.detail}</span>}
+                        {(l.detail || l.sessionRevenueVnd) && (
+                          <span className="sp-table__secondary">
+                            {[
+                              l.detail,
+                              l.sessionRevenueVnd
+                                ? `doanh thu buổi gói ${formatVnd(l.sessionRevenueVnd)} (BR-26)`
+                                : null,
+                            ]
+                              .filter(Boolean)
+                              .join(' · ')}
+                          </span>
+                        )}
                       </td>
                       <td>{l.staffResourceId ? L.name(l.staffResourceId) : ''}</td>
                       <td className="sp-table__num sp-num">{l.quantity}</td>

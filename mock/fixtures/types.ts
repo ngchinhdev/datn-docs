@@ -544,6 +544,8 @@ export interface InvoiceLine {
   packageId?: string;
   /** `package_sale`: the product sold. */
   productId?: string;
+  /** Set when collected, on a line that took a package session: the revenue of that session (BR-26). */
+  sessionRevenueVnd?: bigint;
   /** `wallet_topup`: the bonus that comes with it (BR-25). */
   bonusVnd?: bigint;
 }
