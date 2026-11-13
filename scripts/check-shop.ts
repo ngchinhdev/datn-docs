@@ -9,6 +9,12 @@ import type { TenantFixture } from '../mock/fixtures/types.ts';
 import { openingHours, openingWindows } from '../mock/hours.ts';
 import { localTimeOf } from '../mock/shifts.ts';
 import {
+  ACCENT_SUGGESTIONS,
+  accentProblem,
+  accentStyle,
+  contrastText,
+  REDIRECT_DAYS,
+  whiteContrast,
   applyBranchPrices,
   branchChanges,
   branchRequeues,
@@ -426,6 +432,45 @@ const inRange = (times: string[], from: string, to: string) =>
       selfChangeBlock(appt, '2026-11-07T01:30:00.000Z', opened, false) === null,
     'BR-38: đổi chính sách không đụng lịch đã đặt: cùng giờ, điều khoản 6 giờ chặn, điều khoản 4 giờ cho đổi',
   );
+}
+
+// ---- BR-65: the colour of the shop ----
+
+{
+  report(
+    Math.abs(whiteContrast('#000000') - 21) < 0.01 &&
+      Math.abs(whiteContrast('#FFFFFF') - 1) < 0.001,
+    'BR-65: tương phản chữ trắng: nền đen 21 : 1, nền trắng 1 : 1',
+  );
+  report(
+    ACCENT_SUGGESTIONS.every((c) => accentProblem(c.hex) === null),
+    'BR-65: năm màu gợi ý đều đạt 4,5 : 1 với chữ trắng',
+    ACCENT_SUGGESTIONS.map((c) => c.hex + ' ' + contrastText(whiteContrast(c.hex))).join('; '),
+  );
+  report(
+    accentProblem('#F5D76E') !== null && accentProblem('#FFFF00') !== null,
+    'BR-65: màu vàng nhạt không đạt tương phản, không lưu được',
+    accentProblem('#F5D76E') ?? '',
+  );
+  report(
+    accentProblem('B4235A') !== null &&
+      accentProblem('#B4235') !== null &&
+      accentProblem('#b4235a') === null,
+    'BR-65: mã màu phải dạng #RRGGBB (chữ hoa hay thường đều được)',
+  );
+  report(
+    accentProblem(salon.config.branding.accent) === null &&
+      accentProblem(tenantFixtures[1]!.config.branding.accent) === null,
+    'Màu mẫu của hai cơ sở đạt tương phản',
+  );
+  const style = accentStyle('may', '#1F5FA8');
+  report(
+    style['--tenant-may'] === '#1F5FA8' &&
+      style['--on-tenant-may'] === '#ffffff' &&
+      Boolean(style['--tenant-may-soft']?.includes('#1F5FA8')),
+    'Trang khách nhận màu đã chọn qua ba biến của cơ sở',
+  );
+  report(REDIRECT_DAYS === 90, 'BR-65: link cũ chuyển hướng 90 ngày');
 }
 
 console.log(failures === 0 ? '\nTất cả đạt.' : `\n${failures} mục không đạt.`);

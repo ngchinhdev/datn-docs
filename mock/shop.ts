@@ -161,6 +161,74 @@ export function branchRequeues(
     }));
 }
 
+// ---- The colour of the shop (BR-65) ----
+
+/** The least contrast white text must have on the accent (BR-65). */
+export const MIN_ACCENT_CONTRAST = 4.5;
+
+/** Five colours offered next to the code box; every one passes `MIN_ACCENT_CONTRAST`. */
+export const ACCENT_SUGGESTIONS = [
+  { name: 'Hồng mận', hex: '#B4235A' },
+  { name: 'Cam đất', hex: '#B4532A' },
+  { name: 'Xanh rêu', hex: '#3F6B2A' },
+  { name: 'Xanh biển', hex: '#1F5FA8' },
+  { name: 'Tím', hex: '#6B3FA0' },
+] as const;
+
+const HEX = /^#[0-9a-f]{6}$/i;
+
+/** `#B4235A` (any case, with the `#`); anything else is not a colour code. */
+export const isHexColor = (text: string) => HEX.test(text.trim());
+
+function channel(value: number): number {
+  const c = value / 255;
+  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+}
+
+/** Relative luminance of a `#RRGGBB` colour (WCAG 2). */
+function luminance(hex: string): number {
+  const n = parseInt(hex.slice(1), 16);
+  return (
+    0.2126 * channel((n >> 16) & 255) + 0.7152 * channel((n >> 8) & 255) + 0.0722 * channel(n & 255)
+  );
+}
+
+/** Contrast ratio of white text on `hex`, 1 to 21 (WCAG 2). */
+export function whiteContrast(hex: string): number {
+  return 1.05 / (luminance(hex) + 0.05);
+}
+
+/** `5,9 : 1`, one decimal, a comma. */
+export const contrastText = (ratio: number) =>
+  `${(Math.floor(ratio * 10) / 10).toFixed(1).replace('.', ',')} : 1`;
+
+/** Why the colour cannot be saved (BR-65), or `null`. */
+export function accentProblem(hex: string): string | null {
+  if (!isHexColor(hex)) return 'Nhập mã màu dạng #B4235A.';
+  const ratio = whiteContrast(hex.trim());
+  if (ratio < MIN_ACCENT_CONTRAST) {
+    return `Chữ trắng trên màu này chỉ ${contrastText(ratio)}, chưa đạt mức 4,5 : 1. Chọn màu đậm hơn.`;
+  }
+  return null;
+}
+
+/** The pale colour behind a chosen item: the accent at 14% over the page surface, so it follows the theme. */
+export const accentSoft = (hex: string) => `color-mix(in oklab, ${hex} 14%, var(--surface))`;
+
+/** The pages of a customer take these custom properties from the shop, over the sample ones. */
+export function accentStyle(tenantId: string, hex: string): Record<string, string> {
+  return {
+    [`--tenant-${tenantId}`]: hex,
+    [`--tenant-${tenantId}-soft`]: accentSoft(hex),
+    [`--on-tenant-${tenantId}`]: '#ffffff',
+  };
+}
+
+// ---- The address of the booking page (BR-65) ----
+
+/** Days an old address keeps leading to the new one (BR-65). */
+export const REDIRECT_DAYS = 90;
+
 // ---- What a save changes (BR-63) ----
 
 export interface BranchChange {
