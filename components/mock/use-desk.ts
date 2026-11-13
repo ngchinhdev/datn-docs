@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useRef } from 'react';
 import { MOCK_NOW } from '@/mock/time';
 import type { Ctx, World } from '@/mock/money-ops';
-import { staffRoleOf, type StaffRole } from '@/mock/selection';
+import { roleLabel, staffRoleOf, type StaffRole } from '@/mock/selection';
 import { useScheduleStore } from './schedule-store';
 import { useLiveFixture } from './use-live-fixture';
 
@@ -37,8 +37,9 @@ export function useDesk(tenantSlug: string) {
       commissionPercent: fixture.commissionPercent,
       now: now(),
       actor,
+      role: roleLabel(role),
     }),
-    [fixture, actor, now],
+    [fixture, actor, role, now],
   );
 
   return {

@@ -3,10 +3,12 @@
  * HoSoKhach.dc.html draw it: invoices of 06/11 and 07/11, the wallet of chị Hà, four refund
  * requests. The drafts of today's appointments wait to be collected.
  */
+import { addAudit, SYSTEM_ACTOR, type Actor, type AuditInput } from '../audit.ts';
 import { draftInvoice } from '../money.ts';
 import { MOCK_NOW } from '../time.ts';
 import type {
   Appointment,
+  AuditEntry,
   CommissionEntry,
   Invoice,
   InvoiceLine,
@@ -20,6 +22,59 @@ import type {
 
 /** Local `YYYY-MM-DD` and `HH:mm` as a UTC instant. */
 const at = (date: string, hhmm: string) => new Date(`${date}T${hhmm}:00+07:00`).toISOString();
+
+/** What the log of 04/11 to 06/11 holds: the refunds above and the two things the system did. */
+function sampleAudit(): AuditEntry[] {
+  const lan: Actor = { name: 'Lan', role: 'Lễ tân' };
+  const hung: Actor = { name: 'Hùng', role: 'Quản lý' };
+  let log: AuditEntry[] = [];
+  const add = (when: string, actor: Actor, input: AuditInput) => {
+    log = addAudit(log, when, actor, input);
+  };
+  add(at('2026-11-04', '11:02'), lan, {
+    action: 'Tạo yêu cầu hoàn',
+    object: 'HĐ-0182',
+    href: 'invoices/inv-0182',
+    detail: '410.000 ₫ chuyển khoản · Chuyển nhà, xin hoàn gói (BR-27)',
+  });
+  add(at('2026-11-04', '15:30'), hung, {
+    action: 'Từ chối hoàn tiền',
+    object: 'HĐ-0182',
+    href: 'invoices/inv-0182',
+    detail: '410.000 ₫ · Gói còn hạn, mời khách dùng tiếp 7 buổi.',
+  });
+  add(at('2026-11-05', '08:00'), SYSTEM_ACTOR, {
+    action: 'Bật bắt buộc cọc',
+    object: 'Bùi Hữu Phúc',
+    href: 'customers/may-c-phuc',
+    detail: 'Không đến lần thứ 2 (BR-10)',
+  });
+  add(at('2026-11-06', '14:11'), SYSTEM_ACTOR, {
+    action: 'Hoàn cọc tự động',
+    object: 'Lịch 14:00',
+    href: 'refunds',
+    detail: '100.000 ₫ · giờ đã có người đặt (BR-29)',
+  });
+  add(at('2026-11-06', '17:45'), lan, {
+    action: 'Tạo yêu cầu hoàn',
+    object: 'HĐ-0183',
+    href: 'invoices/inv-0183',
+    detail: '50.000 ₫ thẻ · Tính nhầm giá tóc dài',
+  });
+  add(at('2026-11-06', '18:05'), hung, {
+    action: 'Duyệt hoàn tiền',
+    object: 'HĐ-0183',
+    href: 'invoices/inv-0183',
+    detail: '50.000 ₫ về thẻ · Tính nhầm giá tóc dài',
+  });
+  add(at('2026-11-06', '19:40'), lan, {
+    action: 'Tạo yêu cầu hoàn',
+    object: 'HĐ-0184',
+    href: 'invoices/inv-0184',
+    detail: '80.000 ₫ tiền mặt · Khách không hài lòng, sấy chưa khô',
+  });
+  return log;
+}
 
 export function salonMoney(services: Service[], appointments: Appointment[]): MoneyState {
   const priceOf = (variantId: string) => {
@@ -348,13 +403,6 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
       { id: '2026-10', label: '10/2026', status: 'closed' },
       { id: '2026-11', label: '11/2026', status: 'open' },
     ],
-    audit: [
-      {
-        id: 'au-1',
-        at: at('2026-11-06', '18:05'),
-        by: 'Hùng',
-        text: 'Duyệt hoàn 50.000 ₫ cho HĐ-0183',
-      },
-    ],
+    audit: sampleAudit(),
   };
 }

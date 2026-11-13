@@ -32,6 +32,10 @@ export interface Branch {
   tenantId: string;
   name: string;
   address: string;
+  /** Shown to a customer who can no longer change a booking by themselves (BR-08). */
+  phone?: string;
+  /** Price of a service variant at this branch; a variant not listed has the shared price (BR-02). */
+  prices?: Record<string, bigint>;
   timeZone: string;
   businessHours: BusinessHours[];
   specialDays: SpecialDay[];
@@ -157,6 +161,8 @@ export interface CustomerPackage {
   unitPriceVnd?: bigint;
   /** Refunded: no session is left to use. */
   refunded?: boolean;
+  /** The product it was sold from. */
+  productId?: string;
 }
 
 export interface WalletTransaction {
@@ -266,6 +272,8 @@ export interface Appointment {
   depositRef?: string;
   /** ISO 8601, UTC: when the deposit came in. */
   depositPaidAt?: string;
+  /** The rules in force when it was booked online (BR-38); the opening ones when absent. */
+  terms?: BookingTerms;
   /** Paid in full; a completed appointment without it waits for payment. */
   settled?: boolean;
   note?: string;
@@ -507,11 +515,14 @@ export interface TenantFixture {
   actors: Record<'receptionist' | 'manager' | 'owner', string>;
   /** Invoices, payments, wallet entries, refunds, commission. */
   money: MoneyState;
+  config: ShopConfig;
 }
 
 /** A package a shop sells (BR-26, BR-27); set up in Cài đặt › Gói liệu trình. */
 export interface PackageProduct {
   id: string;
+  /** Off: no more are sold; the ones customers hold stay usable (BR-38). */
+  selling: boolean;
   name: string;
   serviceVariantId: string;
   totalSessions: number;
@@ -682,13 +693,103 @@ export interface CommissionEntry {
   at: string;
 }
 
-/** A sensitive action and who did it (BR-63). */
+/** A sensitive action and who did it; entries are only added (BR-63). */
 export interface AuditEntry {
   id: string;
   /** ISO 8601, UTC. */
   at: string;
+  /** "Lan", or "Hệ thống" for what the system does by itself. */
   by: string;
+  /** Shown under the name: "Lễ tân", "Chủ cơ sở", "Tự động". */
+  role: string;
+  /** "Thu tiền", "Sửa chính sách", "Duyệt hoàn tiền". */
+  action: string;
+  /** What it was done to: "HĐ-0187", "Đặt trước ít nhất". */
+  object: string;
+  /** Where the object is, a path under `/mock/app/[tenant]`. */
+  href?: string;
+  detail: string;
+}
+
+/** A resource out of use for a while (BR-37). */
+export interface ResourceOutage {
+  id: string;
+  resourceId: string;
+  /** ISO 8601, UTC. */
+  from: string;
+  /** ISO 8601, UTC; "Mở lại" brings it to now. */
+  to: string;
+  reason: string;
+}
+
+/** What a cancelling customer gets back of the deposit, by how long before the time (BR-23). */
+export interface RefundTiers {
+  /** 24 hours or more before. */
+  over24: number;
+  /** From 4 to 24 hours before. */
+  over4: number;
+  /** Under 4 hours before, or no show. */
+  under4: number;
+}
+
+/** What the customer was promised when they booked; later changes of the settings do not reach it (BR-38). */
+export interface BookingTerms {
+  cancelBeforeHours: number;
+  maxReschedules: number;
+  refund: RefundTiers;
+}
+
+export interface Branding {
+  /** `#RRGGBB`, with at least 4.5 : 1 against white text (BR-65). */
+  accent: string;
+  /** The address of the booking page, `toc-may`. */
+  slug: string;
+  /** Name of the chosen logo file; nothing is uploaded. */
+  logoName?: string;
+  /** The address before the last change, which still leads here until `redirectUntil`. */
+  previousSlug?: string;
+  /** Local date `YYYY-MM-DD`. */
+  redirectUntil?: string;
+}
+
+export interface GatewayEvent {
+  id: string;
+  /** ISO 8601, UTC. */
+  at: string;
   text: string;
+  ok: boolean;
+}
+
+export interface NotificationSettings {
+  /** BR-66: only these two reminders can be turned off. */
+  reminder24h: boolean;
+  reminder2h: boolean;
+  staffNewAppointment: boolean;
+  staffNewLeave: boolean;
+}
+
+export interface ChatbotSettings {
+  enabled: boolean;
+  /** At most 200 characters. */
+  greeting: string;
+  /** BR-67. */
+  perCustomerPerDay: number;
+  perShopPerMonth: number;
+  usedThisMonth: number;
+}
+
+/** What Cài đặt keeps for a shop besides branch, resources, policies, packages and bonus tiers. */
+export interface ShopConfig {
+  outages: ResourceOutage[];
+  refundTiers: RefundTiers;
+  branding: Branding;
+  /** Taken off when a package is given back (BR-27). Integer VND. */
+  packageCancelFee: bigint;
+  /** Cash is always on. */
+  counterMethods: { transfer: boolean; card: boolean; wallet: boolean };
+  gateway: { keyTail: string; keyVersion: number; events: GatewayEvent[] };
+  notifications: NotificationSettings;
+  chatbot: ChatbotSettings;
 }
 
 export interface MoneyState {

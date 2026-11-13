@@ -4,6 +4,7 @@
  * takes the world and returns the next one; nothing is changed in place, and the clock and the
  * actor come in as arguments. Pure, so Node can run it (scripts/check-money.ts).
  */
+import { addAudit, addAudits, type Actor, type AuditInput } from './audit.ts';
 import type {
   Appointment,
   CommissionEntry,
@@ -52,7 +53,12 @@ export interface Ctx {
   now: string;
   /** Who does it: "Lan", "Hùng". */
   actor: string;
+  /** The role they act in, for the audit log: "Lễ tân", "Chủ cơ sở". */
+  role: string;
 }
+
+/** The person of a context, as the audit log writes them. */
+const whoIs = (ctx: Ctx): Actor => ({ name: ctx.actor, role: ctx.role });
 
 const PREFIX: Record<PaymentMethod, string> = {
   cash: 'CS',
@@ -260,6 +266,7 @@ function finalize(
           serviceVariantId: product.serviceVariantId,
           priceVnd: l.unitPriceVnd,
           unitPriceVnd: variant.priceVnd,
+          productId: product.id,
         };
         packages = [...packages, bought];
       }
@@ -319,16 +326,32 @@ function finalize(
       }))
     : [];
 
-  const audit = invoice.discount
-    ? [
-        {
-          id: `au-${invoice.id}-discount`,
-          at: ctx.now,
-          by: ctx.actor,
-          text: `Giảm giá ${formatVnd(totals.discount)} cho ${invoice.number}: ${invoice.discount.reason}`,
-        },
-      ]
-    : [];
+  // BR-63: collecting and a hand discount are logged.
+  const collected = plan
+    .map((p) => `${(METHOD_LABEL[p.method] ?? p.method).toLowerCase()} ${formatVnd(p.amountVnd)}`)
+    .join(', ');
+  const auditInputs: AuditInput[] = [
+    {
+      action: 'Thu tiền',
+      object: invoice.number,
+      href: `invoices/${invoice.id}`,
+      detail: `${formatVnd(totals.due)}${collected ? `: ${collected}` : ''}`,
+    },
+    ...(invoice.discount
+      ? [
+          {
+            action: 'Giảm giá',
+            object: invoice.number,
+            href: `invoices/${invoice.id}`,
+            detail: `${
+              invoice.discount.kind === 'percent'
+                ? `${invoice.discount.percent}%`
+                : formatVnd(invoice.discount.amountVnd)
+            } · ${invoice.discount.reason}`,
+          },
+        ]
+      : []),
+  ];
 
   money = {
     ...money,
@@ -347,7 +370,7 @@ function finalize(
     ],
     walletEntries: [...money.walletEntries, ...entries],
     commission: [...money.commission, ...commission],
-    audit: [...money.audit, ...audit],
+    audit: addAudits(money.audit, ctx.now, whoIs(ctx), auditInputs),
   };
   return { money, customers, appointments };
 }
@@ -505,15 +528,12 @@ export function requestRefund(
       money: {
         ...world.money,
         refunds: [...world.money.refunds, request],
-        audit: [
-          ...world.money.audit,
-          {
-            id: `au-${request.id}`,
-            at: ctx.now,
-            by: ctx.actor,
-            text: `Yêu cầu hoàn ${formatVnd(request.amountVnd)} cho ${invoice.number}: ${request.reason}`,
-          },
-        ],
+        audit: addAudit(world.money.audit, ctx.now, whoIs(ctx), {
+          action: 'Tạo yêu cầu hoàn',
+          object: invoice.number,
+          href: `invoices/${invoice.id}`,
+          detail: `${formatVnd(request.amountVnd)} ${(METHOD_LABEL[request.method] ?? '').toLowerCase()} · ${request.reason}`,
+        }),
       },
     },
     error: null,
@@ -546,15 +566,12 @@ export function withdrawReal(world: World, customerId: string, ctx: Ctx): World 
     money: {
       ...world.money,
       walletEntries: [...world.money.walletEntries, entry],
-      audit: [
-        ...world.money.audit,
-        {
-          id: `au-${entry.id}`,
-          at: ctx.now,
-          by: ctx.actor,
-          text: `Rút ${formatVnd(realVnd)} tiền thật từ ví của ${customer?.name ?? customerId}`,
-        },
-      ],
+      audit: addAudit(world.money.audit, ctx.now, whoIs(ctx), {
+        action: 'Rút tiền ví',
+        object: customer?.name ?? customerId,
+        href: `customers/${customerId}`,
+        detail: `${formatVnd(realVnd)} tiền thật`,
+      }),
     },
   };
 }

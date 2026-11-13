@@ -2,6 +2,7 @@
  * Deciding a refund: what approving does, approving, rejecting, and the automatic refund of a
  * deposit that came too late (BR-27, BR-28, BR-29, BR-42, BR-63). Pure, like `money-ops`.
  */
+import { addAudit, SYSTEM_ACTOR } from './audit.ts';
 import type { CommissionEntry, MoneyState, RefundRequest, WalletEntry } from './fixtures/types.ts';
 import { formatVnd } from './format.ts';
 import {
@@ -12,6 +13,16 @@ import {
   type StaffAmount,
 } from './money.ts';
 import type { Ctx, World } from './money-ops.ts';
+
+/** "tiền mặt", "thẻ": where a refund goes, in a sentence. */
+const NAMES: Record<string, string> = {
+  cash: 'tiền mặt',
+  transfer: 'chuyển khoản',
+  card: 'thẻ',
+  wallet: 'ví',
+  gateway: 'cổng thanh toán',
+};
+const methodName = (method: string) => NAMES[method] ?? method;
 
 /** What approving a request does, for the panel and for the approval itself. */
 export interface ApprovalEffects {
@@ -165,15 +176,17 @@ export function approveRefund(
         ),
         walletEntries: [...world.money.walletEntries, ...entries],
         commission: [...world.money.commission, ...commission],
-        audit: [
-          ...world.money.audit,
+        audit: addAudit(
+          world.money.audit,
+          ctx.now,
+          { name: ctx.actor, role: ctx.role },
           {
-            id: `au-${request.id}-approve`,
-            at: ctx.now,
-            by: ctx.actor,
-            text: `Duyệt hoàn ${formatVnd(request.amountVnd)} cho ${invoice.number}`,
+            action: 'Duyệt hoàn tiền',
+            object: invoice.number,
+            href: `invoices/${invoice.id}`,
+            detail: `${formatVnd(request.amountVnd)} về ${methodName(request.method)} · ${request.reason}`,
           },
-        ],
+        ),
       },
     },
     error: null,
@@ -209,15 +222,17 @@ export function rejectRefund(
               }
             : r,
         ),
-        audit: [
-          ...world.money.audit,
+        audit: addAudit(
+          world.money.audit,
+          ctx.now,
+          { name: ctx.actor, role: ctx.role },
           {
-            id: `au-${request.id}-reject`,
-            at: ctx.now,
-            by: ctx.actor,
-            text: `Từ chối hoàn ${formatVnd(request.amountVnd)} cho ${invoice?.number ?? request.what}: ${note.trim()}`,
+            action: 'Từ chối hoàn tiền',
+            object: invoice?.number ?? request.what,
+            ...(invoice ? { href: `invoices/${invoice.id}` } : {}),
+            detail: `${formatVnd(request.amountVnd)} · ${note.trim()}`,
           },
-        ],
+        ),
       },
     },
     error: null,
@@ -248,5 +263,14 @@ export function addAutoRefund(
     createdAt: input.at,
     status: 'auto',
   };
-  return { ...money, refunds: [...money.refunds, request] };
+  return {
+    ...money,
+    refunds: [...money.refunds, request],
+    audit: addAudit(money.audit, input.at, SYSTEM_ACTOR, {
+      action: 'Hoàn cọc tự động',
+      object: `Lịch ${input.slotLabel}`,
+      href: 'refunds',
+      detail: `${formatVnd(input.amountVnd)} · giờ đã có người đặt (BR-29)`,
+    }),
+  };
 }

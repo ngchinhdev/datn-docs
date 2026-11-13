@@ -388,6 +388,7 @@ export function InvoiceDetail({ tenantSlug, id }: { tenantSlug: string; id: stri
           invoice={invoice}
           money={money}
           customer={customer}
+          defaultFee={fixture.config.packageCancelFee}
           onClose={() => setRefundOpen(false)}
           onSubmit={(input) => {
             const result = requestRefund(world, input, ctx());

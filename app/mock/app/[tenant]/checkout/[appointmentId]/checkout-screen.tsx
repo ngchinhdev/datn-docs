@@ -4,6 +4,7 @@ import { Banknote, CreditCard, Landmark, Wallet, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useSubscription } from '@/components/mock/subscription-store';
 import { TransferQrDialog } from '@/components/mock/transfer-qr-dialog';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { useDesk } from '@/components/mock/use-desk';
@@ -59,6 +60,7 @@ const min = (a: bigint, b: bigint) => (a < b ? a : b);
 /** Thu tiền (MH-29): the lines of an invoice, a hand discount, and the methods that add up to the amount due. */
 export function CheckoutScreen({ tenantSlug, target }: { tenantSlug: string; target: string }) {
   const desk = useDesk(tenantSlug);
+  const { can } = useSubscription();
   const { fixture, world, apply, ctx, role, canManage } = desk;
   const router = useRouter();
   const appHref = useAppHref(tenantSlug);
@@ -568,8 +570,12 @@ export function CheckoutScreen({ tenantSlug, target }: { tenantSlug: string; tar
 
                   <div className="flex flex-wrap gap-2 border-t border-(--line) py-3">
                     {METHODS.filter((m) => !rows.some((r) => r.method === m))
+                      // Cài đặt › Thanh toán: cash is always on; the others can be turned off.
+                      .filter((m) => m === 'cash' || fixture.config.counterMethods[m])
                       .filter(
-                        (m) => m !== 'wallet' || (customer && balance.balanceVnd > 0n && !sale),
+                        (m) =>
+                          m !== 'wallet' ||
+                          (can('packages_wallet') && customer && balance.balanceVnd > 0n && !sale),
                       )
                       .map((m) => (
                         <Button key={m} size="sm" onClick={() => addMethod(m)}>

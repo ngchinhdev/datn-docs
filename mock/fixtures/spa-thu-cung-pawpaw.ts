@@ -2,6 +2,7 @@ import { appointmentBuilder } from './bookings.ts';
 import { dateRange, generateWeek } from './generate.ts';
 import { generatePeople, withVisitCounts } from './people.ts';
 import { pawpawMoney } from './pawpaw-money.ts';
+import { pawpawConfig } from './shop-config.ts';
 import { petServices as services } from './pawpaw-services.ts';
 import { petSpaTemplate } from './templates.ts';
 import type {
@@ -504,6 +505,7 @@ export const spaThuCungPawpaw: TenantFixture = {
   packageCatalog: [
     {
       id: 'paw-pkg-5',
+      selling: true,
       name: 'Gói 5 lần tắm sấy chó nhỏ',
       serviceVariantId: 'paw-bath-small',
       totalSessions: 5,
@@ -515,4 +517,5 @@ export const spaThuCungPawpaw: TenantFixture = {
   commissionPercent: 10,
   actors: { receptionist: 'Vy', manager: 'Khoa', owner: 'Chủ cơ sở' },
   money: pawpawMoney(services, appointments),
+  config: pawpawConfig,
 };
