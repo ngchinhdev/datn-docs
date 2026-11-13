@@ -9,6 +9,7 @@ import type { TenantFixture } from '../mock/fixtures/types.ts';
 import { openingHours, openingWindows } from '../mock/hours.ts';
 import { localTimeOf } from '../mock/shifts.ts';
 import { topupBonus } from '../mock/money.ts';
+import { addAudit, addAudits, SYSTEM_ACTOR } from '../mock/audit.ts';
 import { chatbotPreview, chatbotProblem, limitExample } from '../mock/chatbot.ts';
 import { buildEmails } from '../mock/emails.ts';
 import {
@@ -34,6 +35,7 @@ import {
 import {
   earliestBooking,
   noShowFrom,
+  noShowsInSixMonths,
   refundPercent,
   refundVnd,
   selfChangeBlock,
@@ -614,6 +616,53 @@ const inRange = (times: string[], from: string, to: string) =>
   report(
     salon.config.chatbot.usedThisMonth < salon.config.chatbot.perShopPerMonth,
     'Số lượt đã dùng tháng này nhỏ hơn giới hạn của cơ sở',
+  );
+}
+
+// ---- BR-63: the audit log only grows ----
+
+{
+  const base = salon.money.audit;
+  const lan = { name: 'Lan', role: 'Lễ tân' };
+  const next = addAudit(base, '2026-11-07T03:30:00Z', lan, {
+    action: 'Sửa chính sách',
+    object: 'Đặt trước ít nhất',
+    detail: '2 → 3 giờ',
+  });
+  report(
+    next.length === base.length + 1 && base.every((e, i) => next[i] === e),
+    'BR-63: thêm một dòng nhật ký không đổi các dòng đã có',
+  );
+  const added = next.at(-1)!;
+  report(
+    added.by === 'Lan' &&
+      added.role === 'Lễ tân' &&
+      added.action === 'Sửa chính sách' &&
+      added.at === '2026-11-07T03:30:00Z',
+    'BR-63: dòng nhật ký có giờ, người, vai trò, thao tác, đối tượng, chi tiết',
+  );
+  const many = addAudits(next, '2026-11-07T03:31:00Z', SYSTEM_ACTOR, [
+    { action: 'a', object: 'x', detail: '1' },
+    { action: 'b', object: 'y', detail: '2' },
+  ]);
+  report(
+    new Set(many.map((e) => e.id)).size === many.length && many.at(-1)!.by === 'Hệ thống',
+    'Mọi dòng nhật ký có mã riêng; việc hệ thống tự làm ghi người là "Hệ thống"',
+  );
+  report(
+    salon.money.audit.some((e) => e.by === 'Hệ thống' && e.action === 'Bật bắt buộc cọc') &&
+      salon.money.audit.some((e) => e.action === 'Hoàn cọc tự động'),
+    'BR-63: nhật ký mẫu có việc hệ thống tự làm (bật bắt buộc cọc, hoàn cọc tự động)',
+  );
+  const appts = [
+    { customerId: 'c', status: 'no_show', startAt: '2026-10-01T03:00:00Z' },
+    { customerId: 'c', status: 'no_show', startAt: '2026-01-01T03:00:00Z' },
+    { customerId: 'c', status: 'completed', startAt: '2026-10-05T03:00:00Z' },
+    { customerId: 'd', status: 'no_show', startAt: '2026-10-01T03:00:00Z' },
+  ];
+  report(
+    noShowsInSixMonths(appts, 'c', '2026-11-07T03:20:00Z') === 1,
+    'BR-10: chỉ tính lần không đến của khách đó trong 6 tháng gần nhất',
   );
 }
 

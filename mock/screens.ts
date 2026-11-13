@@ -169,7 +169,21 @@ const built: Record<string, ScreenLink[]> = {
     },
   ],
   'MH-47': [{ label: 'Nhân sự', href: app('settings/staff') }],
+  'MH-42': [{ label: 'Chi nhánh', href: app('settings/branches') }],
+  'MH-43': [
+    {
+      label: 'Chi tiết chi nhánh',
+      href: (slug) => app(`settings/branches/${fixtureBySlug(slug)?.branches[0]?.id ?? ''}`)(slug),
+    },
+  ],
+  'MH-46': [{ label: 'Tài nguyên', href: app('settings/resources') }],
   'MH-49': [{ label: 'Chính sách', href: app('settings/policies') }],
+  'MH-50': [{ label: 'Thương hiệu', href: app('settings/branding') }],
+  'MH-51': [{ label: 'Gói liệu trình', href: app('settings/packages') }],
+  'MH-52': [{ label: 'Thanh toán', href: app('settings/payments') }],
+  'MH-53': [{ label: 'Thông báo', href: app('settings/notifications') }],
+  'MH-54': [{ label: 'Chatbot', href: app('settings/chatbot') }],
+  'MH-57': [{ label: 'Nhật ký thao tác', href: app('audit-log') }],
   'MH-59': [
     { label: 'Gói cấu hình ngành', href: () => '/mock/admin/templates', platform: true },
     {

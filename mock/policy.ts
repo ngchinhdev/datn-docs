@@ -75,9 +75,23 @@ export const termsFrom = (policy: SelfServicePolicy, refund: RefundTiers): Booki
   refund,
 });
 
+/** BR-10: the no-shows of the customer in the last six months before `now`. */
+export const noShowsInSixMonths = (
+  appointments: readonly { customerId: string | null; status: string; startAt: string }[],
+  customerId: string,
+  now: string,
+) =>
+  appointments.filter(
+    (a) =>
+      a.customerId === customerId &&
+      a.status === 'no_show' &&
+      Date.parse(now) - Date.parse(a.startAt) <= SIX_MONTHS_MS,
+  ).length;
+
 // ---- Sentences of Cài đặt › Chính sách, from the numbers being typed ----
 
 const GRID_MINUTES = 15;
+const SIX_MONTHS_MS = 183 * 86_400_000;
 
 /** BR-06: the first time a customer can start, from `minNoticeHours` on, on the 15-minute grid. ISO 8601, UTC. */
 export function earliestBooking(now: string, minNoticeHours: number): string {

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { ConfirmDialog } from '@/components/sapio/confirm-dialog';
@@ -9,7 +10,8 @@ import { useToast } from '@/components/sapio/toast';
 import type { Appointment, TenantFixture } from '@/mock/fixtures';
 import { formatVnd } from '@/mock/format';
 import { appointmentDetail, lookups } from '@/mock/reception';
-import { DEFAULT_REFUND_TIERS, noShowFrom, refundVnd } from '@/mock/policy';
+import { addAudit, SYSTEM_ACTOR } from '@/mock/audit';
+import { DEFAULT_REFUND_TIERS, noShowFrom, noShowsInSixMonths, refundVnd } from '@/mock/policy';
 import { termsOfAppointment } from '@/mock/terms';
 import { formatTime } from '@/mock/time';
 import type { RefundTiers } from '@/mock/fixtures';
@@ -50,6 +52,7 @@ export function useAppointmentActions(
   const L = lookups(fixture);
   const toast = useToast();
   const router = useRouter();
+  const store = useScheduleStore();
   const appHref = useAppHref(fixture.tenant.slug);
   // On trial nobody can be checked in (BR-81): the appointments are sample data to configure around.
   const { canBook } = useSubscription();
@@ -69,6 +72,29 @@ export function useAppointmentActions(
       cancel: a.status === 'confirmed',
       edit: a.status === 'confirmed' || a.status === 'checked_in',
     };
+  }
+
+  /**
+   * BR-10, BR-63: the no-show that reaches K turns the deposit on by itself, and the system says so
+   * in the audit log. A person who decided otherwise is not overruled.
+   */
+  function markDepositByRule(a: Appointment) {
+    const customer = a.customerId
+      ? fixture.customers.find((c) => c.id === a.customerId)
+      : undefined;
+    if (!customer || customer.depositOverride) return;
+    const k = fixture.policies.depositAfterNoShows;
+    const before = noShowsInSixMonths(appointments, customer.id, now);
+    if (before >= k || before + 1 < k) return;
+    store.setMoney((m) => ({
+      ...m,
+      audit: addAudit(m.audit, now, SYSTEM_ACTOR, {
+        action: 'Bật bắt buộc cọc',
+        object: customer.name,
+        href: `customers/${customer.id}`,
+        detail: `Không đến lần thứ ${before + 1} (BR-10)`,
+      }),
+    }));
   }
 
   function checkIn(a: Appointment) {
@@ -106,6 +132,7 @@ export function useAppointmentActions(
           onClose={close}
           onConfirm={() => {
             replace({ ...target, status: 'no_show' });
+            markDepositByRule(target);
             close();
             toast({ text: `Đã đánh dấu ${who} không đến lịch ${time}.` });
           }}
