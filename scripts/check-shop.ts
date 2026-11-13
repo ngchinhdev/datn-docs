@@ -9,6 +9,8 @@ import type { TenantFixture } from '../mock/fixtures/types.ts';
 import { openingHours, openingWindows } from '../mock/hours.ts';
 import { localTimeOf } from '../mock/shifts.ts';
 import { topupBonus } from '../mock/money.ts';
+import { chatbotPreview, chatbotProblem, limitExample } from '../mock/chatbot.ts';
+import { buildEmails } from '../mock/emails.ts';
 import {
   ACCENT_SUGGESTIONS,
   keyTailFor,
@@ -538,6 +540,80 @@ const inRange = (times: string[], from: string, to: string) =>
       keyTailFor(2) === keyTailFor(2) &&
       /^[0-9a-f]{4}$/.test(keyTailFor(7)),
     'Khóa mới có 4 ký tự cuối khác khóa cũ, cùng phiên bản thì cùng kết quả',
+  );
+}
+
+// ---- BR-66, BR-67: notifications and the chatbot ----
+
+{
+  const NOW = '2026-11-07T03:20:00Z';
+  const ids = (f: TenantFixture, all = false) =>
+    buildEmails(f, NOW, all ? { all: true } : {}).map((e) => e.id);
+  const off = (patch: Partial<TenantFixture['config']['notifications']>): TenantFixture => ({
+    ...salon,
+    config: { ...salon.config, notifications: { ...salon.config.notifications, ...patch } },
+  });
+  report(
+    ids(salon).includes('remind24') && ids(salon).includes('remind2'),
+    'Mặc định cả hai email nhắc đều có trong mẫu email',
+  );
+  report(
+    !ids(off({ reminder24h: false })).includes('remind24') &&
+      ids(off({ reminder24h: false })).includes('remind2'),
+    'BR-66: tắt nhắc 24 giờ thì mẫu đó biến mất, nhắc 2 giờ còn',
+  );
+  const noReminders = ids(off({ reminder24h: false, reminder2h: false }));
+  report(
+    ['code', 'booked', 'moved', 'cancelled', 'asked'].every((id) => noReminders.includes(id)),
+    'BR-66: email mã xác nhận, đã đặt, đổi giờ, hủy, hỏi ý đổi người không tắt được',
+    noReminders.join(', '),
+  );
+  report(
+    ids(off({ reminder24h: false, reminder2h: false }), true).includes('remind24'),
+    'Trang cài đặt vẫn xem trước được email nhắc đang tắt',
+  );
+
+  const reply = chatbotPreview(salon, NOW);
+  report(
+    reply.question === 'Chiều nay còn giờ cắt ngắn không?' &&
+      reply.answer.includes('150.000 ₫') &&
+      reply.answer.includes('45 phút') &&
+      /\d{2}:\d{2}/.test(reply.answer),
+    'BR-67: trợ lý nói giờ trống, giá và thời lượng lấy từ hệ thống',
+    reply.answer,
+  );
+  const pricier: TenantFixture = {
+    ...salon,
+    branches: [{ ...salon.branches[0]!, prices: { 'may-cut-short': 170_000n } }],
+    services: applyBranchPrices(salon.services, { 'may-cut-short': 170_000n }),
+  };
+  report(
+    chatbotPreview(pricier, NOW).answer.includes('170.000 ₫'),
+    'BR-67: đổi giá riêng của chi nhánh thì trợ lý nói giá mới',
+  );
+  const later = chatbotPreview(salon, '2026-11-07T12:30:00Z').answer;
+  report(
+    later.includes('hết giờ trống') && later.includes('028 3930 1234'),
+    'BR-67: hết giờ trống thì mời gọi số của chi nhánh',
+    later,
+  );
+  const ok = { greeting: 'Chào bạn', perCustomerPerDay: 20, perShopPerMonth: 3000 };
+  report(
+    chatbotProblem(ok) === null &&
+      chatbotProblem({ ...ok, greeting: 'x'.repeat(201) }) !== null &&
+      chatbotProblem({ ...ok, greeting: 'x'.repeat(200) }) === null &&
+      chatbotProblem({ ...ok, greeting: '  ' }) !== null &&
+      chatbotProblem({ ...ok, perCustomerPerDay: 0 }) !== null &&
+      chatbotProblem({ ...ok, perShopPerMonth: 0 }) !== null,
+    'BR-67: lời chào tối đa 200 ký tự, hai giới hạn từ 1 lượt',
+  );
+  report(
+    limitExample(20).includes('lượt thứ 21'),
+    'BR-67: giới hạn 20 lượt thì lượt thứ 21 trong ngày được mời gọi tiệm',
+  );
+  report(
+    salon.config.chatbot.usedThisMonth < salon.config.chatbot.perShopPerMonth,
+    'Số lượt đã dùng tháng này nhỏ hơn giới hạn của cơ sở',
   );
 }
 

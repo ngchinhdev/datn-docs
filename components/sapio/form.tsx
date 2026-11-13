@@ -117,12 +117,15 @@ export function SwitchRow({
   checked,
   onChange,
   full = true,
+  disabled = false,
 }: {
   label: string;
   hint?: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
   full?: boolean;
+  /** A setting that cannot be changed, e.g. a mandatory email; say why in `hint`. */
+  disabled?: boolean;
 }) {
   return (
     <label className={cn('sp-switch', full && 'sp-field--full')}>
@@ -134,6 +137,7 @@ export function SwitchRow({
         type="checkbox"
         role="switch"
         checked={checked}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.checked)}
       />
     </label>

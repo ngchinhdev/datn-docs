@@ -67,7 +67,15 @@ export function pickSamples(fixture: TenantFixture, now: string) {
   return { asked: asked ?? null, booked, plain, customerId };
 }
 
-export function buildEmails(fixture: TenantFixture, now: string): EmailSample[] {
+/**
+ * The emails the shop sends. The two reminders the shop turned off are left out (BR-66: they are
+ * the only ones that can be); `all` keeps them, for the settings page that previews each.
+ */
+export function buildEmails(
+  fixture: TenantFixture,
+  now: string,
+  options: { all?: boolean } = {},
+): EmailSample[] {
   const { asked, booked, plain, customerId } = pickSamples(fixture, now);
   if (!booked || !plain) return [];
   const customer = fixture.customers.find((c) => c.id === customerId);
@@ -316,5 +324,10 @@ export function buildEmails(fixture: TenantFixture, now: string): EmailSample[] 
     ],
   });
 
-  return emails;
+  const on = fixture.config?.notifications;
+  return options.all || !on
+    ? emails
+    : emails.filter(
+        (e) => !(e.id === 'remind24' && !on.reminder24h) && !(e.id === 'remind2' && !on.reminder2h),
+      );
 }

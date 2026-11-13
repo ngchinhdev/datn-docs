@@ -13,7 +13,7 @@ const base = {
   counterMethods: { transfer: true, card: true, wallet: true },
   notifications: {
     reminder24h: true,
-    reminder2h: false,
+    reminder2h: true,
     staffNewAppointment: true,
     staffNewLeave: true,
   },
