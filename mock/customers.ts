@@ -87,11 +87,15 @@ export function fold(text: string) {
  * Name: any accent-free match. Phone: digits typed in any form ("0934 567", "+84934567") match
  * the stored E.164 number (BR-61).
  */
-export function matchesSearch(row: CustomerRow, query: string) {
+export const matchesSearch = (row: CustomerRow, query: string) =>
+  matchesPerson(row.name, row.phone, query);
+
+/** The same match for anyone with a name and an E.164 phone number. */
+export function matchesPerson(name: string, phone: string, query: string) {
   const text = query.trim();
   if (!text) return true;
   // Each typed word must start a word of the name: "ha" finds Hà and Hải, not Phan or Khánh.
-  const words = fold(row.name).split(/\s+/);
+  const words = fold(name).split(/\s+/);
   const typed = fold(text).split(/\s+/);
   if (typed.every((t) => words.some((w) => w.startsWith(t)))) return true;
   if (/[^\d\s+().-]/.test(text)) return false;
@@ -99,7 +103,7 @@ export function matchesSearch(row: CustomerRow, query: string) {
   if (digits.length < 3) return false;
   const international = digits.startsWith('0') ? `84${digits.slice(1)}` : digits;
   const whole = normalizePhone(text);
-  return whole ? whole === row.phone : row.phone.replace(/\D/g, '').includes(international);
+  return whole ? whole === phone : phone.replace(/\D/g, '').includes(international);
 }
 
 export const SORT_KEYS = ['name', 'phone', 'last', 'next', 'visits', 'noShows'] as const;
