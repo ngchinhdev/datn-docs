@@ -124,22 +124,22 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
 | MH-41 | Tổng quan | `/app/[tenant]` | CCS, QL | 3 | Vẽ | Hôm nay: số lịch, đang làm, doanh thu; tuần: lấp đầy, không đến; việc cần xử lý (nghỉ phép, hoàn tiền chờ duyệt) |
-| MH-42 | Chi nhánh | `/app/[tenant]/settings/branches` | CCS | 1 | DS | |
-| MH-43 | Chi tiết chi nhánh | `/app/[tenant]/settings/branches/[id]` | CCS | 1 | Vẽ | Giờ mở cửa nhiều khung mỗi ngày, ngày đặc biệt (BR-02), giá riêng của chi nhánh |
+| MH-42 | Chi nhánh | `/app/[tenant]/settings/branches` | CCS | 1 | DS | **Đã chọn.** Mẫu danh sách. |
+| MH-43 | Chi tiết chi nhánh | `/app/[tenant]/settings/branches/[id]` | CCS | 1 | Vẽ | **Đã chọn.** Giờ mở cửa nhiều khung mỗi ngày, ngày đặc biệt (BR-02), giá riêng của chi nhánh |
 | MH-44 | Dịch vụ | `/app/[tenant]/settings/services` | CCS | 1 | DS | Nhóm dịch vụ, kéo đổi thứ tự, bật/tắt đặt online |
 | MH-45 | Chi tiết dịch vụ | `/app/[tenant]/settings/services/[id]` | CCS | 1 | Vẽ | **Đã chọn. Màn đặc trưng thứ hai.** Biến thể khách tự chọn hoặc theo thuộc tính đối tượng, kiểm điều kiện phủ đủ, không trùng (BR-13, BR-55); trục thời gian theo từng loại tài nguyên, đoạn Chuẩn bị, Làm, Chờ, dọn dẹp theo loại tài nguyên (BR-50 đến BR-52); giá theo cấp nhân viên (BR-56); ai làm được (BR-03); cột phải xem trước trên lịch lễ tân và thẻ khách thấy; lịch đã đặt giữ thời gian, giá cũ (BR-59) |
-| MH-46 | Tài nguyên | `/app/[tenant]/settings/resources` | CCS | 1 | DS | Nhóm theo loại (từ gói ngành), chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng |
+| MH-46 | Tài nguyên | `/app/[tenant]/settings/resources` | CCS | 1 | DS | **Đã chọn.** Nhóm theo loại (từ gói ngành), chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng |
 | MH-47 | Nhân sự | `/app/[tenant]/settings/staff` | CCS | 1 | DS | Mời, vai trò, chi nhánh, nhận đặt online |
 | MH-48 | Hồ sơ nhân viên | `/app/[tenant]/settings/staff/[id]` | CCS | 1 | Form | Hai lớp hồ sơ (BR-15), kỹ năng, cấp, chi nhánh, vai trò |
-| MH-49 | Chính sách | `/app/[tenant]/settings/policies` | CCS | 1 (cọc ở 2) | Form | Tham số X, Y, N, M, K của BR-06 đến BR-10; mức hoàn cọc (BR-23); mỗi trường có câu giải thích bằng ví dụ |
-| MH-50 | Thương hiệu và trang đặt lịch | `/app/[tenant]/settings/branding` | CCS | 1 | Form | Logo, ảnh bìa, màu nhấn (kiểm tương phản 4.5:1 như token `tenant-*`), slug, xem trước MH-11 |
-| MH-51 | Gói liệu trình | `/app/[tenant]/settings/packages` | CCS | 2 | Form | Số buổi, dịch vụ áp dụng, giá, hạn dùng |
-| MH-52 | Thanh toán | `/app/[tenant]/settings/payments` | CCS | 2 | Nhẹ | Provider giả lập (D-09), phương thức nhận tại quầy |
-| MH-53 | Thông báo | `/app/[tenant]/settings/notifications` | CCS | 3 | Form | Bật/tắt nhắc 24h, 2h; xem trước email |
-| MH-54 | Chatbot | `/app/[tenant]/settings/chatbot` | CCS | 3 | Form | Bật/tắt, lời chào, giới hạn lượt |
+| MH-49 | Chính sách | `/app/[tenant]/settings/policies` | CCS | 1 (cọc ở 2) | Form | **Đã chọn.** Tham số X, Y, N, M, K của BR-06 đến BR-10; mức hoàn cọc (BR-23); mỗi trường có câu giải thích bằng ví dụ |
+| MH-50 | Thương hiệu và trang đặt lịch | `/app/[tenant]/settings/branding` | CCS | 1 | Form | **Đã chọn.** Logo, ảnh bìa, màu nhấn (kiểm tương phản 4.5:1 như token `tenant-*`), slug, xem trước MH-11 |
+| MH-51 | Gói liệu trình | `/app/[tenant]/settings/packages` | CCS | 2 | Form | **Đã chọn.** Số buổi, dịch vụ áp dụng, giá, hạn dùng |
+| MH-52 | Thanh toán | `/app/[tenant]/settings/payments` | CCS | 2 | Nhẹ | **Đã chọn.** Provider giả lập (D-09), phương thức nhận tại quầy |
+| MH-53 | Thông báo | `/app/[tenant]/settings/notifications` | CCS | 3 | Form | **Đã chọn.** Bật/tắt nhắc 24h, 2h; xem trước email |
+| MH-54 | Chatbot | `/app/[tenant]/settings/chatbot` | CCS | 3 | Form | **Đã chọn.** Bật/tắt, lời chào, giới hạn lượt |
 | MH-55 | Báo cáo | `/app/[tenant]/reports` | CCS, QL | 3 | Vẽ | Doanh thu, tiền trả trước và doanh thu thực hiện, lấp đầy, không đến; lọc chi nhánh và khoảng ngày |
 | MH-56 | Hoa hồng | `/app/[tenant]/commission`, `/commission/periods/[id]` | CCS | 3 | Vẽ | Quy tắc có ngày hiệu lực (BR-41), chia nhiều thợ (BR-43), chốt kỳ, khoản thu hồi vào kỳ sau (BR-42) |
-| MH-57 | Nhật ký thao tác | `/app/[tenant]/audit-log` | CCS | 3 | DS | BR-63; cột: giờ, người, thao tác, đối tượng |
+| MH-57 | Nhật ký thao tác | `/app/[tenant]/audit-log` | CCS | 3 | DS | **Đã chọn.** BR-63; cột: giờ, người, thao tác, đối tượng |
 | MH-61 | Gói Sapio | `/app/[tenant]/settings/plan` | CCS | 2 | Vẽ | Trạng thái gói, hai thẻ gói, chọn kỳ 1/3/12 tháng, thanh toán QR, lịch sử thanh toán (BR-83, BR-84). Hết hạn: mọi route khu nội bộ chuyển về đây, kèm bảng lịch đã đặt sau hạn chỉ để đọc (BR-82). Trang của tính năng bị khóa có bảng tiền nâng gói (BR-85, BR-87) |
 
 ## H. Quản trị nền tảng: `/admin`

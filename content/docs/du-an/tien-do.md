@@ -7,6 +7,42 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 13/11/2026 (tối): chốt đợt D, cấu hình cơ sở
+- **Đã làm:**
+  - Vẽ và chốt đợt D (9 bảng):
+    - MH-43 chi tiết chi nhánh;
+    - MH-46 tài nguyên;
+    - MH-49 chính sách;
+    - MH-50 thương hiệu;
+    - MH-51 gói liệu trình;
+    - MH-52 thanh toán;
+    - MH-53 thông báo;
+    - MH-54 chatbot;
+    - MH-57 nhật ký thao tác.
+
+    MH-42 dùng mẫu danh sách, không vẽ riêng.
+  - Quy tắc:
+    - BR-02 thêm nhiều khung giờ, đổi giờ thì xếp lại, giá riêng chi nhánh.
+    - BR-37 tạm ngưng tài nguyên.
+    - BR-38 sửa cấu hình chỉ áp từ lúc lưu.
+    - BR-63 phạm vi nhật ký.
+    - BR-65 màu nhấn và đường dẫn.
+    - BR-66 email bắt buộc.
+    - BR-67 giới hạn chatbot.
+- **Ghi chú cho ERD:**
+  - `branch_hours` nhiều dòng mỗi ngày.
+  - `branch_special_days`.
+  - `branch_prices` (chi nhánh, biến thể, giá).
+  - `resource_outages` (tài nguyên, khoảng, lý do).
+  - `topup_bonus_tiers`.
+  - `tenant_branding` (màu, slug, slug cũ và hạn chuyển hướng).
+  - `notification_settings`.
+  - `chatbot_settings` với hai giới hạn.
+  - `audit_log` chỉ thêm.
+- **Tiếp theo:**
+  - Claude Code làm [Bước 14](../ky-thuat/ke-hoach-ui-mock.md#bước-14-đợt-d-cấu-hình-cơ-sở-mh-42-mh-43-mh-46-mh-49-đến-mh-54-mh-57).
+  - Phiên claude.ai vẽ đợt E (quản lý, báo cáo: MH-37, MH-41, MH-55, MH-56).
+
 ### 13/11/2026 (tối): merge PR #8 (Bước 13)
 - **Đã làm:**
   - Review PR #8. Sửa hai chỗ trên cùng nhánh rồi người dùng merge:

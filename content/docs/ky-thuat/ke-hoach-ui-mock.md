@@ -879,6 +879,102 @@ Chữ và số trên bảng là minh họa; mock tính từ dữ liệu mẫu. K
   - Vai trò Lễ tân không duyệt được.
 - **Hồ sơ khách:** Lê Thu Hà có số dư 50.000 ₫ tiền tặng, "Rút tiền thật" tắt.
 
+## Bước 14. Đợt D: cấu hình cơ sở (MH-42, MH-43, MH-46, MH-49 đến MH-54, MH-57)
+
+Sau khi PR #8 merge. Căn cứ:
+- Các bảng `ChiNhanhChiTiet`, `TaiNguyen`, `ChinhSach`, `ThuongHieu`, `GoiLieuTrinh`, `ThanhToan`, `ThongBao`, `ChatbotCaiDat`, `NhatKy` (bảng ở `design/README.md`).
+- Quy tắc BR-02, BR-06 đến BR-10, BR-23, BR-25, BR-27, BR-35 đến BR-38, BR-63, BR-65 đến BR-67.
+
+Chữ và số trên bảng là minh họa; mock đọc và ghi vào store. Kiểm trên máy theo `CLAUDE.md`. Làm trên nhánh `feat/mock-settings`, mỗi mục 14a–14h một commit, mở PR mới, không merge.
+
+### 14a. Store cấu hình
+
+- Cấu hình của cơ sở vào store chung: chi nhánh, giờ mở cửa, ngày đặc biệt, giá riêng, tài nguyên và khoảng ngưng, chính sách, thương hiệu, gói, thanh toán, thông báo, chatbot.
+- Mọi màn đã có đọc từ store:
+  - `findSlots` dùng giờ mở cửa và ngày đặc biệt của store, tài nguyên đang ngưng thì không dùng được;
+  - giá theo chi nhánh;
+  - trang khách theo chính sách và thương hiệu;
+  - Thu tiền theo mức tặng và phương thức.
+- Mỗi lần lưu ghi một dòng nhật ký (BR-63). Đổi số chỉ áp từ lúc lưu (BR-38).
+
+### 14b. Chi nhánh (MH-42, MH-43)
+
+- **`/settings/branches`:** mẫu danh sách, cột tên, địa chỉ, số nhân viên, số tài nguyên. Gói Cơ bản chỉ một chi nhánh: nút Thêm khóa kèm "cần nâng gói".
+- **`/settings/branches/[id]`** đúng `ChiNhanhChiTiet`:
+  - Giờ mỗi ngày nhiều khung, kiểm không chồng nhau (BR-02).
+  - Ngày đặc biệt: đóng cửa, hoặc giờ khác.
+  - Giá riêng: để trống là giá chung.
+- **Lưu mà có lịch nằm ngoài giờ mới:** hiện cảnh báo, nút thành "Lưu và xếp lại N lịch". Lưu xong các lịch vào "Cần xếp lại" (dùng lại của BR-35).
+
+### 14c. Tài nguyên (MH-46, BR-37)
+
+- `/settings/resources` đúng `TaiNguyen`: nhóm theo loại từ gói ngành, cột lịch 7 ngày tới.
+- **"Tạm ngưng"** mở `SidePanel`: khoảng giờ, lý do, danh sách lịch bị ảnh hưởng tính bằng hàm thuần.
+  - Lịch còn tài nguyên cùng loại trống: ghi "Ghế 1 trống" và tự chuyển khi lưu.
+  - Lịch không còn chỗ: vào "Cần xếp lại".
+- "Mở lại" kết thúc khoảng ngưng ngay. Thêm, sửa tài nguyên bằng form nhỏ.
+
+### 14d. Chính sách (MH-49)
+
+- Trang hiện có, đổi theo `ChinhSach`: mỗi ô có câu ví dụ tính từ giờ mock và số đang nhập (ví dụ "bây giờ là 10:20 thì khách đặt được từ 13:30").
+- Thêm ba mức hoàn cọc (BR-23).
+- Thanh lưu ghi rõ đang đổi gì.
+
+### 14e. Thương hiệu (MH-50, BR-65)
+
+- `/settings/branding` đúng `ThuongHieu`.
+- Ảnh chỉ là ô chọn tệp, xem trước trong trình duyệt, không tải lên đâu.
+- **Màu nhấn:**
+  - Có 5 màu gợi ý và ô mã màu.
+  - Tính tương phản với chữ trắng; dưới 4,5 : 1 thì báo lỗi và nút Lưu tắt.
+  - Màu nhạt cho nền ô chọn sinh ra từ màu nhấn.
+- **Đường dẫn:**
+  - Kiểm định dạng và trùng với cơ sở khác.
+  - Đổi thì ghi "link cũ chuyển hướng 90 ngày"; mock giữ slug cũ trỏ về slug mới.
+- Khung xem trước dùng đúng màu đang chọn. Lưu xong thì trang khách đổi màu.
+
+### 14f. Gói liệu trình, thanh toán (MH-51, MH-52)
+
+- **`/settings/packages`** đúng `GoiLieuTrinh`:
+  - Danh sách và `SidePanel` sửa.
+  - Dòng "X ₫ mỗi buổi, rẻ hơn giá lẻ Y%".
+  - Công tắc Đang bán.
+  - Sửa chỉ áp cho gói bán sau (BR-38).
+  - Bán gói ở MH-30 chỉ liệt kê gói đang bán.
+- **`/settings/payments`** đúng `ThanhToan`:
+  - Cổng giả lập: khóa che, "Tạo khóa mới", "Gửi thử một thông báo" ghi một dòng vào lịch sử cổng.
+  - Phương thức tại quầy; Tiền mặt luôn bật.
+  - Mức tặng nhiều bậc, áp bậc cao nhất đạt được.
+  - Phí hủy gói.
+  - MH-29 và MH-30 đọc từ đây.
+
+### 14g. Thông báo, chatbot (MH-53, MH-54, BR-66, BR-67)
+
+- **`/settings/notifications`** đúng `ThongBao`:
+  - Email bắt buộc thì công tắc khóa, ghi lý do.
+  - Nhắc 24 giờ và 2 giờ tắt được.
+  - Xem trước dùng mẫu ở `mock/emails.ts` với một lịch thật. "Gửi thử" chỉ hiện toast.
+- **`/settings/chatbot`** đúng `ChatbotCaiDat`:
+  - Bật tắt, lời chào (tối đa 200 ký tự), hai giới hạn lượt, số lượt đã dùng tháng này.
+  - Khung xem trước dùng lời chào đang nhập.
+  - Gói Cơ bản thì trang khóa như hiện có.
+
+### 14h. Nhật ký và hoàn tất (MH-57)
+
+- `/audit-log` đúng `NhatKy`: mẫu danh sách, lọc người, thao tác, khoảng ngày; tìm theo đối tượng.
+- Gom các dòng đã ghi ở Bước 13, 14 và các thao tác hệ thống tự làm (bật bắt buộc cọc, hoàn cọc tự động). Không có nút sửa hay xóa.
+- `mock/screens.ts`: 10 màn của đợt D thành "Đang làm".
+- `pnpm check:availability`, `pnpm check:money`, `pnpm build`, `pnpm typecheck`, `prettier --check` xanh.
+- Mở PR mới, mô tả theo 14a–14h, có mục "Tự quyết". Ghi một mục Tiến độ.
+
+**Xong khi** (người dùng tự kiểm):
+- **Giờ mở cửa:** Chủ Nhật nghỉ trưa 12:00–14:00 thì trang khách không còn giờ trong khoảng đó; lịch đã có lúc 12:30 vào "Cần xếp lại".
+- **Đóng cửa:** thêm ngày đóng cửa 15/11 thì lịch trên trang khách ngày đó không còn giờ.
+- **Tạm ngưng:** tạm ngưng Ghế 2 ngày 10/11 09:00–13:00 thì lịch có ghế khác trống tự chuyển ghế, lịch không còn chỗ vào "Cần xếp lại".
+- **Chính sách:** đổi "Đặt trước ít nhất" thành 3 giờ thì trang khách bỏ các giờ trước 13:30 hôm nay, và nhật ký có dòng mới.
+- **Thương hiệu:** chọn màu vàng nhạt thì báo không đạt tương phản, không lưu được; chọn Xanh biển rồi lưu thì trang khách đổi màu.
+- **Gói và ví:** ngừng bán "Gói 5 lần gội sấy" thì MH-30 không còn gói này; thêm mức nạp 3.000.000 ₫ tặng 15% thì MH-30 tính đúng.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -978,4 +1074,16 @@ trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 13a đến 13g,
 theo bảng; chữ và số lấy từ dữ liệu mẫu, tính bằng hàm thuần ở mock/money.ts, tiền là bigint. Chỉ chạy
 các lệnh kiểm trong CLAUDE.md, không chạy Playwright hay axe. Mở PR mới, không merge. Dừng lại hỏi mình
 nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 14:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-settings.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, BR-02, BR-06 đến BR-10,
+BR-23, BR-25, BR-27, BR-35 đến BR-38, BR-63, BR-65 đến BR-67 trong quy-tac.md, và design/README.md
+(các bảng của đợt D). Làm Bước 14 trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 14a
+đến 14h, mỗi mục một commit. Bố cục theo bảng; chữ và số lấy từ store, logic là hàm thuần ở mock/.
+Chỉ chạy các lệnh kiểm trong CLAUDE.md. Mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu
+thuẫn với quy tắc nghiệp vụ.
 ```

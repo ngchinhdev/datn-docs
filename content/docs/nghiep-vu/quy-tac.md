@@ -15,7 +15,7 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 | Mã | Quy tắc |
 |---|---|
 | BR-01 | Không có hai đoạn trạng thái `hold`/`active` chồng nhau trên cùng một tài nguyên |
-| BR-02 | Giờ trống chỉ nằm trong giờ mở cửa của chi nhánh; ngày đặc biệt ưu tiên hơn giờ thường lệ |
+| BR-02 | Giờ trống chỉ nằm trong giờ mở cửa của chi nhánh; ngày đặc biệt ưu tiên hơn giờ thường lệ. Một ngày có nhiều khung, không chồng nhau. Đổi giờ mở cửa hay thêm ngày đóng cửa mà có lịch nằm ngoài giờ mới thì lưu xong các lịch đó vào "Cần xếp lại" (BR-35), giữ giá. Chi nhánh có giá riêng cho từng biến thể; để trống là giá chung, giá theo cấp (BR-56) tính trên giá của chi nhánh |
 | BR-03 | Nhân viên chỉ được xếp cho dịch vụ thuộc kỹ năng của mình |
 | BR-04 | Thời gian chuẩn bị và dọn dẹp chiếm dụng tài nguyên như thời gian làm |
 | BR-05 | Đoạn "chờ" giải phóng nhân viên nhưng vẫn chiếm phòng/ghế/lồng sấy theo cấu hình dịch vụ |
@@ -44,6 +44,8 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 | BR-33 | Khi phải hỏi ý khách (đổi người, nghỉ phép), hạn trả lời là 24 giờ sau khi gửi nhưng không muộn hơn 2 giờ trước giờ hẹn. Quá hạn thì lễ tân gọi điện; hệ thống không tự hủy lịch |
 | BR-34 | Lịch bị ảnh hưởng (nghỉ phép, bớt ca) xử lý theo cách khách đã chọn: "Bất kỳ ai" thì đổi sang người khác cùng giờ; đích danh thì hỏi ý (BR-33); không ai trống thì dời giờ hoặc hủy và báo khách, cơ sở hủy thì hoàn cọc 100% (BR-24). Đơn nghỉ chỉ duyệt được khi mọi lịch đã có cách xử lý; lúc duyệt, hệ thống kiểm lại từng cách, cách nào không còn hợp lệ thì lịch đó trở về "chưa xử lý". Bớt ca thì ca mới lưu ngay, các lịch vướng vào "Cần xếp lại" (BR-35) |
 | BR-35 | Ca làm có thể có nhiều khung trong một ngày và được bắt đầu trước giờ mở cửa (để chuẩn bị, BR-54). Bớt ca mà còn lịch thì các lịch đó vào danh sách "Cần xếp lại" và xử lý theo BR-34. Khoảng giờ mở cửa không có ai trực thì màn Xếp ca cảnh báo |
+| BR-37 | Tạm ngưng tài nguyên (bảo trì) theo khoảng giờ, có lý do. Lịch dùng tài nguyên đó trong khoảng ngưng: còn tài nguyên cùng loại trống thì tự chuyển, không báo khách; không còn thì vào "Cần xếp lại" (BR-35) |
+| BR-38 | Sửa cấu hình chỉ áp từ lúc lưu: chính sách áp cho lịch đặt sau đó; giá, số buổi của gói áp cho gói bán sau đó; ngừng bán gói không ảnh hưởng gói khách đã mua |
 | BR-36 | Kỹ thuật viên chỉ thấy lịch của mình, kể cả đoạn chuẩn bị, và tự cập nhật Bắt đầu, Xong. Số điện thoại khách ẩn với kỹ thuật viên, trừ khi cơ sở bật "Kỹ thuật viên thấy số điện thoại khách" ở Chính sách (mặc định tắt) |
 
 ## Cấu hình dịch vụ và giờ trống
@@ -94,8 +96,11 @@ Chi tiết và ví dụ tính tay ở [Thuật toán tính giờ trống](../ky-
 | BR-60 | Cùng số điện thoại ở hai khách thuê là hai hồ sơ độc lập |
 | BR-61 | Số điện thoại được chuẩn hóa (`0912...` và `+84912...` là một) |
 | BR-62 | Ghi chú nội bộ không bao giờ hiển thị cho khách |
-| BR-63 | Thao tác nhạy cảm (hoàn tiền, xuất danh sách khách, đổi giá) được ghi nhật ký |
+| BR-63 | Thao tác nhạy cảm (thu tiền, giảm giá, hoàn tiền, rút ví, xuất danh sách khách, đổi giá, chính sách, quyền, duyệt nghỉ, việc hệ thống tự làm như bật bắt buộc cọc) được ghi nhật ký: giờ, người, thao tác, đối tượng, chi tiết. Nhật ký chỉ thêm, giữ 12 tháng |
 | BR-64 | Khách đồng ý xử lý dữ liệu cá nhân khi đặt lịch lần đầu; đồng ý nhận quảng cáo là lựa chọn riêng, mặc định tắt. Đổi email đăng nhập phải nhập mã gửi tới email mới |
+| BR-65 | Màu nhấn của cơ sở phải đạt tương phản 4,5 : 1 với chữ trắng, không đạt thì không lưu được. Đổi đường dẫn trang đặt lịch thì đường dẫn cũ chuyển hướng 90 ngày |
+| BR-66 | Email mã xác nhận, đã đặt lịch, đổi giờ, hủy, hoàn cọc, hỏi ý đổi người là bắt buộc; cơ sở chỉ tắt được email nhắc trước 24 giờ và 2 giờ. Email gửi qua outbox, lỗi thì thử lại 3 lần |
+| BR-67 | Chatbot có giới hạn lượt theo khách mỗi ngày và cả cơ sở mỗi tháng; hết lượt thì mời khách gọi tiệm hoặc đặt trên trang. Chatbot chỉ nói giá, giờ lấy từ hệ thống |
 | BR-70 | Gói cấu hình ngành chỉ được nạp khi tạo tenant; sau đó mọi chỉnh sửa thuộc về tenant, không ảnh hưởng gói gốc. Gói có bản nháp và các bản đã xuất bản; cơ sở mới nhận bản đang xuất bản lúc tạo, sửa hay xuất bản bản mới không đổi cơ sở đã tạo |
 | BR-71 | Thuộc tính của đối tượng được phục vụ phải hợp lệ theo schema của ngành trước khi lưu |
 | BR-72 | Slug của cơ sở (cũng là tên miền con, T-16): chữ thường không dấu, số, gạch ngang, 3–40 ký tự, không bắt đầu hoặc kết thúc bằng gạch ngang, duy nhất trên nền tảng, không trùng từ dành riêng (`www`, `app`, `admin`, `api`, `mail`, `status`, `blog`, `cdn`, `signup`, `login`, `logout`, `invite`, `verify-email`, `forgot-password`, `reset-password`, `select-workspace`, `docs`, `mock`, `help`, `about`, `terms`, `privacy`, `static`, `assets`). Đổi slug thì link cũ tự chuyển sang slug mới |
@@ -159,6 +164,8 @@ Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-h
 | Khách không trả lời email hỏi ý, còn 2 giờ tới giờ hẹn | Lễ tân thấy cần gọi; lịch không tự hủy | BR-33 |
 | Bớt ca Hùng thành 10:00–15:00 khi còn lịch 16:00 | Lưu thì lịch 16:00 vào "Cần xếp lại" | BR-35, BR-34 |
 | Lan gửi đơn nghỉ 10/11, chưa duyệt; khách mở trang đặt lịch ngày 10/11 | Lan không có giờ trống; lịch cũ của Lan vẫn giữ tới khi duyệt | BR-11 |
+| Tạm ngưng Ghế 2 khi còn Ghế 1 trống cùng giờ | Lịch tự chuyển sang Ghế 1, không báo khách | BR-37 |
+| Chủ Nhật nghỉ trưa 12:00–14:00, đã có lịch 12:30 | Lưu xong lịch 12:30 vào "Cần xếp lại" | BR-02, BR-35 |
 | Đã chọn đổi Chị Ngọc sang Lan, trước lúc duyệt Lan có khách mới cùng giờ | Duyệt bị chặn, lịch Chị Ngọc trở về "chưa xử lý" kèm lý do | BR-34 |
 
 ## Câu hỏi nghiệp vụ còn mở
