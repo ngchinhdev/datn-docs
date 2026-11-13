@@ -6,6 +6,7 @@
 import { formatVnd } from './format.ts';
 import type { Appointment, ServedSubject, TenantFixture } from './fixtures/types.ts';
 import { refundPercent, refundVnd, replyDeadline } from './policy.ts';
+import { termsOfAppointment } from './terms.ts';
 import { heldItems, modeOf, openQuestion } from './reschedule.ts';
 import { addMinutes, formatDay, formatTime, localDate } from './time.ts';
 
@@ -108,11 +109,14 @@ export function buildEmails(fixture: TenantFixture, now: string): EmailSample[] 
 
   const policyLine = (appt: Appointment) => {
     const deposit = appt.depositVnd ?? 0n;
-    const selfBy = addMinutes(appt.startAt, -fixture.policies.cancelBeforeHours * 60);
+    // BR-38: the booking keeps the terms it was made under.
+    const terms = termsOfAppointment(appt, fixture.tenant.slug);
+    const selfBy = addMinutes(appt.startAt, -terms.cancelBeforeHours * 60);
     const fullBy = addMinutes(appt.startAt, -24 * 60);
+    const early = terms.refund.over24 === 100 ? 'hoàn đủ cọc' : `hoàn ${terms.refund.over24}% cọc`;
     return [
       `Đổi giờ hoặc hủy trên trang lịch hẹn trước ${hhmm(selfBy)} ngày ${dayMonth(selfBy)}.`,
-      ...(deposit > 0n ? [`Hủy trước ${hhmm(fullBy)} ngày ${dayMonth(fullBy)} hoàn đủ cọc.`] : []),
+      ...(deposit > 0n ? [`Hủy trước ${hhmm(fullBy)} ngày ${dayMonth(fullBy)} ${early}.`] : []),
     ].join(' ');
   };
 
@@ -243,18 +247,19 @@ export function buildEmails(fixture: TenantFixture, now: string): EmailSample[] 
   });
 
   if (deposit > 0n) {
-    const percent = refundPercent(booked.startAt, now);
+    const tiers = termsOfAppointment(booked, fixture.tenant.slug).refund;
+    const percent = refundPercent(booked.startAt, now, tiers);
     emails.push({
       id: 'refunded',
       label: 'Đã hoàn cọc',
       from,
-      subject: `Đã hoàn cọc ${formatVnd(refundVnd(deposit, booked.startAt, now))}`,
+      subject: `Đã hoàn cọc ${formatVnd(refundVnd(deposit, booked.startAt, now, tiers))}`,
       appointmentId: booked.id,
       greeting: hello,
       lead: `tiệm đã hoàn tiền cọc của lịch ${hhmm(booked.startAt)}, ${dayText(booked.startAt)}.`,
       rows: [
         ['Đã cọc', formatVnd(deposit)],
-        ['Hoàn lại', `${formatVnd(refundVnd(deposit, booked.startAt, now))} (${percent}%)`],
+        ['Hoàn lại', `${formatVnd(refundVnd(deposit, booked.startAt, now, tiers))} (${percent}%)`],
         ['Mã hoàn', refundCode(booked.id)],
       ],
       actions: [{ label: 'Đặt lại', to: 'rebook' }],

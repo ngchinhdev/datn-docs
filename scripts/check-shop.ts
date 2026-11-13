@@ -17,6 +17,16 @@ import {
   toBusinessHours,
   windowsProblem,
 } from '../mock/shop.ts';
+import {
+  earliestBooking,
+  noShowFrom,
+  refundPercent,
+  refundVnd,
+  selfChangeBlock,
+  selfChangeUntil,
+  termsFrom,
+} from '../mock/policy.ts';
+import { openingTerms, termsOfAppointment } from '../mock/terms.ts';
 import { activeOutage, outageImpact, touchedBy, upcomingCount } from '../mock/outage.ts';
 import { localDate, MOCK_NOW } from '../mock/time.ts';
 import { minutesOf } from '../mock/shifts.ts';
@@ -359,6 +369,62 @@ const inRange = (times: string[], from: string, to: string) =>
   report(
     activeOutage([{ ...o, to: now }], 'may-chair-2', now) === undefined,
     '"Mở lại" kết thúc khoảng ngưng ngay (BR-37)',
+  );
+}
+
+// ---- BR-06 to BR-10, BR-23, BR-38: policies and the terms of a booking ----
+
+{
+  const NOW = '2026-11-07T03:20:00Z';
+  const local = (iso: string) => localTimeOf(minutesOf(iso));
+  report(
+    local(earliestBooking(NOW, 3)) === '13:30' && local(earliestBooking(NOW, 2)) === '12:30',
+    'BR-06: bây giờ 10:20, đặt trước ít nhất 3 giờ thì từ 13:30 (2 giờ thì từ 12:30)',
+    local(earliestBooking(NOW, 3)),
+  );
+  const start = '2026-11-07T07:00:00.000Z';
+  report(
+    local(selfChangeUntil(start, 4)) === '10:00',
+    'BR-08: lịch 14:00, tự đổi trước 4 giờ thì tới 10:00',
+  );
+  report(
+    local(noShowFrom(start, 15)) === '14:15',
+    'BR-09: lịch 14:00, sau 15 phút thì lễ tân thấy "Không đến" từ 14:15',
+  );
+  const tenHoursBefore = '2026-11-06T21:00:00.000Z';
+  report(
+    refundVnd(100_000n, start, tenHoursBefore) === 50_000n &&
+      refundVnd(100_000n, start, tenHoursBefore, { over24: 100, over4: 70, under4: 0 }) === 70_000n,
+    'BR-23: cọc 100.000 ₫, hủy khi còn 10 giờ: mức mặc định hoàn 50.000 ₫, mức 70% hoàn 70.000 ₫',
+  );
+  report(
+    refundPercent(start, '2026-11-05T07:00:00.000Z', { over24: 90, over4: 50, under4: 10 }) ===
+      90 &&
+      refundPercent(start, '2026-11-07T06:00:00.000Z', { over24: 90, over4: 50, under4: 10 }) ===
+        10,
+    'BR-23: ba mức theo 24 giờ và 4 giờ, mức cấu hình thay mức mặc định',
+  );
+
+  // BR-38: the sample bookings keep the opening terms, a new booking its own.
+  const opened = openingTerms('toc-may');
+  report(
+    opened.cancelBeforeHours === 4 && opened.maxReschedules === 2 && opened.refund.over24 === 100,
+    'BR-38: lịch mẫu giữ điều khoản lúc cơ sở mở (tự đổi trước 4 giờ, tối đa 2 lần, hoàn 100/50/0)',
+  );
+  const promised = termsFrom(
+    { cancelBeforeHours: 6, maxReschedules: 1 },
+    { over24: 80, over4: 40, under4: 0 },
+  );
+  report(
+    termsOfAppointment({ terms: promised }, 'toc-may').cancelBeforeHours === 6 &&
+      termsOfAppointment({}, 'toc-may').cancelBeforeHours === 4,
+    'BR-38: lịch có điều khoản riêng giữ điều khoản đó, lịch không có thì dùng điều khoản lúc mở',
+  );
+  const appt = { status: 'confirmed', startAt: start, selfChanges: 1 };
+  report(
+    selfChangeBlock(appt, '2026-11-07T01:30:00.000Z', promised, false) !== null &&
+      selfChangeBlock(appt, '2026-11-07T01:30:00.000Z', opened, false) === null,
+    'BR-38: đổi chính sách không đụng lịch đã đặt: cùng giờ, điều khoản 6 giờ chặn, điều khoản 4 giờ cho đổi',
   );
 }
 

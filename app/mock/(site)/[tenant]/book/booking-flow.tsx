@@ -46,6 +46,7 @@ import { cn } from '@/lib/utils';
 import { freeChainSlots, freeGroupSlots, type FreeChainSlot } from '@/mock/availability';
 import { slotKey, type BookingSlot } from '@/mock/booking';
 import { bookingWindow, selfChangeBlock } from '@/mock/policy';
+import { termsOfAppointment } from '@/mock/terms';
 import { heldItems, modeOf, movedAppointment, openQuestion } from '@/mock/reschedule';
 import { matchesAttributes, priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
 import {
@@ -618,7 +619,7 @@ export function BookingFlow({
   function confirmReschedule() {
     if (!target || !slot) return;
     // Checked again at the moment of confirming: the time kept moving while the customer chose.
-    const blocked = selfChangeBlock(target, now, fixture.policies, answering);
+    const blocked = selfChangeBlock(target, now, termsOfAppointment(target, tenantSlug), answering);
     if (blocked) {
       toast({ text: blocked });
       router.push(`/mock/${tenantSlug}/me/appointments/${target.id}`);
@@ -1580,7 +1581,12 @@ export function BookingFlow({
             title: slotLine,
             subtitle: answering
               ? 'Không tính vào số lần đổi giờ'
-              : `Còn ${Math.max(0, fixture.policies.maxReschedules - (target.selfChanges ?? 0) - 1)} lần đổi sau lần này`,
+              : `Còn ${Math.max(
+                  0,
+                  termsOfAppointment(target, tenantSlug).maxReschedules -
+                    (target.selfChanges ?? 0) -
+                    1,
+                )} lần đổi sau lần này`,
             label: answering ? 'Gửi giờ này cho tiệm' : 'Xác nhận đổi giờ',
             disabled: false,
             onClick: confirmReschedule,
