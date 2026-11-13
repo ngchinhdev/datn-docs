@@ -68,14 +68,14 @@ Chi tiết và ví dụ tính tay ở [Thuật toán tính giờ trống](../ky-
 | Mã | Quy tắc |
 |---|---|
 | BR-20 | Mọi thay đổi số dư phải qua bút toán; không có thao tác sửa số dư |
-| BR-21 | Mỗi khoản thanh toán chỉ được ghi nhận một lần theo `idempotency_key` |
-| BR-22 | Thứ tự giảm giá: giá gốc → khuyến mãi tự động → voucher (tối đa 1) |
+| BR-21 | Mỗi khoản thanh toán chỉ được ghi nhận một lần theo `idempotency_key`. Thu tiền nhiều phương thức: tổng các khoản phải đúng bằng số còn phải thu mới ghi được. Tiền mặt nhập tiền khách đưa, tự tính tiền thối. Chuyển khoản hiện QR, tự ghi khi cổng báo; đóng hộp QR không hủy mã. Thu xong hóa đơn khóa, sửa bằng hoàn tiền |
+| BR-22 | Thứ tự tính hóa đơn: giá theo lịch (BR-12) → dùng buổi gói (dòng thành 0) → giảm giá → trừ cọc → còn phải thu. Giảm giá chỉ là giảm tay (phần trăm hoặc số tiền), cần quyền quản lý và lý do, ghi nhật ký (BR-63). Không có khuyến mãi tự động và voucher trong phạm vi đồ án. Bán lẻ là dòng nhập tay (tên, số lượng, đơn giá), không quản lý kho |
 | BR-23 | Hoàn cọc mặc định: hủy trước 24h hoàn 100%, 4–24h hoàn 50%, dưới 4h hoặc không đến hoàn 0% (cấu hình được) |
 | BR-24 | Cơ sở chủ động hủy thì luôn hoàn cọc 100% |
-| BR-25 | Rút tiền ví chỉ hoàn phần tiền thật còn lại, không hoàn tiền tặng |
+| BR-25 | Rút tiền ví chỉ hoàn phần tiền thật còn lại, không hoàn tiền tặng. Trả bằng ví thì trừ tiền thật trước, tiền tặng sau. Tiền tặng khi nạp theo mức cấu hình (mặc định nạp từ 1.000.000 ₫ tặng 10%) |
 | BR-26 | Doanh thu gói ghi nhận theo từng buổi sử dụng |
 | BR-27 | Hoàn gói = giá gói − (số buổi đã dùng × giá lẻ tại thời điểm mua) − phí hủy; âm thì bằng 0 |
-| BR-28 | Hoàn tiền bắt buộc ghi lý do và cần quyền quản lý; kéo theo thu hồi hoa hồng và hoàn buổi gói |
+| BR-28 | Hoàn tiền bắt buộc ghi lý do và cần quyền quản lý; kéo theo thu hồi hoa hồng (vào kỳ đang mở, BR-42) và hoàn buổi gói. Yêu cầu tạo từ hóa đơn, chọn khoản đã trả; tiền hoàn về đúng phương thức của khoản đó (ví về ví, giữ tỉ lệ tiền thật, tiền tặng), không vượt số đã thu trừ số đã hoàn. Cọc đã trừ vào dịch vụ đã làm thì hoàn qua khoản khác |
 | BR-29 | Giữ chỗ khi trả cọc vẫn là 10 phút tính từ lúc chọn giờ (BR-07); sang trang trả cọc không cộng thêm. Tiền cọc về sau khi hết giữ chỗ: giờ còn trống thì vẫn xác nhận; đã có người đặt thì hệ thống tự hoàn đủ, không cần quản lý duyệt (khác BR-28), và gợi ý giờ gần nhất |
 
 ## Hoa hồng
@@ -139,6 +139,9 @@ Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-h
 | Nhân viên nghỉ đột xuất, đã có lịch trong ngày | Liệt kê lịch bị ảnh hưởng; khách chọn đích danh được hỏi ý | BR-11 |
 | Gói liệu trình hết hạn khi khách còn lịch đặt trước | Cảnh báo khi đặt; đến ngày, lễ tân chọn gia hạn hoặc tính giá lẻ | BR-26 |
 | Cùng số điện thoại đặt ở hai cơ sở khác nhau | Hai hồ sơ độc lập, không cơ sở nào thấy của nhau | BR-60 |
+| Chị Hà trả 200.000 ₫ bằng ví khi ví có 150.000 ₫ tiền thật và 100.000 ₫ tiền tặng | Trừ 150.000 ₫ tiền thật rồi 50.000 ₫ tiền tặng; còn 50.000 ₫ tiền tặng, không rút được | BR-25 |
+| Hoàn khoản trả bằng ví 200.000 ₫ | Trả lại vào ví 150.000 ₫ tiền thật, 50.000 ₫ tiền tặng | BR-28 |
+| Lễ tân bấm Thu hai lần liền | Chỉ một khoản được ghi | BR-21 |
 | Một khách đặt cho hai thú cưng cùng lúc | Đặt nhóm, mỗi bé là một đối tượng được phục vụ | BR-13, BR-19 |
 | Hai bé cùng giờ mà chỉ còn một lồng sấy rảnh | Không hiện giờ đó cho "cùng giờ"; gợi ý giờ lệch nhau không quá 60 phút | BR-19 |
 | Khách chọn Lan cho cả Cắt rồi Nhuộm | Nhuộm bắt đầu sau khi cắt xong thêm 15 phút pha thuốc; khách thấy khoảng chờ này | BR-18 |

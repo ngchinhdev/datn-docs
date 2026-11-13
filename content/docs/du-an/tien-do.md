@@ -7,6 +7,38 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 13/11/2026: merge PR #7 (Bước 12), chốt đợt C, tiền
+- **Đã làm:**
+  - Review PR #7. Sửa trên cùng nhánh rồi người dùng merge:
+    - BR-06 cho giờ trống phía khách;
+    - "Chọn lại giờ" dời lịch ngay;
+    - chỉ ghép khách theo email;
+    - Pawpaw có chuỗi dịch vụ khi chỉ chọn một bé;
+    - kiểm lại số lần đổi lúc xác nhận;
+    - khách tự hủy thì đóng dòng hỏi ý.
+  - `CLAUDE.md`: kiểm trên máy chỉ chạy script; không chạy Playwright hay axe. Người dùng tự kiểm giao diện.
+  - Vẽ và chốt đợt C (9 bảng):
+    - MH-29 thu tiền: ví cộng tiền mặt; gói cộng chuyển khoản QR;
+    - MH-30 bán gói, nạp ví;
+    - MH-31 danh sách và chi tiết hóa đơn;
+    - MH-33 hồ sơ khách;
+    - MH-34 danh sách hoàn tiền với bảng duyệt, và hộp tạo yêu cầu hoàn.
+  - Quy tắc:
+    - BR-22: thứ tự tính hóa đơn; chỉ giảm tay; bỏ khuyến mãi tự động và voucher; bán lẻ nhập tay, không kho.
+    - BR-25: ví trừ tiền thật trước, có mức tặng khi nạp.
+    - BR-28: hoàn về đúng phương thức đã trả.
+    - BR-21: thu nhiều phương thức, QR, khóa hóa đơn sau khi thu.
+- **Ghi chú cho ERD:**
+  - Bỏ bảng `promotions`, `vouchers`.
+  - `invoice_lines.kind` có `retail` nhập tay, không có `product_id`.
+  - `invoices.discount_vnd` kèm lý do và người duyệt.
+  - Bút toán ví tách tiền thật, tiền tặng.
+  - `refund_requests` gắn với một `payment`, có `created_by` rỗng khi tự động (BR-29).
+  - Bậc tặng khi nạp nằm trong cài đặt thanh toán.
+- **Tiếp theo:**
+  - Claude Code làm [Bước 13](../ky-thuat/ke-hoach-ui-mock.md#bước-13-đợt-c-tiền-mh-29-mh-30-mh-31-mh-33-mh-34).
+  - Phiên claude.ai vẽ đợt D (cấu hình cơ sở: MH-42, MH-43, MH-46, MH-49 đến MH-54, MH-57).
+
 ### 12/11/2026: mock phía khách (Bước 12, đợt B)
 
 - **Đã làm** (nhánh `feat/mock-customer`, mỗi mục 12a–12h một commit):

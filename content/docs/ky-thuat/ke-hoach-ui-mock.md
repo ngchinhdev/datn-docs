@@ -777,6 +777,108 @@ Làm trên nhánh `feat/mock-customer`, mỗi mục 12a–12i một commit, mở
 - **Bé:** sửa cân nặng Lucky thành 0 thì báo lỗi. Lucky còn lịch nên không có nút Xóa.
 - **Điện thoại:** ở 390px mọi màn mới không cuộn ngang.
 
+## Bước 13. Đợt C: tiền (MH-29, MH-30, MH-31, MH-33, MH-34)
+
+Sau khi PR #7 merge. Căn cứ:
+- Các bảng của đợt C: `ThuTien`, `ThuTienQR`, `BanGoi`, `NapVi`, `HoaDon*`, `HoSoKhach`, `HoanTien*` (bảng ở `design/README.md`).
+- Quy tắc BR-10, BR-20 đến BR-29, BR-40, BR-42, BR-62, BR-63.
+
+Chữ và số trên bảng là minh họa; mock tính từ dữ liệu mẫu. Kiểm trên máy theo `CLAUDE.md`: không chạy Playwright hay axe. Làm trên nhánh `feat/mock-money`, mỗi mục 13a–13g một commit, mở PR mới, không merge.
+
+### 13a. Dọn sau Bước 12 và dữ liệu tiền
+
+- Trang khách đọc X, N (BR-08) và BR-06 từ chính sách của cơ sở trong store, không đọc từ chính sách mặc định của gói ngành. Sửa ở Cài đặt › Chính sách thì trang khách đổi theo.
+- **Hàm thuần ở `mock/money.ts`** (đơn vị VND `bigint`, không dùng số thực):
+  - `invoiceTotals(lines, discount, deposit)`: tính theo thứ tự BR-22.
+  - `splitWallet(amount, real, bonus)`: trừ tiền thật trước (BR-25).
+  - `refundable(invoice, payment)`: số còn hoàn được của một khoản (BR-28).
+  - `packageRefund` theo BR-27.
+  - `sessionRevenue` theo BR-26.
+  - `commissionClawback` theo BR-40, BR-42.
+- **Sổ ví** chỉ thêm bút toán (BR-20); số dư là tổng bút toán.
+- **Dữ liệu mẫu:**
+  - Hóa đơn của ngày 06/11 và 07/11 như `HoaDonDanhSach`.
+  - Ví của Lê Thu Hà: nạp 1.000.000 ₫, tặng 100.000 ₫, đã trả 850.000 ₫.
+  - Gói 5 lần gội sấy của Nguyễn Bảo An, còn 2 buổi.
+  - 4 yêu cầu hoàn tiền, trong đó có một yêu cầu "Tự động" theo BR-29.
+- **`check:availability`** (hoặc script mới `check:money`) thêm các ca: ví 200.000 ₫ trừ 150.000 ₫ tiền thật và 50.000 ₫ tiền tặng; hoàn gói 700.000 − 3 × 80.000 − 50.000; hoàn không vượt số đã thu.
+
+### 13b. Thu tiền (MH-29)
+
+- `/mock/app/[tenant]/checkout/[appointmentId]`, đúng `ThuTien` và `ThuTienQR`. Lịch hoàn thành thì có hóa đơn nháp; nút "Thu tiền" ở Hôm nay, Lịch và chi tiết lịch mở trang này thay cho hộp thu tiền hiện có.
+- **Dòng:**
+  - Dịch vụ theo giá lúc đặt (BR-12), không sửa được.
+  - "Thêm dòng bán lẻ" (tên, số lượng, đơn giá), bỏ được.
+  - "Dùng buổi gói" khi khách có gói áp dụng cho dòng đó: dòng thành 0 ₫ kèm badge Gói.
+- **Giảm giá:** phần trăm hoặc số tiền, lý do bắt buộc. Lễ tân không có quyền quản lý thì ô tắt, ghi "Cần quản lý".
+- **Phương thức:**
+  - Ví ghi rõ phần tiền thật, tiền tặng.
+  - Tiền mặt có ô "Khách đưa" và tiền thối.
+  - Chuyển khoản mở hộp QR đúng `ThuTienQR`. Trong mock có nút "Giả lập: tiền về".
+  - Thẻ chỉ ghi tay.
+- Tổng các khoản chưa đúng số còn phải thu thì dòng báo thiếu hoặc thừa, nút Thu tắt.
+- **Bấm Thu:** nút khóa ngay; bấm hai lần chỉ ghi một khoản (BR-21). Thu xong:
+  - lịch thành đã thanh toán, sổ ví thêm bút toán;
+  - buổi gói bị trừ;
+  - hoa hồng ghi vào kỳ đang mở;
+  - chuyển sang chi tiết hóa đơn.
+
+### 13c. Bán gói, nạp ví (MH-30)
+
+- `/mock/app/[tenant]/sales/new?type=package|wallet`, đúng `BanGoi`, `NapVi`. Gói lấy từ cấu hình gói; mức tặng lấy từ cài đặt thanh toán (mặc định nạp từ 1.000.000 ₫ tặng 10%).
+- "Thu …" mở MH-29 với một dòng gói hoặc nạp ví. Thu xong thì gói hoặc số dư hiện ngay ở hồ sơ khách.
+- Nút "Bán gói, nạp ví" ở Hóa đơn và hồ sơ khách.
+
+### 13d. Hóa đơn (MH-31)
+
+- **`/invoices`:** mẫu danh sách (MH-08) đúng `HoaDonDanhSach`. Lọc Hôm nay, Phương thức, Trạng thái; tìm theo số, tên, số điện thoại.
+- **`/invoices/[id]`:** đúng `HoaDonChiTiet`, gồm dòng, khoản thanh toán có mã, lịch sử.
+  - "In" mở bản in gọn (`@media print`).
+  - "Gửi email" chỉ hiện toast trong mock.
+  - "Yêu cầu hoàn tiền" mở hộp đúng `HoanTienTao`:
+    - chọn khoản đã trả;
+    - nhập số tiền, tối đa số còn hoàn được;
+    - lý do bắt buộc;
+    - khoản cọc đã trừ vào dịch vụ thì tắt và ghi lý do.
+
+### 13e. Hồ sơ khách (MH-33)
+
+- `/customers/[id]`, đúng `HoSoKhach`. Bấm tên ở danh sách khách mở trang này.
+- **Lịch sử lịch hẹn** có link hóa đơn.
+- **Sổ ví** theo từng bút toán.
+- **Ví và gói:** "Rút tiền thật" chỉ bật khi còn tiền thật (BR-25).
+- **Ghi chú nội bộ** (BR-62).
+- **Bắt buộc đặt cọc:** tự bật khi đủ K lần không đến (BR-10); tắt tay cần quản lý và lý do.
+- **Ngày đồng ý xử lý dữ liệu** và lựa chọn nhận tin khuyến mãi (BR-64).
+- Ngành có đối tượng thì có thêm phần "Bé" (dùng lại danh sách của trang khách, chỉ xem).
+
+### 13f. Hoàn tiền (MH-34)
+
+- `/refunds` đúng `HoanTien`. Lọc Chờ duyệt mặc định. Số trên thanh bên đếm số yêu cầu chờ duyệt.
+- Bấm một dòng chờ duyệt thì mở `SidePanel` duyệt:
+  - các con số;
+  - lý do;
+  - khối "Duyệt thì", liệt kê bút toán đảo, hoa hồng bị thu hồi vào kỳ nào, buổi gói được trả lại.
+- **Duyệt:** hóa đơn thành "Đã hoàn" hoặc "Đã hoàn một phần", và ghi nhật ký (BR-63).
+- **Từ chối:** cần ghi chú.
+- Vai trò lễ tân thấy danh sách nhưng không có nút duyệt (BR-28).
+- Hoàn cọc tự động (BR-29) hiện với người tạo "Tự động", không cần duyệt.
+
+### 13g. Hoàn tất
+
+- `mock/screens.ts`: MH-29, MH-30, MH-31, MH-33, MH-34 thành "Đang làm".
+- `pnpm check:availability` (và `check:money` nếu có), `pnpm build`, `pnpm typecheck`, `prettier --check` xanh.
+- Mở PR mới: mô tả theo 13a–13g, mục "Tự quyết". Ghi một mục Tiến độ.
+
+**Xong khi** (người dùng tự kiểm):
+- **Thu tiền:** Lê Thu Hà, lịch 09:00, thêm một dòng bán lẻ 120.000 ₫, chọn Ví và Tiền mặt. Ví trừ đúng 150.000 ₫ tiền thật và 50.000 ₫ tiền tặng; khách đưa 500.000 ₫ thì thối 180.000 ₫. Bấm Thu hai lần chỉ có một hóa đơn.
+- **Dùng gói:** Nguyễn Bảo An dùng 1 buổi gói cho Gội sấy, phần còn lại chuyển khoản; bấm "Giả lập: tiền về" thì hóa đơn thành Đã thu, gói còn 1 buổi.
+- **Nạp ví:** nạp 1.000.000 ₫ cho một khách thì ví có thêm 100.000 ₫ tiền tặng.
+- **Hoàn tiền:**
+  - Yêu cầu hoàn 120.000 ₫ ở HĐ-0187, rồi duyệt bằng vai trò Quản lý: hóa đơn thành Đã hoàn một phần, hoa hồng của Mai có một dòng thu hồi.
+  - Vai trò Lễ tân không duyệt được.
+- **Hồ sơ khách:** Lê Thu Hà có số dư 50.000 ₫ tiền tặng, "Rút tiền thật" tắt.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -864,4 +966,16 @@ trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 12a đến 12i,
 theo các bảng của đợt B trong design/screens/; chữ và số lấy từ dữ liệu mẫu, tính bằng hàm thật. Kiểm
 "Xong khi" trước khi báo xong, mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy
 tắc nghiệp vụ.
+```
+
+Bước 13:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-money.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, BR-10, BR-20 đến BR-29,
+BR-40, BR-42, BR-62, BR-63 trong quy-tac.md, và design/README.md (các bảng của đợt C). Làm Bước 13
+trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 13a đến 13g, mỗi mục một commit. Bố cục
+theo bảng; chữ và số lấy từ dữ liệu mẫu, tính bằng hàm thuần ở mock/money.ts, tiền là bigint. Chỉ chạy
+các lệnh kiểm trong CLAUDE.md, không chạy Playwright hay axe. Mở PR mới, không merge. Dừng lại hỏi mình
+nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
 ```

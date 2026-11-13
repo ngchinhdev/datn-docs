@@ -94,12 +94,12 @@ Route trong bảng là đường dẫn trên tên miền con của cơ sở (ví
 | MH-26 | Tạo lịch hẹn | ngăn trượt trên MH-24; `/app/[tenant]/appointments/new` trên điện thoại | LT | 1 | Vẽ | **Đã chọn.** Tìm hoặc tạo khách theo số điện thoại (BR-61), khách vãng lai, dịch vụ, thợ, giờ trống; bấm ô trống trên lịch thì điền sẵn giờ và cột |
 | MH-27 | Kéo thả đổi giờ, đổi người | trong MH-24 | LT | 1 | Vẽ | **Đã chọn.** Kiểm ràng buộc khi đang kéo (ô không hợp lệ tô `danger-soft`), thả xong có Hoàn tác (D-14); lịch "bất kỳ ai" và lịch chọn đích danh xử lý khác nhau |
 | MH-28 | Chi tiết lịch hẹn | `/app/[tenant]/appointments/[id]` | LT, KTV | 1 | Nhẹ | **Đã chọn.** Trang riêng cho điện thoại; nội dung như bảng chi tiết của MH-24 |
-| MH-29 | Thu tiền | `/app/[tenant]/checkout/[appointmentId]` | LT | 2 | Vẽ | Hóa đơn từ lịch hẹn, thêm bán lẻ, trừ cọc, trừ buổi gói, dùng ví, giảm giá (BR-22), nhiều phương thức, QR; bấm hai lần chỉ ghi một lần (BR-21) |
-| MH-30 | Bán gói, nạp ví | `/app/[tenant]/sales/new?type=package\|wallet` | LT | 2 | Form | Chọn khách, gói hoặc số tiền nạp, tiền tặng kèm; qua MH-29 để thu |
-| MH-31 | Hóa đơn | `/app/[tenant]/invoices`, `/invoices/[id]` | LT, CCS | 2 | DS | Cột: số, giờ, khách, tổng, phương thức, trạng thái; chi tiết có in và "Yêu cầu hoàn tiền" |
+| MH-29 | Thu tiền | `/app/[tenant]/checkout/[appointmentId]` | LT | 2 | Vẽ | **Đã chọn.** Hóa đơn từ lịch hẹn, thêm bán lẻ, trừ cọc, trừ buổi gói, dùng ví, giảm tay (BR-22), nhiều phương thức, QR; bấm hai lần chỉ ghi một lần (BR-21) |
+| MH-30 | Bán gói, nạp ví | `/app/[tenant]/sales/new?type=package\|wallet` | LT | 2 | Form | **Đã chọn.** Chọn khách, gói hoặc số tiền nạp, tiền tặng kèm; qua MH-29 để thu |
+| MH-31 | Hóa đơn | `/app/[tenant]/invoices`, `/invoices/[id]` | LT, CCS | 2 | DS | **Đã chọn.** Cột: số, giờ, khách, tổng, phương thức, trạng thái; chi tiết có in và "Yêu cầu hoàn tiền" |
 | MH-32 | Khách hàng | `/app/[tenant]/customers` | LT, CCS | 1 | DS | Tìm theo tên, số điện thoại chuẩn hóa; cột: lần đến gần nhất, số lần, số lần không đến |
-| MH-33 | Hồ sơ khách | `/app/[tenant]/customers/[id]` | LT, CCS | 1 (tiền ở 2) | Vẽ | Lịch sử, ghi chú nội bộ (BR-62), đối tượng được phục vụ, gói, ví, bắt buộc cọc (BR-10) |
-| MH-34 | Hoàn tiền | `/app/[tenant]/refunds` | LT tạo, QL/CCS duyệt | 2 | DS | Lý do bắt buộc, chờ duyệt (BR-28); duyệt thì thu hồi hoa hồng và hoàn buổi gói |
+| MH-33 | Hồ sơ khách | `/app/[tenant]/customers/[id]` | LT, CCS | 1 (tiền ở 2) | Vẽ | **Đã chọn.** Lịch sử, ghi chú nội bộ (BR-62), đối tượng được phục vụ, gói, ví, bắt buộc cọc (BR-10) |
+| MH-34 | Hoàn tiền | `/app/[tenant]/refunds` | LT tạo, QL/CCS duyệt | 2 | DS | **Đã chọn.** Lý do bắt buộc, chờ duyệt (BR-28); duyệt thì thu hồi hoa hồng và hoàn buổi gói |
 
 ## E. Kỹ thuật viên (ưu tiên điện thoại)
 
