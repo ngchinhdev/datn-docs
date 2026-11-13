@@ -104,7 +104,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
         channel: 'online',
         now: MOCK_NOW,
         // BR-06: the times shown are the ones a customer may book.
-        ...bookingWindow(fixture.template.defaultPolicies, MOCK_NOW),
+        ...bookingWindow(fixture.policies, MOCK_NOW),
       });
       map[s.resourceId] = slots[0] ? formatTime(slots[0].startAt) : null;
     }
@@ -137,7 +137,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
     return formatHoursGroup(branch.businessHours);
   }, [branch.businessHours]);
 
-  const policies = fixture.template.defaultPolicies;
+  const policies = fixture.policies;
   const depositService = fixture.services.find((s) => s.variants.some((v) => v.depositVnd));
   const depositVnd = depositService?.variants.find((v) => v.depositVnd)?.depositVnd;
 

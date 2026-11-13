@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { useScheduleStore } from './schedule-store';
 import type { Customer, CustomerPackage, CustomerWallet, ServedSubject } from '@/mock/fixtures';
+import { walletView } from '@/mock/wallet-view';
 
 export interface CustomerSessionValue {
   customer: Customer | null;
@@ -25,13 +26,6 @@ export interface CustomerSessionValue {
 
 const CustomerSessionContext = createContext<CustomerSessionValue | null>(null);
 
-const emptyWallet: CustomerWallet = {
-  balanceVnd: 0n,
-  realVnd: 0n,
-  bonusVnd: 0n,
-  history: [],
-};
-
 export function CustomerSessionProvider({
   tenantSlug,
   children,
@@ -39,7 +33,7 @@ export function CustomerSessionProvider({
   tenantSlug: string;
   children: ReactNode;
 }) {
-  const { customers, replaceCustomer, servedSubjects } = useScheduleStore();
+  const { customers, replaceCustomer, servedSubjects, money } = useScheduleStore();
 
   // Default customer for mock: Chị Quyên for toc-may, Chị Linh for pawpaw
   const defaultCustomerId = useMemo(() => {
@@ -69,9 +63,10 @@ export function CustomerSessionProvider({
     return customer?.packages ?? [];
   }, [customer]);
 
-  const wallet = useMemo(() => {
-    return customer?.wallet ?? emptyWallet;
-  }, [customer]);
+  const wallet = useMemo(
+    () => walletView(money.walletEntries, currentId ?? ''),
+    [money.walletEntries, currentId],
+  );
 
   const login = useCallback(
     (email: string) => {

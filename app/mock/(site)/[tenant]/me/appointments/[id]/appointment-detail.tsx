@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useCustomerSession } from '@/components/mock/customer-session';
 import { useScheduleStore } from '@/components/mock/schedule-store';
+import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
 import { Sheet } from '@/components/sapio/sheet';
@@ -21,7 +22,6 @@ import {
   timeLeftText,
 } from '@/mock/policy';
 import { bookingCode, heldItems, modeOf, openQuestion } from '@/mock/reschedule';
-import { fixtureBySlug } from '@/mock/selection';
 import { branchPhone } from '@/mock/site';
 import { formatDay, formatTime, localDate } from '@/mock/time';
 import type { LeaveHandling } from '@/mock/fixtures';
@@ -30,7 +30,7 @@ const REASONS = ['Bận việc đột xuất', 'Đặt nhầm giờ', 'Khác'];
 
 /** MH-18: one booking of the logged-in customer, with the things they may do to it by themselves. */
 export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: string }) {
-  const fixture = fixtureBySlug(tenantSlug)!;
+  const fixture = useLiveFixture(tenantSlug);
   const { tenant, branches, resources, staff } = fixture;
   const branch = branches[0]!;
   const store = useScheduleStore();
@@ -66,7 +66,7 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
   const day = formatDay(localDate(appt.startAt));
   const live = appt.status === 'confirmed' || appt.status === 'checked_in';
   const price = items.reduce((m, it) => m + it.priceVnd, 0n);
-  const policy = fixture.template.defaultPolicies;
+  const policy = fixture.policies;
   const selfOk = live && canSelfService(appt.startAt, now, policy.cancelBeforeHours);
   const used = appt.selfChanges ?? 0;
   const left = Math.max(0, policy.maxReschedules - used);

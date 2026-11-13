@@ -147,9 +147,16 @@ export interface CustomerPackage {
   totalSessions: number;
   usedSessions: number;
   remainingSessions: number;
+  /** `dd/MM/yyyy`. */
   expiresAt: string;
   serviceVariantId?: string;
   note?: string;
+  /** Integer VND paid for the package (BR-27). */
+  priceVnd?: bigint;
+  /** Retail price of one session when it was bought (BR-27). */
+  unitPriceVnd?: bigint;
+  /** Refunded: no session is left to use. */
+  refunded?: boolean;
 }
 
 export interface WalletTransaction {
@@ -181,11 +188,12 @@ export interface Customer {
   /** Internal note; never shown to the customer (BR-62). */
   note?: string;
   packages?: CustomerPackage[];
-  wallet?: CustomerWallet;
   /** Agreed to email offers, a choice of its own; off by default (BR-64). */
   marketingOptIn?: boolean;
   /** ISO 8601, UTC: when they agreed to the processing of their data, at the first booking (BR-64). */
   consentAt?: string;
+  /** A person's own decision on the deposit, over the no-show count (BR-10). */
+  depositOverride?: { on: boolean; reason: string; by: string; at: string };
 }
 
 export interface ServedSubject {
@@ -254,6 +262,10 @@ export interface Appointment {
   checkedInAt?: string;
   /** Integer VND. */
   depositVnd?: bigint;
+  /** Reference of the online deposit, e.g. `PG-7K2Q9`; the invoice shows it as a payment. */
+  depositRef?: string;
+  /** ISO 8601, UTC: when the deposit came in. */
+  depositPaidAt?: string;
   /** Paid in full; a completed appointment without it waits for payment. */
   settled?: boolean;
   note?: string;
@@ -483,4 +495,195 @@ export interface TenantFixture {
   customers: Customer[];
   servedSubjects: ServedSubject[];
   appointments: Appointment[];
+  /** The tenant's booking policies, copied from the template when it was created (BR-70). */
+  policies: TemplatePolicies;
+  /** Packages on sale (BR-26). */
+  packageCatalog: PackageProduct[];
+  /** Top-up bonus tiers of the payment settings (BR-25), highest `minVnd` last. */
+  topupBonusTiers: BonusTier[];
+  /** Percent of the one commission rule that covers every line (BR-40). */
+  commissionPercent: number;
+  /** Who does what at the desk, as the screens write it: "Lan thu", "Hùng duyệt". */
+  actors: Record<'receptionist' | 'manager' | 'owner', string>;
+  /** Invoices, payments, wallet entries, refunds, commission. */
+  money: MoneyState;
+}
+
+/** A package a shop sells (BR-26, BR-27); set up in Cài đặt › Gói liệu trình. */
+export interface PackageProduct {
+  id: string;
+  name: string;
+  serviceVariantId: string;
+  totalSessions: number;
+  validDays: number;
+  /** Integer VND. */
+  priceVnd: bigint;
+}
+
+/** Top up at least `minVnd` and the wallet gets `percent` of it on top (BR-25). */
+export interface BonusTier {
+  minVnd: bigint;
+  percent: number;
+}
+
+export type PaymentMethod = 'cash' | 'transfer' | 'card' | 'wallet' | 'gateway';
+
+export interface InvoiceLine {
+  id: string;
+  kind: 'service' | 'retail' | 'package_sale' | 'wallet_topup';
+  description: string;
+  /** Grey text under the description. */
+  detail?: string;
+  quantity: number;
+  /** Integer VND. */
+  unitPriceVnd: bigint;
+  staffResourceId?: string;
+  /** Service line: the variant booked (BR-12). */
+  serviceVariantId?: string;
+  /** Takes one session of this customer package; the line is worth 0 (BR-22). */
+  packageId?: string;
+  /** `package_sale`: the product sold. */
+  productId?: string;
+  /** `wallet_topup`: the bonus that comes with it (BR-25). */
+  bonusVnd?: bigint;
+}
+
+/** Only by hand: a percentage or an amount, with a reason and who allowed it (BR-22). */
+export type Discount =
+  | { kind: 'percent'; percent: number; reason: string; approvedBy: string }
+  | { kind: 'amount'; amountVnd: bigint; reason: string; approvedBy: string };
+
+export interface Invoice {
+  id: string;
+  /** `HĐ-0187`. */
+  number: string;
+  appointmentId?: string;
+  customerId: string | null;
+  /** Shown when there is no customer record. */
+  customerName?: string;
+  /** ISO 8601, UTC. */
+  createdAt: string;
+  lines: InvoiceLine[];
+  discount?: Discount;
+  /** Deposit paid online, taken off the amount due (BR-22). Integer VND. */
+  depositVnd: bigint;
+  /** ISO 8601, UTC. Set when the last payment came in; the invoice is locked from then (BR-21). */
+  paidAt?: string;
+  /** Who collected, e.g. "Lan". */
+  collectedBy?: string;
+}
+
+export interface Payment {
+  id: string;
+  invoiceId: string;
+  purpose: 'deposit' | 'invoice';
+  method: PaymentMethod;
+  /** Integer VND counted towards the invoice. */
+  amountVnd: bigint;
+  /** Cash only: what the customer handed over. */
+  tenderedVnd?: bigint;
+  /** Wallet only: the part paid from real money and from the bonus (BR-25). */
+  realVnd?: bigint;
+  bonusVnd?: bigint;
+  /** Reference of the payment, e.g. `CS-0187`. */
+  code: string;
+  /** ISO 8601, UTC. */
+  at: string;
+  /** A transfer waits for the bank; the other methods are paid at once. */
+  status: 'pending' | 'paid';
+  /** One payment is recorded once per key (BR-21). */
+  idempotencyKey: string;
+}
+
+/** One line of the wallet ledger: real money and bonus move apart, the balance is their sum (BR-20, BR-25). */
+export interface WalletEntry {
+  id: string;
+  customerId: string;
+  /** ISO 8601, UTC. */
+  at: string;
+  /** Signed integer VND. */
+  realVnd: bigint;
+  /** Signed integer VND. */
+  bonusVnd: bigint;
+  kind: 'topup' | 'payment' | 'refund' | 'withdraw';
+  memo: string;
+  invoiceId?: string;
+  idempotencyKey: string;
+}
+
+export type RefundStatus = 'pending' | 'approved' | 'rejected' | 'auto';
+
+/** A request to give money back from one payment (BR-28), or the automatic one of BR-29. */
+export interface RefundRequest {
+  id: string;
+  invoiceId: string | null;
+  paymentId: string | null;
+  customerId: string | null;
+  /** First line of the "Khách, hóa đơn" cell. */
+  who: string;
+  /** Second line: the invoice number and what it was for. */
+  what: string;
+  /** Integer VND. */
+  amountVnd: bigint;
+  /** Where the money goes back: the method of the payment. */
+  method: PaymentMethod;
+  reason: string;
+  /** "Lan", or "Tự động" for BR-29. */
+  createdBy: string;
+  /** ISO 8601, UTC. */
+  createdAt: string;
+  status: RefundStatus;
+  decidedBy?: string;
+  decidedAt?: string;
+  /** Rejected only. */
+  rejectNote?: string;
+  /** Invoice line the refund is about. */
+  lineId?: string;
+  /** Refund of a package sale (BR-27): the package and the fee that was taken off. */
+  packageId?: string;
+  feeVnd?: bigint;
+  /** The line used a package session: it goes back to the package (BR-28). */
+  returnSession?: boolean;
+  /** Set when approved: how a wallet payment goes back. */
+  walletRealVnd?: bigint;
+  walletBonusVnd?: bigint;
+}
+
+export interface CommissionPeriod {
+  id: string;
+  /** `11/2026`. */
+  label: string;
+  status: 'open' | 'closed';
+}
+
+/** A commission posting of one person; the clawback of a refund is negative (BR-28, BR-42). */
+export interface CommissionEntry {
+  id: string;
+  staffResourceId: string;
+  periodId: string;
+  /** Signed integer VND. */
+  amountVnd: bigint;
+  invoiceId: string;
+  kind: 'earn' | 'clawback';
+  /** ISO 8601, UTC. */
+  at: string;
+}
+
+/** A sensitive action and who did it (BR-63). */
+export interface AuditEntry {
+  id: string;
+  /** ISO 8601, UTC. */
+  at: string;
+  by: string;
+  text: string;
+}
+
+export interface MoneyState {
+  invoices: Invoice[];
+  payments: Payment[];
+  walletEntries: WalletEntry[];
+  refunds: RefundRequest[];
+  commission: CommissionEntry[];
+  periods: CommissionPeriod[];
+  audit: AuditEntry[];
 }
