@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Thanh toán</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-shell sp-tenant-may" style="position: relative; height: 1240px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <nav class="sp-shell__side" id="app-sidebar" aria-label="Điều hướng chính">
+    <div class="sp-brand">
+      <span class="sp-brand__name">Sapio</span>
+      <button type="button" class="sp-icon-btn" aria-label="Thu gọn thanh bên" aria-expanded="true" aria-controls="app-sidebar" title="Thu gọn thanh bên"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg></button>
+    </div>
+    <button class="sp-switcher" type="button" aria-haspopup="menu" aria-expanded="false">
+      <span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent);">M</span>
+      <span class="sp-switcher__text"><span class="sp-sr-only">Đổi cơ sở hoặc chi nhánh:</span><span class="sp-switcher__name">Salon Tóc Mây</span><span class="sp-switcher__sub">Chi nhánh Quận 3</span></span>
+      <svg class="sp-switcher__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+    </button>
+    <div class="sp-nav">
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg><span class="sp-nav__label">Tổng quan</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path></svg><span class="sp-nav__label">Hôm nay</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg><span class="sp-nav__label">Lịch</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span class="sp-nav__label">Khách hàng</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><path d="M12 17.5v-11"></path></svg><span class="sp-nav__label">Hóa đơn</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg><span class="sp-nav__label">Hoàn tiền</span><span class="sp-nav__badge">1</span></a>
+      <div class="sp-nav__group">Nhân sự</div>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span class="sp-nav__label">Xếp ca</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="m14 14-4 4"></path><path d="m10 14 4 4"></path></svg><span class="sp-nav__label">Nghỉ phép</span><span class="sp-nav__badge">2</span></a>
+      <div class="sp-nav__group">Kinh doanh</div>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg><span class="sp-nav__label">Báo cáo</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 5 5 19"></path><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg><span class="sp-nav__label">Hoa hồng</span></a>
+      <div class="sp-nav__group">Cơ sở</div>
+      <a class="sp-nav__item" href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4h-7"></path><path d="M10 4H3"></path><path d="M21 12h-9"></path><path d="M8 12H3"></path><path d="M21 20h-5"></path><path d="M12 20H3"></path><path d="M14 2v4"></path><path d="M8 10v4"></path><path d="M16 18v4"></path></svg><span class="sp-nav__label">Cài đặt</span></a>
+    </div>
+    <div class="sp-account">
+      <span class="sp-avatar sp-avatar--sm">CN</span>
+      <span class="sp-account__text"><span class="sp-switcher__name" style="font-size: 13px; line-height: 18px;">Chính Nguyễn</span><span class="sp-switcher__sub">Chủ cơ sở</span></span>
+      <button type="button" class="sp-icon-btn" aria-label="Chuyển sang giao diện tối" title="Chuyển sang giao diện tối"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></button>
+    </div>
+  </nav>
+  <main class="sp-shell__main" style="overflow: auto;">
+    <div class="sp-shell__content sp-shell__content--wide">
+      <div style="display: flex; gap: 24px; align-items: flex-start;">
+        <nav class="sp-subnav" aria-label="Cài đặt"><a href="#">Gói Sapio</a><a href="#">Chi nhánh</a><a href="#">Dịch vụ</a><a href="#">Tài nguyên</a><a href="#">Nhân sự</a><a href="#">Gói liệu trình</a><a href="#">Chính sách</a><a href="#">Thương hiệu</a><a href="#" aria-current="page">Thanh toán</a><a href="#">Thông báo</a><a href="#">Chatbot</a><a href="#">Nhật ký thao tác</a></nav>
+        <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 20px;">
+      <div class="sp-page-head"><div><h1 class="sp-page-head__title">Thanh toán</h1></div></div>
+          <section class="sp-panel" aria-labelledby="pm-1">
+          <div style="display: flex; align-items: center; gap: 8px;"><h2 class="sp-panel__title" id="pm-1">Cổng thanh toán online</h2></div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+  <div style="display: flex; align-items: center; gap: 8px;"><span class="sp-badge sp-badge--confirmed">Đang chạy</span><span style="font: 400 14px/20px var(--font-sans);">Cổng giả lập Sapio Pay · ký HMAC-SHA256</span></div>
+  <div style="display: flex; gap: 12px; align-items: flex-end;"><div class="sp-field sp-field--sm" style="width: 260px;"><label class="sp-field__label" for="pg-k">Khóa bí mật</label><div class="sp-field__control"><input id="pg-k" value="••••••••••••3f9a"></div><span class="sp-field__help">Chỉ hiện 4 ký tự cuối.</span></div><button type="button" class="sp-btn sp-btn--secondary sp-btn--sm">Tạo khóa mới</button><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>Gửi thử một thông báo</button></div>
+  <p style="margin: 0; font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Lần báo gần nhất: 07/11 10:52, HĐ-0188, đúng chữ ký. payOS không có môi trường thử nên đồ án dùng cổng giả lập (D-09).</p>
+</div>
+        </section>
+          <section class="sp-panel" aria-labelledby="pm-2">
+          <div style="display: flex; align-items: center; gap: 8px;"><h2 class="sp-panel__title" id="pm-2">Nhận tại quầy</h2></div>
+          <div style="display: flex; flex-direction: column; gap: 10px;"><label class="sp-check"><input type="checkbox" checked disabled><span>Tiền mặt<span class="sp-check__hint">Luôn bật.</span></span></label><label class="sp-check"><input type="checkbox" checked><span>Chuyển khoản QR<span class="sp-check__hint">Tự ghi khi cổng báo (BR-21).</span></span></label><label class="sp-check"><input type="checkbox" checked><span>Thẻ<span class="sp-check__hint">Lễ tân ghi tay sau khi quẹt máy POS.</span></span></label><label class="sp-check"><input type="checkbox" checked><span>Ví của khách<span class="sp-check__hint">Cần gói Chuyên nghiệp.</span></span></label></div>
+        </section>
+          <section class="sp-panel" aria-labelledby="pm-3">
+          <div style="display: flex; align-items: center; gap: 8px;"><h2 class="sp-panel__title" id="pm-3">Ví</h2></div>
+          <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Mức tặng khi nạp ví, cuộn được"><table class="sp-table"><caption class="sp-sr-only">Mức tặng khi nạp ví</caption><thead><tr><th scope="col">Nạp từ</th><th scope="col" class="sp-table__num">Tặng</th><th scope="col"><span class="sp-sr-only">Thao tác</span></th></tr></thead><tbody><tr><td><span class="sp-field sp-field--sm" style="display: inline-flex; width: 160px;"><span class="sp-field__control"><input aria-label="Nạp từ" value="1.000.000 ₫" class="sp-num"></span></span></td><td class="sp-table__num sp-num"><span class="sp-field sp-field--sm" style="display: inline-flex; width: 90px;"><span class="sp-field__control"><input aria-label="Tặng" value="10 %" class="sp-num" style="text-align: right;"></span></span></td><td><button type="button" class="sp-icon-btn" aria-label="Bỏ mức này"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button></td></tr><tr><td><span class="sp-field sp-field--sm" style="display: inline-flex; width: 160px;"><span class="sp-field__control"><input aria-label="Nạp từ" value="3.000.000 ₫" class="sp-num"></span></span></td><td class="sp-table__num sp-num"><span class="sp-field sp-field--sm" style="display: inline-flex; width: 90px;"><span class="sp-field__control"><input aria-label="Tặng" value="15 %" class="sp-num" style="text-align: right;"></span></span></td><td><button type="button" class="sp-icon-btn" aria-label="Bỏ mức này"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button></td></tr></tbody></table></div><div style="display: flex; gap: 8px; margin-top: 8px;"><button type="button" class="sp-btn sp-btn--secondary sp-btn--sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>Thêm mức</button></div><p style="margin: 0; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--fill-tonal); font: 400 13px/18px var(--font-sans);"><strong>Ví dụ:</strong> nạp 1.500.000 ₫ thì tặng 150.000 ₫; nạp 3.000.000 ₫ thì tặng 450.000 ₫.</p><p class="sp-panel__note">Áp mức cao nhất mà số nạp đạt tới. Tiền tặng không rút được (BR-25).</p>
+        </section>
+          <section class="sp-panel" aria-labelledby="pm-4">
+          <div style="display: flex; align-items: center; gap: 8px;"><h2 class="sp-panel__title" id="pm-4">Gói liệu trình</h2></div>
+          <div class="sp-field sp-field--sm" style="width: 180px;"><label class="sp-field__label" for="pm-f">Phí hủy gói</label><div class="sp-field__control"><input id="pm-f" value="50.000"><span class="sp-field__suffix">₫</span></div><span class="sp-field__help">Trừ khi hoàn gói (BR-27).</span></div>
+        </section>
+          <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;"><span style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Chưa lưu: 1 thay đổi</span><button type="button" class="sp-btn sp-btn--secondary">Hủy</button><button type="button" class="sp-btn sp-btn--primary">Lưu thay đổi</button></div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

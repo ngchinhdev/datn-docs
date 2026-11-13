@@ -84,5 +84,14 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `HoSoKhach.dc.html` | MH-33 Hồ sơ khách: lịch sử, sổ ví, ghi chú nội bộ, bắt buộc cọc | **Đã chọn** | `/mock/app/[tenant]/customers/[id]` |
 | `HoanTien.dc.html` | MH-34 Hoàn tiền: danh sách, bảng duyệt | **Đã chọn** | `/mock/app/[tenant]/refunds` |
 | `HoanTienTao.dc.html` | MH-34 Tạo yêu cầu hoàn tiền từ hóa đơn | **Đã chọn** | `/mock/app/[tenant]/invoices/[id]` |
+| `ChiNhanhChiTiet.dc.html` | MH-43 Chi tiết chi nhánh: giờ nhiều khung, ngày đặc biệt, giá riêng | **Đã chọn** | `/mock/app/[tenant]/settings/branches/[id]` (Bước 14) |
+| `TaiNguyen.dc.html` | MH-46 Tài nguyên, tạm ngưng bảo trì | **Đã chọn** | `/mock/app/[tenant]/settings/resources` |
+| `ChinhSach.dc.html` | MH-49 Chính sách, mỗi số kèm ví dụ | **Đã chọn** | `/mock/app/[tenant]/settings/policies` |
+| `ThuongHieu.dc.html` | MH-50 Thương hiệu, xem trước trang cơ sở | **Đã chọn** | `/mock/app/[tenant]/settings/branding` |
+| `GoiLieuTrinh.dc.html` | MH-51 Gói liệu trình | **Đã chọn** | `/mock/app/[tenant]/settings/packages` |
+| `ThanhToan.dc.html` | MH-52 Thanh toán: cổng giả lập, phương thức, mức tặng, phí hủy gói | **Đã chọn** | `/mock/app/[tenant]/settings/payments` |
+| `ThongBao.dc.html` | MH-53 Thông báo, xem trước email | **Đã chọn** | `/mock/app/[tenant]/settings/notifications` |
+| `ChatbotCaiDat.dc.html` | MH-54 Chatbot | **Đã chọn** | `/mock/app/[tenant]/settings/chatbot` |
+| `NhatKy.dc.html` | MH-57 Nhật ký thao tác | **Đã chọn** | `/mock/app/[tenant]/audit-log` |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-13 đến BR-36, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-63 đến BR-67, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
