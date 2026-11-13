@@ -67,6 +67,10 @@ const firstStaffId = (slug: string) => fixtureBySlug(slug)?.staff[0]?.resourceId
 const checkedInId = (slug: string) =>
   fixtureBySlug(slug)?.appointments.find((a) => a.status === 'checked_in')?.id ?? '';
 
+/** An invoice that is collected, so its detail has payments and a history. */
+const firstInvoiceId = (slug: string) =>
+  fixtureBySlug(slug)?.money.invoices.find((i) => i.paidAt)?.id ?? '';
+
 /** A leave request still waiting for a decision, with appointments to deal with. */
 const pendingLeaveId = (slug: string) =>
   fixtureBySlug(slug)?.staffTimeOff.find((l) => l.status === 'pending')?.id ?? '';
@@ -127,7 +131,26 @@ const built: Record<string, ScreenLink[]> = {
   'MH-28': [
     { label: 'Chi tiết lịch hẹn', href: (slug) => app(`appointments/${checkedInId(slug)}`)(slug) },
   ],
+  'MH-29': [{ label: 'Thu tiền', href: (slug) => app(`checkout/${checkedInId(slug)}`)(slug) }],
+  'MH-30': [
+    { label: 'Bán gói', href: app('sales/new?type=package') },
+    { label: 'Nạp ví', href: app('sales/new?type=wallet') },
+  ],
+  'MH-31': [
+    { label: 'Danh sách hóa đơn', href: app('invoices') },
+    {
+      label: 'Chi tiết hóa đơn',
+      href: (slug) => app(`invoices/${firstInvoiceId(slug)}`)(slug),
+    },
+  ],
   'MH-32': [{ label: 'Khách hàng', href: app('customers') }],
+  'MH-33': [
+    {
+      label: 'Hồ sơ khách',
+      href: (slug) => app(`customers/${slug === 'pawpaw' ? 'paw-c-linh' : 'may-c-ha'}`)(slug),
+    },
+  ],
+  'MH-34': [{ label: 'Hoàn tiền', href: app('refunds?role=manager') }],
   'MH-35': [{ label: 'Lịch của tôi', href: app('my/schedule?role=technician') }],
   'MH-36': [{ label: 'Xin nghỉ', href: app('my/time-off?role=technician') }],
   'MH-38': [{ label: 'Xếp ca', href: app('shifts?role=manager') }],

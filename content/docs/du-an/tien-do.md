@@ -7,6 +7,35 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 13/11/2026 (tối): mock tiền (Bước 13, đợt C)
+
+- **Đã làm** (nhánh `feat/mock-money`, mỗi mục 13a–13f một commit):
+  - 13a: `mock/money.ts` (hàm thuần, `bigint`): tổng hóa đơn theo BR-22, ví trừ tiền thật trước (BR-25), mức tặng khi nạp, hoàn khoản (BR-28), hoàn gói (BR-27), doanh thu theo buổi (BR-26), hoa hồng và thu hồi (BR-40, BR-42). Sổ ví chỉ thêm bút toán, số dư là tổng (BR-20). Chính sách của cơ sở nằm trong store; trang khách và email đọc từ đó, Cài đặt › Chính sách sửa được sáu tham số.
+  - 13b: thu tiền ở `/checkout/[appointmentId]`: dòng bán lẻ, dùng buổi gói, giảm tay (chỉ quản lý), ví, tiền mặt có tiền thối, chuyển khoản có hộp QR và nút "Giả lập: tiền về", thẻ ghi tay. Bấm Thu hai lần chỉ ghi một khoản (BR-21).
+  - 13c: bán gói, nạp ví ở `/sales/new`, thu qua MH-29.
+  - 13d: danh sách và chi tiết hóa đơn có in; hộp yêu cầu hoàn tiền (khoản đã trả, số tiền tối đa, lý do; hoàn gói theo BR-27).
+  - 13e: hồ sơ khách: lịch sử với link hóa đơn, sổ ví, ví và gói, rút tiền thật, ghi chú nội bộ, bắt buộc cọc (BR-10), đồng ý xử lý dữ liệu.
+  - 13f: danh sách hoàn tiền với bảng duyệt: bút toán đảo, thu hồi hoa hồng vào kỳ đang mở, trả buổi gói, nhật ký (BR-63). Hoàn cọc tự động (BR-29) ghi từ trang trả cọc. Số trên thanh bên đếm yêu cầu chờ duyệt.
+  - `pnpm check:money` (script mới): ca ví, hoàn gói, thu hai lần, duyệt hoàn, thu hồi hoa hồng, quét 4.000 bộ số.
+- **Tự quyết:**
+  - HĐ-0187, HĐ-0188, HĐ-0189 là hóa đơn nháp của chị Hà, anh Bảo An, anh Tuấn; bảng danh sách vẽ chúng đã thu lúc 10:48 và 10:52, sau giờ mock 10:20, và nếu đã thu thì không làm được các ca thu của hai khách này.
+  - HĐ-0182 (anh Phúc mua gói) đặt ngày 30/10, để yêu cầu hoàn ngày 04/11 đến sau lần mua.
+  - Ví chị Quyên dựng lại từ sổ bút toán (nạp 300.000 ₫, trả 150.000 ₫, nạp 1.000.000 ₫ tặng 100.000 ₫ ở HĐ-0185): số cũ không cộng ra đúng và có lần nạp 500.000 ₫ vẫn được tặng, trái mức tặng từ 1.000.000 ₫.
+  - Hộp tạo yêu cầu hoàn chọn một khoản (radio): một yêu cầu gắn một `payment`. Bảng vẽ dùng ô tick.
+  - "Rút tiền thật" chỉ quản lý và chủ cơ sở bấm được, vì tiền ra khỏi quầy; quy tắc nghiệp vụ chưa nói rõ.
+  - Hoa hồng dùng một quy tắc phẳng 10% (khớp 80.000 ₫ → −8.000 ₫ trên bảng); màn quy tắc hoa hồng chưa làm.
+  - Phí hủy gói 50.000 ₫ là hằng số trong `mock/money.ts`; mức tặng nạp nằm trong dữ liệu cơ sở, chưa có màn Cài đặt › Thanh toán.
+  - Tên khách theo dữ liệu mẫu: "Trần Bảo An", "Bùi Hữu Phúc".
+  - Dòng "dùng 1 buổi gói" bỏ khỏi lịch sử ví của chị Quyên vì không phải bút toán tiền.
+- **Chưa làm:** `pnpm build` chưa chạy trên máy (chờ đồng ý); người dùng tự kiểm giao diện theo mục "Xong khi" của Bước 13.
+- **Ghi chú cho ERD:**
+  - `invoices.held`: các khoản chờ ghi cùng khoản chuyển khoản chưa về.
+  - `refund_requests` có `line_id`, `package_id`, `fee_vnd`, `return_session`, `wallet_real_vnd`, `wallet_bonus_vnd`.
+  - `customers.deposit_override` (bật hoặc tắt tay, kèm lý do, người, lúc).
+  - `appointments.deposit_ref`, `deposit_paid_at`.
+  - Một khách có nhiều gói; gói có `refunded`.
+- **Tiếp theo:** người dùng kiểm Bước 13 và review PR; phiên claude.ai vẽ đợt D (cấu hình cơ sở).
+
 ### 13/11/2026: merge PR #7 (Bước 12), chốt đợt C, tiền
 - **Đã làm:**
   - Review PR #7. Sửa trên cùng nhánh rồi người dùng merge:
