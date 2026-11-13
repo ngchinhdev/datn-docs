@@ -7,6 +7,18 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 13/11/2026 (tối): merge PR #8 (Bước 13)
+- **Đã làm:**
+  - Review PR #8. Sửa hai chỗ trên cùng nhánh rồi người dùng merge:
+    - Cọc thừa vào ví thành tiền thật.
+    - Buổi dùng gói ghi doanh thu theo BR-26 và có hoa hồng.
+  - Quy tắc:
+    - BR-22 thêm cọc thừa.
+    - BR-25 thêm: chỉ quản lý hoặc chủ cơ sở rút tiền thật.
+    - BR-26 thêm: hoa hồng trên doanh thu buổi gói.
+- **Ghi chú cho ERD:** bút toán ví có loại `deposit_excess`; `invoice_lines.session_revenue_vnd` cho dòng dùng gói.
+- **Tiếp theo:** phiên claude.ai vẽ đợt D (cấu hình cơ sở).
+
 ### 13/11/2026 (tối): mock tiền (Bước 13, đợt C)
 
 - **Đã làm** (nhánh `feat/mock-money`, mỗi mục 13a–13f một commit):
