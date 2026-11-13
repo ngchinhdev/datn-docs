@@ -474,6 +474,7 @@ export const spaThuCungPawpaw: TenantFixture = {
       tenantId,
       name: 'Pawpaw Thủ Đức',
       address: '45 Võ Văn Ngân, Phường Thủ Đức, TP.HCM',
+      phone: '028 7300 5678',
       timeZone: 'Asia/Ho_Chi_Minh',
       businessHours: [
         ...mondayToSaturday('08:00', '18:00'),

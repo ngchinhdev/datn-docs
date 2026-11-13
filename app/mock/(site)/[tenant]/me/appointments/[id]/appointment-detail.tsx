@@ -58,7 +58,7 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
   const items = heldItems(fixture, appt, store.servedSubjects, asksSubject || mode === 'group');
   const nameOf = (rid: string) => resources.find((r) => r.id === rid)?.name ?? '';
   const titleOf = (rid: string) => staff.find((s) => s.resourceId === rid)?.profile.title ?? '';
-  const phone = branchPhone(tenantSlug);
+  const phone = branchPhone(tenantSlug, fixture.branches[0]?.phone);
   const end = appt.bookings.reduce(
     (m, b) => (b.kind !== 'cleanup' && b.endAt > m ? b.endAt : m),
     appt.startAt,

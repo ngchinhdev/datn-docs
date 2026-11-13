@@ -169,6 +169,8 @@ export function SaveBar({
   onDiscard,
   note,
   saveDisabled = false,
+  summary,
+  saveLabel = 'Lưu',
 }: {
   count: number;
   onDiscard: () => void;
@@ -176,19 +178,24 @@ export function SaveBar({
   note?: ReactNode;
   /** The form still has errors: the button is off and says why through `note`. */
   saveDisabled?: boolean;
+  /** Says what is changed, "Chưa lưu: giờ Chủ Nhật, giá Nhuộm ngắn", in place of the count. */
+  summary?: ReactNode;
+  /** The main button, "Lưu và xếp lại 2 lịch" when saving has a side effect. */
+  saveLabel?: string;
 }) {
   if (count === 0) return null;
   return (
     <div className="sp-savebar max-md:bottom-22!" role="region" aria-label="Lưu thay đổi">
       <span aria-live="polite">
-        Còn {count} thay đổi chưa lưu{note && <> · {note}</>}
+        {summary ?? <>Còn {count} thay đổi chưa lưu</>}
+        {note && <> · {note}</>}
       </span>
       <span className="sp-savebar__actions">
         <Button variant="ghost" onClick={onDiscard}>
           Bỏ thay đổi
         </Button>
         <Button type="submit" variant="primary" disabled={saveDisabled}>
-          Lưu
+          {saveLabel}
         </Button>
       </span>
     </div>

@@ -10,7 +10,10 @@ export interface OpenWindow {
  * The windows the first branch is open on a local date, in time order; none when closed (BR-02).
  * A special day replaces the regular hours; a regular day may have several windows.
  */
-export function openingWindows(fixture: TenantFixture, date: string): OpenWindow[] {
+export function openingWindows(
+  fixture: Pick<TenantFixture, 'branches'>,
+  date: string,
+): OpenWindow[] {
   const branch = fixture.branches[0];
   if (!branch) return [];
   const special = branch.specialDays.find((d) => d.date === date);

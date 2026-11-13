@@ -8,7 +8,16 @@ import { tenantFixtures } from '../mock/fixtures/index.ts';
 import type { TenantFixture } from '../mock/fixtures/types.ts';
 import { openingHours, openingWindows } from '../mock/hours.ts';
 import { localTimeOf } from '../mock/shifts.ts';
-import { applyBranchPrices } from '../mock/shop.ts';
+import {
+  applyBranchPrices,
+  branchChanges,
+  branchRequeues,
+  hoursByDay,
+  outsideHours,
+  toBusinessHours,
+  windowsProblem,
+} from '../mock/shop.ts';
+import { localDate, MOCK_NOW } from '../mock/time.ts';
 import { minutesOf } from '../mock/shifts.ts';
 
 let failures = 0;
@@ -176,6 +185,88 @@ const inRange = (times: string[], from: string, to: string) =>
     applyBranchPrices(salon.services, undefined).length === salon.services.length &&
       dye.priceVnd === 500_000n,
     'Không đổi dữ liệu gốc',
+  );
+}
+
+// ---- BR-02, BR-35: changing the hours with appointments already booked ----
+
+{
+  const b = salon.branches[0]!;
+  const lunch: typeof b = {
+    ...b,
+    businessHours: [
+      ...b.businessHours.filter((h) => h.weekday !== 0),
+      { weekday: 0, open: '09:00', close: '12:00' },
+      { weekday: 0, open: '14:00', close: '20:00' },
+    ],
+  };
+  const out = outsideHours(salon.appointments, lunch, MOCK_NOW);
+  report(
+    out.length > 0 && out.every((a) => new Date(a.startAt).getUTCDay() !== undefined),
+    'BR-35: nghỉ trưa Chủ Nhật 12:00–14:00 thì có lịch đã đặt nằm ngoài giờ',
+    out.map((a) => `${a.id}@${a.startAt}`).join(' '),
+  );
+  report(
+    out.every((a) => a.status === 'confirmed' && a.startAt >= MOCK_NOW),
+    'BR-35: chỉ lịch sắp tới đã xác nhận mới vào Cần xếp lại',
+  );
+  report(
+    outsideHours(salon.appointments, b, MOCK_NOW).length === 0,
+    'Giờ mở cửa hiện tại: không có lịch nào ngoài giờ',
+  );
+  const sundayOnly = out.every((a) => localDate(a.startAt) >= '2026-11-08');
+  report(sundayOnly, 'Lịch bị ảnh hưởng đều từ Chủ Nhật 08/11 trở đi');
+  const requeues = branchRequeues(
+    out,
+    { kind: 'hours', label: 'Chi nhánh', reason: 'Giờ mở cửa mới' },
+    MOCK_NOW,
+    (n) => `rq-${n}`,
+  );
+  report(
+    requeues.every((r) => r.kind === 'hours' && r.appointmentIds.length > 0) &&
+      requeues.reduce((m, r) => m + r.appointmentIds.length, 0) === out.length,
+    'BR-35: mỗi ngày một mục Cần xếp lại, đủ mọi lịch bị ảnh hưởng',
+  );
+  const closed = {
+    ...b,
+    specialDays: [...b.specialDays, { date: '2026-11-13', note: 'x', hours: null }],
+  };
+  const closedOut = outsideHours(salon.appointments, closed, MOCK_NOW);
+  report(
+    closedOut.length > 0 && closedOut.every((a) => localDate(a.startAt) === '2026-11-13'),
+    'BR-02: đóng cửa 13/11 thì lịch ngày đó vào Cần xếp lại',
+    String(closedOut.length),
+  );
+  const changes = branchChanges(
+    b,
+    lunch,
+    (id) => id,
+    () => 0n,
+  );
+  report(
+    changes.length === 1 &&
+      changes[0]!.short === 'giờ Chủ Nhật' &&
+      changes[0]!.detail.includes('14:00–20:00'),
+    'Lưu thay đổi ghi đúng một dòng "giờ Chủ Nhật"',
+    JSON.stringify(changes),
+  );
+  report(
+    windowsProblem([
+      { open: '09:00', close: '13:00' },
+      { open: '12:00', close: '20:00' },
+    ]) !== null &&
+      windowsProblem([
+        { open: '09:00', close: '12:00' },
+        { open: '12:00', close: '20:00' },
+      ]) === null &&
+      windowsProblem([{ open: '20:00', close: '09:00' }]) !== null &&
+      windowsProblem([{ open: '9h', close: '12:00' }]) !== null,
+    'BR-02: khung chồng nhau, đảo giờ, sai dạng giờ đều bị từ chối',
+  );
+  const day = hoursByDay(b.businessHours);
+  report(
+    toBusinessHours(day).length === b.businessHours.length,
+    'Đọc rồi ghi lại giờ mở cửa không mất khung nào',
   );
 }
 

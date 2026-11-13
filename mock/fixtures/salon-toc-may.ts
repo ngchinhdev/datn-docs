@@ -897,6 +897,7 @@ export const salonTocMay: TenantFixture = {
       tenantId,
       name: 'Tóc Mây Quận 3',
       address: '120 Võ Văn Tần, Phường Bàn Cờ, TP.HCM',
+      phone: '028 3930 1234',
       timeZone: 'Asia/Ho_Chi_Minh',
       businessHours: everyDay('09:00', '20:00').map((h) =>
         h.weekday === 6 ? { ...h, open: '08:00' } : h,

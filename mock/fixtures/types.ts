@@ -350,6 +350,12 @@ export interface Requeue {
   createdAt: string;
   appointmentIds: string[];
   handling: Record<string, LeaveHandling>;
+  /** What caused it; a cut shift when absent (BR-35). `hours`: new opening hours, `outage`: a resource out of use (BR-37). */
+  kind?: 'shift' | 'hours' | 'outage';
+  /** Who or what it is about, in place of a person's name: "Chi nhánh", "Ghế 2". */
+  label?: string;
+  /** The heading of its page, in place of "<person> bớt ca <day>". */
+  title?: string;
 }
 
 /** One field a customer fills in for the person or thing being served (BR-71). */
