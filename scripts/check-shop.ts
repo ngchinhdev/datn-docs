@@ -17,6 +17,7 @@ import {
   toBusinessHours,
   windowsProblem,
 } from '../mock/shop.ts';
+import { activeOutage, outageImpact, touchedBy, upcomingCount } from '../mock/outage.ts';
 import { localDate, MOCK_NOW } from '../mock/time.ts';
 import { minutesOf } from '../mock/shifts.ts';
 
@@ -267,6 +268,97 @@ const inRange = (times: string[], from: string, to: string) =>
   report(
     toBusinessHours(day).length === b.businessHours.length,
     'Đọc rồi ghi lại giờ mở cửa không mất khung nào',
+  );
+}
+
+// ---- BR-37: appointments of a resource that is taken out ----
+
+{
+  const now = '2026-11-07T03:20:00Z';
+  const stop = (resourceId: string, from: string, to: string) =>
+    outageImpact({ fixture: salon, resourceId, from, to, now });
+  const one = stop('may-chair-1', '2026-11-07T04:00:00Z', '2026-11-07T05:00:00Z');
+  report(
+    one.length === 1 &&
+      one[0]!.appt.id === 'may-a-ngoc' &&
+      one[0]!.moved !== null &&
+      one[0]!.before.join() === 'Ghế 1' &&
+      one[0]!.after.join() === 'Ghế 3',
+    'BR-37: Ghế 1 ngưng 11:00–12:00 thì lịch chị Ngọc tự sang Ghế 3, cùng giờ, cùng thợ',
+    JSON.stringify(one.map((i) => [i.appt.id, i.before, i.after, i.reason])),
+  );
+  report(
+    Date.parse(one[0]!.moved!.startAt) === Date.parse(one[0]!.appt.startAt) &&
+      one[0]!.moved!.items[0]!.staffResourceId === one[0]!.appt.items[0]!.staffResourceId &&
+      one[0]!.moved!.items[0]!.priceVnd === one[0]!.appt.items[0]!.priceVnd,
+    'BR-37: đổi ghế không đổi giờ, người làm hay giá (BR-12)',
+  );
+  const jam = stop('may-chair-3', '2026-11-07T06:00:00Z', '2026-11-07T09:00:00Z');
+  report(
+    jam.length === 1 && jam[0]!.moved === null && jam[0]!.reason === 'Không còn ghế cắt',
+    'BR-37: không còn ghế cùng loại trống thì vào Cần xếp lại',
+    JSON.stringify(jam.map((i) => [i.appt.id, i.reason])),
+  );
+  const mixed = stop('may-chair-1', '2026-11-07T02:00:00Z', '2026-11-07T05:30:00Z');
+  report(
+    mixed.some((i) => i.moved) && mixed.some((i) => !i.moved),
+    'BR-37: một khoảng ngưng có lịch tự chuyển được và lịch không chuyển được',
+    JSON.stringify(mixed.map((i) => [i.appt.id, i.moved ? 'chuyển' : 'xếp lại'])),
+  );
+
+  // After the moves nothing is booked twice (BR-01) and nothing is on the resource in the outage.
+  const moved = new Map(mixed.filter((i) => i.moved).map((i) => [i.appt.id, i.moved!]));
+  const after = salon.appointments.map((a) => moved.get(a.id) ?? a);
+  const clash: string[] = [];
+  const byResource = new Map<string, { a: number; b: number; id: string }[]>();
+  for (const appt of after) {
+    if (!['confirmed', 'checked_in', 'completed', 'held'].includes(appt.status)) continue;
+    for (const bk of appt.bookings) {
+      const list = byResource.get(bk.resourceId) ?? [];
+      list.push({ a: minutesOf(bk.startAt), b: minutesOf(bk.endAt), id: appt.id });
+      byResource.set(bk.resourceId, list);
+    }
+  }
+  for (const [resourceId, list] of byResource) {
+    list.sort((x, y) => x.a - y.a);
+    for (let i = 1; i < list.length; i++) {
+      if (list[i]!.a < list[i - 1]!.b && list[i]!.id !== list[i - 1]!.id) {
+        clash.push(`${resourceId}: ${list[i - 1]!.id}/${list[i]!.id}`);
+      }
+    }
+  }
+  report(
+    clash.length === 0,
+    'BR-01: sau khi chuyển ghế không có hai lịch chồng nhau',
+    clash.slice(0, 3).join('; '),
+  );
+
+  report(
+    touchedBy(salon.appointments, 'may-chair-1', '2026-11-07T04:00:00Z', '2026-11-07T05:00:00Z')
+      .length === 1,
+    'Lịch chạm khoảng ngưng tính đúng theo từng đoạn dùng tài nguyên',
+  );
+  report(
+    upcomingCount(salon.appointments, 'may-chair-1', now) > 0 &&
+      upcomingCount(salon.appointments, 'may-chair-1', now) >=
+        upcomingCount(salon.appointments, 'may-chair-3', now) - 20,
+    'Cột "Lịch 7 ngày tới" đếm lịch có dùng tài nguyên',
+  );
+  const o = {
+    id: 'o',
+    resourceId: 'may-chair-2',
+    from: '2026-11-07T02:00:00Z',
+    to: '2026-11-12T10:00:00Z',
+    reason: 'x',
+  };
+  report(
+    activeOutage([o], 'may-chair-2', now)?.id === 'o' &&
+      activeOutage([o], 'may-chair-1', now) === undefined,
+    'Trạng thái "Bảo trì đến …": chỉ tài nguyên đang trong khoảng ngưng',
+  );
+  report(
+    activeOutage([{ ...o, to: now }], 'may-chair-2', now) === undefined,
+    '"Mở lại" kết thúc khoảng ngưng ngay (BR-37)',
   );
 }
 
