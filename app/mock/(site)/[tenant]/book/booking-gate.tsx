@@ -1,9 +1,9 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { BookingFlow } from './booking-flow';
 import { MOCK_NOW } from '@/mock/time';
-import { entitlements, mockSubscription, planOverrideOf } from '@/mock/subscription';
+import { entitlements } from '@/mock/subscription';
+import { useTenantSubscription } from '@/components/mock/platform-store';
 import { SiteSuspended, useSiteSuspended } from '@/components/mock/site-suspended';
 
 /**
@@ -17,11 +17,8 @@ export function BookingGate({
   tenantSlug: string;
   newCustomer: boolean;
 }) {
-  const query = useSearchParams();
-  const mode = entitlements(
-    mockSubscription(tenantSlug, planOverrideOf(query.get('plan')), query.get('periodEnd')),
-    MOCK_NOW,
-  ).mode;
+  const { subscription, catalog } = useTenantSubscription(tenantSlug);
+  const mode = entitlements(subscription, MOCK_NOW, catalog).mode;
   const suspended = useSiteSuspended(tenantSlug);
 
   if (suspended) return <SiteSuspended tenantSlug={tenantSlug} />;

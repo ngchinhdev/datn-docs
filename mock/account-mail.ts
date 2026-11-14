@@ -97,3 +97,49 @@ export function inviteMail(input: {
     notes: ['Link dùng một lần. Không quen người mời thì bỏ qua email này.'],
   };
 }
+
+/** The notice to the owner of a tenant the platform locked, with the reason (BR-75, BR-90). */
+export function platformLockMail(input: {
+  ownerEmail: string;
+  ownerName: string;
+  tenantName: string;
+  reason: string;
+  now: string;
+  seq: number;
+}): AccountMail {
+  return {
+    id: `mail-platform-lock-${input.seq}`,
+    at: input.now,
+    to: input.ownerEmail,
+    subject: `${input.tenantName} đã bị khóa trên Sapio`,
+    lead: `Chào ${firstName(input.ownerName)}, quản trị Sapio vừa khóa cơ sở ${input.tenantName}.`,
+    rows: [
+      ['Khóa lúc', formatMoment(input.now)],
+      ['Lý do', input.reason],
+    ],
+    notes: [
+      'Khu quản trị và trang đặt lịch dừng; khách đã đặt vẫn xem và hủy được lịch của mình. Gói vẫn chạy, không cộng bù ngày.',
+      'Gỡ nội dung vi phạm rồi trả lời email hotro@sapio.vn để được mở lại.',
+    ],
+  };
+}
+
+/** The notice that the lock is gone; the reason of the unlock stays with the platform (BR-90). */
+export function platformUnlockMail(input: {
+  ownerEmail: string;
+  ownerName: string;
+  tenantName: string;
+  now: string;
+  seq: number;
+}): AccountMail {
+  return {
+    id: `mail-platform-unlock-${input.seq}`,
+    at: input.now,
+    to: input.ownerEmail,
+    subject: `${input.tenantName} đã được mở khóa`,
+    lead: `Chào ${firstName(input.ownerName)}, cơ sở ${input.tenantName} đã được mở khóa.`,
+    rows: [['Mở khóa lúc', formatMoment(input.now)]],
+    action: { label: 'Vào cơ sở', href: '/mock/select-workspace' },
+    notes: ['Khu quản trị và trang đặt lịch hoạt động trở lại.'],
+  };
+}

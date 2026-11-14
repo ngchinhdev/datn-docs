@@ -1,15 +1,14 @@
 /*
  * What the landing page (MH-01) says about money: the plans and their features, read from the same
- * data the plan page uses (BR-83, BR-84), never written by hand. Pure.
+ * data the plan page and the platform administration use (BR-83, BR-84), never written by hand. Pure.
  */
 import { formatVnd } from './format';
-import { TRIAL_DAYS } from './signup';
 import {
-  PERIODS,
+  TRIAL_DAYS,
   planFeatureList,
   planHasAll,
   PLAN_CODES,
-  plans,
+  type Catalog,
   type PlanCode,
 } from './subscription';
 
@@ -23,9 +22,9 @@ export interface PricingCard {
   features: { label: string; on: boolean }[];
 }
 
-export const pricingCards = (): PricingCard[] =>
+export const pricingCards = (catalog: Catalog): PricingCard[] =>
   PLAN_CODES.map((code) => {
-    const plan = plans[code];
+    const plan = catalog.plans[code];
     return {
       code,
       name: plan.name,
@@ -39,19 +38,20 @@ export const pricingCards = (): PricingCard[] =>
   });
 
 /** The cheapest monthly price, for "chọn gói từ …". */
-export const lowestPrice = () =>
+export const lowestPrice = (catalog: Catalog) =>
   formatVnd(
-    PLAN_CODES.map((code) => plans[code].monthlyPriceVnd).reduce((a, b) => (b < a ? b : a)),
+    PLAN_CODES.map((code) => catalog.plans[code].monthlyPriceVnd).reduce((a, b) => (b < a ? b : a)),
   );
 
 /** `Trả 3 tháng giảm 10%, 12 tháng giảm 20%.` */
-export const discountLine = () =>
-  `Trả ${PERIODS.filter((p) => p.discountPercent > 0)
+export const discountLine = (catalog: Catalog) =>
+  `Trả ${catalog.periods
+    .filter((p) => p.discountPercent > 0)
     .map((p) => `${p.months} tháng giảm ${p.discountPercent}%`)
     .join(', ')}.`;
 
 export const TRIAL_LABEL = `Dùng thử ${TRIAL_DAYS} ngày`;
 
 /** The line under the trial button. */
-export const trialNote = () =>
-  `Không cần thẻ. Hết ${TRIAL_DAYS} ngày, chọn gói từ ${lowestPrice()} mỗi tháng.`;
+export const trialNote = (catalog: Catalog) =>
+  `Không cần thẻ. Hết ${TRIAL_DAYS} ngày, chọn gói từ ${lowestPrice(catalog)} mỗi tháng.`;

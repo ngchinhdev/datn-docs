@@ -7,6 +7,26 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 14/11/2026 (đêm): mock quản trị nền tảng (Bước 17, đợt G)
+
+- **Đã làm** (nhánh `feat/mock-admin`, mỗi mục 17a–17f một commit):
+  - 17a: `mock/fixtures/platform.ts` (23 cơ sở), `mock/platform.ts` (trạng thái gói, số tổng quan, lọc, khóa, gia hạn, thay đổi gói), `pnpm check:platform` (48 ca). Giá gói và % giảm theo kỳ vào store (`platform-store.tsx`); trang giới thiệu, trang Gói Sapio, phần nâng gói, trang đặt lịch của khách đọc từ đó.
+  - 17b: `/mock/admin` tổng quan.
+  - 17c: `/mock/admin/tenants` danh sách, bộ lọc trên URL.
+  - 17d: `/mock/admin/tenants/[id]` chi tiết; khóa, mở khóa, gia hạn thủ công; `/mock/admin/audit-log`.
+  - 17e: `/mock/admin/plans` gói và giá.
+  - 17f: `mock/screens.ts` MH-58, MH-60, MH-62 "Đang làm"; mọi lệnh kiểm xanh.
+- **Tự quyết:**
+  - Dùng thử 7 ngày tính cả ngày tạo (BR-80) không dựng đúng cùng lúc "5 cơ sở mới" và "1 hết trong 3 ngày" của bảng; Barber Anh Tuấn tạo 04/11, nên "Cơ sở mới" không còn Spa Mèo Ú (vẫn mở được từ "Sắp hết hạn").
+  - Số "Thu tháng 11" tính từ dữ liệu: 5.451.000 ₫, 11 giao dịch (bảng ghi 5.183.000 ₫, 12); không dựng lại được mà vẫn giữ 9 Cơ bản + 6 Chuyên nghiệp.
+  - Gói có hơn 1 chi nhánh thì có tính năng nhiều chi nhánh; bảng không có công tắc riêng cho tính năng này.
+  - Số cơ sở bị ảnh hưởng khi tắt tính năng của Chuyên nghiệp gồm cả cơ sở dùng thử (BR-81).
+  - Lý do mở khóa chỉ cần không trống; email mở khóa không kèm lý do (BR-90).
+  - Mở khóa, khóa, gia hạn cùng gửi thư vào hộp thư mẫu `/mock/mailbox`.
+  - Route `/mock/admin/[...rest]` (trang "Chưa làm") đổi từ catch-all tùy chọn sang bắt buộc, vì Next không cho trùng với `/mock/admin`.
+- **Ghi chú cho ERD:** khóa và gia hạn thủ công ghi `platform_audit_log` kèm `reason`; thanh toán gói lưu giá lúc trả nên đổi giá không động tới kỳ đã trả.
+- **Tiếp theo:** người dùng kiểm Bước 17 và review PR; phiên claude.ai vẽ đợt H (MH-22 chatbot).
+
 ### 14/11/2026 (chiều muộn): chốt đợt G, quản trị nền tảng
 
 - **Đã làm:**

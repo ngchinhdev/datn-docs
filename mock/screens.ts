@@ -229,6 +229,12 @@ const built: Record<string, ScreenLink[]> = {
     },
   ],
   'MH-57': [{ label: 'Nhật ký thao tác', href: app('audit-log') }],
+  'MH-58': [
+    { label: 'Danh sách khách thuê', href: () => '/mock/admin/tenants', platform: true },
+    { label: 'Chi tiết Salon Tóc Mây', href: () => '/mock/admin/tenants/may', platform: true },
+    { label: 'Nail Hạ Vy (hết hạn)', href: () => '/mock/admin/tenants/havy', platform: true },
+    { label: 'Nhật ký nền tảng', href: () => '/mock/admin/audit-log', platform: true },
+  ],
   'MH-59': [
     { label: 'Gói cấu hình ngành', href: () => '/mock/admin/templates', platform: true },
     {
@@ -237,6 +243,8 @@ const built: Record<string, ScreenLink[]> = {
       platform: true,
     },
   ],
+  'MH-60': [{ label: 'Tổng quan nền tảng', href: () => '/mock/admin', platform: true }],
+  'MH-62': [{ label: 'Gói và giá', href: () => '/mock/admin/plans', platform: true }],
   'MH-61': [
     { label: 'Gói Sapio', href: app('settings/plan') },
     { label: 'Dùng thử', href: app('calendar?plan=trial') },
@@ -830,7 +838,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'DS',
     routes: ['/admin/tenants', '/admin/tenants/[id]'],
-    note: 'Duyệt, khóa, mở khóa; chi tiết chỉ có số liệu tổng (số chi nhánh, số lịch tháng), không xem dữ liệu khách của cơ sở',
+    note: 'Khóa, mở khóa, gia hạn thủ công; chi tiết chỉ có số liệu tổng (số chi nhánh, số lịch tháng), không xem dữ liệu khách của cơ sở',
   },
   {
     code: 'MH-59',

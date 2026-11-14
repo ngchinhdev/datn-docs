@@ -8,6 +8,7 @@ import { navByRole, ownCommission, tabIds } from '@/components/mock/app-nav';
 import { ExpiredScreen } from '@/components/mock/expired-screen';
 import { Forbidden } from '@/components/mock/forbidden';
 import { LockedWorkspace, SAMPLE_LOCK_REASON } from '@/components/mock/locked-workspace';
+import { usePlatform } from '@/components/mock/platform-store';
 import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useStaffStore } from '@/components/mock/staff-store';
 import { useSubscription } from '@/components/mock/subscription-store';
@@ -20,7 +21,7 @@ import { hasOwnCommission, memberForRole } from '@/mock/account';
 import { tenantFixtures } from '@/mock/fixtures';
 import { canOpenPage } from '@/mock/permissions';
 import { fixtureBySlug, roleLabel, staffRoleOf, type StaffRole } from '@/mock/selection';
-import { PLAN_OVERRIDES, planOverrideOf, plans } from '@/mock/subscription';
+import { PLAN_OVERRIDES, planOverrideOf } from '@/mock/subscription';
 import { formatFullDate } from '@/mock/time';
 
 /** Roles the mock lets you try; the sidebar and the allowed pages follow the role. */
@@ -52,6 +53,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   /** Requests waiting for a decision, and shifts cut short that left appointments to place. */
   const waiting = leaves.filter((l) => l.status === 'pending').length + requeues.length;
   const { entitlements: plan, daysLeft, can } = useSubscription();
+  const { catalog } = usePlatform();
   const role = staffRoleOf(searchParams.get('role'));
   const branch =
     fixture.branches.find((b) => b.id === searchParams.get('branch')) ?? fixture.branches[0]!;
@@ -137,7 +139,8 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
       </Banner>
     ) : plan.mode === 'active' && soon ? (
       <Banner tone="warning" action={{ label: 'Gia hạn', href: appHref('settings/plan') }}>
-        Gói {plans[plan.planCode].name} hết hạn 23:59 ngày {ends}. Gia hạn để không gián đoạn.
+        Gói {catalog.plans[plan.planCode].name} hết hạn 23:59 ngày {ends}. Gia hạn để không gián
+        đoạn.
       </Banner>
     ) : null;
 

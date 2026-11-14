@@ -16,6 +16,7 @@
     "check:shop": "node scripts/check-shop.ts",
     "check:reports": "node scripts/check-reports.ts",
     "check:account": "node scripts/check-account.ts",
+    "check:platform": "node scripts/check-platform.ts",
     "format": "prettier --write app components lib mock"
   },
   "dependencies": {
