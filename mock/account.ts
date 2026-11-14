@@ -603,3 +603,52 @@ export function afterLogin(
   }
   return { kind: 'choose' };
 }
+
+/** The tenants of an account as doors; `overrides` replaces the stored status of a tenant. */
+export function doorsOf(
+  accountId: string,
+  members: readonly Member[],
+  workspaces: readonly Workspace[],
+  overrides: Record<string, Workspace['status']> = {},
+): Door[] {
+  return members
+    .filter((m) => m.accountId === accountId)
+    .flatMap((member) => {
+      const workspace = workspaces.find((w) => w.id === member.workspaceId);
+      return workspace
+        ? [
+            {
+              workspaceId: workspace.id,
+              role: member.role,
+              status: overrides[workspace.id] ?? workspace.status,
+            },
+          ]
+        : [];
+    });
+}
+
+/** The first page of each role in a tenant. */
+const HOME: Record<StaffRoleId, string> = {
+  owner: 'calendar',
+  manager: 'calendar',
+  receptionist: 'calendar',
+  technician: 'my/schedule',
+};
+
+/**
+ * Where a member lands in a tenant: the plan page, the lock page, or the first page of the role.
+ * `null` when there is nothing to open (paused for staff, or a tenant without screens).
+ */
+export function entryHref(workspace: Workspace, member: Member, entry: DoorEntry): string | null {
+  if (!workspace.built || entry === 'paused') return null;
+  const base = `/mock/app/${workspace.slug}`;
+  if (entry === 'plan') return `${base}/settings/plan`;
+  const params = new URLSearchParams();
+  if (member.role !== 'owner') params.set('role', member.role);
+  if (member.role === 'technician' && member.staffResourceId) {
+    params.set('me', member.staffResourceId);
+  }
+  const query = params.toString();
+  const path = entry === 'locked' ? base : `${base}/${HOME[member.role]}`;
+  return query ? `${path}?${query}` : path;
+}

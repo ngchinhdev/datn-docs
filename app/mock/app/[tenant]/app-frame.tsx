@@ -42,7 +42,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   const toast = useToast();
   const router = useRouter();
   const { staff } = useStaffStore();
-  const { accounts, members } = useAccountStore();
+  const { accounts, members, patch } = useAccountStore();
   const { leaves, requeues, money } = useScheduleStore();
   /** Refund requests waiting for a manager (BR-28). */
   const pendingRefunds = money.refunds.filter((r) => r.status === 'pending').length;
@@ -172,7 +172,10 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
       {...(role === 'technician' ? { moreLabel: 'Tài khoản' } : {})}
       account={{ name: person, initials: initialsOf(person), roleLabel: roleLabel(role) }}
       onProfile={() => toast({ text: 'Hồ sơ cá nhân: chưa có trong mock.' })}
-      onSignOut={() => toast({ text: 'Đăng xuất: chưa có trong mock.' })}
+      onSignOut={() => {
+        patch(() => ({ session: null }));
+        router.push('/mock/login');
+      }}
       accountExtra={(kind) => (
         <>
           <div className={kind === 'menu' ? 'sp-menu__label' : 'sp-menu__label mt-(--space-2)'}>

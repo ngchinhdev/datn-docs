@@ -10,6 +10,7 @@ import {
   blankStaffMember,
   declineInvitation,
   doorEntry,
+  entryHref,
   hasOwnCommission,
   inviteDaysLeft,
   inviteEmailError,
@@ -41,6 +42,7 @@ import {
   workspaces,
   SAMPLE_PASSWORD,
 } from '../mock/fixtures/accounts.ts';
+import { formatWait, resetMail } from '../mock/account-mail.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
 import { addMinutes, localToUtc, MOCK_NOW } from '../mock/time.ts';
 
@@ -574,6 +576,48 @@ report(
     !hasOwnCommission(memberForRole(members, 'may', 'receptionist')) &&
     !hasOwnCommission(memberForRole(members, 'may', 'owner')),
   'BR-44: Hoa hồng của tôi chỉ có với người có cột lịch (Hùng có, Linh và chủ cơ sở không)',
+);
+
+// ---- Thư và đường vào cơ sở ----
+
+const mayWs = workspaces.find((w) => w.id === 'may')!;
+const memberOf = (email: string, workspaceId: string) =>
+  members.find(
+    (m) =>
+      m.workspaceId === workspaceId && m.accountId === accounts.find((a) => a.email === email)!.id,
+  )!;
+report(
+  entryHref(mayWs, memberOf('chinh@tocmay.vn', 'may'), 'open') === '/mock/app/toc-may/calendar' &&
+    entryHref(mayWs, memberOf(LINH, 'may'), 'open') ===
+      '/mock/app/toc-may/calendar?role=receptionist' &&
+    entryHref(mayWs, memberOf('mai@tocmay.vn', 'may'), 'open') ===
+      '/mock/app/toc-may/my/schedule?role=technician&me=may-mai' &&
+    entryHref(mayWs, memberOf('chinh@tocmay.vn', 'may'), 'plan') ===
+      '/mock/app/toc-may/settings/plan' &&
+    entryHref(mayWs, memberOf(LINH, 'may'), 'paused') === null,
+  'BR-79: vào cơ sở theo vai trò; hết gói chủ cơ sở vào trang Gói Sapio',
+);
+const havy = workspaces.find((w) => w.id === 'havy')!;
+report(
+  entryHref(havy, memberOf(LINH, 'havy'), 'open') === null,
+  'Cơ sở chỉ là dữ liệu của tài khoản không có trang để mở',
+);
+const mail = resetMail(
+  accounts.find((a) => a.email === LINH)!,
+  'dat-lai-1',
+  at(30),
+  MOCK_NOW,
+  1,
+);
+report(
+  mail.action?.href === '/mock/reset-password?token=dat-lai-1' &&
+    mail.rows[0]?.[1] === '10:50, 07/11/2026',
+  'BR-77: thư đặt lại có link bấm được và giờ hết hạn',
+  show(mail.rows),
+);
+report(
+  formatWait(900) === '15:00' && formatWait(45) === '0:45',
+  'BR-76, BR-77: đếm ngược hiện phút:giây',
 );
 
 console.log(failures === 0 ? '\nTất cả đạt.' : `\n${failures} lỗi.`);
