@@ -244,11 +244,14 @@ export function clawbackEntries(input: ClawbackInput): CommissionEntry[] {
     if (line) {
       push(line, input.refundVnd, `com-${input.refundId}-${line.id}`);
     } else {
+      // The share of a line is over every service and retail line worth something, with or without
+      // a person; only a line with a person is taken back from.
       const shares = netByLine(input.invoice.lines, input.discountVnd).filter(
-        (s) => s.line.staffResourceId && s.net > 0n,
+        (s) => (s.line.kind === 'service' || s.line.kind === 'retail') && s.net > 0n,
       );
       const total = shares.reduce((m, s) => m + s.net, 0n);
       for (const s of shares) {
+        if (!s.line.staffResourceId) continue;
         push(s.line, (input.refundVnd * s.net) / total, `com-${input.refundId}-${s.line.id}`);
       }
     }

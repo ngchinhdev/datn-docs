@@ -354,6 +354,32 @@ const line = (
   );
 }
 
+{
+  // BR-28: the share of a refund is over every service and retail line, with or without a person.
+  const mixed = clawbackEntries({
+    refundId: 'rf-z',
+    invoice: {
+      id: 'inv-z',
+      lines: [
+        line({ id: 'a', unitPriceVnd: 500_000n, staffResourceId: 'may-mai' }),
+        line({ id: 'b', kind: 'retail', unitPriceVnd: 200_000n }),
+      ],
+    } as Invoice,
+    earned: [],
+    refundVnd: 700_000n,
+    discountVnd: 0n,
+    at: '2026-11-07T03:00:00Z',
+    fallback: () => ({ percent: 10 }),
+  });
+  report(
+    mixed.length === 1 &&
+      mixed[0]!.staffResourceId === 'may-mai' &&
+      mixed[0]!.amountVnd === -50_000n,
+    'BR-28: hoàn 700.000 ₫ không theo dòng, dòng bán lẻ 200.000 ₫ không người bán vẫn nằm trong mẫu số: Mai bị thu hồi đúng 50.000 ₫',
+    show(mixed),
+  );
+}
+
 // ---- The sample data ----
 
 for (const f of tenantFixtures) {
