@@ -1,11 +1,11 @@
 'use client';
 
 import { Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
 import { SignupLayout } from '@/components/sapio/signup-layout';
-import { useToast } from '@/components/sapio/toast';
 import { emailError, passwordError, type SignupDraft } from '@/mock/signup';
 
 type Key = 'fullName' | 'email' | 'password' | 'terms';
@@ -30,7 +30,6 @@ export function AccountStep({
   setPassword: (value: string) => void;
   onNext: () => void;
 }) {
-  const toast = useToast();
   const [touched, setTouched] = useState<Partial<Record<Key, boolean>>>({});
   const [submitted, setSubmitted] = useState(false);
   const [shown, setShown] = useState(false);
@@ -63,13 +62,9 @@ export function AccountStep({
       lead="Dùng tài khoản này để quản lý lịch, nhân viên và thu tiền."
       maxWidth={560}
       top={
-        <button
-          type="button"
-          className="sp-btn sp-btn--ghost sp-btn--sm"
-          onClick={() => toast({ text: 'Đăng nhập: chưa có trong mock.' })}
-        >
+        <Link href="/mock/login" className="sp-btn sp-btn--ghost sp-btn--sm no-underline">
           Đăng nhập
-        </button>
+        </Link>
       }
     >
       <form onSubmit={submit} noValidate className="flex flex-col gap-(--space-4)">
