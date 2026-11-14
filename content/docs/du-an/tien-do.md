@@ -7,6 +7,18 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 14/11/2026 (tối, sau review): chốt Bước 16
+
+- **Đã làm:**
+  - Review PR #11 (Bước 16). Claude Code sửa hai điểm:
+    - quản lý chỉ gửi lại, thu hồi lời mời của vai mình mời được;
+    - không tạo lời mời thứ hai cho email đang có lời mời chờ nhận.
+  - Người dùng đã merge.
+  - BR-78 thêm hai ý trên. BR-79 ghi rõ nhân viên không thấy cả lý do lẫn thời điểm khóa.
+  - Bảng `NhanLoiMoiCoTaiKhoan` đổi sang `nam.tran@email.vn` được mời vào Pawpaw (Thảo Điền, Lê Thu Hà mời), khớp mock; thêm nút "Từ chối lời mời" như bảng `NhanLoiMoi`.
+- **Ghi chú cho ERD:** `invitations` có ràng buộc một lời mời `pending` còn hạn cho mỗi (tenant_id, email). Khi mời mới sau lời mời đã hết hạn, đánh dấu lời mời cũ là `revoked` để danh sách chỉ còn một dòng cho mỗi email.
+- **Tiếp theo:** phiên claude.ai vẽ đợt G (quản trị nền tảng: MH-58, MH-60, MH-62).
+
 ### 14/11/2026 (tối): mock tài khoản và khung (Bước 16, đợt F)
 
 - **Đã làm** (nhánh `feat/mock-account`, mỗi mục 16a–16g một commit):
