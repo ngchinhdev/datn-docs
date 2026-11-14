@@ -22,6 +22,7 @@ import { holdState, offerAfterExpiry } from '@/mock/assistant-hold';
 import { ANY_STAFF } from '@/mock/availability';
 import { formatDuration, formatVnd } from '@/mock/format';
 import { visibleMinutes } from '@/mock/occupation';
+import { branchPhone } from '@/mock/site';
 import { can, entitlements } from '@/mock/subscription';
 import { addMinutes, formatDay, formatRange, formatTime, localDate, MOCK_NOW } from '@/mock/time';
 
@@ -107,7 +108,7 @@ function AssistantWindow() {
   const name = `Trợ lý ${fixture.tenant.name.replace(/^(Salon|Spa thú cưng|Spa|Nail)\s+/, '')}`;
 
   useEffect(() => input.current?.focus(), []);
-  useEffect(() => end.current?.scrollIntoView({ block: 'end' }), [messages]);
+  useEffect(() => end.current?.scrollIntoView({ block: 'end' }), [messages, limit]);
 
   const close = () => {
     setOpen(false);
@@ -163,6 +164,21 @@ function AssistantWindow() {
         {messages.map((m, i) => (
           <Message key={m.id} message={m} last={i === messages.length - 1} />
         ))}
+        {limit && (
+          <div className="max-w-[92%] self-start">
+            <LimitCard
+              card={{
+                kind: 'limit',
+                reason: limit,
+                limit:
+                  limit === 'month'
+                    ? fixture.config.chatbot.perShopPerMonth
+                    : fixture.config.chatbot.perCustomerPerDay,
+                phone: branchPhone(fixture.tenant.slug, fixture.branches[0]?.phone),
+              }}
+            />
+          </div>
+        )}
         {messages.length === 1 && (
           <p className="caption m-0 text-(--ink-muted)">
             Mình không tự đặt lịch: lịch chỉ được đặt khi bạn nhập mã 6 số gửi qua email.
