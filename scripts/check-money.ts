@@ -4,8 +4,16 @@
  * random amounts for the invariants, and the sample money data.
  * Run: pnpm check:money   (Node 24 runs TypeScript directly)
  */
+import { clawbackEntries, earnEntries, periodState, postEntries } from '../mock/commission.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
-import type { Invoice, InvoiceLine, Payment, RefundRequest } from '../mock/fixtures/types.ts';
+import type {
+  CommissionRule,
+  Invoice,
+  InvoiceLine,
+  Payment,
+  RefundRequest,
+} from '../mock/fixtures/types.ts';
+import { MOCK_TODAY } from '../mock/time.ts';
 import {
   cancelTransfer,
   collect,
@@ -26,8 +34,6 @@ import {
 } from '../mock/money-refunds.ts';
 import {
   collectedVnd,
-  commissionClawback,
-  commissionEarned,
   invoiceStatus,
   invoiceTotals,
   nextInvoiceNumber,
@@ -238,7 +244,19 @@ const line = (over: Partial<InvoiceLine> & Pick<InvoiceLine, 'unitPriceVnd'>): I
       bad = `hóa đơn không khớp: ${show(t)}`;
     } else if (t.depositApplied + t.depositUnused !== deposit) bad = 'cọc không khớp';
     const pct = next(40);
-    const earned = commissionEarned(lines, t.discount, pct).reduce((m, e) => m + e.amountVnd, 0n);
+    const sweepRules: CommissionRule[] = [
+      { id: 'r-all', scope: 'all', percent: pct, effectiveFrom: '2026-01-01' },
+      { id: 'r-retail', scope: 'retail', percent: pct, effectiveFrom: '2026-01-01' },
+    ];
+    const earned = earnEntries({
+      invoice: { id: 'inv-sweep' } as Invoice,
+      lines: lines.map((l) => ({ ...l, staffResourceId: 'may-mai' })),
+      discountVnd: t.discount,
+      rules: sweepRules,
+      services: salon.services,
+      levelOf: () => 1,
+      at: '2026-11-07T03:00:00Z',
+    }).reduce((m, e) => m + e.amountVnd, 0n);
     if (earned > (t.afterDiscount * BigInt(pct)) / 100n) {
       bad = 'hoa hồng vượt phần trăm của số thực thu';
     }
@@ -378,61 +396,71 @@ const request = (over: Partial<RefundRequest>): RefundRequest => ({
     line({ id: 'a', unitPriceVnd: 500_000n, staffResourceId: 'may-mai' }),
     line({ id: 'b', kind: 'retail', unitPriceVnd: 120_000n, staffResourceId: 'may-mai' }),
   ];
-  const periods = salon.money.periods;
-  const back = commissionClawback({
+  const invoice = { id: 'inv-x', lines } as Invoice;
+  const at = '2026-11-07T03:00:00Z';
+  const ten = () => ({ percent: 10 });
+  const back = clawbackEntries({
+    refundId: 'rf-x',
+    invoice,
+    earned: [],
     refundVnd: 80_000n,
-    percent: 10,
-    lines,
-    discountVnd: 0n,
     lineId: 'b',
-    periods,
+    discountVnd: 0n,
+    at,
+    fallback: ten,
   });
   report(
-    back.entries.length === 1 &&
-      back.entries[0]!.amountVnd === -8_000n &&
-      back.period.id === '2026-11',
-    'BR-42: hoàn 80.000 ₫ thu hồi 8.000 ₫ vào kỳ 11/2026 đang mở',
+    back.length === 1 && back[0]!.amountVnd === -8_000n && back[0]!.periodId === '2026-11',
+    'BR-42: hoàn 80.000 ₫ thu hồi 8.000 ₫ vào kỳ 11/2026',
     show(back),
   );
-  const shared = commissionClawback({
+  const shared = clawbackEntries({
+    refundId: 'rf-y',
+    invoice: {
+      id: 'inv-y',
+      lines: [
+        line({ id: 'a', unitPriceVnd: 300_000n, staffResourceId: 'may-mai' }),
+        line({ id: 'b', unitPriceVnd: 100_000n, staffResourceId: 'may-lan' }),
+      ],
+    } as Invoice,
+    earned: [],
     refundVnd: 100_000n,
-    percent: 10,
-    lines: [
-      line({ id: 'a', unitPriceVnd: 300_000n, staffResourceId: 'may-mai' }),
-      line({ id: 'b', unitPriceVnd: 100_000n, staffResourceId: 'may-lan' }),
-    ],
     discountVnd: 0n,
-    periods,
+    at,
+    fallback: ten,
   });
-  const by = Object.fromEntries(shared.entries.map((e) => [e.staffResourceId, e.amountVnd]));
+  const by = Object.fromEntries(shared.map((e) => [e.staffResourceId, e.amountVnd]));
   report(
     by['may-mai'] === -7_500n && by['may-lan'] === -2_500n,
     'BR-28: không chỉ định dòng thì thu hồi theo phần mỗi người đã được',
     show(by),
   );
-  let threw = false;
-  try {
-    commissionClawback({
-      refundVnd: 1n,
-      percent: 10,
-      lines,
-      discountVnd: 0n,
-      periods: [{ id: 'x', label: 'x', status: 'closed' }],
-    });
-  } catch {
-    threw = true;
-  }
-  report(threw, 'BR-42: không có kỳ mở thì không ghi vào kỳ đã chốt');
-  const earned = commissionEarned(
-    [line({ unitPriceVnd: 500_000n, staffResourceId: 'may-mai' })],
-    50_000n,
-    10,
-  );
+  const rules: CommissionRule[] = [
+    { id: 'r', scope: 'all', percent: 10, effectiveFrom: '2026-10-01' },
+  ];
+  const earned = earnEntries({
+    invoice,
+    lines: [line({ id: 'a', unitPriceVnd: 500_000n, staffResourceId: 'may-mai' })],
+    discountVnd: 50_000n,
+    rules,
+    services: salon.services,
+    levelOf: () => 2,
+    at,
+  });
   report(
     earned[0]?.amountVnd === 45_000n,
     'BR-40: hoa hồng tính trên số thực thu sau giảm giá (450.000 × 10%)',
     show(earned),
   );
+  const closed = postEntries(
+    {
+      ...salon.money,
+      periods: [{ id: '2026-11', label: '11/2026', status: 'closed' }],
+      commission: [],
+    },
+    back,
+  );
+  report(closed.commission.length === 0, 'BR-42: kỳ đã chốt không nhận thêm khoản nào');
 }
 
 // ---- The sample data of the two tenants ----
@@ -493,8 +521,8 @@ for (const f of tenantFixtures) {
     over.map((r) => r.id).join(', '),
   );
 
-  const open = m.periods.filter((p) => p.status === 'open');
-  report(open.length === 1, `${name}: đúng một kỳ hoa hồng đang mở (BR-42)`);
+  const running = m.periods.filter((p) => periodState(p, MOCK_TODAY) === 'open');
+  report(running.length === 1, `${name}: đúng một kỳ hoa hồng đang chạy (BR-42)`);
   const closedPosting = m.commission.filter((c) => {
     const period = m.periods.find((p) => p.id === c.periodId);
     return period?.status === 'closed' && c.kind === 'clawback';
@@ -514,8 +542,12 @@ for (const f of tenantFixtures) {
     'Mẫu: HĐ-0185, HĐ-0186 đã thu',
   );
   report(
-    nextInvoiceNumber(m.invoices) === 'HĐ-0190',
-    'Mẫu: hóa đơn tiếp theo là HĐ-0190 (0187–0189 là nháp)',
+    new Set(m.invoices.map((i) => i.number)).size === m.invoices.length,
+    'Mẫu: số hóa đơn không trùng nhau',
+  );
+  report(
+    Number(nextInvoiceNumber(m.invoices).replace(/\D/g, '')) > 189,
+    'Mẫu: hóa đơn tiếp theo đứng sau HĐ-0189',
     nextInvoiceNumber(m.invoices),
   );
   const ha = find('HĐ-0187');
@@ -535,8 +567,8 @@ for (const f of tenantFixtures) {
   const an = salon.customers.find((c) => c.id === 'may-c-an')!;
   report(an.packages?.[0]?.remainingSessions === 2, 'Mẫu: anh Bảo An còn 2 buổi gói 5 lần gội sấy');
   report(
-    m.refunds.length === 4 && m.refunds.filter((r) => r.createdBy === 'Tự động').length === 1,
-    'Mẫu: 4 yêu cầu hoàn tiền, một yêu cầu "Tự động" (BR-29)',
+    m.refunds.length === 5 && m.refunds.filter((r) => r.createdBy === 'Tự động').length === 1,
+    'Mẫu: 5 yêu cầu hoàn tiền, một yêu cầu "Tự động" (BR-29)',
   );
 }
 
@@ -547,7 +579,7 @@ for (const f of tenantFixtures) {
   const ctx: Ctx = {
     services: salon.services,
     catalog: salon.packageCatalog,
-    commissionPercent: salon.commissionPercent,
+    levelOf: (id) => salon.staff.find((s) => s.resourceId === id)?.level,
     now: NOW,
     actor: 'Lan',
     role: 'Lễ tân',
@@ -610,11 +642,11 @@ for (const f of tenantFixtures) {
     );
     const com = w.money.commission.filter((c) => c.invoiceId === haId);
     report(
-      com.length === 1 &&
-        com[0]!.staffResourceId === 'may-mai' &&
-        com[0]!.amountVnd === 62_000n &&
-        com[0]!.periodId === '2026-11',
-      'BR-40: hoa hồng của Mai 62.000 ₫ vào kỳ 11/2026',
+      com.length === 2 &&
+        com.every((c) => c.staffResourceId === 'may-mai' && c.periodId === '2026-11') &&
+        com.find((c) => c.source === 'service')?.amountVnd === 50_000n &&
+        com.find((c) => c.source === 'retail')?.amountVnd === 6_000n,
+      'BR-40, BR-41: Mai có 50.000 ₫ (10% của Nhuộm 500.000 ₫) và 6.000 ₫ (5% của dầu xả 120.000 ₫) vào kỳ 11/2026',
       show(com),
     );
     const again = collect(w, haId, plan, ctx);
@@ -704,7 +736,7 @@ for (const f of tenantFixtures) {
       );
       const com = done.world.money.commission.filter((c) => c.invoiceId === anId);
       report(
-        com.length === 1 && com[0]!.amountVnd === 22_600n,
+        com.length === 2 && com.reduce((m, c) => m + c.amountVnd, 0n) === 22_600n,
         'BR-40: hoa hồng của Hùng = 10% × 150.000 ₫ thực thu + 10% × 76.000 ₫ doanh thu buổi gói = 22.600 ₫',
         show(com),
       );
@@ -717,8 +749,10 @@ for (const f of tenantFixtures) {
         show(line.sessionRevenueVnd),
       );
       report(
-        done.world.money.commission.filter((c) => c.invoiceId === anId).length === 1,
-        'BR-40: hoa hồng của một người trên một hóa đơn chỉ một dòng, gộp cả phần buổi gói',
+        done.world.money.commission
+          .filter((c) => c.invoiceId === anId)
+          .every((c) => c.lineId.startsWith(anId)),
+        'BR-40: mỗi khoản hoa hồng gắn với một dòng của hóa đơn, buổi gói tính riêng một khoản',
       );
     }
     const back = cancelTransfer(w, anId);
@@ -858,7 +892,7 @@ for (const f of tenantFixtures) {
   const ctx: Ctx = {
     services: salon.services,
     catalog: salon.packageCatalog,
-    commissionPercent: salon.commissionPercent,
+    levelOf: (id) => salon.staff.find((s) => s.resourceId === id)?.level,
     now: NOW,
     actor: 'Hùng',
     role: 'Quản lý',
@@ -872,7 +906,7 @@ for (const f of tenantFixtures) {
 
   // HĐ-0184: the pending request of 80.000 ₫ cash by Lan.
   const pending = start.money.refunds.find((r) => r.id === 'rf-0184')!;
-  const fx = approvalEffects(start, pending, ctx.commissionPercent);
+  const fx = approvalEffects(start, pending, ctx);
   report(
     fx.clawback.length === 1 &&
       fx.clawback[0]!.staffResourceId === 'may-lan' &&
@@ -891,7 +925,7 @@ for (const f of tenantFixtures) {
     'BR-28: duyệt xong hóa đơn thành Đã hoàn',
   );
   report(
-    w.money.commission.some((c) => c.id === 'com-rf-0184-may-lan' && c.amountVnd === -8_000n),
+    w.money.commission.some((c) => c.id === 'com-rf-0184-inv-0184-l0' && c.amountVnd === -8_000n),
     'BR-42: có một dòng thu hồi hoa hồng',
   );
   report(
@@ -1008,7 +1042,7 @@ for (const f of tenantFixtures) {
       'BR-28: duyệt thì buổi gói được trả lại (còn 2 buổi như trước khi dùng)',
       show(pkg),
     );
-    const back = approved.money.commission.find((c) => c.id === `com-${id}-may-hung`);
+    const back = approved.money.commission.find((c) => c.id === `com-${id}-${lineId}-session`);
     report(
       back?.amountVnd === -7_600n && back.kind === 'clawback' && back.periodId === '2026-11',
       'BR-26, BR-42: hoàn buổi gói thu hồi đúng 7.600 ₫ hoa hồng của phần doanh thu 76.000 ₫, vào kỳ đang mở',

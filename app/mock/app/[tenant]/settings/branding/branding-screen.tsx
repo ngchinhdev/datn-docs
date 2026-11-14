@@ -312,7 +312,7 @@ export function BrandingScreen({ tenantSlug }: { tenantSlug: string }) {
             </h2>
             <Field
               id="br-s"
-              label="Đường dẫn"
+              label="Tên miền"
               suffix={`.${BASE_DOMAIN}`}
               help={`Chữ thường, số, gạch ngang. Đổi đường dẫn thì link cũ chuyển hướng ${REDIRECT_DAYS} ngày.`}
               error={slugProblem}

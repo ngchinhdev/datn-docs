@@ -125,7 +125,7 @@ const inRange = (times: string[], from: string, to: string) =>
 {
   const day = '2026-11-15';
   const closed = withBranch(salon, {
-    specialDays: [...salon.branches[0]!.specialDays, { date: day, note: 'Nghỉ lễ', hours: null }],
+    specialDays: [...salon.branches[0]!.specialDays, { date: day, note: 'Nghỉ lễ', hours: [] }],
   });
   report(starts(salon, day).length > 0, 'Đối chứng: 15/11 còn giờ trống khi mở cửa thường');
   report(
@@ -135,12 +135,39 @@ const inRange = (times: string[], from: string, to: string) =>
   const short = withBranch(salon, {
     specialDays: [
       ...salon.branches[0]!.specialDays,
-      { date: day, note: 'Đóng sớm', hours: { open: '09:00', close: '12:00' } },
+      { date: day, note: 'Đóng sớm', hours: [{ open: '09:00', close: '12:00' }] },
     ],
   });
   report(
     starts(short, day).every((t) => t < '12:00'),
     'BR-02: ngày đặc biệt giờ khác thay giờ thường: không có giờ sau 12:00',
+  );
+}
+
+{
+  // A special day may have several windows, like a regular day (BR-02).
+  const day = '2026-11-20';
+  const split = withBranch(salon, {
+    specialDays: [
+      ...salon.branches[0]!.specialDays,
+      {
+        date: day,
+        note: 'Giờ đặc biệt',
+        hours: [
+          { open: '09:00', close: '12:00' },
+          { open: '15:00', close: '20:00' },
+        ],
+      },
+    ],
+  });
+  const times = starts(split, day);
+  report(
+    openingWindows(split, day).length === 2 &&
+      times.some((t) => t < '12:00') &&
+      times.some((t) => t >= '15:00') &&
+      times.every((t) => t < '12:00' || t >= '15:00'),
+    'BR-02: ngày đặc biệt 20/11 mở 09:00–12:00 và 15:00–20:00 thì không có giờ trong 12:00–15:00',
+    times.join(' '),
   );
 }
 
@@ -259,7 +286,7 @@ const inRange = (times: string[], from: string, to: string) =>
   );
   const closed = {
     ...b,
-    specialDays: [...b.specialDays, { date: '2026-11-13', note: 'x', hours: null }],
+    specialDays: [...b.specialDays, { date: '2026-11-13', note: 'x', hours: [] }],
   };
   const closedOut = outsideHours(salon.appointments, closed, MOCK_NOW);
   report(

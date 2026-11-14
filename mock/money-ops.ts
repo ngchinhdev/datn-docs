@@ -7,7 +7,6 @@
 import { addAudit, addAudits, type Actor, type AuditInput } from './audit.ts';
 import type {
   Appointment,
-  CommissionEntry,
   Customer,
   CustomerPackage,
   Invoice,
@@ -22,19 +21,17 @@ import type {
   WalletEntry,
 } from './fixtures/types.ts';
 import { formatVnd } from './format.ts';
+import { earnEntries, postEntries } from './commission.ts';
 import {
-  commissionEarned,
   draftInvoice,
   invoiceTotals,
   nextInvoiceNumber,
   packageExpiry,
-  packageSessionCommission,
   packageUsable,
   refundable,
   sessionRevenue,
   splitWallet,
   walletBalance,
-  type StaffAmount,
 } from './money.ts';
 
 /** Everything an action can change at once: money, the customers' packages, the appointments. */
@@ -47,8 +44,8 @@ export interface World {
 export interface Ctx {
   services: Service[];
   catalog: PackageProduct[];
-  /** Percent of the commission rule (BR-40). */
-  commissionPercent: number;
+  /** 1-based level of a member of staff, for the commission rules (BR-41). */
+  levelOf: (staffResourceId: string) => number | undefined;
   /** ISO 8601, UTC. */
   now: string;
   /** Who does it: "Lan", "Hùng". */
@@ -74,17 +71,6 @@ export const METHOD_LABEL: Record<PaymentMethod, string> = {
   card: 'Thẻ',
   wallet: 'Ví',
   gateway: 'Cọc qua cổng (giả lập)',
-};
-
-/** Adds the amounts of the same person together. */
-const mergeStaff = (...lists: StaffAmount[][]): StaffAmount[] => {
-  const out: StaffAmount[] = [];
-  for (const e of lists.flat()) {
-    const found = out.find((x) => x.staffResourceId === e.staffResourceId);
-    if (found) found.amountVnd += e.amountVnd;
-    else out.push({ ...e });
-  }
-  return out;
 };
 
 const digits = (text: string) => text.replace(/\D/g, '');
@@ -240,7 +226,11 @@ function finalize(
     if (!pkg?.priceVnd) return l;
     const nth = (taken.get(pkg.id) ?? pkg.usedSessions) + 1;
     taken.set(pkg.id, nth);
-    return { ...l, sessionRevenueVnd: sessionRevenue(pkg.priceVnd, pkg.totalSessions, nth) };
+    return {
+      ...l,
+      sessionRevenueVnd: sessionRevenue(pkg.priceVnd, pkg.totalSessions, nth),
+      sessionNo: nth,
+    };
   });
   for (const l of invoice.lines) {
     if (l.packageId) {
@@ -309,22 +299,16 @@ function finalize(
     );
   }
 
-  // BR-40, BR-42: commission on what was really collected, in the open period.
-  const period = money.periods.find((p) => p.status === 'open');
-  const commission: CommissionEntry[] = period
-    ? mergeStaff(
-        commissionEarned(lines, totals.discount, ctx.commissionPercent),
-        packageSessionCommission(lines, ctx.commissionPercent),
-      ).map((e) => ({
-        id: `com-${invoice.id}-${e.staffResourceId}`,
-        staffResourceId: e.staffResourceId,
-        periodId: period.id,
-        amountVnd: e.amountVnd,
-        invoiceId: invoice.id,
-        kind: 'earn',
-        at: ctx.now,
-      }))
-    : [];
+  // BR-40, BR-41, BR-42: commission on what was really collected, by the rule of the day, in the period of that day.
+  const commission = earnEntries({
+    invoice,
+    lines,
+    discountVnd: totals.discount,
+    rules: money.commissionRules,
+    services: ctx.services,
+    levelOf: ctx.levelOf,
+    at: ctx.now,
+  });
 
   // BR-63: collecting and a hand discount are logged.
   const collected = plan
@@ -369,9 +353,9 @@ function finalize(
       ...payments,
     ],
     walletEntries: [...money.walletEntries, ...entries],
-    commission: [...money.commission, ...commission],
     audit: addAudits(money.audit, ctx.now, whoIs(ctx), auditInputs),
   };
+  money = postEntries(money, commission);
   return { money, customers, appointments };
 }
 

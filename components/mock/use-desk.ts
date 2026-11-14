@@ -34,7 +34,7 @@ export function useDesk(tenantSlug: string) {
     (): Ctx => ({
       services: fixture.services,
       catalog: fixture.packageCatalog,
-      commissionPercent: fixture.commissionPercent,
+      levelOf: (id) => fixture.staff.find((s) => s.resourceId === id)?.level,
       now: now(),
       actor,
       role: roleLabel(role),

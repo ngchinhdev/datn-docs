@@ -97,7 +97,7 @@ export const navByRole: Record<StaffRole, NavEntry[]> = {
     { id: 'my-time-off', label: 'Xin nghỉ', path: 'my/time-off', icon: CalendarX },
     { id: 'my-commission', label: 'Hoa hồng', path: 'my/commission', icon: Percent },
   ],
-  manager: management,
+  manager: [overview, ...management],
   owner: [overview, ...management, commission, settings],
 };
 

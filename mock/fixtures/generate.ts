@@ -84,7 +84,11 @@ const iso = (ms: number) => new Date(ms).toISOString().replace('.000Z', 'Z');
 
 function openRange(branch: Branch, date: string) {
   const special = branch.specialDays.find((d) => d.date === date);
-  if (special) return special.hours;
+  if (special) {
+    const first = special.hours[0];
+    const last = special.hours.at(-1);
+    return first && last ? { open: first.open, close: last.close } : null;
+  }
   const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
   return branch.businessHours.find((h) => h.weekday === weekday) ?? null;
 }

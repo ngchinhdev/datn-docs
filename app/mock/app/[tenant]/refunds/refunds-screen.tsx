@@ -127,7 +127,7 @@ export function RefundsScreen({ tenantSlug }: { tenantSlug: string }) {
           (x.status === 'approved' || x.status === 'auto'),
       )
       .reduce((m, x) => m + x.amountVnd, 0n);
-    const fx = r.status === 'pending' ? approvalEffects(world, r, fixture.commissionPercent) : null;
+    const fx = r.status === 'pending' ? approvalEffects(world, r, ctx()) : null;
     const decidable = r.status === 'pending' && canManage;
     return (
       <SidePanel

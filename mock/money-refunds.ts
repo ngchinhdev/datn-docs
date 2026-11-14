@@ -3,16 +3,25 @@
  * deposit that came too late (BR-27, BR-28, BR-29, BR-42, BR-63). Pure, like `money-ops`.
  */
 import { addAudit, SYSTEM_ACTOR } from './audit.ts';
-import type { CommissionEntry, MoneyState, RefundRequest, WalletEntry } from './fixtures/types.ts';
-import { formatVnd } from './format.ts';
 import {
-  collectedVnd,
-  commissionClawback,
-  invoiceTotals,
-  splitWalletRefund,
-  type StaffAmount,
-} from './money.ts';
+  clawbackEntries,
+  periodLabelOf,
+  periodOfInstant,
+  postEntries,
+  ruleFor,
+  serviceIdOfVariant,
+} from './commission.ts';
+import type {
+  CommissionEntry,
+  InvoiceLine,
+  MoneyState,
+  RefundRequest,
+  WalletEntry,
+} from './fixtures/types.ts';
+import { formatVnd } from './format.ts';
+import { collectedVnd, invoiceTotals, splitWalletRefund, type StaffAmount } from './money.ts';
 import type { Ctx, World } from './money-ops.ts';
+import { localDate } from './time.ts';
 
 /** "tiền mặt", "thẻ": where a refund goes, in a sentence. */
 const NAMES: Record<string, string> = {
@@ -26,8 +35,10 @@ const methodName = (method: string) => NAMES[method] ?? method;
 
 /** What approving a request does, for the panel and for the approval itself. */
 export interface ApprovalEffects {
-  /** Negative postings of commission, one per person, in the open period (BR-28, BR-42). */
+  /** What each person gets taken back, negative, for the panel (BR-28). */
   clawback: StaffAmount[];
+  /** The negative entries posted, one per line, in the period of the day it is approved (BR-42). */
+  entries: CommissionEntry[];
   periodLabel: string | null;
   /** A wallet payment goes back to the wallet keeping the ratio (BR-28). */
   wallet: { realVnd: bigint; bonusVnd: bigint } | null;
@@ -44,14 +55,14 @@ export interface ApprovalEffects {
 export function approvalEffects(
   world: World,
   request: RefundRequest,
-  percent: number,
+  ctx: Pick<Ctx, 'services' | 'levelOf' | 'now'>,
 ): ApprovalEffects {
   const invoice = world.money.invoices.find((i) => i.id === request.invoiceId);
   const payment = world.money.payments.find((p) => p.id === request.paymentId);
-  const open = world.money.periods.find((p) => p.status === 'open');
   const effects: ApprovalEffects = {
     clawback: [],
-    periodLabel: open?.label ?? null,
+    entries: [],
+    periodLabel: periodLabelOf(periodOfInstant(ctx.now)),
     wallet: null,
     returnSession: Boolean(request.returnSession),
     sessionRevenueVnd: null,
@@ -60,23 +71,34 @@ export function approvalEffects(
   };
   if (!invoice) return effects;
   const totals = invoiceTotals(invoice.lines, invoice.discount, invoice.depositVnd);
-  if (open && request.amountVnd > 0n) {
-    effects.clawback = commissionClawback({
-      refundVnd: request.amountVnd,
-      percent,
-      lines: invoice.lines,
-      discountVnd: totals.discount,
-      ...(request.lineId ? { lineId: request.lineId } : {}),
-      periods: world.money.periods,
-    }).entries.filter((e) => e.amountVnd !== 0n);
+  // BR-42: with the percent of the line it takes back; one the line never earned from follows the rule of its day.
+  const fallback = (line: InvoiceLine) => {
+    const rule = ruleFor(world.money.commissionRules, {
+      retail: line.kind === 'retail',
+      serviceId: serviceIdOfVariant(ctx.services, line.serviceVariantId),
+      level: line.staffResourceId ? ctx.levelOf(line.staffResourceId) : undefined,
+      date: localDate(invoice.paidAt ?? ctx.now),
+    });
+    return rule ? { percent: rule.percent, ruleId: rule.id } : null;
+  };
+  effects.entries = clawbackEntries({
+    refundId: request.id,
+    invoice,
+    earned: world.money.commission.filter((c) => c.invoiceId === invoice.id),
+    refundVnd: request.amountVnd,
+    ...(request.lineId ? { lineId: request.lineId } : {}),
+    ...(request.returnSession ? { returnSession: true } : {}),
+    discountVnd: totals.discount,
+    at: ctx.now,
+    fallback,
+  });
+  for (const e of effects.entries) {
+    const found = effects.clawback.find((c) => c.staffResourceId === e.staffResourceId);
+    if (found) found.amountVnd += e.amountVnd;
+    else effects.clawback.push({ staffResourceId: e.staffResourceId, amountVnd: e.amountVnd });
   }
-  // BR-26, BR-40: a session given back takes back the commission it earned.
   const line = invoice.lines.find((l) => l.id === request.lineId);
-  if (open && request.returnSession && line?.staffResourceId && line.sessionRevenueVnd) {
-    const back = -((line.sessionRevenueVnd * BigInt(percent)) / 100n);
-    const found = effects.clawback.find((e) => e.staffResourceId === line.staffResourceId);
-    if (found) found.amountVnd += back;
-    else effects.clawback.push({ staffResourceId: line.staffResourceId, amountVnd: back });
+  if (request.returnSession && line?.staffResourceId && line.sessionRevenueVnd) {
     effects.sessionRevenueVnd = line.sessionRevenueVnd;
   }
   if (payment?.method === 'wallet') {
@@ -105,7 +127,7 @@ export function approveRefund(
   }
   const invoice = world.money.invoices.find((i) => i.id === request.invoiceId);
   if (!invoice) return { world, error: 'Không tìm thấy hóa đơn của yêu cầu.' };
-  const effects = approvalEffects(world, request, ctx.commissionPercent);
+  const effects = approvalEffects(world, request, ctx);
 
   const entries: WalletEntry[] = [];
   if (effects.wallet && invoice.customerId) {
@@ -121,19 +143,6 @@ export function approveRefund(
       idempotencyKey: `refund:${request.id}`,
     });
   }
-  const period = world.money.periods.find((p) => p.status === 'open');
-  const commission: CommissionEntry[] = period
-    ? effects.clawback.map((e) => ({
-        id: `com-${request.id}-${e.staffResourceId}`,
-        staffResourceId: e.staffResourceId,
-        periodId: period.id,
-        amountVnd: e.amountVnd,
-        invoiceId: invoice.id,
-        kind: 'clawback' as const,
-        at: ctx.now,
-      }))
-    : [];
-
   let customers = world.customers;
   const customer = customers.find((c) => c.id === invoice.customerId);
   if (customer?.packages) {
@@ -152,45 +161,41 @@ export function approveRefund(
     customers = customers.map((c) => (c.id === customer.id ? { ...c, packages } : c));
   }
 
-  return {
-    world: {
-      ...world,
-      customers,
-      money: {
-        ...world.money,
-        refunds: world.money.refunds.map((r) =>
-          r.id === request.id
-            ? {
-                ...r,
-                status: 'approved' as const,
-                decidedBy: ctx.actor,
-                decidedAt: ctx.now,
-                ...(effects.wallet
-                  ? {
-                      walletRealVnd: effects.wallet.realVnd,
-                      walletBonusVnd: effects.wallet.bonusVnd,
-                    }
-                  : {}),
-              }
-            : r,
-        ),
-        walletEntries: [...world.money.walletEntries, ...entries],
-        commission: [...world.money.commission, ...commission],
-        audit: addAudit(
-          world.money.audit,
-          ctx.now,
-          { name: ctx.actor, role: ctx.role },
-          {
-            action: 'Duyệt hoàn tiền',
-            object: invoice.number,
-            href: `invoices/${invoice.id}`,
-            detail: `${formatVnd(request.amountVnd)} về ${methodName(request.method)} · ${request.reason}`,
-          },
-        ),
-      },
+  const money = postEntries(
+    {
+      ...world.money,
+      refunds: world.money.refunds.map((r) =>
+        r.id === request.id
+          ? {
+              ...r,
+              status: 'approved' as const,
+              decidedBy: ctx.actor,
+              decidedAt: ctx.now,
+              ...(effects.wallet
+                ? {
+                    walletRealVnd: effects.wallet.realVnd,
+                    walletBonusVnd: effects.wallet.bonusVnd,
+                  }
+                : {}),
+            }
+          : r,
+      ),
+      walletEntries: [...world.money.walletEntries, ...entries],
+      audit: addAudit(
+        world.money.audit,
+        ctx.now,
+        { name: ctx.actor, role: ctx.role },
+        {
+          action: 'Duyệt hoàn tiền',
+          object: invoice.number,
+          href: `invoices/${invoice.id}`,
+          detail: `${formatVnd(request.amountVnd)} về ${methodName(request.method)} · ${request.reason}`,
+        },
+      ),
     },
-    error: null,
-  };
+    effects.entries,
+  );
+  return { world: { ...world, customers, money }, error: null };
 }
 
 /** A rejection needs a note, which the person who asked can read (BR-28). */

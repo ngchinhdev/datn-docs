@@ -153,6 +153,7 @@ const built: Record<string, ScreenLink[]> = {
   'MH-34': [{ label: 'Hoàn tiền', href: app('refunds?role=manager') }],
   'MH-35': [{ label: 'Lịch của tôi', href: app('my/schedule?role=technician') }],
   'MH-36': [{ label: 'Xin nghỉ', href: app('my/time-off?role=technician') }],
+  'MH-37': [{ label: 'Hoa hồng của tôi', href: app('my/commission?role=technician') }],
   'MH-38': [{ label: 'Xếp ca', href: app('shifts?role=manager') }],
   'MH-39': [{ label: 'Nghỉ phép', href: app('time-off?role=manager') }],
   'MH-40': [
@@ -169,6 +170,7 @@ const built: Record<string, ScreenLink[]> = {
     },
   ],
   'MH-47': [{ label: 'Nhân sự', href: app('settings/staff') }],
+  'MH-41': [{ label: 'Tổng quan', href: app('?role=owner') }],
   'MH-42': [{ label: 'Chi nhánh', href: app('settings/branches') }],
   'MH-43': [
     {
@@ -183,6 +185,14 @@ const built: Record<string, ScreenLink[]> = {
   'MH-52': [{ label: 'Thanh toán', href: app('settings/payments') }],
   'MH-53': [{ label: 'Thông báo', href: app('settings/notifications') }],
   'MH-54': [{ label: 'Chatbot', href: app('settings/chatbot') }],
+  'MH-55': [{ label: 'Báo cáo', href: app('reports?role=owner') }],
+  'MH-56': [
+    { label: 'Hoa hồng', href: app('commission?role=owner') },
+    {
+      label: 'Kỳ của một người',
+      href: app('commission/periods/2026-11?role=owner&staff=' + 'may-mai'),
+    },
+  ],
   'MH-57': [{ label: 'Nhật ký thao tác', href: app('audit-log') }],
   'MH-59': [
     { label: 'Gói cấu hình ngành', href: () => '/mock/admin/templates', platform: true },
@@ -765,7 +775,7 @@ const rows: Row[] = [
     wave: 3,
     level: 'Vẽ',
     routes: ['/app/[tenant]/commission', '/commission/periods/[id]'],
-    note: 'Quy tắc có ngày hiệu lực (BR-41), chia nhiều thợ (BR-43), chốt kỳ, khoản thu hồi vào kỳ sau (BR-42)',
+    note: 'Quy tắc có ngày hiệu lực (BR-41), chốt kỳ, khoản thu hồi vào kỳ của ngày duyệt hoàn (BR-42)',
   },
   {
     code: 'MH-57',
