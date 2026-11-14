@@ -77,17 +77,28 @@ Chi tiết và ví dụ tính tay ở [Thuật toán tính giờ trống](../ky-
 | BR-25 | Rút tiền ví chỉ hoàn phần tiền thật còn lại, không hoàn tiền tặng. Trả bằng ví thì trừ tiền thật trước, tiền tặng sau. Tiền tặng khi nạp theo mức cấu hình (mặc định nạp từ 1.000.000 ₫ tặng 10%). Rút tiền thật chỉ quản lý hoặc chủ cơ sở làm được |
 | BR-26 | Doanh thu gói ghi nhận theo từng buổi sử dụng: giá gói chia số buổi, buổi cuối nhận phần lẻ. Người làm buổi đó có hoa hồng trên doanh thu này (BR-40); hoàn buổi thì thu hồi đúng phần đó |
 | BR-27 | Hoàn gói = giá gói − (số buổi đã dùng × giá lẻ tại thời điểm mua) − phí hủy; âm thì bằng 0 |
-| BR-28 | Hoàn tiền bắt buộc ghi lý do và cần quyền quản lý; kéo theo thu hồi hoa hồng (vào kỳ đang mở, BR-42) và hoàn buổi gói. Yêu cầu tạo từ hóa đơn, chọn khoản đã trả; tiền hoàn về đúng phương thức của khoản đó (ví về ví, giữ tỉ lệ tiền thật, tiền tặng), không vượt số đã thu trừ số đã hoàn. Cọc đã trừ vào dịch vụ đã làm thì hoàn qua khoản khác |
+| BR-28 | Hoàn tiền bắt buộc ghi lý do và cần quyền quản lý; kéo theo thu hồi hoa hồng (vào kỳ của ngày duyệt hoàn, BR-42) và hoàn buổi gói. Yêu cầu tạo từ hóa đơn, chọn khoản đã trả; tiền hoàn về đúng phương thức của khoản đó (ví về ví, giữ tỉ lệ tiền thật, tiền tặng), không vượt số đã thu trừ số đã hoàn. Cọc đã trừ vào dịch vụ đã làm thì hoàn qua khoản khác |
 | BR-29 | Giữ chỗ khi trả cọc vẫn là 10 phút tính từ lúc chọn giờ (BR-07); sang trang trả cọc không cộng thêm. Tiền cọc về sau khi hết giữ chỗ: giờ còn trống thì vẫn xác nhận; đã có người đặt thì hệ thống tự hoàn đủ, không cần quản lý duyệt (khác BR-28), và gợi ý giờ gần nhất |
 
 ## Hoa hồng
 
 | Mã | Quy tắc |
 |---|---|
-| BR-40 | Hoa hồng tính trên giá trị thực thu sau giảm giá (mặc định) |
-| BR-41 | Quy tắc mới chỉ áp cho dịch vụ hoàn thành từ ngày hiệu lực |
-| BR-42 | Kỳ đã chốt không thay đổi; điều chỉnh phát sinh ghi vào kỳ mở kế tiếp |
-| BR-43 | Nhiều nhân viên cùng làm thì chia theo tỉ lệ cấu hình của dịch vụ |
+| BR-40 | Hoa hồng tính trên số thực thu của từng dòng hóa đơn sau giảm giá (giảm tay chia cho các dòng theo tỉ lệ giá trị). Dòng dùng buổi gói tính trên doanh thu của buổi đó (BR-26). Dòng bán lẻ tính cho người ghi ở dòng đó lúc thu tiền, mặc định là người làm dịch vụ đầu tiên của hóa đơn, để trống thì không ai có. Bán gói, nạp ví là tiền trả trước, không có hoa hồng |
+| BR-41 | Quy tắc hoa hồng gồm phạm vi (mọi dịch vụ, một dịch vụ, hoặc bán lẻ), cấp nhân viên (một cấp hoặc mọi cấp), tỉ lệ % và ngày hiệu lực (không trước hôm nay). Mỗi dòng dùng quy tắc cụ thể nhất đang hiệu lực vào ngày thu tiền hóa đơn: dịch vụ và cấp > dịch vụ > mọi dịch vụ và cấp > mọi dịch vụ. Quy tắc mới chỉ áp cho hóa đơn thu từ ngày hiệu lực, không tính lại dòng cũ. Thêm, sửa quy tắc ghi nhật ký (BR-63) |
+| BR-42 | Kỳ hoa hồng theo tháng dương lịch, giờ của chi nhánh. Khoản hoa hồng ghi vào kỳ của ngày thu tiền; khoản thu hồi do hoàn tiền ghi vào kỳ của ngày duyệt hoàn, theo đúng tỉ lệ đã tính cho dòng gốc. Chủ cơ sở chốt kỳ bằng tay sau khi tháng kết thúc; hết tháng 7 ngày chưa chốt thì Tổng quan nhắc. Kỳ đã chốt không thay đổi, chốt kỳ ghi nhật ký |
+| BR-43 | (đã bỏ 14/11/2026: mỗi mục lịch chỉ có một người làm, như BT1; dịch vụ cần hai nhân viên nằm trong câu hỏi còn mở của ERD) |
+| BR-44 | Nhân viên chỉ xem được hoa hồng của chính mình: tạm tính của kỳ đang mở, từng dòng và khoản thu hồi. Tên khách không kèm số điện thoại (BR-36). Quy tắc, các kỳ và hoa hồng của người khác chỉ chủ cơ sở xem (cột hoa hồng tạm tính của báo cáo cho cả quản lý) |
+
+## Báo cáo
+
+Số liệu tính theo ngày giờ của chi nhánh, lọc theo chi nhánh và khoảng ngày; ô số so với khoảng liền trước cùng độ dài.
+
+| Mã | Quy tắc |
+|---|---|
+| BR-45 | **Doanh thu thực hiện** = dòng dịch vụ và bán lẻ của hóa đơn đã thu (sau giảm giá, theo ngày thu) + doanh thu buổi gói đã dùng (BR-26), trừ hoàn tiền của các dòng đó vào ngày duyệt hoàn. Cọc bị giữ khi khách không đến hay hủy muộn không tính vào đây, hiện riêng ở ô Không đến |
+| BR-46 | **Tiền thu vào** = mọi khoản tiền về qua tiền mặt, chuyển khoản, thẻ, cổng (gồm cọc, bán gói, nạp ví), trừ tiền đã hoàn ra. Trả bằng ví hay buổi gói không phải tiền vào. **Tiền trả trước còn giữ** (cuối khoảng) = doanh thu các buổi gói chưa dùng + tiền thật trong ví; tiền tặng không tính |
+| BR-47 | **Lấp đầy** = phút nhân viên bận cho khách (đoạn Chuẩn bị và Làm của lịch không bị hủy, BR-05) ÷ phút trong ca sau nghỉ phép đã duyệt; đoạn Chờ không tính. **Không đến** = số lịch "không đến" ÷ số lịch đã tới giờ, không tính lịch đã hủy; kèm giá trị lịch mất và tiền cọc giữ lại |
 
 ## Dữ liệu, bảo mật, cấu hình ngành
 
@@ -140,7 +151,9 @@ Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-h
 | Dịch vụ kéo dài quá giờ, lấn sang lịch sau | Cảnh báo lễ tân, gợi ý chuyển lịch sau cho nhân viên khác | BR-01 |
 | Đổi giá dịch vụ khi đã có lịch đặt trước | Lịch cũ giữ giá cũ | BR-12 |
 | Đổi quy tắc hoa hồng giữa tháng | Quy tắc mới chỉ áp từ ngày hiệu lực | BR-41 |
-| Hoàn tiền sau khi kỳ hoa hồng đã chốt | Bút toán âm vào kỳ mở kế tiếp | BR-42, BR-28 |
+| Hoàn tiền sau khi kỳ hoa hồng đã chốt | Bút toán âm vào kỳ của ngày duyệt hoàn, kỳ cũ giữ nguyên | BR-42, BR-28 |
+| Nhuộm có quy tắc "Thợ chính 12% từ 01/12", Mai (thợ chính) nhuộm 30/11 và 01/12 | Hóa đơn 30/11 tính 10%, hóa đơn 01/12 tính 12% | BR-41 |
+| Khách mua gói 5 buổi 350.000 ₫ rồi dùng 1 buổi trong tuần | Tiền thu vào 350.000 ₫; doanh thu thực hiện 70.000 ₫; trả trước còn giữ 280.000 ₫ | BR-45, BR-46 |
 | Nhân viên nghỉ đột xuất, đã có lịch trong ngày | Liệt kê lịch bị ảnh hưởng; khách chọn đích danh được hỏi ý | BR-11 |
 | Gói liệu trình hết hạn khi khách còn lịch đặt trước | Cảnh báo khi đặt; đến ngày, lễ tân chọn gia hạn hoặc tính giá lẻ | BR-26 |
 | Cùng số điện thoại đặt ở hai cơ sở khác nhau | Hai hồ sơ độc lập, không cơ sở nào thấy của nhau | BR-60 |
@@ -173,4 +186,3 @@ Quyết định ở [D-15](../du-an/quyet-dinh.md#d-15-dùng-thử-7-ngày-và-h
 Ghi các điểm chưa rõ ở đây; chốt xong thì chuyển thành BR.
 
 - Gộp đối tượng trùng sau OTP; email và số điện thoại trỏ tới hai khách khác nhau; bỏ kỹ năng khi còn lịch sắp tới; dịch vụ cần hai nhân viên. Đề xuất ở [ERD](../thiet-ke/erd.md#13-câu-hỏi-còn-mở).
-- Hoa hồng của dịch vụ trả bằng buổi trong gói tính trên giá một buổi của gói hay giá lẻ hiện hành? (Phân tích gốc: giá một buổi của gói.)

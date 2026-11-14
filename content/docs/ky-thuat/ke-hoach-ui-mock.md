@@ -975,6 +975,79 @@ Chữ và số trên bảng là minh họa; mock đọc và ghi vào store. Ki�
 - **Thương hiệu:** chọn màu vàng nhạt thì báo không đạt tương phản, không lưu được; chọn Xanh biển rồi lưu thì trang khách đổi màu.
 - **Gói và ví:** ngừng bán "Gói 5 lần gội sấy" thì MH-30 không còn gói này; thêm mức nạp 3.000.000 ₫ tặng 15% thì MH-30 tính đúng.
 
+## Bước 15. Đợt E: tổng quan, báo cáo, hoa hồng (MH-37, MH-41, MH-55, MH-56)
+
+Sau khi PR #9 merge. Căn cứ:
+- Các bảng `TongQuan`, `BaoCao`, `HoaHong`, `HoaHongKy`, `KtvHoaHong` (bảng ở `design/README.md`).
+- Quy tắc BR-26, BR-28, BR-36, BR-40 đến BR-47, BR-63, BR-87.
+
+Chữ và số trên bảng là minh họa; mock tính từ store bằng hàm thuần. Kiểm trên máy theo `CLAUDE.md`. Làm trên nhánh `feat/mock-reports`, mỗi mục 15a–15g một commit, mở PR mới, không merge.
+
+### 15a. Hoa hồng trong store (BR-40 đến BR-42)
+
+- Bỏ `commissionPercent`; thêm quy tắc: phạm vi (`all`, một dịch vụ, `retail`), cấp (một cấp hoặc mọi cấp), tỉ lệ, ngày hiệu lực. Dữ liệu mẫu như bảng `HoaHong`: mọi dịch vụ 10% từ 01/10/2026; Nhuộm tóc, Thợ chính 12% từ 01/12/2026; bán lẻ 5% từ 01/10/2026. Pawpaw có bộ quy tắc riêng tương tự.
+- `mock/commission.ts` (hàm thuần):
+  - `ruleFor(line, staffLevel, date)`: quy tắc cụ thể nhất đang hiệu lực (dịch vụ và cấp > dịch vụ > mọi dịch vụ và cấp > mọi dịch vụ).
+  - Khoản hoa hồng lưu kèm quy tắc, tỉ lệ, số tính trên, dòng hóa đơn, để khoản thu hồi dùng đúng tỉ lệ đó.
+  - `periodFor(date)`: kỳ theo tháng, giờ chi nhánh. Khoản hoa hồng vào kỳ của ngày thu tiền; khoản thu hồi vào kỳ của ngày duyệt hoàn (sửa `commissionClawback`, hiện đang lấy kỳ mở đầu tiên).
+  - Chốt kỳ: chỉ khi tháng đã hết; kỳ đã chốt không nhận thêm khoản nào.
+- **Dòng bán lẻ** ở Thu tiền có ô "Người bán", mặc định người làm dịch vụ đầu tiên của hóa đơn, chọn "Không ai" được (BR-40).
+- Dữ liệu mẫu: kỳ 09/2026 đã chốt, 10/2026 hết kỳ chưa chốt, 11/2026 đang mở. Có một hoàn tiền duyệt 05/11 cho hóa đơn tháng 10 để thấy khoản thu hồi.
+- `scripts/check-reports.ts` và lệnh `pnpm check:reports`: quy tắc cụ thể hơn thắng, quy tắc 01/12 không áp cho hóa đơn 30/11, buổi gói tính trên doanh thu buổi, bán lẻ để trống người bán thì không ai có, thu hồi vào kỳ của ngày duyệt với tỉ lệ gốc, kỳ đã chốt không đổi.
+
+### 15b. Số liệu báo cáo (BR-45 đến BR-47)
+
+- `mock/reports.ts` (hàm thuần), mọi hàm nhận chi nhánh và khoảng ngày:
+  - doanh thu thực hiện, tiền thu vào, tiền trả trước còn giữ;
+  - lấp đầy (đoạn Chuẩn bị và Làm trên phút trong ca sau nghỉ phép; đoạn Chờ không tính);
+  - không đến (kèm giá trị lịch mất, tiền cọc giữ);
+  - theo ngày, theo nhân viên, theo dịch vụ; khoảng liền trước cùng độ dài để so sánh.
+- Thêm vào `check:reports`: ví dụ gói 5 buổi 350.000 ₫ dùng 1 buổi (tiền thu vào 350.000 ₫, doanh thu thực hiện 70.000 ₫, trả trước còn 280.000 ₫); trả bằng ví không là tiền thu vào; tổng theo nhân viên và theo dịch vụ bằng tổng doanh thu thực hiện.
+
+### 15c. Tổng quan (MH-41)
+
+- `/app/[tenant]` đúng `TongQuan`, cho chủ cơ sở và quản lý (thay trang "Chưa làm" hiện tại).
+- Bốn ô số tính bằng 15b. "Việc cần xử lý" lấy từ store, mỗi dòng có nút "Mở" tới đúng màn:
+  - đơn nghỉ chờ duyệt → `/time-off/[id]`;
+  - hoàn tiền chờ duyệt → `/refunds`;
+  - lịch "Cần xếp lại" → nơi xử lý hiện có;
+  - kỳ hoa hồng hết 7 ngày chưa chốt → `/commission` (chỉ chủ cơ sở thấy).
+- Bảng "Đang diễn ra" và biểu đồ "Lấp đầy 7 ngày tới" (SVG như bảng vẽ, không thêm thư viện biểu đồ; ngày đóng cửa ghi rõ).
+
+### 15d. Báo cáo (MH-55)
+
+- `/reports` đúng `BaoCao`: chọn Hôm nay, 7 ngày, Tháng này, Tùy chọn; chọn chi nhánh; năm ô số so với khoảng trước; biểu đồ theo ngày hai đường; bảng theo nhân viên và theo dịch vụ.
+- "Xuất CSV" tạo tệp trong trình duyệt (Blob), ghi một dòng nhật ký.
+- Gói Cơ bản vẫn khóa như hiện có (BR-87).
+
+### 15e. Hoa hồng (MH-56)
+
+- `/commission` đúng `HoaHong`, chỉ chủ cơ sở:
+  - Bảng quy tắc; quy tắc chưa tới ngày hiệu lực có nhãn "Chưa áp". "Thêm quy tắc" và "Sửa" mở `SidePanel`; ngày hiệu lực không trước hôm nay. Sửa quy tắc đã áp thì tạo quy tắc mới từ ngày chọn, quy tắc cũ giữ nguyên cho hóa đơn trước đó (BR-41). Mỗi lần lưu ghi nhật ký.
+  - Bảng các kỳ. Kỳ hết tháng chưa chốt có nút "Chốt kỳ": khung bên phải liệt kê tổng từng người, xác nhận rồi khóa, ghi nhật ký (BR-42, BR-63).
+- `/commission/periods/[id]?staff=` đúng `HoaHongKy`: chọn người, bốn ô (tạm tính, từ dịch vụ, từ bán lẻ, thu hồi), bảng từng dòng gắn hóa đơn, xuất CSV.
+
+### 15f. Hoa hồng của kỹ thuật viên (MH-37)
+
+- `/my/commission` đúng `KtvHoaHong`, giao diện điện thoại như "Lịch của tôi"; thanh dưới thêm "Hoa hồng".
+- Chỉ số của chính người đang đăng nhập, kỳ đang mở, các dòng gần đây và khoản thu hồi; tên khách không kèm số điện thoại (BR-36, BR-44). Đổi người qua bộ chọn vai trò thì số đổi theo.
+
+### 15g. Việc còn lại từ Bước 14 và hoàn tất
+
+- Ngày đặc biệt có nhiều khung giờ như ngày thường (`SpecialDay.hours` thành danh sách khung; form ở `/settings/branches/[id]` thêm, bớt khung; `openingWindows` đọc đủ). Thêm ca vào `check:shop`.
+- `/settings/branding`: ô "Tên miền" ghi `toc-may` với phần đuôi `.sapio.vn`, câu kiểm "toc-may.sapio.vn đang là của bạn" (bảng `ThuongHieu` đã sửa theo T-16).
+- `mock/screens.ts`: MH-37, MH-41, MH-55, MH-56 thành "Đang làm".
+- `pnpm check:availability`, `pnpm check:money`, `pnpm check:shop`, `pnpm check:reports`, `pnpm build`, `pnpm typecheck`, `prettier --check` xanh.
+- Mở PR mới, mô tả theo 15a–15g, có mục "Tự quyết". Ghi một mục Tiến độ.
+
+**Xong khi** (người dùng tự kiểm):
+- **Tổng quan:** có dòng "Kỳ hoa hồng 10/2026 chưa chốt"; chốt kỳ xong dòng đó mất. Duyệt đơn nghỉ của Lan thì dòng của Lan mất.
+- **Báo cáo:** đổi 7 ngày sang Tháng này thì năm ô và hai bảng đổi theo; tổng cột doanh thu thực hiện của bảng nhân viên bằng ô Doanh thu thực hiện.
+- **Quy tắc:** thêm "Gội sấy, mọi cấp, 15%, từ hôm nay", thu tiền một lịch gội sấy thì kỳ đang mở có dòng 15%; lịch cắt tóc vẫn 10%.
+- **Thu hồi:** duyệt hoàn một phần hóa đơn tháng 10 thì khoản âm vào kỳ 11/2026, kỳ 10/2026 không đổi.
+- **Kỹ thuật viên:** vào vai Mai thì thấy đúng 794.000 ₫ như chủ cơ sở thấy ở kỳ 11/2026 của Mai (số có thể khác bảng vẽ nếu dữ liệu mẫu khác, nhưng hai màn phải bằng nhau).
+- **Ngày đặc biệt:** thêm 20/11 mở 09:00–12:00 và 15:00–20:00 thì trang khách ngày đó không có giờ 12:00–15:00.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -1085,5 +1158,17 @@ BR-23, BR-25, BR-27, BR-35 đến BR-38, BR-63, BR-65 đến BR-67 trong quy-tac
 (các bảng của đợt D). Làm Bước 14 trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 14a
 đến 14h, mỗi mục một commit. Bố cục theo bảng; chữ và số lấy từ store, logic là hàm thuần ở mock/.
 Chỉ chạy các lệnh kiểm trong CLAUDE.md. Mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu
+thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 15:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-reports.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, BR-26, BR-28, BR-36,
+BR-40 đến BR-47, BR-63, BR-87 trong quy-tac.md, và design/README.md (các bảng của đợt E). Làm Bước 15
+trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 15a đến 15g, mỗi mục một commit. Bố cục
+theo bảng; chữ và số tính từ store bằng hàm thuần ở mock/, tiền là bigint. Chỉ chạy các lệnh kiểm trong
+CLAUDE.md và các lệnh check của mục 15g. Mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu
 thuẫn với quy tắc nghiệp vụ.
 ```

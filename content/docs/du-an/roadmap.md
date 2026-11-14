@@ -217,8 +217,8 @@ Mỗi bài toán là một mục trong chương 4 của báo cáo, theo khung: *
 ### BT5. Hoa hồng có ngày hiệu lực, chốt kỳ và thu hồi
 
 - **Vấn đề:** đổi quy tắc giữa tháng; kỳ đã chốt không được sửa; hoàn tiền sau khi chốt.
-- **Hướng giải:** quy tắc có `effective_from`; hoa hồng ghi thành bút toán gắn hóa đơn; kỳ `open → closed`; hoàn tiền sau chốt sinh bút toán âm vào kỳ mở kế tiếp.
-- **Chứng minh:** bộ test kịch bản: đổi quy tắc ngày 15, hoàn tiền sau chốt, hai thợ chia 70/30, dịch vụ trả bằng gói.
+- **Hướng giải:** quy tắc có `effective_from`; hoa hồng ghi thành bút toán gắn hóa đơn; kỳ `open → closed`; hoàn tiền sinh bút toán âm vào kỳ của ngày duyệt hoàn, kỳ cũ giữ nguyên (BR-42).
+- **Chứng minh:** bộ test kịch bản: đổi quy tắc ngày 15, hoàn tiền sau chốt, quy tắc cụ thể hơn thắng, dịch vụ trả bằng gói.
 
 ### BT6. Cô lập dữ liệu giữa các khách thuê
 
@@ -503,7 +503,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 | Thợ đang ủ thuốc thì nhận khách khác được không? | Mô hình đoạn chiếm dụng, BR-05 |
 | Webhook về hai lần? | idempotency_key + transaction; E3 |
 | Gói 10 buổi dùng 4 buổi rồi hoàn, giá lẻ đã tăng? | BR-27: dùng giá lẻ tại thời điểm mua gói |
-| Kỳ hoa hồng đã chốt mà khách được hoàn tiền? | BR-42: bút toán âm vào kỳ mở kế tiếp |
+| Kỳ hoa hồng đã chốt mà khách được hoàn tiền? | BR-42: bút toán âm vào kỳ của ngày duyệt hoàn |
 | Tiệm A có xem được dữ liệu tiệm B không? | Hai lớp, có RLS; E5 |
 | AI đặt sai lịch thì sao? | AI chỉ gọi tool, không xác nhận; mọi lịch qua OTP và exclusion constraint; E7 |
 | Em đã thử với người dùng thật chưa? | Trình bày dùng thử đối thủ, khảo sát gián tiếp, SUS; nêu rõ hạn chế |

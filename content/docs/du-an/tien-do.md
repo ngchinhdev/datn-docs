@@ -7,6 +7,33 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 14/11/2026 (sáng): chốt đợt E, tổng quan, báo cáo, hoa hồng
+
+- **Đã làm:**
+  - Review và cho merge PR #9 (Bước 14) sau bản sửa màn Xếp ca đọc đủ các khung mở cửa.
+  - Vẽ và chốt đợt E (5 bảng):
+    - MH-41 tổng quan;
+    - MH-55 báo cáo;
+    - MH-56 hoa hồng, chi tiết kỳ của một người;
+    - MH-37 hoa hồng tạm tính của kỹ thuật viên.
+  - Quy tắc:
+    - BR-40 thêm cách tính dòng bán lẻ, buổi gói; bán gói và nạp ví không có hoa hồng.
+    - BR-41 quy tắc theo phạm vi × cấp × tỉ lệ × ngày hiệu lực, cụ thể hơn thắng.
+    - BR-42 kỳ theo tháng, chốt tay, khoản thu hồi vào kỳ của ngày duyệt hoàn (trước đây ghi "kỳ mở kế tiếp", không rõ khi có hai kỳ chưa chốt). Sửa theo ở BR-28, BT5.
+    - Bỏ BR-43 (chia hoa hồng nhiều thợ): mỗi mục lịch chỉ có một người làm.
+    - BR-44 kỹ thuật viên chỉ thấy hoa hồng của mình.
+    - Mục mới "Báo cáo": BR-45 doanh thu thực hiện, BR-46 tiền thu vào và tiền trả trước, BR-47 lấp đầy và không đến.
+    - Bỏ câu hỏi mở về hoa hồng buổi gói (đã trả lời ở BR-26).
+  - Sửa bảng `ThuongHieu`, `ChatbotCaiDat` theo T-16: địa chỉ `toc-may.sapio.vn`. Sửa bảng `HoaHong`, `HoaHongKy` cho khớp BR-42 và khớp số thu hồi.
+  - Kế hoạch Bước 15 (nhánh `feat/mock-reports`), gồm hai việc còn lại của Bước 14: ngày đặc biệt nhiều khung, ô tên miền ở Thương hiệu.
+- **Ghi chú cho ERD:**
+  - `commission_rules`: phạm vi (`all`, `service`, `retail`), `service_id?`, `staff_level?`, `percent`, `effective_from`; không sửa quy tắc đã áp, tạo quy tắc mới.
+  - `commission_entries` lưu `rule_id`, `percent`, `base_vnd`, `invoice_line_id`, `period_id`, `kind` (`earn`, `clawback`); chỉ thêm.
+  - `commission_periods` theo tháng, `closed_at`, `closed_by`. Bỏ `services.commission_split` (BR-43 đã bỏ).
+  - `invoice_lines.staff_resource_id` dùng cho cả dòng bán lẻ (người bán).
+  - Báo cáo tính từ hóa đơn, khoản thanh toán, buổi gói đã dùng, sổ ví, lịch hẹn và ca; chưa cần bảng tổng hợp riêng, xem lại khi đo hiệu năng.
+- **Tiếp theo:** Claude Code làm Bước 15; phiên claude.ai vẽ đợt F (tài khoản và khung: MH-01, MH-03 đến MH-06, MH-10).
+
 ### 13/11/2026 (tối): mock cấu hình cơ sở (Bước 14, đợt D)
 
 - **Đã làm** (nhánh `feat/mock-settings`, mỗi mục 14a–14h một commit, `pnpm build` chạy trước mỗi commit):

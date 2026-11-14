@@ -107,7 +107,7 @@ Route trong bảng là đường dẫn trên tên miền con của cơ sở (ví
 |---|---|---|---|---|---|---|
 | MH-35 | Lịch của tôi | `/app/[tenant]/my/schedule` | KTV | 1 | Vẽ | **Đã chọn.** Chỉ lịch của mình, theo ngày và tuần; cập nhật trạng thái dịch vụ; ghi chú về khách (không thấy số điện thoại nếu cơ sở tắt) |
 | MH-36 | Xin nghỉ | `/app/[tenant]/my/time-off` | KTV | 1 | Form | **Đã chọn.** Chọn ngày, cả ngày hay vài giờ, lý do; thấy trước số lịch bị ảnh hưởng |
-| MH-37 | Hoa hồng tạm tính | `/app/[tenant]/my/commission` | KTV | 3 | Nhẹ | Kỳ đang mở, từng dịch vụ, khoản bị thu hồi |
+| MH-37 | Hoa hồng tạm tính | `/app/[tenant]/my/commission` | KTV | 3 | Nhẹ | **Đã chọn.** BR-44. Tạm tính kỳ đang mở của chính mình, các dòng gần đây, khoản thu hồi; tên khách không kèm số điện thoại |
 
 ## F. Quản lý chi nhánh
 
@@ -123,7 +123,7 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-41 | Tổng quan | `/app/[tenant]` | CCS, QL | 3 | Vẽ | Hôm nay: số lịch, đang làm, doanh thu; tuần: lấp đầy, không đến; việc cần xử lý (nghỉ phép, hoàn tiền chờ duyệt) |
+| MH-41 | Tổng quan | `/app/[tenant]` | CCS, QL | 3 | Vẽ | **Đã chọn.** Bốn ô: lịch hôm nay, đã thu hôm nay, lấp đầy hôm nay, không đến 7 ngày (BR-45 đến BR-47). "Việc cần xử lý": đơn nghỉ chờ duyệt, hoàn tiền chờ duyệt, "Cần xếp lại", kỳ hoa hồng hết 7 ngày chưa chốt (BR-42). Lịch đang diễn ra; lấp đầy 7 ngày tới |
 | MH-42 | Chi nhánh | `/app/[tenant]/settings/branches` | CCS | 1 | DS | **Đã chọn.** Mẫu danh sách. |
 | MH-43 | Chi tiết chi nhánh | `/app/[tenant]/settings/branches/[id]` | CCS | 1 | Vẽ | **Đã chọn.** Giờ mở cửa nhiều khung mỗi ngày, ngày đặc biệt (BR-02), giá riêng của chi nhánh |
 | MH-44 | Dịch vụ | `/app/[tenant]/settings/services` | CCS | 1 | DS | Nhóm dịch vụ, kéo đổi thứ tự, bật/tắt đặt online |
@@ -137,8 +137,8 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | MH-52 | Thanh toán | `/app/[tenant]/settings/payments` | CCS | 2 | Nhẹ | **Đã chọn.** Provider giả lập (D-09), phương thức nhận tại quầy |
 | MH-53 | Thông báo | `/app/[tenant]/settings/notifications` | CCS | 3 | Form | **Đã chọn.** Bật/tắt nhắc 24h, 2h; xem trước email |
 | MH-54 | Chatbot | `/app/[tenant]/settings/chatbot` | CCS | 3 | Form | **Đã chọn.** Bật/tắt, lời chào, giới hạn lượt |
-| MH-55 | Báo cáo | `/app/[tenant]/reports` | CCS, QL | 3 | Vẽ | Doanh thu, tiền trả trước và doanh thu thực hiện, lấp đầy, không đến; lọc chi nhánh và khoảng ngày |
-| MH-56 | Hoa hồng | `/app/[tenant]/commission`, `/commission/periods/[id]` | CCS | 3 | Vẽ | Quy tắc có ngày hiệu lực (BR-41), chia nhiều thợ (BR-43), chốt kỳ, khoản thu hồi vào kỳ sau (BR-42) |
+| MH-55 | Báo cáo | `/app/[tenant]/reports` | CCS, QL | 3 | Vẽ | **Đã chọn.** BR-45 đến BR-47. Năm ô số so với khoảng trước; biểu đồ theo ngày (doanh thu thực hiện và tiền thu vào); bảng theo nhân viên, theo dịch vụ; lọc chi nhánh và khoảng ngày; xuất CSV. Gói Cơ bản khóa (BR-87) |
+| MH-56 | Hoa hồng | `/app/[tenant]/commission`, `/commission/periods/[id]` | CCS | 3 | Vẽ | **Đã chọn.** Quy tắc theo phạm vi, cấp, tỉ lệ, ngày hiệu lực; cụ thể hơn thắng (BR-41). Kỳ theo tháng, chốt tay, khoản thu hồi vào kỳ của ngày duyệt hoàn (BR-42). Chi tiết kỳ của một người: từng dòng gắn dòng hóa đơn. Gói Cơ bản khóa (BR-87) |
 | MH-57 | Nhật ký thao tác | `/app/[tenant]/audit-log` | CCS | 3 | DS | **Đã chọn.** BR-63; cột: giờ, người, thao tác, đối tượng |
 | MH-61 | Gói Sapio | `/app/[tenant]/settings/plan` | CCS | 2 | Vẽ | Trạng thái gói, hai thẻ gói, chọn kỳ 1/3/12 tháng, thanh toán QR, lịch sử thanh toán (BR-83, BR-84). Hết hạn: mọi route khu nội bộ chuyển về đây, kèm bảng lịch đã đặt sau hạn chỉ để đọc (BR-82). Trang của tính năng bị khóa có bảng tiền nâng gói (BR-85, BR-87) |
 
