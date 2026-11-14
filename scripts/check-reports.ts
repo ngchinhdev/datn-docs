@@ -21,7 +21,25 @@ import { tenantFixtures } from '../mock/fixtures/index.ts';
 import type { CommissionRule, Invoice, InvoiceLine } from '../mock/fixtures/types.ts';
 import { collect, type Ctx, type World } from '../mock/money-ops.ts';
 import { approveRefund } from '../mock/money-refunds.ts';
-import { MOCK_TODAY } from '../mock/time.ts';
+import {
+  busyMinutes,
+  byDay,
+  byService,
+  byStaff,
+  cashIn,
+  changePercent,
+  noShows,
+  occupancy,
+  previousRange,
+  prepaidHeld,
+  revenueItems,
+  revenueRealised,
+  sameDaysLastMonth,
+  shiftMinutes,
+  type ReportInput,
+} from '../mock/reports.ts';
+import { MOCK_NOW, MOCK_TODAY } from '../mock/time.ts';
+import type { Appointment, MoneyState, Payment, StaffTimeOff } from '../mock/fixtures/types.ts';
 
 let failures = 0;
 const report = (ok: boolean, name: string, detail = '') => {
@@ -357,6 +375,301 @@ for (const f of tenantFixtures) {
   report(
     sum === periodSummary(m.commission, '2026-11').totalVnd,
     `${name}: tổng kỳ bằng tổng từng người`,
+  );
+}
+
+// ---- BR-45, BR-46: revenue, money in, prepaid ----
+
+const at = (date: string, hhmm: string) => new Date(`${date}T${hhmm}:00+07:00`).toISOString();
+const emptyMoney: MoneyState = {
+  commissionRules: rules,
+  invoices: [],
+  payments: [],
+  walletEntries: [],
+  refunds: [],
+  commission: [],
+  periods: [],
+  audit: [],
+};
+const inputOf = (money: MoneyState, extra: Partial<ReportInput> = {}): ReportInput => ({
+  fixture: salon,
+  services: salon.services,
+  money,
+  appointments: [],
+  shifts: [],
+  timeOff: [],
+  now: MOCK_NOW,
+  ...extra,
+});
+const pay = (
+  over: Partial<Payment> & Pick<Payment, 'id' | 'invoiceId' | 'amountVnd' | 'at'>,
+): Payment => ({
+  purpose: 'invoice',
+  method: 'transfer',
+  code: 'x',
+  status: 'paid',
+  idempotencyKey: over.id,
+  ...over,
+});
+const week = { from: '2026-11-02', to: '2026-11-08' };
+
+{
+  const sale: Invoice = {
+    id: 'i1',
+    number: 'HĐ-1',
+    customerId: 'c',
+    createdAt: at('2026-11-03', '10:00'),
+    paidAt: at('2026-11-03', '10:00'),
+    depositVnd: 0n,
+    lines: [line({ id: 'i1-l0', kind: 'package_sale', unitPriceVnd: 350_000n, productId: 'p' })],
+  };
+  const session: Invoice = {
+    id: 'i2',
+    number: 'HĐ-2',
+    customerId: 'c',
+    createdAt: at('2026-11-04', '10:00'),
+    paidAt: at('2026-11-04', '10:00'),
+    depositVnd: 0n,
+    lines: [
+      line({
+        id: 'i2-l0',
+        unitPriceVnd: 80_000n,
+        staffResourceId: 'may-mai',
+        serviceVariantId: 'may-wash-std',
+        packageId: 'pk',
+        sessionRevenueVnd: 70_000n,
+        sessionNo: 1,
+      }),
+    ],
+  };
+  const money: MoneyState = {
+    ...emptyMoney,
+    invoices: [sale, session],
+    payments: [pay({ id: 'p1', invoiceId: 'i1', amountVnd: 350_000n, at: sale.paidAt! })],
+  };
+  const input = inputOf(money);
+  const cash = cashIn(input, week);
+  const held = prepaidHeld(input, '2026-11-08');
+  report(
+    cash.totalVnd === 350_000n &&
+      revenueRealised(input, week) === 70_000n &&
+      held.packagesVnd === 280_000n,
+    'BR-45, BR-46: gói 5 buổi 350.000 ₫ dùng 1 buổi: tiền thu vào 350.000 ₫, doanh thu thực hiện 70.000 ₫, trả trước còn 280.000 ₫',
+    show({ cash, held }),
+  );
+  report(
+    cash.prepaidVnd === 350_000n,
+    'BR-46: tiền bán gói được kể là tiền trả trước trong tiền thu vào',
+  );
+
+  const walletPaid: Invoice = {
+    id: 'i3',
+    number: 'HĐ-3',
+    customerId: 'c',
+    createdAt: at('2026-11-05', '10:00'),
+    paidAt: at('2026-11-05', '10:00'),
+    depositVnd: 0n,
+    lines: [
+      line({
+        id: 'i3-l0',
+        unitPriceVnd: 100_000n,
+        staffResourceId: 'may-lan',
+        serviceVariantId: 'may-cut-short',
+      }),
+    ],
+  };
+  const withWallet = inputOf({
+    ...money,
+    invoices: [...money.invoices, walletPaid],
+    payments: [
+      ...money.payments,
+      pay({
+        id: 'p3',
+        invoiceId: 'i3',
+        amountVnd: 100_000n,
+        at: walletPaid.paidAt!,
+        method: 'wallet',
+      }),
+    ],
+  });
+  report(
+    cashIn(withWallet, week).totalVnd === 350_000n &&
+      revenueRealised(withWallet, week) === 170_000n,
+    'BR-46: trả bằng ví không là tiền thu vào, nhưng dịch vụ vẫn là doanh thu thực hiện',
+  );
+
+  const topup = inputOf({
+    ...emptyMoney,
+    walletEntries: [
+      {
+        id: 'w1',
+        customerId: 'c',
+        at: at('2026-11-03', '09:00'),
+        realVnd: 1_000_000n,
+        bonusVnd: 100_000n,
+        kind: 'topup',
+        memo: '',
+        idempotencyKey: 'w1',
+      },
+    ],
+  });
+  report(
+    prepaidHeld(topup, '2026-11-08').walletVnd === 1_000_000n &&
+      prepaidHeld(topup, '2026-11-02').walletVnd === 0n,
+    'BR-46: trả trước còn giữ chỉ tính tiền thật trong ví, tính tới cuối khoảng, không tính tiền tặng',
+  );
+}
+
+{
+  // The sample month: the October refund takes 150.000 ₫ off 05/11, not off October.
+  const input = inputOf(salon.money, {
+    appointments: salon.appointments,
+    shifts: salon.shifts,
+    timeOff: salon.staffTimeOff,
+  });
+  const refund = salon.money.refunds.find((r) => r.decidedAt?.startsWith('2026-11-05'))!;
+  const day = { from: '2026-11-05', to: '2026-11-05' };
+  const items = revenueItems(input, day).filter((i) => i.amountVnd < 0n);
+  report(
+    items.length === 1 && items[0]!.amountVnd === -refund.amountVnd,
+    'BR-45: hoàn tiền trừ vào doanh thu của ngày duyệt hoàn (05/11)',
+    show(items),
+  );
+  const oct = { from: '2026-10-01', to: '2026-10-31' };
+  report(
+    revenueItems(input, oct).every((i) => i.amountVnd >= 0n),
+    'BR-45: doanh thu tháng 10 không bị trừ khoản hoàn duyệt tháng 11',
+  );
+  for (const [name, range] of [
+    ['tháng 10', oct],
+    ['01–07/11', { from: '2026-11-01', to: '2026-11-07' }],
+  ] as const) {
+    const total = revenueRealised(input, range);
+    const staffSum = byStaff(input, range).reduce((m, r) => m + r.revenueVnd, 0n);
+    const serviceSum = byService(input, range).reduce((m, r) => m + r.revenueVnd, 0n);
+    const daySum = byDay(input, range).reduce((m, r) => m + r.revenueVnd, 0n);
+    report(
+      total > 0n && staffSum === total && serviceSum === total && daySum === total,
+      `BR-45: ${name}: tổng theo nhân viên, theo dịch vụ, theo ngày đều bằng doanh thu thực hiện`,
+      show({ total, staffSum, serviceSum, daySum }),
+    );
+  }
+  const range = { from: '2026-11-01', to: '2026-11-07' };
+  const prev = sameDaysLastMonth(range);
+  report(
+    prev.from === '2026-10-01' && prev.to === '2026-10-07' && changePercent(110n, 100n) === 10,
+    'So với cùng các ngày của tháng trước: 01–07/11 với 01–07/10',
+  );
+  const pr = previousRange({ from: '2026-11-02', to: '2026-11-08' });
+  report(pr.from === '2026-10-26' && pr.to === '2026-11-01', 'Khoảng liền trước cùng độ dài');
+  report(
+    sameDaysLastMonth({ from: '2026-03-31', to: '2026-03-31' }).to === '2026-02-28',
+    'Ngày 31/03 so với 28/02, không tràn sang tháng sau',
+  );
+  const commissionSum = byStaff(input, range).reduce((m, r) => m + r.commissionVnd, 0n);
+  const posted = salon.money.commission
+    .filter((c) => c.at >= at('2026-11-01', '00:00') && c.at < at('2026-11-08', '00:00'))
+    .reduce((m, c) => m + c.amountVnd, 0n);
+  report(commissionSum === posted, 'Hoa hồng tạm tính theo nhân viên bằng tổng các khoản đã ghi');
+}
+
+// ---- BR-47: occupancy and no-shows ----
+
+{
+  const base = salon.appointments.find((a) => a.status === 'completed')!;
+  const date = '2026-11-04';
+  const seg = (kind: 'prep' | 'work' | 'wait', resourceId: string, from: string, to: string) => ({
+    resourceId,
+    startAt: at(date, from),
+    endAt: at(date, to),
+    kind,
+    itemIndex: 0,
+  });
+  const appt: Appointment = {
+    ...base,
+    id: 'occ-1',
+    startAt: at(date, '10:00'),
+    status: 'completed',
+    bookings: [
+      seg('prep', 'may-hung', '09:45', '10:00'),
+      seg('work', 'may-hung', '10:00', '10:40'),
+      seg('wait', 'may-chair-1', '10:40', '11:25'),
+      seg('work', 'may-hung', '11:25', '11:45'),
+    ],
+  };
+  const input = inputOf(emptyMoney, { appointments: [appt] });
+  report(
+    busyMinutes(input, 'may-hung', date) === 75,
+    'BR-47: 15 phút chuẩn bị + 40 + 20 phút làm = 75 phút bận; 45 phút chờ không tính',
+    String(busyMinutes(input, 'may-hung', date)),
+  );
+  const cancelled = inputOf(emptyMoney, { appointments: [{ ...appt, status: 'cancelled' }] });
+  report(busyMinutes(cancelled, 'may-hung', date) === 0, 'BR-47: lịch đã hủy không tính');
+
+  const full = shiftMinutes(input, 'may-hung', date);
+  const leave: StaffTimeOff = {
+    id: 'l1',
+    resourceId: 'may-hung',
+    date,
+    from: '09:00',
+    to: '11:00',
+    reason: 'x',
+    status: 'approved',
+    sentAt: at('2026-11-01', '08:00'),
+  };
+  const off = inputOf(emptyMoney, { timeOff: [leave] });
+  const pending = inputOf(emptyMoney, { timeOff: [{ ...leave, status: 'pending' }] });
+  report(
+    full > 120 &&
+      shiftMinutes(off, 'may-hung', date) === full - 120 &&
+      shiftMinutes(pending, 'may-hung', date) === full,
+    'BR-47: phút trong ca trừ nghỉ phép đã duyệt (2 giờ), đơn chưa duyệt chưa trừ',
+  );
+  const occ = occupancy(input, { from: date, to: date }, ['may-hung']);
+  report(
+    occ.percent === Math.round((75 / full) * 100),
+    'BR-47: lấp đầy = phút bận ÷ phút trong ca',
+    show(occ),
+  );
+  const closed = '2026-11-09';
+  report(
+    occupancy(input, { from: closed, to: closed }).percent === null,
+    'BR-47: ngày đóng cửa không có ca nên không có tỉ lệ',
+  );
+
+  const mk = (
+    id: string,
+    status: Appointment['status'],
+    start: string,
+    deposit?: bigint,
+  ): Appointment => ({
+    ...base,
+    id,
+    status,
+    startAt: at('2026-11-03', start),
+    ...(deposit ? { depositVnd: deposit } : {}),
+    items: [{ ...base.items[0]!, priceVnd: 150_000n }],
+  });
+  const ns = noShows(
+    inputOf(emptyMoney, {
+      appointments: [
+        mk('n1', 'completed', '09:00'),
+        mk('n2', 'completed', '10:00'),
+        mk('n3', 'no_show', '11:00', 100_000n),
+        mk('n4', 'cancelled', '12:00'),
+        { ...mk('n5', 'confirmed', '13:00'), startAt: '2026-11-20T03:00:00Z' },
+      ],
+    }),
+    { from: '2026-11-01', to: '2026-11-30' },
+  );
+  report(
+    ns.noShow === 1 &&
+      ns.due === 3 &&
+      ns.rateTenths === 333 &&
+      ns.lostVnd === 150_000n &&
+      ns.depositKeptVnd === 100_000n,
+    'BR-47: không đến = 1 / 3 lịch đã tới giờ (hủy và chưa tới không tính), mất 150.000 ₫, giữ 100.000 ₫ cọc',
+    show(ns),
   );
 }
 
