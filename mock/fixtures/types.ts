@@ -11,11 +11,11 @@ export interface BusinessHours {
   close: LocalTime;
 }
 
-/** Overrides the regular hours for one date (BR-02). `null` hours = closed all day. */
+/** Overrides the regular hours for one date (BR-02): one window or several; none = closed all day. */
 export interface SpecialDay {
   date: string; // YYYY-MM-DD, local date
   note: string;
-  hours: { open: LocalTime; close: LocalTime } | null;
+  hours: { open: LocalTime; close: LocalTime }[];
 }
 
 export interface Tenant {

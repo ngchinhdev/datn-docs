@@ -481,7 +481,7 @@ export const spaThuCungPawpaw: TenantFixture = {
         { weekday: 0, open: '08:00', close: '12:00' },
       ],
       specialDays: [
-        { date: '2026-12-24', note: 'Đóng sớm', hours: { open: '08:00', close: '15:00' } },
+        { date: '2026-12-24', note: 'Đóng sớm', hours: [{ open: '08:00', close: '15:00' }] },
       ],
     },
   ],

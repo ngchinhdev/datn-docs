@@ -7,6 +7,29 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 14/11/2026 (tối): mock tổng quan, báo cáo, hoa hồng (Bước 15, đợt E)
+
+- **Đã làm** (nhánh `feat/mock-reports`, mỗi mục 15a–15g một commit):
+  - 15a: quy tắc hoa hồng trong store (phạm vi, cấp, tỉ lệ, ngày hiệu lực; cụ thể hơn thắng), `mock/commission.ts`. Khoản hoa hồng gắn từng dòng hóa đơn và nhớ quy tắc, tỉ lệ, số tính trên. Kỳ theo tháng giờ chi nhánh, thu hồi vào kỳ của ngày duyệt hoàn với tỉ lệ của dòng gốc, kỳ đã chốt không nhận thêm. Dòng bán lẻ ở Thu tiền có ô "Người bán".
+  - 15b: `mock/reports.ts` (doanh thu thực hiện, tiền thu vào, trả trước còn giữ, lấp đầy, không đến, theo ngày, nhân viên, dịch vụ).
+  - 15c: `/app/[tenant]` là Tổng quan (MH-41) cho chủ cơ sở và quản lý.
+  - 15d: `/reports` (MH-55), xuất CSV ghi nhật ký.
+  - 15e: `/commission` và `/commission/periods/[id]` (MH-56): thêm, sửa quy tắc, chốt kỳ.
+  - 15f: `/my/commission` (MH-37).
+  - 15g: ngày đặc biệt nhiều khung giờ; ô "Tên miền" ở Thương hiệu.
+  - `pnpm check:reports` (script mới).
+- **Tự quyết:**
+  - Dữ liệu mẫu có thêm một hóa đơn đã thu cho mỗi lịch hoàn thành từ 01/10 (`mock/fixtures/sales-history.ts`), để báo cáo và hoa hồng có số. Hóa đơn mới nhất của Tóc Mây là HĐ-0230; Pawpaw đánh lại số từ HĐ-0001. Thêm ba buổi gói của anh Phúc và một hoàn tiền duyệt 05/11 cho hóa đơn tháng 10 của Mai.
+  - Kỳ 09/2026 đã chốt nhưng trống: quy tắc "mọi dịch vụ 10%" có hiệu lực từ 01/10 như bảng `HoaHong`.
+  - "Tháng này" so với cùng các ngày của tháng trước (bảng `BaoCao`); các khoảng khác so với khoảng liền trước cùng độ dài. Ngày 07/11, "7 ngày" và "Tháng này" cùng bao 01–07/11 nên cùng số.
+  - Hoàn tiền một gói trừ vào "trả trước còn giữ" đúng số tiền trả lại; hoàn tiền không gắn dòng nào chia theo giá trị các dòng.
+  - Quy tắc sửa mà chưa tới ngày hiệu lực thì sửa tại chỗ; đã áp thì thêm quy tắc mới từ ngày chọn.
+  - Quản lý thấy mục Tổng quan, không thấy dòng nhắc chốt kỳ (chỉ chủ cơ sở).
+- **Ghi chú cho ERD:**
+  - `commission_entries` thêm `line_id`, `rule_id`, `percent`, `base_vnd`, `source`, `session_no`; `commission_periods` thêm `closed_at`, `closed_by`.
+  - `special_day_windows` (ngày đặc biệt có nhiều khung, rỗng là đóng cửa cả ngày).
+- **Tiếp theo:** người dùng kiểm Bước 15 và review PR; phiên claude.ai vẽ đợt F (tài khoản và khung: MH-01, MH-03 đến MH-06, MH-10).
+
 ### 14/11/2026 (sáng): chốt đợt E, tổng quan, báo cáo, hoa hồng
 
 - **Đã làm:**

@@ -325,7 +325,7 @@ export function branchChanges(
     }
   }
   const text = (d: Branch['specialDays'][number]) =>
-    d.hours ? `${d.hours.open}–${d.hours.close}` : 'đóng cửa';
+    d.hours.length > 0 ? d.hours.map((h) => `${h.open}–${h.close}`).join(' và ') : 'đóng cửa';
   for (const d of after.specialDays) {
     const old = before.specialDays.find((x) => x.date === d.date);
     if (!old)

@@ -17,7 +17,11 @@ export function openingWindows(
   const branch = fixture.branches[0];
   if (!branch) return [];
   const special = branch.specialDays.find((d) => d.date === date);
-  if (special) return special.hours ? [special.hours] : [];
+  if (special) {
+    return special.hours
+      .map(({ open, close }) => ({ open, close }))
+      .sort((a, b) => a.open.localeCompare(b.open));
+  }
   const weekday = new Date(`${date}T00:00:00Z`).getUTCDay();
   return branch.businessHours
     .filter((h) => h.weekday === weekday)

@@ -23,7 +23,6 @@ import {
   branchChanges,
   branchRequeues,
   hoursByDay,
-  isTime,
   outsideHours,
   toBusinessHours,
   WEEK,
@@ -102,11 +101,13 @@ export function BranchDetail({ tenantSlug, id }: { tenantSlug: string; id: strin
   const addressBad = draft.address.trim() === '';
   const phoneBad = (draft.phone ?? '').replace(/\D/g, '').length < 8;
   const dayProblems = WEEK.map((w) => windowsProblem(days[w]));
-  const specialProblems = draft.specialDays.some(
-    (d) =>
-      d.hours !== null &&
-      (!isTime(d.hours.open) || !isTime(d.hours.close) || d.hours.open >= d.hours.close),
-  );
+  const specialProblems = draft.specialDays.some((d) => windowsProblem(d.hours) !== null);
+  const setSpecialHours = (date: string, hours: OpenWindow[]) =>
+    set({
+      specialDays: draft.specialDays.map((d) =>
+        d.date === date ? { ...d, hours: hours as SpecialDay['hours'] } : d,
+      ),
+    });
   const invalid = nameBad || addressBad || phoneBad || dayProblems.some(Boolean) || specialProblems;
 
   const hourReasons = changes
@@ -419,13 +420,13 @@ export function BranchDetail({ tenantSlug, id }: { tenantSlug: string; id: strin
                           </span>
                         </td>
                         <td>
-                          {d.hours ? (
-                            <span className="sp-num">
-                              {d.hours.open}–{d.hours.close}
-                            </span>
-                          ) : (
-                            <strong>Đóng cửa</strong>
-                          )}
+                          <WindowsEditor
+                            label={`Ngày ${d.date.slice(8)}/${d.date.slice(5, 7)}`}
+                            windows={d.hours}
+                            problem={windowsProblem(d.hours)}
+                            invalid={submitted}
+                            onChange={(hours) => setSpecialHours(d.date, hours)}
+                          />
                         </td>
                         <td>{d.note}</td>
                         <td>
@@ -556,7 +557,98 @@ export function BranchDetail({ tenantSlug, id }: { tenantSlug: string; id: strin
   );
 }
 
-/** "Thêm ngày": closed all day, or other hours, from today on. */
+/**
+ * The windows of one special day: several are allowed like on a regular day (BR-02); none means
+ * closed all day.
+ */
+function WindowsEditor({
+  label,
+  windows,
+  problem,
+  invalid,
+  onChange,
+}: {
+  label: string;
+  windows: readonly OpenWindow[];
+  problem: string | null;
+  invalid: boolean;
+  onChange: (windows: OpenWindow[]) => void;
+}) {
+  const closed = windows.length === 0;
+  const patch = (i: number, next: Partial<OpenWindow>) =>
+    onChange(windows.map((w, j) => (j === i ? { ...w, ...next } : w)));
+  return (
+    <div className="flex flex-col gap-1">
+      {closed ? (
+        <strong>Đóng cửa</strong>
+      ) : (
+        <span className="inline-flex flex-wrap gap-1">
+          {windows.map((w, i) => (
+            <span key={i} className="mr-2 inline-flex items-center gap-1">
+              <span className="sp-field sp-field--sm inline-flex w-20">
+                <span className="sp-field__control">
+                  <input
+                    className="sp-num"
+                    aria-label={`${label} từ`}
+                    aria-invalid={invalid && problem ? true : undefined}
+                    value={w.open}
+                    onChange={(e) => patch(i, { open: e.target.value })}
+                  />
+                </span>
+              </span>
+              –
+              <span className="sp-field sp-field--sm inline-flex w-20">
+                <span className="sp-field__control">
+                  <input
+                    className="sp-num"
+                    aria-label={`${label} đến`}
+                    aria-invalid={invalid && problem ? true : undefined}
+                    value={w.close}
+                    onChange={(e) => patch(i, { close: e.target.value })}
+                  />
+                </span>
+              </span>
+              <button
+                type="button"
+                className="sp-icon-btn"
+                aria-label={`Bỏ khung ${w.open}–${w.close} của ${label}`}
+                onClick={() => onChange(windows.filter((_, j) => j !== i))}
+              >
+                <Trash2 size={16} aria-hidden="true" />
+              </button>
+            </span>
+          ))}
+        </span>
+      )}
+      <span className="flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => {
+            const last = windows.at(-1);
+            const start = last ? (last.close < '20:00' ? last.close : '20:00') : '09:00';
+            onChange([
+              ...windows,
+              { open: start, close: last ? (start < '23:00' ? '23:00' : '23:59') : '12:00' },
+            ]);
+          }}
+        >
+          Thêm khung
+        </Button>
+        {!closed && (
+          <Button size="sm" variant="ghost" onClick={() => onChange([])}>
+            Đóng cửa cả ngày
+          </Button>
+        )}
+      </span>
+      {problem && (invalid || windows.length > 1) && (
+        <span className="sp-field__help block text-(--danger)">{problem}</span>
+      )}
+    </div>
+  );
+}
+
+/** "Thêm ngày": closed all day, or one or more windows, from today on. */
 function SpecialDayDialog({
   open,
   existing,
@@ -570,8 +662,7 @@ function SpecialDayDialog({
 }) {
   const [date, setDate] = useState('');
   const [closed, setClosed] = useState(true);
-  const [from, setFrom] = useState('09:00');
-  const [to, setTo] = useState('12:00');
+  const [windows, setWindows] = useState<OpenWindow[]>([{ open: '09:00', close: '12:00' }]);
   const [note, setNote] = useState('');
   const problem = !/^\d{4}-\d{2}-\d{2}$/.test(date)
     ? 'Chọn ngày.'
@@ -579,8 +670,8 @@ function SpecialDayDialog({
       ? 'Chọn ngày từ hôm nay trở đi.'
       : existing.includes(date)
         ? 'Ngày này đã có trong danh sách.'
-        : !closed && (!isTime(from) || !isTime(to) || from >= to)
-          ? 'Nhập giờ mở và giờ đóng, giờ đóng sau giờ mở.'
+        : !closed && (windows.length === 0 || windowsProblem(windows) !== null)
+          ? (windowsProblem(windows) ?? 'Thêm ít nhất một khung giờ.')
           : null;
 
   return (
@@ -595,13 +686,12 @@ function SpecialDayDialog({
         onAdd({
           date,
           note: note.trim(),
-          hours: closed
-            ? null
-            : { open: from as `${number}:${number}`, close: to as `${number}:${number}` },
+          hours: closed ? [] : (windows as SpecialDay['hours']),
         });
         setDate('');
         setNote('');
         setClosed(true);
+        setWindows([{ open: '09:00', close: '12:00' }]);
       }}
     >
       <Field id="sd-date" label="Ngày" help={problem && date !== '' ? problem : undefined}>
@@ -632,14 +722,13 @@ function SpecialDayDialog({
         </button>
       </div>
       {!closed && (
-        <div className="flex gap-3">
-          <Field id="sd-from" label="Từ">
-            <input id="sd-from" value={from} onChange={(e) => setFrom(e.target.value)} />
-          </Field>
-          <Field id="sd-to" label="Đến">
-            <input id="sd-to" value={to} onChange={(e) => setTo(e.target.value)} />
-          </Field>
-        </div>
+        <WindowsEditor
+          label="Ngày đặc biệt"
+          windows={windows}
+          problem={windowsProblem(windows)}
+          invalid
+          onChange={setWindows}
+        />
       )}
       <Field id="sd-note" label="Ghi chú" optional>
         <input id="sd-note" value={note} onChange={(e) => setNote(e.target.value)} />
