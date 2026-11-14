@@ -7,6 +7,30 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 14/11/2026 (tối): mock tài khoản và khung (Bước 16, đợt F)
+
+- **Đã làm** (nhánh `feat/mock-account`, mỗi mục 16a–16g một commit):
+  - 16a: `mock/fixtures/accounts.ts` (tài khoản, thành viên, lời mời), `mock/account.ts` (đăng nhập, đặt lại mật khẩu, lời mời, đi đâu sau đăng nhập), `pnpm check:account`. Lễ tân là Linh ở cả hai cơ sở; Lan và Vy chỉ còn là kỹ thuật viên. Quản lý có cột lịch (Hùng, Khoa) xem được "Hoa hồng của tôi".
+  - 16b: `/mock/login`, `/mock/forgot-password`, `/mock/reset-password`, `/mock/mailbox`; đồng hồ mock có nút "Cho thời gian trôi 15 phút".
+  - 16c: `/mock/invite/[token]`, `/mock/select-workspace`; người nhận khách có cột lịch với hồ sơ trống.
+  - 16d: Nhân sự liệt kê mọi thành viên, bảng lời mời đang chờ, hộp "Mời nhân viên".
+  - 16e: 403 trong khung với một hàm quyền (`mock/permissions.ts`) cho menu và trang, 404, 500, cơ sở bị khóa, trang khách tạm dừng, dải mất kết nối.
+  - 16f: `/mock/landing`, bảng giá đọc từ dữ liệu gói.
+  - 16g: `mock/screens.ts`: MH-01, MH-03 đến MH-06, MH-10 "Đang làm", ghi chú MH-47.
+- **Tự quyết:**
+  - Thư của trang tài khoản (đặt lại mật khẩu, báo khóa, lời mời) hiện ở `/mock/mailbox`, không gắn cơ sở.
+  - Mọi tài khoản mẫu dùng chung mật khẩu `ca phe sua da buoi sang`, ghi trong `accounts.ts`.
+  - Lời mời mẫu cho tài khoản đã có là `nam.tran@email.vn` vào Pawpaw, vì Linh đã là thành viên Tóc Mây (BR-78 cấm mời).
+  - Quản lý chỉ mở được `settings/staff` trong Cài đặt, và không sửa hồ sơ nhân viên.
+  - Trang khóa cơ sở: nhân viên không thấy lý do lẫn thời điểm khóa.
+  - Bỏ các thông báo chặn riêng ở Tổng quan, Báo cáo, Hoa hồng; hàm quyền thay chúng.
+  - Công cụ mock: menu tài khoản trong app (Khóa cơ sở, Mất kết nối, trang lỗi 500), nút "Khóa cơ sở" ở thanh trên trang khách, thanh đồng hồ và hộp thư ở trang tài khoản.
+  - Hóa đơn, hoàn tiền, nhật ký mẫu ghi Linh thu thay cho Lan và Vy.
+- **Ghi chú cho ERD:**
+  - Đếm đăng nhập sai theo email, kể cả email không có tài khoản.
+  - Nhật ký có thêm bốn thao tác: Gửi lời mời, Gửi lại lời mời, Thu hồi lời mời, Nhận lời mời.
+- **Tiếp theo:** người dùng kiểm Bước 16 và review PR; phiên claude.ai vẽ đợt G (quản trị nền tảng: MH-58, MH-60, MH-62).
+
 ### 14/11/2026 (chiều): chốt đợt F, tài khoản và khung
 
 - **Đã làm:**

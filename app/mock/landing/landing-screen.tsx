@@ -1,3 +1,5 @@
+'use client';
+
 import { Check, CreditCard, PawPrint, CalendarCheck, Layers, Minus, Scissors } from 'lucide-react';
 import Link from 'next/link';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
