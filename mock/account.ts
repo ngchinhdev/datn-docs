@@ -663,3 +663,9 @@ export function branchLabel(branchId: string | null): string {
   }
   return branchId;
 }
+
+/** Tenants the platform has locked (BR-75), as status overrides for `doorsOf`. */
+export const lockedStatuses = (
+  locks: Record<string, unknown>,
+): Record<string, Workspace['status']> =>
+  Object.fromEntries(Object.keys(locks).map((id) => [id, 'locked' as const]));

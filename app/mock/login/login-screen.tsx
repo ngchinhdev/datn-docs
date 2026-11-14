@@ -16,6 +16,7 @@ import {
   doorsOf,
   entryHref,
   LOCK_MINUTES,
+  lockedStatuses,
   lockedUntil,
   MAX_FAILED,
   normalizeEmail,
@@ -67,7 +68,7 @@ export function LoginScreen() {
 
     const { account } = outcome;
     patch(() => ({ session: { accountId: account.id, persistent } }));
-    const doors = doorsOf(account.id, members, workspaces);
+    const doors = doorsOf(account.id, members, workspaces, lockedStatuses(store.locks));
     const last = store.lastWorkspace[account.id] ?? null;
     const destination = afterLogin(doors, last);
     if (destination.kind === 'enter') {

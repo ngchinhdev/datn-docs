@@ -10,6 +10,7 @@ import {
   declineInvitation,
   doorEntry,
   entryHref,
+  lockedStatuses,
   memberEmails,
   resendInvitation,
   revokeInvitation,
@@ -87,10 +88,14 @@ export function useInvitations() {
       }
       return {
         ...result,
-        href: entryHref(workspace, member, doorEntry(member.role, workspace.status)),
+        href: entryHref(
+          workspace,
+          member,
+          doorEntry(member.role, lockedStatuses(store.locks)[workspace.id] ?? workspace.status),
+        ),
       };
     },
-    [accounts, members, invitations, now, patch, root],
+    [accounts, members, invitations, now, patch, root, store.locks],
   );
 
   const decline = useCallback(

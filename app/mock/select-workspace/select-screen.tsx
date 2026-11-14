@@ -15,6 +15,7 @@ import {
   doorEntry,
   doorsOf,
   entryHref,
+  lockedStatuses,
   pendingInvitationsFor,
   ROLE_LABEL,
   type DoorEntry,
@@ -34,7 +35,7 @@ const NOTE: Record<DoorEntry, string | null> = {
 export function SelectScreen() {
   const router = useRouter();
   const toast = useToast();
-  const { now, members, invitations, signedIn, lastWorkspace, patch } = useAccountStore();
+  const { now, members, invitations, signedIn, lastWorkspace, locks, patch } = useAccountStore();
   const { accept, decline } = useInvitations();
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export function SelectScreen() {
   }, [signedIn, router]);
   if (!signedIn) return null;
 
-  const doors = doorsOf(signedIn.id, members, workspaces);
+  const doors = doorsOf(signedIn.id, members, workspaces, lockedStatuses(locks));
   const last = lastWorkspace[signedIn.id];
   const waiting = pendingInvitationsFor(invitations, signedIn.email, now);
 

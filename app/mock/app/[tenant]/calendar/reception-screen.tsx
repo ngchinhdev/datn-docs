@@ -1,11 +1,12 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, RefreshCw, Search, WifiOff } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { useQueryState } from '@/components/mock/use-query-state';
+import { useAccountStore } from '@/components/mock/account-store';
 import { Button } from '@/components/sapio/button';
 import { useToast } from '@/components/sapio/toast';
 import { SegmentedNav } from '@/components/sapio/segmented';
@@ -45,6 +46,7 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
   const branch = fixture.branches[0]!;
   const L = lookups(fixture);
   const now = useMockNow();
+  const { offlineSince } = useAccountStore();
   const today = localDate(MOCK_NOW);
   const appHref = useAppHref(tenantSlug);
   const [date, setDate] = useQueryState('date', today);
@@ -258,6 +260,23 @@ export function ReceptionScreen({ tenantSlug }: { tenantSlug: string }) {
 
   return (
     <div className="sp-shell__content sp-shell__content--wide">
+      {offlineSince !== null && (
+        <div className="sp-banner sp-banner--warning rounded-(--radius-md)" role="status">
+          <WifiOff size={16} aria-hidden="true" />
+          <span className="sp-banner__text">
+            <strong>Mất kết nối lúc {formatTime(offlineSince)}.</strong> Lịch có thể chưa có thay
+            đổi mới nhất của người khác; Sapio đang thử nối lại. Bạn vẫn tạo, sửa được, hệ thống
+            kiểm trùng khi lưu.
+          </span>
+          <Button
+            size="sm"
+            onClick={() => toast({ text: 'Chưa nối lại được. Sapio đang thử lại.' })}
+          >
+            <RefreshCw size={14} aria-hidden="true" />
+            Tải lại lịch
+          </Button>
+        </div>
+      )}
       {/* Top bar, tablet and up. */}
       <header className="hidden flex-wrap items-center gap-x-(--space-5) gap-y-(--space-3) rounded-(--radius-md) bg-(--surface-raised) px-(--space-4) py-(--space-3) shadow-[0_0_0_1px_var(--line)] md:flex">
         <div className="flex items-center gap-(--space-1)">

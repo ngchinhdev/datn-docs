@@ -10,12 +10,14 @@ import {
   blankStaffMember,
   branchLabel,
   declineInvitation,
+  doorsOf as doorsWithLocks,
   doorEntry,
   entryHref,
   hasOwnCommission,
   inviteDaysLeft,
   inviteEmailError,
   inviteState,
+  lockedStatuses,
   inviteView,
   invitableRoles,
   lockedUntil,
@@ -44,6 +46,7 @@ import {
   SAMPLE_PASSWORD,
 } from '../mock/fixtures/accounts.ts';
 import { formatWait, inviteMail, resetMail } from '../mock/account-mail.ts';
+import { canOpenPage, homeOf, pageTitle } from '../mock/permissions.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
 import { addMinutes, localToUtc, MOCK_NOW } from '../mock/time.ts';
 
@@ -635,6 +638,79 @@ report(
 report(
   formatWait(900) === '15:00' && formatWait(45) === '0:45',
   'BR-76, BR-77: đếm ngược hiện phút:giây',
+);
+
+// ---- BR-79: pages by role, locks ----
+
+const roles = ['owner', 'manager', 'receptionist', 'technician'] as const;
+const opens = (role: (typeof roles)[number], path: string) =>
+  canOpenPage(role, path.split('/').filter(Boolean));
+report(
+  roles.every((r) => opens(r, '') === (r === 'owner' || r === 'manager')) &&
+    !opens('receptionist', 'reports') &&
+    opens('manager', 'reports') &&
+    opens('owner', 'reports'),
+  'BR-79: Tổng quan và Báo cáo chỉ chủ cơ sở và quản lý; lễ tân mở Báo cáo thì ngoài quyền',
+);
+report(
+  !opens('manager', 'commission') &&
+    !opens('manager', 'commission/periods/2026-10') &&
+    opens('owner', 'commission/periods/2026-10') &&
+    !opens('technician', 'commission'),
+  'BR-44: quy tắc và các kỳ hoa hồng chỉ chủ cơ sở',
+);
+report(
+  opens('manager', 'my/commission') &&
+    !opens('manager', 'my/schedule') &&
+    opens('technician', 'my/schedule') &&
+    opens('technician', 'my/commission') &&
+    !opens('receptionist', 'my/commission'),
+  'BR-44: Hoa hồng của tôi mở cho kỹ thuật viên và quản lý, không cho lễ tân',
+);
+report(
+  opens('manager', 'settings/staff') &&
+    !opens('manager', 'settings') &&
+    !opens('manager', 'settings/staff/may-mai') &&
+    !opens('manager', 'settings/policies') &&
+    !opens('receptionist', 'settings/staff') &&
+    opens('owner', 'settings/policies') &&
+    !opens('manager', 'audit-log'),
+  'BR-78: quản lý chỉ mở được Nhân sự trong Cài đặt; chủ cơ sở mở hết',
+);
+report(
+  ['today', 'calendar', 'customers', 'invoices', 'refunds'].every((p) =>
+    opens('receptionist', p),
+  ) &&
+    !opens('receptionist', 'shifts') &&
+    !opens('receptionist', 'time-off') &&
+    !opens('technician', 'calendar') &&
+    opens('receptionist', 'cho-chua-lam'),
+  'BR-79: lễ tân mở các trang quầy; trang chưa dựng ai cũng thấy trang giữ chỗ',
+);
+report(
+  pageTitle(['reports']) === 'Báo cáo' &&
+    pageTitle(['my', 'schedule']) === 'trang này' &&
+    homeOf('technician').path === 'my/schedule' &&
+    homeOf('receptionist').label === 'Hôm nay',
+  'BR-79: trang 403 gọi tên trang và dẫn về trang đầu của vai trò',
+);
+const lockedMay = lockedStatuses({ may: { at: MOCK_NOW, reason: 'x' } });
+report(
+  dest(
+    afterLogin(
+      doorsWithLocks(
+        accounts.find((a) => a.email === 'mai@tocmay.vn')!.id,
+        members,
+        workspaces,
+        lockedMay,
+      ),
+      null,
+    ),
+  ) === dest({ kind: 'enter', workspaceId: 'may', entry: 'locked' }) &&
+    doorsWithLocks(accounts.find((a) => a.email === LINH)!.id, members, workspaces, lockedMay).find(
+      (d) => d.workspaceId === 'pawpaw',
+    )?.status === 'active',
+  'BR-75: khóa một cơ sở thì chỉ cơ sở đó dừng; cơ sở khác của tài khoản vẫn mở',
 );
 
 console.log(failures === 0 ? '\nTất cả đạt.' : `\n${failures} lỗi.`);

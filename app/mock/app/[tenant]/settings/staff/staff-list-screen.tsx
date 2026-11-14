@@ -127,7 +127,7 @@ export function StaffListScreen({ tenantSlug }: { tenantSlug: string }) {
           <div className="sp-table__primary">
             <span className="sp-avatar sp-avatar--sm">{initialsOfName(nameOf(row))}</span>
             <span className="min-w-0">
-              {profile ? (
+              {profile && role === 'owner' ? (
                 <Link href={appHref(`settings/staff/${profile.resourceId}`)}>{nameOf(row)}</Link>
               ) : (
                 nameOf(row)
@@ -163,13 +163,15 @@ export function StaffListScreen({ tenantSlug }: { tenantSlug: string }) {
         const profile = profileOf(row);
         return profile ? (
           <span className="flex gap-1">
-            <Link
-              href={appHref(`settings/staff/${profile.resourceId}`)}
-              className="sp-btn sp-btn--ghost sp-btn--sm no-underline"
-              aria-label={`Sửa hồ sơ ${nameOf(row)}`}
-            >
-              Sửa
-            </Link>
+            {role === 'owner' && (
+              <Link
+                href={appHref(`settings/staff/${profile.resourceId}`)}
+                className="sp-btn sp-btn--ghost sp-btn--sm no-underline"
+                aria-label={`Sửa hồ sơ ${nameOf(row)}`}
+              >
+                Sửa
+              </Link>
+            )}
             <Link
               href={appHref('calendar', { staff: profile.resourceId })}
               className="sp-btn sp-btn--ghost sp-btn--sm no-underline"
@@ -236,7 +238,7 @@ export function StaffListScreen({ tenantSlug }: { tenantSlug: string }) {
                 </span>
               </>
             );
-            return profile ? (
+            return profile && role === 'owner' ? (
               <Link
                 href={appHref(`settings/staff/${profile.resourceId}`)}
                 className="sp-cards__item"

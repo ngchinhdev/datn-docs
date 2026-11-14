@@ -35,6 +35,10 @@ interface AccountData {
   lastWorkspace: Record<string, string>;
   /** Staff made by accepting an invitation, by tenant slug: they join the staff list of the app. */
   joiners: Record<string, Staff[]>;
+  /** Tenants the platform has locked, by workspace id: when, and why (BR-75). */
+  locks: Record<string, { at: string; reason: string }>;
+  /** When the realtime link went down; `null` while it is up. The calendar says so (BR-79). */
+  offlineSince: string | null;
 }
 
 const INITIAL: AccountData = {
@@ -49,6 +53,8 @@ const INITIAL: AccountData = {
   mails: [],
   lastWorkspace: { 'acc-linh': 'may' },
   joiners: {},
+  locks: {},
+  offlineSince: null,
 };
 
 interface AccountStore extends AccountData {

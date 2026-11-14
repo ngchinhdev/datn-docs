@@ -14,6 +14,7 @@ import {
   afterLogin,
   doorsOf,
   entryHref,
+  lockedStatuses,
   resetPassword,
   resetState,
   type ResetState,
@@ -95,7 +96,7 @@ export function ResetScreen() {
       session: { accountId: result.account.id, persistent: false },
     }));
     // BR-77: into the tenant used last; BR-79 decides when that tenant cannot be entered.
-    const doors = doorsOf(result.account.id, members, workspaces);
+    const doors = doorsOf(result.account.id, members, workspaces, lockedStatuses(store.locks));
     const destination = afterLogin(doors, store.lastWorkspace[result.account.id] ?? null, {
       resumeLast: true,
     });
