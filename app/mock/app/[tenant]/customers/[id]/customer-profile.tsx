@@ -11,6 +11,7 @@ import { Field } from '@/components/sapio/form';
 import { PageHeader } from '@/components/sapio/page-header';
 import { StatusBadge } from '@/components/sapio/status-badge';
 import { useToast } from '@/components/sapio/toast';
+import { addAudit } from '@/mock/audit';
 import { customerRows } from '@/mock/customers';
 import { formatPhone, formatVnd } from '@/mock/format';
 import { walletBalance } from '@/mock/money';
@@ -107,15 +108,17 @@ export function CustomerProfile({ tenantSlug, id }: { tenantSlug: string; id: st
     // BR-63: a rule about money that a person changed is logged.
     store.setMoney((m) => ({
       ...m,
-      audit: [
-        ...m.audit,
+      audit: addAudit(
+        m.audit,
+        now.now,
+        { name: now.actor, role: now.role },
         {
-          id: `au-deposit-${customer.id}-${m.audit.length}`,
-          at: now.now,
-          by: now.actor,
-          text: `${on ? 'Bật' : 'Tắt'} bắt buộc đặt cọc cho ${customer.name}${reason ? `: ${reason}` : ''}`,
+          action: on ? 'Bật bắt buộc cọc' : 'Tắt bắt buộc cọc',
+          object: customer.name,
+          href: `customers/${customer.id}`,
+          detail: reason || 'Bật tay',
         },
-      ],
+      ),
     }));
     toast({ text: on ? 'Lần sau khách phải đặt cọc.' : 'Đã tắt bắt buộc đặt cọc.' });
   }

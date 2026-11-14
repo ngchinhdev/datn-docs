@@ -13,7 +13,7 @@ export function EmailsScreen({ tenantSlug }: { tenantSlug: string }) {
   const fixture = useLiveFixture(tenantSlug);
   const { tenant } = fixture;
   const branch = fixture.branches[0]!;
-  const phone = branchPhone(tenantSlug);
+  const phone = branchPhone(tenantSlug, fixture.branches[0]?.phone);
   const emails = buildEmails(fixture, MOCK_NOW);
   const base = `/mock/${tenantSlug}`;
 

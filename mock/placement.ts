@@ -12,7 +12,7 @@ import type {
   ServiceVariant,
   TenantFixture,
 } from './fixtures/types.ts';
-import { openingHours } from './hours.ts';
+import { openingWindows } from './hours.ts';
 import { subtract, type Interval } from './intervals.ts';
 import {
   occupation,
@@ -203,7 +203,7 @@ function problemOf(
   isStaff: boolean,
   at: Interval,
   open: Interval[],
-): { kind: 'shift' | 'leave' | 'busy'; text: string } | null {
+): { kind: 'shift' | 'leave' | 'busy' | 'outage'; text: string } | null {
   const { fixture, date } = input;
   if (isStaff) {
     const own = staffWindows({
@@ -224,6 +224,12 @@ function problemOf(
     if (subtract([at], free).length > 0) return { kind: 'leave', text: 'xin nghỉ' };
   } else if (subtract([at], open).length > 0) {
     return { kind: 'shift', text: 'ngoài giờ mở cửa' };
+  } else {
+    // BR-37: a resource under maintenance cannot hold anything in that time.
+    const out = (fixture.config?.outages ?? []).find(
+      (o) => o.resourceId === resourceId && minutesOf(o.from) < at[1] && at[0] < minutesOf(o.to),
+    );
+    if (out) return { kind: 'outage', text: `đang bảo trì (${out.reason})` };
   }
   const other = whoIsIn(input, resourceId, at);
   return other
@@ -235,17 +241,20 @@ function explain(input: PlaceInput): string {
   const { fixture, variant, service, date } = input;
   const time = localTimeOf(arrival(input));
   const lead = `Không đặt được ${time}`;
-  const hours = openingHours(fixture, date);
-  if (!hours) {
+  const windows = openingWindows(fixture, date);
+  if (windows.length === 0) {
     const special = fixture.branches[0]?.specialDays.find((d) => d.date === date);
     return `${lead}: cơ sở đóng cửa ngày này${special ? ` (${special.note})` : ''}.`;
   }
-  const open: Interval[] = [[localMinutes(date, hours.open), localMinutes(date, hours.close)]];
+  const open: Interval[] = windows.map((w): Interval => [
+    localMinutes(date, w.open),
+    localMinutes(date, w.close),
+  ]);
   const origin = arrival(input) - prepMinutes(variant);
   const [visFrom, visTo] = visibleRange(variant);
   const visible: Interval = [origin + visFrom, origin + visTo];
   if (subtract([visible], open).length > 0) {
-    return `${lead}: ngoài giờ mở cửa (${hours.open}–${hours.close}).`;
+    return `${lead}: ngoài giờ mở cửa (${windows.map((w) => `${w.open}–${w.close}`).join(', ')}).`;
   }
 
   const staffTypeIds = new Set(fixture.resourceTypes.filter((t) => t.isStaff).map((t) => t.id));

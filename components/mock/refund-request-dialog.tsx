@@ -5,13 +5,7 @@ import { ConfirmDialog } from '@/components/sapio/confirm-dialog';
 import { Field } from '@/components/sapio/form';
 import type { Customer, Invoice, MoneyState } from '@/mock/fixtures';
 import { formatVnd } from '@/mock/format';
-import {
-  PACKAGE_CANCEL_FEE,
-  packageRefund,
-  parseVnd,
-  refundable,
-  splitWalletRefund,
-} from '@/mock/money';
+import { packageRefund, parseVnd, refundable, splitWalletRefund } from '@/mock/money';
 import { METHOD_LABEL, type RefundInput } from '@/mock/money-ops';
 
 const number = new Intl.NumberFormat('vi-VN');
@@ -26,6 +20,7 @@ export function RefundRequestDialog({
   invoice,
   money,
   customer,
+  defaultFee,
   onSubmit,
   onClose,
 }: {
@@ -33,6 +28,8 @@ export function RefundRequestDialog({
   invoice: Invoice;
   money: MoneyState;
   customer: Customer | undefined;
+  /** The fee Cài đặt › Thanh toán takes off a package that is given back (BR-27). */
+  defaultFee: bigint;
   /** Returns the problem in words, or `null` when the request was made. */
   onSubmit: (input: RefundInput) => string | null;
   onClose: () => void;
@@ -47,7 +44,7 @@ export function RefundRequestDialog({
   const [amountText, setAmountText] = useState('');
   const [lineId, setLineId] = useState('');
   const [reason, setReason] = useState('');
-  const [feeText, setFeeText] = useState(number.format(PACKAGE_CANCEL_FEE));
+  const [feeText, setFeeText] = useState(number.format(defaultFee));
   const [error, setError] = useState<string | null>(null);
 
   const chosen = options.find((o) => o.payment.id === paymentId);

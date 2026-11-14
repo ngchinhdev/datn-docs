@@ -140,7 +140,8 @@ export function TimeOffListScreen({ tenantSlug }: { tenantSlug: string }) {
             Cần xếp lại
           </h2>
           <p className="sp-panel__note">
-            Lịch hẹn mất người làm vì bớt ca. Xử lý như đơn nghỉ phép (BR-11, BR-35).
+            Lịch hẹn mất người làm, mất giờ mở cửa hoặc mất tài nguyên (bớt ca, đổi giờ, bảo trì).
+            Xử lý như đơn nghỉ phép (BR-11, BR-35, BR-37).
           </p>
           <ul className="m-0 flex list-none flex-col gap-(--space-2) p-0">
             {waiting.map((r) => (
@@ -149,8 +150,8 @@ export function TimeOffListScreen({ tenantSlug }: { tenantSlug: string }) {
                 className="flex flex-wrap items-center justify-between gap-(--space-2)"
               >
                 <span className="sp-num text-sm leading-5">
-                  {nameOf(r.resourceId)} · {formatDay(r.date).replace(',', '')} · {r.reason} ·{' '}
-                  {r.appointmentIds.length} lịch
+                  {r.label ?? nameOf(r.resourceId)} · {formatDay(r.date).replace(',', '')} ·{' '}
+                  {r.reason} · {r.appointmentIds.length} lịch
                 </span>
                 <Link
                   href={appHref(`time-off/${r.id}`)}

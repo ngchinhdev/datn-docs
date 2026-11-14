@@ -15,6 +15,7 @@ import { bookVariant } from './fixtures/bookings.ts';
 import type {
   Appointment,
   AppointmentItem,
+  BookingTerms,
   ServedSubject,
   Service,
   ServiceVariant,
@@ -155,6 +156,8 @@ export interface AppointmentInput {
   status: 'held' | 'confirmed';
   holdExpiresAt?: string;
   depositVnd?: bigint;
+  /** The terms in force now; the booking keeps them (BR-38). */
+  terms?: BookingTerms;
 }
 
 /** The appointment a booking becomes: prices kept as quoted (BR-12), one booking per resource. */
@@ -192,5 +195,6 @@ export function buildAppointment(input: AppointmentInput): Appointment {
     ),
     ...(input.holdExpiresAt ? { holdExpiresAt: input.holdExpiresAt } : {}),
     ...(input.depositVnd ? { depositVnd: input.depositVnd } : {}),
+    ...(input.terms ? { terms: input.terms } : {}),
   };
 }

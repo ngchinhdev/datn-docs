@@ -1,17 +1,9 @@
 import { notFound } from 'next/navigation';
-import { GatedPage } from '@/components/mock/locked-feature';
 import { fixtureBySlug } from '@/mock/selection';
+import { ChatbotScreen } from './chatbot-screen';
 
-/** Not built yet; the plan decides whether it shows "Chưa làm" or the page that explains the lock. */
 export default async function Page({ params }: PageProps<'/mock/app/[tenant]/settings/chatbot'>) {
   const { tenant } = await params;
   if (!fixtureBySlug(tenant)) notFound();
-  return (
-    <GatedPage
-      feature="chatbot"
-      tenantSlug={tenant}
-      path={['settings', 'chatbot']}
-      inSettings={true}
-    />
-  );
+  return <ChatbotScreen tenantSlug={tenant} />;
 }

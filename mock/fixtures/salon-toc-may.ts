@@ -2,6 +2,7 @@ import { appointmentBuilder } from './bookings.ts';
 import { dateRange, generateWeek } from './generate.ts';
 import { generatePeople, withVisitCounts } from './people.ts';
 import { salonMoney } from './salon-money.ts';
+import { salonConfig } from './shop-config.ts';
 import { salonServices as services } from './salon-services.ts';
 import { hairSalonTemplate } from './templates.ts';
 import type {
@@ -114,6 +115,7 @@ const regulars: Customer[] = [
     packages: [
       {
         id: 'may-pkg-an-1',
+        productId: 'may-pkg-5',
         name: 'Gói 5 lần gội sấy',
         totalSessions: 5,
         usedSessions: 3,
@@ -171,6 +173,7 @@ const regulars: Customer[] = [
     packages: [
       {
         id: 'may-pkg-phuc-1',
+        productId: 'may-pkg-10',
         name: 'Gói 10 lần gội sấy',
         totalSessions: 10,
         usedSessions: 3,
@@ -400,6 +403,7 @@ const others = (
             packages: [
               {
                 id: 'may-pkg-quyen-1',
+                productId: 'may-pkg-10',
                 name: 'Gói 10 lần gội sấy',
                 totalSessions: 10,
                 usedSessions: 4,
@@ -893,6 +897,7 @@ export const salonTocMay: TenantFixture = {
       tenantId,
       name: 'Tóc Mây Quận 3',
       address: '120 Võ Văn Tần, Phường Bàn Cờ, TP.HCM',
+      phone: '028 3930 1234',
       timeZone: 'Asia/Ho_Chi_Minh',
       businessHours: everyDay('09:00', '20:00').map((h) =>
         h.weekday === 6 ? { ...h, open: '08:00' } : h,
@@ -923,6 +928,7 @@ export const salonTocMay: TenantFixture = {
   packageCatalog: [
     {
       id: 'may-pkg-10',
+      selling: true,
       name: 'Gói 10 lần gội sấy',
       serviceVariantId: 'may-wash-std',
       totalSessions: 10,
@@ -931,6 +937,7 @@ export const salonTocMay: TenantFixture = {
     },
     {
       id: 'may-pkg-5',
+      selling: true,
       name: 'Gói 5 lần gội sấy',
       serviceVariantId: 'may-wash-std',
       totalSessions: 5,
@@ -939,6 +946,7 @@ export const salonTocMay: TenantFixture = {
     },
     {
       id: 'may-pkg-dye-3',
+      selling: false,
       name: 'Gói 3 lần nhuộm phủ bạc',
       serviceVariantId: 'may-dye-short',
       totalSessions: 3,
@@ -950,4 +958,5 @@ export const salonTocMay: TenantFixture = {
   commissionPercent: 10,
   actors: { receptionist: 'Lan', manager: 'Hùng', owner: 'Chủ cơ sở' },
   money: salonMoney(services, appointments),
+  config: salonConfig,
 };

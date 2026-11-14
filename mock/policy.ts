@@ -1,7 +1,8 @@
 /*
  * What a customer may do by themselves with a booking, and what a cancellation returns
- * (BR-08, BR-23, BR-33). Pure; imports nothing, so Node can run it (scripts/check-availability.ts).
+ * (BR-08, BR-23, BR-33). Pure; imports only types, so Node can run it (scripts/check-availability.ts).
  */
+import type { BookingTerms, RefundTiers } from './fixtures/types.ts';
 
 /** What the shop allows a customer to do alone: X and N of BR-08. */
 export interface SelfServicePolicy {
@@ -45,17 +46,67 @@ export function selfChangeBlock(
   return null;
 }
 
-/** BR-23, default tiers: 24 hours or more 100%, from 4 to 24 hours 50%, under 4 hours nothing. */
-export function refundPercent(startAt: string, now: string): 0 | 50 | 100 {
+/** BR-23, the default tiers. */
+export const DEFAULT_REFUND_TIERS: RefundTiers = { over24: 100, over4: 50, under4: 0 };
+
+/** BR-23: the percent of the deposit that goes back: 24 hours or more, from 4 to 24 hours, under 4 hours. */
+export function refundPercent(
+  startAt: string,
+  now: string,
+  tiers: RefundTiers = DEFAULT_REFUND_TIERS,
+): number {
   const left = hoursLeft(startAt, now);
-  if (left >= 24) return 100;
-  if (left >= 4) return 50;
-  return 0;
+  if (left >= 24) return tiers.over24;
+  if (left >= 4) return tiers.over4;
+  return tiers.under4;
 }
 
 /** Whole VND: `bigint` division, so no fraction is ever created. */
-export const refundVnd = (depositVnd: bigint, startAt: string, now: string) =>
-  (depositVnd * BigInt(refundPercent(startAt, now))) / 100n;
+export const refundVnd = (
+  depositVnd: bigint,
+  startAt: string,
+  now: string,
+  tiers: RefundTiers = DEFAULT_REFUND_TIERS,
+) => (depositVnd * BigInt(refundPercent(startAt, now, tiers))) / 100n;
+
+export const termsFrom = (policy: SelfServicePolicy, refund: RefundTiers): BookingTerms => ({
+  cancelBeforeHours: policy.cancelBeforeHours,
+  maxReschedules: policy.maxReschedules,
+  refund,
+});
+
+/** BR-10: the no-shows of the customer in the last six months before `now`. */
+export const noShowsInSixMonths = (
+  appointments: readonly { customerId: string | null; status: string; startAt: string }[],
+  customerId: string,
+  now: string,
+) =>
+  appointments.filter(
+    (a) =>
+      a.customerId === customerId &&
+      a.status === 'no_show' &&
+      Date.parse(now) - Date.parse(a.startAt) <= SIX_MONTHS_MS,
+  ).length;
+
+// ---- Sentences of Cài đặt › Chính sách, from the numbers being typed ----
+
+const GRID_MINUTES = 15;
+const SIX_MONTHS_MS = 183 * 86_400_000;
+
+/** BR-06: the first time a customer can start, from `minNoticeHours` on, on the 15-minute grid. ISO 8601, UTC. */
+export function earliestBooking(now: string, minNoticeHours: number): string {
+  const at = Date.parse(now) + minNoticeHours * HOUR;
+  const step = GRID_MINUTES * 60_000;
+  return new Date(Math.ceil(at / step) * step).toISOString();
+}
+
+/** BR-08: how long before the time a customer can still change or cancel by themselves. ISO 8601, UTC. */
+export const selfChangeUntil = (startAt: string, cancelBeforeHours: number) =>
+  new Date(Date.parse(startAt) - cancelBeforeHours * HOUR).toISOString();
+
+/** BR-09: when a booking that has not checked in may be marked no-show. ISO 8601, UTC. */
+export const noShowFrom = (startAt: string, minutes: number) =>
+  new Date(Date.parse(startAt) + minutes * 60_000).toISOString();
 
 /** BR-33: 24 hours after sending, but no later than 2 hours before the booking. ISO 8601, UTC. */
 export function replyDeadline(sentAt: string, startAt: string): string {

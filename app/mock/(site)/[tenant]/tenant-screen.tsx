@@ -10,7 +10,8 @@ import { freeSlots } from '@/mock/availability';
 import { formatDuration, formatVnd } from '@/mock/format';
 import { visibleMinutes } from '@/mock/occupation';
 import { formatTime, MOCK_NOW, MOCK_TODAY } from '@/mock/time';
-import type { BusinessHours, Service, ServiceVariant } from '@/mock/fixtures';
+import type { BusinessHours, Service, ServiceVariant, Weekday } from '@/mock/fixtures';
+import { hoursByDay, WEEK, WEEKDAY_NAME, windowsText } from '@/mock/shop';
 
 function variantSummary(service: Service): string {
   if (service.variants.length === 1) {
@@ -39,40 +40,21 @@ function lowestPriceOf(service: Service): { price: bigint; isRange: boolean } {
   return { price: min, isRange: hasRange };
 }
 
+/** The weekly hours as lines: days in a row with the same windows share a line, a closed day says so (BR-02). */
 function formatHoursGroup(hours: BusinessHours[]): { label: string; time: string }[] {
-  // Typical group: Monday to Friday, Saturday, Sunday
-  const result: { label: string; time: string }[] = [];
-  const map = new Map<string, number[]>();
-  for (const h of hours) {
-    const t = `${h.open}–${h.close}`;
-    const days = map.get(t) ?? [];
-    days.push(h.weekday);
-    map.set(t, days);
+  const days = hoursByDay(hours);
+  const lines: { from: Weekday; to: Weekday; time: string }[] = [];
+  for (const weekday of WEEK) {
+    const time = windowsText(days[weekday]);
+    const last = lines.at(-1);
+    if (last && last.time === time) last.to = weekday;
+    else lines.push({ from: weekday, to: weekday, time });
   }
-
-  // Sort by weekdays
-  const weekdayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-
-  // Check if Mon-Fri have same hours
-  const monToFri = [1, 2, 3, 4, 5];
-  for (const [t, days] of map.entries()) {
-    const hasAllMonFri = monToFri.every((d) => days.includes(d));
-    if (hasAllMonFri && days.length === 5) {
-      result.push({ label: 'Thứ Hai đến Thứ Sáu', time: t });
-    }
-  }
-
-  // Add Saturday and Sunday or individual days
-  for (const h of hours) {
-    if (h.weekday === 6) {
-      result.push({ label: 'Thứ Bảy', time: `${h.open}–${h.close}` });
-    } else if (h.weekday === 0) {
-      result.push({ label: 'Chủ Nhật', time: `${h.open}–${h.close}` });
-    } else if (!monToFri.every((d) => (map.get(`${h.open}–${h.close}`) ?? []).includes(d))) {
-      result.push({ label: weekdayNames[h.weekday]!, time: `${h.open}–${h.close}` });
-    }
-  }
-  return result;
+  return lines.map((l) => ({
+    label:
+      l.from === l.to ? WEEKDAY_NAME[l.from] : `${WEEKDAY_NAME[l.from]} đến ${WEEKDAY_NAME[l.to]}`,
+    time: l.time,
+  }));
 }
 
 export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
@@ -144,7 +126,7 @@ export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
   const staffLabel = fixture.template.vocabulary.staff;
 
   const isPawpaw = fixture.tenant.slug === 'pawpaw';
-  const phone = branchPhone(fixture.tenant.slug);
+  const phone = branchPhone(fixture.tenant.slug, branch.phone);
 
   return (
     <div className={`${tenantClass} w-full text-(--ink) font-(--font-sans)`}>

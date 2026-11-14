@@ -4,6 +4,7 @@ import { fixtureBySlug } from '@/mock/selection';
 import { ScheduleStoreProvider } from '@/components/mock/schedule-store';
 import { CustomerSessionProvider } from '@/components/mock/customer-session';
 import { BookingDraftProvider } from '@/components/mock/booking-draft';
+import { BrandingScope } from '@/components/mock/branding-scope';
 import { ServiceStoreProvider } from '@/components/mock/service-store';
 import { StaffStoreProvider } from '@/components/mock/staff-store';
 
@@ -23,7 +24,9 @@ export default async function CustomerTenantLayout({
       <ServiceStoreProvider tenantSlug={tenant}>
         <ScheduleStoreProvider tenantSlug={tenant}>
           <CustomerSessionProvider tenantSlug={tenant}>
-            <BookingDraftProvider>{children}</BookingDraftProvider>
+            <BookingDraftProvider>
+              <BrandingScope tenantSlug={tenant}>{children}</BrandingScope>
+            </BookingDraftProvider>
           </CustomerSessionProvider>
         </ScheduleStoreProvider>
       </ServiceStoreProvider>

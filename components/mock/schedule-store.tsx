@@ -4,15 +4,39 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import {
   tenantFixtures,
   type Appointment,
+  type BonusTier,
+  type Branch,
   type Customer,
   type MoneyState,
+  type PackageProduct,
   type Requeue,
+  type Resource,
   type ServedSubject,
   type Shift,
+  type ShopConfig,
   type StaffTimeOff,
   type TemplatePolicies,
 } from '@/mock/fixtures';
+import { addAudits, type Actor, type AuditInput } from '@/mock/audit';
 import type { World } from '@/mock/money-ops';
+
+/** What Cài đặt saves in one go; a field left out stays as it is. */
+export interface SettingsPatch {
+  branch?: Branch;
+  resources?: Resource[];
+  policies?: TemplatePolicies;
+  packageCatalog?: PackageProduct[];
+  topupBonusTiers?: BonusTier[];
+  config?: Partial<ShopConfig>;
+}
+
+/** The audit lines a save adds (BR-63). */
+export interface SettingsLog {
+  /** ISO 8601, UTC. */
+  at: string;
+  actor: Actor;
+  entries: AuditInput[];
+}
 
 export interface ScheduleStore {
   appointments: Appointment[];
@@ -53,6 +77,14 @@ export interface ScheduleStore {
   setMoney: (next: MoneyState | ((prev: MoneyState) => MoneyState)) => void;
   /** One action that touches money, customers and appointments together (collect, refund). */
   applyWorld: (fn: (prev: World) => World) => void;
+  /** The branch, its resources, the packages on sale, the bonus tiers and the rest of Cài đặt. */
+  branch: Branch;
+  resources: Resource[];
+  packageCatalog: PackageProduct[];
+  topupBonusTiers: BonusTier[];
+  config: ShopConfig;
+  /** Saves settings and adds their audit lines in one step; a change counts from now (BR-38). */
+  saveSettings: (patch: SettingsPatch, log?: SettingsLog) => void;
 }
 
 interface TenantScheduleData {
@@ -65,6 +97,11 @@ interface TenantScheduleData {
   staffSeesCustomerPhone: boolean;
   policies: TemplatePolicies;
   money: MoneyState;
+  branch: Branch;
+  resources: Resource[];
+  packageCatalog: PackageProduct[];
+  topupBonusTiers: BonusTier[];
+  config: ShopConfig;
 }
 
 interface ScheduleRootContextValue {
@@ -90,6 +127,11 @@ function initialTenantData(slug: string): TenantScheduleData {
     staffSeesCustomerPhone: fixture.staffSeesCustomerPhone,
     policies: fixture.policies,
     money: fixture.money,
+    branch: fixture.branches[0]!,
+    resources: fixture.resources,
+    packageCatalog: fixture.packageCatalog,
+    topupBonusTiers: fixture.topupBonusTiers,
+    config: fixture.config,
   };
 }
 
@@ -335,6 +377,29 @@ export function ScheduleStoreProvider({
     [update],
   );
 
+  const saveSettings = useCallback(
+    (patch: SettingsPatch, log?: SettingsLog) => {
+      update((prev) => ({
+        ...prev,
+        ...(patch.branch ? { branch: patch.branch } : {}),
+        ...(patch.resources ? { resources: patch.resources } : {}),
+        ...(patch.policies ? { policies: patch.policies } : {}),
+        ...(patch.packageCatalog ? { packageCatalog: patch.packageCatalog } : {}),
+        ...(patch.topupBonusTiers ? { topupBonusTiers: patch.topupBonusTiers } : {}),
+        ...(patch.config ? { config: { ...prev.config, ...patch.config } } : {}),
+        ...(log
+          ? {
+              money: {
+                ...prev.money,
+                audit: addAudits(prev.money.audit, log.at, log.actor, log.entries),
+              },
+            }
+          : {}),
+      }));
+    },
+    [update],
+  );
+
   const value = useMemo(
     () => ({
       appointments: data.appointments,
@@ -365,6 +430,12 @@ export function ScheduleStoreProvider({
       money: data.money,
       setMoney,
       applyWorld,
+      branch: data.branch,
+      resources: data.resources,
+      packageCatalog: data.packageCatalog,
+      topupBonusTiers: data.topupBonusTiers,
+      config: data.config,
+      saveSettings,
     }),
     [
       data,
@@ -387,6 +458,7 @@ export function ScheduleStoreProvider({
       setPolicies,
       setMoney,
       applyWorld,
+      saveSettings,
     ],
   );
 

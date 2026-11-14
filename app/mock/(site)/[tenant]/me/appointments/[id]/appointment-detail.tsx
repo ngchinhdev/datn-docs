@@ -23,6 +23,7 @@ import {
 } from '@/mock/policy';
 import { bookingCode, heldItems, modeOf, openQuestion } from '@/mock/reschedule';
 import { branchPhone } from '@/mock/site';
+import { termsOfAppointment } from '@/mock/terms';
 import { formatDay, formatTime, localDate } from '@/mock/time';
 import type { LeaveHandling } from '@/mock/fixtures';
 
@@ -58,7 +59,7 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
   const items = heldItems(fixture, appt, store.servedSubjects, asksSubject || mode === 'group');
   const nameOf = (rid: string) => resources.find((r) => r.id === rid)?.name ?? '';
   const titleOf = (rid: string) => staff.find((s) => s.resourceId === rid)?.profile.title ?? '';
-  const phone = branchPhone(tenantSlug);
+  const phone = branchPhone(tenantSlug, fixture.branches[0]?.phone);
   const end = appt.bookings.reduce(
     (m, b) => (b.kind !== 'cleanup' && b.endAt > m ? b.endAt : m),
     appt.startAt,
@@ -66,13 +67,14 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
   const day = formatDay(localDate(appt.startAt));
   const live = appt.status === 'confirmed' || appt.status === 'checked_in';
   const price = items.reduce((m, it) => m + it.priceVnd, 0n);
-  const policy = fixture.policies;
+  // BR-38: the terms the customer was promised when they booked.
+  const policy = termsOfAppointment(appt, tenantSlug);
   const selfOk = live && canSelfService(appt.startAt, now, policy.cancelBeforeHours);
   const used = appt.selfChanges ?? 0;
   const left = Math.max(0, policy.maxReschedules - used);
   const deposit = appt.depositVnd ?? 0n;
-  const percent = refundPercent(appt.startAt, now);
-  const refund = refundVnd(deposit, appt.startAt, now);
+  const percent = refundPercent(appt.startAt, now, policy.refund);
+  const refund = refundVnd(deposit, appt.startAt, now, policy.refund);
 
   const question = live ? openQuestion(appt.id, store.leaves, store.requeues) : null;
   /** What the customer answered the shop, if they did (BR-33). */

@@ -67,7 +67,7 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
   const requeue = requeues.find((r) => r.id === id);
   const subject = leave ?? requeue;
   const resourceId = subject?.resourceId ?? '';
-  const name = L.name(resourceId);
+  const name = requeue?.label ?? L.name(resourceId);
   const handling: Record<string, LeaveHandling> = useMemo(
     () => (leave ? (leave.handling ?? {}) : (requeue?.handling ?? {})),
     [leave, requeue],
@@ -187,7 +187,11 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
     const h = handling[appt.id];
     const total = appt.items.reduce((sum, i) => sum + i.priceVnd, 0n);
     const deposit = appt.depositVnd ?? 0n;
-    const mineItems = appt.items.filter((i) => i.staffResourceId === resourceId);
+    // A cut shift touches one person's items; new hours or a resource out of use touch the whole booking.
+    const wholeBooking = requeue?.kind === 'hours' || requeue?.kind === 'outage';
+    const mineItems = wholeBooking
+      ? appt.items
+      : appt.items.filter((i) => i.staffResourceId === resourceId);
     const named = mineItems.some((i) => i.staffChoice === 'chosen');
     const staffIds = new Set(fixture.staff.map((s) => s.resourceId));
     const resources = [
@@ -202,7 +206,12 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
       id: appt.id,
       time: formatTime(appt.startAt),
       title: `${L.who(appt)} · ${services}`,
-      choice: { text: named ? `Chọn đích danh ${name}` : 'Bất kỳ ai', named },
+      choice: {
+        text: named
+          ? `Chọn đích danh ${wholeBooking ? [...new Set(mineItems.map((i) => L.name(i.staffResourceId)))].join(', ') : name}`
+          : 'Bất kỳ ai',
+        named,
+      },
       meta: `${resources.join(', ')} · ${formatVnd(total)}${deposit > 0n ? ` · đã cọc ${formatVnd(deposit)}` : ''}`,
     };
     const undo = (
@@ -427,7 +436,7 @@ export function TimeOffCaseScreen({ tenantSlug, id }: { tenantSlug: string; id: 
 
   const title = leave
     ? `${name} xin nghỉ ${whenText(leave)}`
-    : `${name} bớt ca ${formatDay(subject.date).replace(',', '')}`;
+    : (requeue?.title ?? `${name} bớt ca ${formatDay(subject.date).replace(',', '')}`);
   const sub = leave
     ? `Lý do: ${leave.reason} · gửi ${formatDateTime(leave.sentAt)}`
     : `${requeue?.reason ?? ''} · tạo ${formatDateTime(requeue?.createdAt ?? now)}`;

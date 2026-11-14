@@ -4,7 +4,7 @@
  * input from a tenant fixture. The real one lives in datn-saas/packages/scheduling-core.
  * Imports only types and pure modules, so Node can run it (scripts/check-availability.ts).
  */
-import { openingHours } from './hours.ts';
+import { openingWindows } from './hours.ts';
 import {
   contains,
   fit,
@@ -186,9 +186,12 @@ interface DayContext {
 
 function dayContext(query: Omit<AvailabilityQuery, 'variant' | 'serviceId' | 'staffResourceId'>) {
   const { fixture, date } = query;
-  const hours = openingHours(fixture, date);
-  if (!hours) return null;
-  const open: Interval[] = [[localMinutes(date, hours.open), localMinutes(date, hours.close)]];
+  const windows = openingWindows(fixture, date);
+  if (windows.length === 0) return null;
+  // BR-02: a day may have several windows; the time between them is closed.
+  const open = normalize(
+    windows.map((w): Interval => [localMinutes(date, w.open), localMinutes(date, w.close)]),
+  );
   const dayStart = localMinutes(date, '00:00');
   const now = minutesOf(query.now ?? query.notBefore ?? isoOf(0));
 
@@ -239,7 +242,11 @@ function resourcesFor(
         (item.staffResourceId === ANY_STAFF || r.id === item.staffResourceId);
       if (!ok) continue;
     }
-    const mine = normalize(day.busy.get(r.id) ?? []);
+    // BR-37: a resource out of use for a while has no free time in it.
+    const outages = (fixture.config?.outages ?? [])
+      .filter((o) => o.resourceId === r.id)
+      .map((o): Interval => [minutesOf(o.from), minutesOf(o.to)]);
+    const mine = normalize([...(day.busy.get(r.id) ?? []), ...outages]);
     const working = isStaff
       ? staffWindows({
           shifts: day.shifts,

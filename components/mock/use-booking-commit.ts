@@ -2,6 +2,7 @@
 
 import type { Appointment, Customer, ServedSubject } from '@/mock/fixtures';
 import { buildAppointment, type BookingSlot } from '@/mock/booking';
+import { termsFrom } from '@/mock/policy';
 import type { BookingDraft } from './booking-draft';
 import { useScheduleStore } from './schedule-store';
 import { useLiveFixture } from './use-live-fixture';
@@ -90,6 +91,8 @@ export function useBookingCommit(tenantSlug: string) {
       status,
       ...(status === 'held' ? { holdExpiresAt: draft.holdExpiresAt } : {}),
       ...(status === 'confirmed' && draft.depositVnd > 0n ? { depositVnd: draft.depositVnd } : {}),
+      // BR-38: the booking keeps the terms of the day it was made.
+      terms: termsFrom(fixture.policies, fixture.config.refundTiers),
     });
     if (store.appointments.some((a) => a.id === appt.id)) store.replaceAppointment(appt);
     else store.addAppointment(appt);

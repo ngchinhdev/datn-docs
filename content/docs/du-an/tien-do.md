@@ -7,6 +7,35 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 13/11/2026 (tối): mock cấu hình cơ sở (Bước 14, đợt D)
+
+- **Đã làm** (nhánh `feat/mock-settings`, mỗi mục 14a–14h một commit, `pnpm build` chạy trước mỗi commit):
+  - 14a: cấu hình của cơ sở nằm trong store: chi nhánh, giờ mở cửa nhiều khung, ngày đặc biệt, giá riêng, tài nguyên và khoảng ngưng, chính sách, thương hiệu, gói, thanh toán, thông báo, chatbot. `findSlots` đọc giờ mở cửa nhiều khung và bỏ tài nguyên đang ngưng; giá theo chi nhánh (giá theo cấp tính trên giá chi nhánh, BR-56); màn Thu tiền đọc phương thức quầy; nhật ký có cấu trúc (người, vai trò, thao tác, đối tượng, chi tiết).
+  - 14b: `/settings/branches`, `/settings/branches/[id]`: nhiều khung mỗi ngày không chồng nhau (BR-02), ngày đặc biệt, giá riêng. Lưu mà có lịch nằm ngoài giờ mới thì nút thành "Lưu và xếp lại N lịch", các lịch vào "Cần xếp lại".
+  - 14c: `/settings/resources`: tạm ngưng theo khoảng giờ; lịch còn tài nguyên cùng loại trống thì tự chuyển, không còn thì vào "Cần xếp lại" (BR-37). "Mở lại" kết thúc khoảng ngưng ngay.
+  - 14d: Chính sách có câu ví dụ tính từ giờ mock và số đang nhập, ba mức hoàn cọc (BR-23). Lịch đặt online giữ điều khoản lúc đặt (BR-38). Nút "Không đến" dùng số phút của chính sách (BR-09).
+  - 14e: `/settings/branding`: màu nhấn kiểm tương phản 4,5 : 1 (BR-65), logo xem trước trong trình duyệt, đường dẫn trang đặt lịch. Trang khách đổi màu ngay.
+  - 14f: `/settings/packages` (Đang bán, "X ₫ mỗi buổi, rẻ hơn giá lẻ Y%"), `/settings/payments` (cổng giả lập, phương thức quầy, mức tặng nhiều bậc, phí hủy gói). MH-29 và MH-30 đọc từ đây.
+  - 14g: `/settings/notifications` (chỉ hai email nhắc tắt được, BR-66; xem trước dùng mẫu của `mock/emails.ts`), `/settings/chatbot` (lời chào tối đa 200 ký tự, hai giới hạn, BR-67; câu trả lời xem trước lấy giờ trống, giá, thời lượng từ hệ thống).
+  - 14h: `/audit-log`: lọc người, thao tác, khoảng ngày, tìm theo đối tượng; chỉ thêm, giữ 12 tháng (BR-63). Thu tiền và việc hệ thống tự làm (bật bắt buộc cọc khi đủ K lần không đến, hoàn cọc tự động) cũng được ghi.
+  - `pnpm check:shop` (script mới): giờ nhiều khung, ngày đặc biệt, tài nguyên ngưng, giá chi nhánh, tương phản màu, điều khoản theo lịch, gói và mức tặng, email nhắc, chatbot, nhật ký.
+- **Tự quyết:**
+  - Địa chỉ trang đặt lịch viết dạng `toc-may.sapio.vn` theo T-16; bảng `ThuongHieu` vẽ `sapio.vn/toc-may`. Route mock giữ slug cố định, nên đổi đường dẫn chỉ ghi slug cũ và hạn chuyển hướng 90 ngày.
+  - Bảng `TaiNguyen` ghi Ghế 3 "Bảo trì đến 12/11" mà khung bên cạnh lại xếp lịch sang "Ghế 3 trống". Mock không dựng khoảng ngưng sẵn cho Ghế 3 (lịch mẫu đang dùng nó); ca tạm ngưng Ghế 2 ngày 10/11 09:00–13:00 tính từ dữ liệu: một lịch dùng Ghế 2 và không còn ghế trống, nên vào "Cần xếp lại".
+  - Nhắc trước 2 giờ mặc định bật (bảng vẽ tắt) để mẫu email MH-23 giữ đủ tám mẫu.
+  - Điều khoản một lịch (tự đổi trước X giờ, số lần đổi, mức hoàn cọc) lưu trên lịch lúc đặt; lịch mẫu dùng điều khoản lúc cơ sở mở.
+  - Lịch "nằm ngoài giờ" khi đổi giờ mở cửa chỉ tính lịch đã xác nhận từ bây giờ trở đi.
+  - Nút trò chuyện chưa có trên trang khách; chatbot mới có cấu hình và xem trước. Hai công tắc báo nhân viên chỉ lưu, chưa có màn nhận thông báo.
+  - Dòng mẫu của nhật ký tính từ dữ liệu mẫu (HĐ-0182, HĐ-0183, HĐ-0184, hoàn cọc tự động, bắt buộc cọc của anh Phúc), không dùng HĐ-0179 của bảng vẽ.
+- **Ghi chú cho ERD:**
+  - `branches.phone`; `branch_prices` (chi nhánh, biến thể, giá).
+  - `resource_outages` (tài nguyên, khoảng, lý do); `requeues.kind` (`shift`, `hours`, `outage`).
+  - `appointments.terms` (cancel_before_hours, max_reschedules, mức hoàn theo ba mốc).
+  - `package_products.selling`; `customer_packages.product_id`.
+  - `tenant_settings` có mức hoàn cọc, phí hủy gói, phương thức quầy; `gateway_events`; `tenant_branding` (màu, slug, slug cũ, hạn chuyển hướng, tên tệp logo).
+  - `audit_log`: giờ, người, vai trò, thao tác, đối tượng, đường dẫn, chi tiết.
+- **Tiếp theo:** người dùng kiểm Bước 14 và review PR; phiên claude.ai vẽ đợt E (quản lý, báo cáo: MH-37, MH-41, MH-55, MH-56).
+
 ### 13/11/2026 (tối): chốt đợt D, cấu hình cơ sở
 - **Đã làm:**
   - Vẽ và chốt đợt D (9 bảng):

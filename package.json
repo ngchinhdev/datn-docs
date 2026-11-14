@@ -13,6 +13,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "check:availability": "node scripts/check-availability.ts",
     "check:money": "node scripts/check-money.ts",
+    "check:shop": "node scripts/check-shop.ts",
     "format": "prettier --write app components lib mock"
   },
   "dependencies": {

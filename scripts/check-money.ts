@@ -550,6 +550,7 @@ for (const f of tenantFixtures) {
     commissionPercent: salon.commissionPercent,
     now: NOW,
     actor: 'Lan',
+    role: 'Lễ tân',
   };
   const start: World = {
     money: salon.money,
@@ -860,6 +861,7 @@ for (const f of tenantFixtures) {
     commissionPercent: salon.commissionPercent,
     now: NOW,
     actor: 'Hùng',
+    role: 'Quản lý',
   };
   const start: World = {
     money: salon.money,
@@ -893,7 +895,9 @@ for (const f of tenantFixtures) {
     'BR-42: có một dòng thu hồi hoa hồng',
   );
   report(
-    w.money.audit.some((a) => a.text.includes('Duyệt hoàn') && a.by === 'Hùng'),
+    w.money.audit.some(
+      (a) => a.action === 'Duyệt hoàn tiền' && a.by === 'Hùng' && a.role === 'Quản lý',
+    ),
     'BR-63: duyệt hoàn tiền được ghi nhật ký',
   );
   report(
