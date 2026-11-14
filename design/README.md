@@ -112,5 +112,11 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `MatKetNoi.dc.html` | MH-10 Mất kết nối realtime trên lịch lễ tân | **Đã chọn** | `/mock/app/[tenant]/calendar` (công cụ mock) |
 | `CoSoBiKhoa.dc.html` | MH-10 Cơ sở bị khóa, khu nội bộ | **Đã chọn** | công cụ mock "Khóa cơ sở" |
 | `CoSoBiKhoaKhach.dc.html` | MH-10 Trang khách tạm dừng (điện thoại) | **Đã chọn** | `/mock/[tenant]` khi cơ sở bị khóa hoặc hết gói |
+| `QtTongQuan.dc.html` | MH-60 Tổng quan nền tảng: ô số, cơ sở theo ngành, cơ sở mới, sắp hết hạn | **Đã chọn** | `/mock/admin` (Bước 17) |
+| `QtKhachThue.dc.html` | MH-58 Danh sách khách thuê: tìm, lọc, gói, trạng thái, hạn | **Đã chọn** | `/mock/admin/tenants` |
+| `QtKhachThueChiTiet.dc.html` | MH-58 Chi tiết cơ sở (Tóc Mây): số tổng, gói và thanh toán, nhật ký quản trị | **Đã chọn** | `/mock/admin/tenants/[id]` |
+| `QtKhoaCoSo.dc.html` | MH-58 Hộp khóa cơ sở có lý do | **Đã chọn** | nút "Khóa cơ sở" ở chi tiết |
+| `QtGiaHan.dc.html` | MH-58 Hộp gia hạn thủ công (cơ sở đã hết hạn) | **Đã chọn** | nút "Gia hạn thủ công" ở chi tiết |
+| `QtGoiVaGia.dc.html` | MH-62 Gói và giá: hai gói, giá theo kỳ, thay đổi chưa lưu | **Đã chọn** | `/mock/admin/plans` |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70, BR-73, BR-75, BR-76 đến BR-79 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70, BR-73, BR-75, BR-76 đến BR-79, BR-83, BR-84, BR-89 đến BR-91 trong `content/docs/nghiep-vu/quy-tac.md`.

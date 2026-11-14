@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MH-60 · Tổng quan nền tảng</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-shell" style="position: relative; height: 900px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <nav class="sp-shell__side" id="admin-sidebar" aria-label="Điều hướng quản trị nền tảng">
+    <div class="sp-brand">
+      <span class="sp-brand__name">Sapio</span>
+      <button type="button" class="sp-icon-btn" aria-label="Thu gọn thanh bên" aria-expanded="true" aria-controls="admin-sidebar" title="Thu gọn thanh bên"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg></button>
+    </div>
+    <div class="sp-switcher" style="cursor: default; width: 100%; box-sizing: border-box;">
+      <span class="sp-switcher__mark" aria-hidden="true" style="background: var(--brand-soft); color: var(--brand);">S</span>
+      <span class="sp-switcher__text"><span class="sp-switcher__name">Quản trị nền tảng</span><span class="sp-switcher__sub">admin.sapio.vn</span></span>
+    </div>
+    <div class="sp-nav">
+      <a class="sp-nav__item" href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg><span class="sp-nav__label">Tổng quan</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg><span class="sp-nav__label">Khách thuê</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"></path><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"></path></svg><span class="sp-nav__label">Gói cấu hình ngành</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"></circle></svg><span class="sp-nav__label">Gói và giá</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12h-5"></path><path d="M15 8h-5"></path><path d="M19 17V5a2 2 0 0 0-2-2H4"></path><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"></path></svg><span class="sp-nav__label">Nhật ký</span></a>
+    </div>
+    <div class="sp-account">
+      <span class="sp-avatar sp-avatar--sm">CN</span>
+      <span class="sp-account__text"><span class="sp-switcher__name" style="font-size: 13px; line-height: 18px;">Chính Nguyễn</span><span class="sp-switcher__sub">Quản trị nền tảng</span></span>
+      <button type="button" class="sp-icon-btn" aria-label="Chuyển sang giao diện tối" title="Chuyển sang giao diện tối"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></button>
+    </div>
+  </nav>
+  <main class="sp-shell__main" style="overflow: auto;">
+    <div class="sp-shell__content sp-shell__content--wide">
+      <div class="sp-page-head"><div><h1 class="sp-page-head__title">Tổng quan nền tảng</h1><p class="sp-page-head__sub">Số liệu đến 10:20, 07/11/2026. Chỉ là số tổng, không có dữ liệu khách của cơ sở nào.</p></div></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch;"><section class="sp-panel" style="gap: 4px; flex: 1 1 140px; min-width: 0;" aria-label="Cơ sở">
+          <span style="font: 500 13px/18px var(--font-sans); color: var(--ink-muted);">Cơ sở</span>
+          <span class="sp-num" style="font: 700 26px/32px var(--font-sans); letter-spacing: -0.01em;">23</span>
+          <span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">+6 từ 01/11</span>
+        </section><section class="sp-panel" style="gap: 4px; flex: 1 1 140px; min-width: 0;" aria-label="Đang trả phí">
+          <span style="font: 500 13px/18px var(--font-sans); color: var(--ink-muted);">Đang trả phí</span>
+          <span class="sp-num" style="font: 700 26px/32px var(--font-sans); letter-spacing: -0.01em;">15</span>
+          <span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">9 Cơ bản · 6 Chuyên nghiệp</span>
+        </section><section class="sp-panel" style="gap: 4px; flex: 1 1 140px; min-width: 0;" aria-label="Dùng thử">
+          <span style="font: 500 13px/18px var(--font-sans); color: var(--ink-muted);">Dùng thử</span>
+          <span class="sp-num" style="font: 700 26px/32px var(--font-sans); letter-spacing: -0.01em;">5</span>
+          <span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">1 hết trong 3 ngày tới</span>
+        </section><section class="sp-panel" style="gap: 4px; flex: 1 1 140px; min-width: 0;" aria-label="Hết hạn, chưa gia hạn">
+          <span style="font: 500 13px/18px var(--font-sans); color: var(--ink-muted);">Hết hạn, chưa gia hạn</span>
+          <span class="sp-num" style="font: 700 26px/32px var(--font-sans); letter-spacing: -0.01em;">3</span>
+          <span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Dữ liệu vẫn giữ (BR-82)</span>
+        </section><section class="sp-panel" style="gap: 4px; flex: 1 1 140px; min-width: 0;" aria-label="Bị khóa">
+          <span style="font: 500 13px/18px var(--font-sans); color: var(--ink-muted);">Bị khóa</span>
+          <span class="sp-num" style="font: 700 26px/32px var(--font-sans); letter-spacing: -0.01em;">1</span>
+          <span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Nail Xinh 247 · từ 06/11</span>
+        </section><section class="sp-panel" style="gap: 4px; flex: 1 1 140px; min-width: 0;" aria-label="Thu tháng 11">
+          <span style="font: 500 13px/18px var(--font-sans); color: var(--ink-muted);">Thu tháng 11</span>
+          <span class="sp-num" style="font: 700 26px/32px var(--font-sans); letter-spacing: -0.01em;">5.183.000 ₫</span>
+          <span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">12 giao dịch · tính đến 07/11</span>
+        </section></div>
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch;"><div style="flex: 2 1 0; min-width: 0; display: flex; flex-direction: column; gap: 16px;"><section class="sp-panel" aria-labelledby="ov-ind">
+          <div style="display: flex; align-items: center; gap: 8px;"><h2 class="sp-panel__title" id="ov-ind">Cơ sở theo ngành</h2></div>
+          <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Cơ sở theo ngành, cuộn được"><table class="sp-table"><caption class="sp-sr-only">Cơ sở theo ngành</caption><thead><tr><th scope="col">Ngành</th><th scope="col" class="sp-table__num">Cơ sở</th><th scope="col" class="sp-table__num">Trả phí</th><th scope="col" class="sp-table__num">Dùng thử</th><th scope="col" class="sp-table__num">Hết hạn</th><th scope="col" class="sp-table__num">Lịch hẹn tháng 11</th></tr></thead><tbody><tr><td><a href="#">Salon tóc</a> <span style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">· gói ngành bản 3</span></td><td class="sp-table__num sp-num">16</td><td class="sp-table__num sp-num">11</td><td class="sp-table__num sp-num">3</td><td class="sp-table__num sp-num">2</td><td class="sp-table__num sp-num">1.812</td></tr><tr><td><a href="#">Spa thú cưng</a> <span style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">· gói ngành bản 2</span></td><td class="sp-table__num sp-num">7</td><td class="sp-table__num sp-num">4</td><td class="sp-table__num sp-num">2</td><td class="sp-table__num sp-num">1</td><td class="sp-table__num sp-num">604</td></tr><tr><td><strong>Tổng</strong></td><td class="sp-table__num sp-num"><strong>23</strong></td><td class="sp-table__num sp-num"><strong>15</strong></td><td class="sp-table__num sp-num"><strong>5</strong></td><td class="sp-table__num sp-num"><strong>3</strong></td><td class="sp-table__num sp-num"><strong>2.416</strong></td></tr></tbody></table></div><p class="sp-panel__note">Lịch hẹn tính theo ngày hẹn trong tháng, mọi trạng thái trừ đã hủy.</p>
+        </section><section class="sp-panel" aria-labelledby="ov-new">
+          <div style="display: flex; align-items: center; gap: 8px;"><h2 class="sp-panel__title" id="ov-new">Cơ sở mới</h2><div style="margin-left: auto;"><a href="#" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Xem tất cả<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a></div></div>
+          <div class="sp-table-wrap" tabindex="0" role="region" aria-label="Cơ sở mới, cuộn được"><table class="sp-table"><caption class="sp-sr-only">Cơ sở mới</caption><thead><tr><th scope="col">Cơ sở</th><th scope="col">Ngành</th><th scope="col">Tạo ngày</th><th scope="col">Trạng thái</th></tr></thead><tbody><tr><td><div class="sp-table__primary"><span><a href="#">Barber Phố Cổ</a><span class="sp-table__secondary">barber-pho-co.sapio.vn</span></span></div></td><td>Salon tóc</td><td><span class="sp-num">06/11/2026</span></td><td><span class="sp-badge sp-badge--confirmed">Dùng thử · còn 6 ngày</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Pet House Quận 7</a><span class="sp-table__secondary">pethouse-q7.sapio.vn</span></span></div></td><td>Spa thú cưng</td><td><span class="sp-num">06/11/2026</span></td><td><span class="sp-badge sp-badge--confirmed">Dùng thử · còn 6 ngày</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Tiệm gội Bống</a><span class="sp-table__secondary">tiem-goi-bong.sapio.vn</span></span></div></td><td>Salon tóc</td><td><span class="sp-num">05/11/2026</span></td><td><span class="sp-badge sp-badge--confirmed">Dùng thử · còn 5 ngày</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Tóc Xinh Gò Vấp</a><span class="sp-table__secondary">toc-xinh-gv.sapio.vn</span></span></div></td><td>Salon tóc</td><td><span class="sp-num">03/11/2026</span></td><td><span class="sp-badge sp-badge--checked-in">Đang dùng</span> <span style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Cơ bản, từ 04/11</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Spa Mèo Ú</a><span class="sp-table__secondary">spa-meo-u.sapio.vn</span></span></div></td><td>Spa thú cưng</td><td><span class="sp-num">02/11/2026</span></td><td><span class="sp-badge sp-badge--confirmed">Dùng thử · còn 2 ngày</span></td></tr></tbody></table></div>
+        </section></div><div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 16px;"><section class="sp-panel" aria-labelledby="ov-soon">
+          <div style="display: flex; align-items: center; gap: 8px;"><h2 class="sp-panel__title" id="ov-soon">Sắp hết hạn, đã hết hạn</h2></div>
+          <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column;"><li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line);"><span style="flex: 1 1 auto; display: flex; flex-direction: column;"><span style="font: 500 14px/20px var(--font-sans);">Spa Mèo Ú</span><span style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Dùng thử hết 23:59 ngày 08/11, chưa kích hoạt</span></span><span class="sp-badge sp-badge--confirmed">Dùng thử · còn 2 ngày</span></li><li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line);"><span style="flex: 1 1 auto; display: flex; flex-direction: column;"><span style="font: 500 14px/20px var(--font-sans);">Tóc Đẹp Thủ Đức</span><span style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Chuyên nghiệp hết 09/11, đã nhắc 1 lần (BR-86)</span></span><span class="sp-badge sp-badge--pending">Còn 3 ngày</span></li><li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line);"><span style="flex: 1 1 auto; display: flex; flex-direction: column;"><span style="font: 500 14px/20px var(--font-sans);">Nail Hạ Vy</span><span style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Cơ bản hết 31/10, chưa gia hạn</span></span><span class="sp-badge sp-badge--no-show">Hết hạn</span></li></ul><p class="sp-panel__note">Nhắc qua email do hệ thống gửi (BR-86); ở đây chỉ để biết.</p>
+        </section></div></div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

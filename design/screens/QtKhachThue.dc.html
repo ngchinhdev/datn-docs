@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MH-58 · Khách thuê</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-shell" style="position: relative; height: 900px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <nav class="sp-shell__side" id="admin-sidebar" aria-label="Điều hướng quản trị nền tảng">
+    <div class="sp-brand">
+      <span class="sp-brand__name">Sapio</span>
+      <button type="button" class="sp-icon-btn" aria-label="Thu gọn thanh bên" aria-expanded="true" aria-controls="admin-sidebar" title="Thu gọn thanh bên"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg></button>
+    </div>
+    <div class="sp-switcher" style="cursor: default; width: 100%; box-sizing: border-box;">
+      <span class="sp-switcher__mark" aria-hidden="true" style="background: var(--brand-soft); color: var(--brand);">S</span>
+      <span class="sp-switcher__text"><span class="sp-switcher__name">Quản trị nền tảng</span><span class="sp-switcher__sub">admin.sapio.vn</span></span>
+    </div>
+    <div class="sp-nav">
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg><span class="sp-nav__label">Tổng quan</span></a>
+      <a class="sp-nav__item" href="#" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg><span class="sp-nav__label">Khách thuê</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"></path><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"></path></svg><span class="sp-nav__label">Gói cấu hình ngành</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"></circle></svg><span class="sp-nav__label">Gói và giá</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 12h-5"></path><path d="M15 8h-5"></path><path d="M19 17V5a2 2 0 0 0-2-2H4"></path><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"></path></svg><span class="sp-nav__label">Nhật ký</span></a>
+    </div>
+    <div class="sp-account">
+      <span class="sp-avatar sp-avatar--sm">CN</span>
+      <span class="sp-account__text"><span class="sp-switcher__name" style="font-size: 13px; line-height: 18px;">Chính Nguyễn</span><span class="sp-switcher__sub">Quản trị nền tảng</span></span>
+      <button type="button" class="sp-icon-btn" aria-label="Chuyển sang giao diện tối" title="Chuyển sang giao diện tối"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></button>
+    </div>
+  </nav>
+  <main class="sp-shell__main" style="overflow: auto;">
+    <div class="sp-shell__content sp-shell__content--wide">
+      <div class="sp-page-head"><div><h1 class="sp-page-head__title">Khách thuê</h1><p class="sp-page-head__sub">23 cơ sở trên Sapio. Mở một cơ sở để gia hạn thủ công hoặc khóa.</p></div></div>
+      <div class="sp-toolbar">
+        <label class="sp-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg><input type="search" placeholder="Tên, địa chỉ trang hoặc email chủ cơ sở" aria-label="Tìm cơ sở"></label>
+        <button class="sp-chip" type="button" aria-pressed="false">Trạng thái <span class="sp-chip__value">Tất cả</span></button>
+        <button class="sp-chip" type="button" aria-pressed="false">Gói <span class="sp-chip__value">Tất cả</span></button>
+        <button class="sp-chip" type="button" aria-pressed="false">Ngành <span class="sp-chip__value">Tất cả</span></button>
+        <button class="sp-chip" type="button" aria-pressed="false">Bị khóa</button>
+      </div>
+      <div class="sp-table-card" style="height: 610px;"><div class="sp-table-wrap" tabindex="0" role="region" aria-label="Danh sách cơ sở, cuộn được"><table class="sp-table"><caption class="sp-sr-only">Danh sách cơ sở</caption><thead><tr><th scope="col">Cơ sở</th><th scope="col">Ngành</th><th scope="col">Gói</th><th scope="col">Trạng thái</th><th scope="col">Hạn</th><th scope="col">Chủ cơ sở</th><th scope="col">Tạo ngày</th></tr></thead><tbody><tr><td><div class="sp-table__primary"><span><a href="#">Salon Tóc Mây</a><span class="sp-table__secondary">toc-may.sapio.vn</span></span></div></td><td>Salon tóc</td><td>Chuyên nghiệp</td><td><span class="sp-badge sp-badge--checked-in">Đang dùng</span></td><td><span class="sp-num">28/11/2026</span></td><td>chinh@tocmay.vn</td><td><span class="sp-num">15/08/2026</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Spa thú cưng Pawpaw</a><span class="sp-table__secondary">pawpaw.sapio.vn</span></span></div></td><td>Spa thú cưng</td><td>Cơ bản</td><td><span class="sp-badge sp-badge--checked-in">Đang dùng</span></td><td><span class="sp-num">28/11/2026</span></td><td>ha.le@pawpaw.vn</td><td><span class="sp-num">20/09/2026</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Barber Phố Cổ</a><span class="sp-table__secondary">barber-pho-co.sapio.vn</span></span></div></td><td>Salon tóc</td><td>Chuyên nghiệp</td><td><span class="sp-badge sp-badge--confirmed">Dùng thử · còn 6 ngày</span></td><td><span class="sp-num">12/11/2026</span></td><td>duc.barber@email.vn</td><td><span class="sp-num">06/11/2026</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Pet House Quận 7</a><span class="sp-table__secondary">pethouse-q7.sapio.vn</span></span></div></td><td>Spa thú cưng</td><td>Chuyên nghiệp</td><td><span class="sp-badge sp-badge--confirmed">Dùng thử · còn 6 ngày</span></td><td><span class="sp-num">12/11/2026</span></td><td>an.pethouse@email.vn</td><td><span class="sp-num">06/11/2026</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Tiệm gội Bống</a><span class="sp-table__secondary">tiem-goi-bong.sapio.vn</span></span></div></td><td>Salon tóc</td><td>Chuyên nghiệp</td><td><span class="sp-badge sp-badge--confirmed">Dùng thử · còn 5 ngày</span></td><td><span class="sp-num">11/11/2026</span></td><td>bong.tran@email.vn</td><td><span class="sp-num">05/11/2026</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Tóc Đẹp Thủ Đức</a><span class="sp-table__secondary">tocdep-td.sapio.vn</span></span></div></td><td>Salon tóc</td><td>Chuyên nghiệp</td><td><span class="sp-badge sp-badge--checked-in">Đang dùng</span></td><td><span class="sp-num">09/11/2026</span></td><td>quang.tocdep@email.vn</td><td><span class="sp-num">10/08/2026</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Nail Xinh 247</a><span class="sp-table__secondary">nailxinh247.sapio.vn</span></span></div></td><td>Salon tóc</td><td>Cơ bản</td><td><span class="sp-badge sp-badge--checked-in">Đang dùng</span> <span style="display: inline-flex; align-items: center; gap: 4px; font: 600 12px/16px var(--font-sans); color: var(--danger);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Bị khóa</span></td><td><span class="sp-num">15/12/2026</span></td><td>xinh247@email.vn</td><td><span class="sp-num">01/09/2026</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Nail Hạ Vy</a><span class="sp-table__secondary">nail-ha-vy.sapio.vn</span></span></div></td><td>Salon tóc</td><td>Cơ bản</td><td><span class="sp-badge sp-badge--no-show">Hết hạn</span></td><td><span class="sp-num">31/10/2026</span></td><td>havy.nail@email.vn</td><td><span class="sp-num">25/08/2026</span></td></tr><tr><td><div class="sp-table__primary"><span><a href="#">Spa Mèo Ú</a><span class="sp-table__secondary">spa-meo-u.sapio.vn</span></span></div></td><td>Spa thú cưng</td><td>Chuyên nghiệp</td><td><span class="sp-badge sp-badge--confirmed">Dùng thử · còn 2 ngày</span></td><td><span class="sp-num">08/11/2026</span></td><td>meou.spa@email.vn</td><td><span class="sp-num">02/11/2026</span></td></tr></tbody></table></div><div class="sp-table-foot"><span class="sp-num">Hiển thị 1–9 trong 23 cơ sở</span>
+          <div class="sp-table-foot__right">
+            <nav class="sp-pagination" aria-label="Phân trang">
+              <button type="button" class="sp-pagination__page sp-pagination__step" aria-label="Trang trước" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+              <a class="sp-pagination__page" href="#" aria-current="page">1</a>
+              <a class="sp-pagination__page" href="#">2</a>
+              <a class="sp-pagination__page" href="#">3</a>
+              <a class="sp-pagination__page sp-pagination__step" href="#" aria-label="Trang sau"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></a>
+            </nav>
+          </div></div></div>
+      <p style="margin: 0; font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">"Hạn" là ngày cuối của dùng thử hoặc của kỳ đã trả, dùng đến 23:59 giờ của cơ sở. Khóa (BR-75) là việc của quản trị nền tảng, không phải trạng thái gói: cơ sở bị khóa vẫn giữ gói và hạn.</p>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

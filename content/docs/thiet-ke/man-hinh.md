@@ -146,10 +146,10 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-58 | Khách thuê | `/admin/tenants`, `/admin/tenants/[id]` | QTNT | 1 | DS | Khóa, mở khóa có lý do (BR-75); cột gói, trạng thái (dùng thử, đang dùng, hết hạn) và hạn; gia hạn thủ công; chi tiết chỉ có số liệu tổng (số chi nhánh, số lịch tháng), **không** xem dữ liệu khách của cơ sở |
+| MH-58 | Khách thuê | `/admin/tenants`, `/admin/tenants/[id]` | QTNT | 1 | Vẽ | **Đã chọn.** Danh sách tìm, lọc theo trạng thái, gói, ngành, bị khóa; cột gói, trạng thái (dùng thử, đang dùng, hết hạn) và hạn. Chi tiết chỉ có số tổng, **không** xem dữ liệu khách của cơ sở (BR-89); hộp khóa, mở khóa có lý do (BR-75, BR-90) và gia hạn thủ công (BR-91); nhật ký quản trị của cơ sở |
 | MH-59 | Gói cấu hình ngành | `/admin/templates`, `/admin/templates/[id]` | QTNT | 1 | Vẽ | **Đã chọn. Màn chứng minh BT8.** Bản nháp, xuất bản theo phiên bản (BR-70). Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70) |
-| MH-60 | Tổng quan nền tảng | `/admin` | QTNT | 3 | Nhẹ | Số cơ sở theo ngành, số lịch đặt, cơ sở mới |
-| MH-62 | Gói và giá | `/admin/plans` | QTNT | 2 | Form | Giá tháng, tính năng và giới hạn của từng gói (BR-83); mức giảm theo kỳ; đổi giá không ảnh hưởng kỳ đã trả |
+| MH-60 | Tổng quan nền tảng | `/admin` | QTNT | 3 | Vẽ | **Đã chọn.** Ô số (cơ sở, trả phí, dùng thử, hết hạn, bị khóa, thu tháng), cơ sở và lịch hẹn theo ngành, cơ sở mới, sắp hết hạn (BR-89) |
+| MH-62 | Gói và giá | `/admin/plans` | QTNT | 2 | Vẽ | **Đã chọn.** Tên, giá tháng, dòng mô tả, số chi nhánh tối đa, tính năng của hai gói; % giảm theo kỳ kèm bảng giá kỳ; đổi giá chỉ áp lần thanh toán sau (BR-83, BR-84) |
 
 ## Tổng hợp
 

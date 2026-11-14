@@ -1159,6 +1159,71 @@ Chữ và số trên bảng là minh họa. Mock không có máy chủ: "gửi e
   - Bật "Khóa cơ sở" thì trang khách báo tạm dừng nhưng vẫn hủy được lịch đã đặt.
 - **Hoa hồng:** vào vai Quản lý (Hùng) thì có "Hoa hồng của tôi" với đúng số của Hùng.
 
+## Bước 17. Đợt G: quản trị nền tảng (MH-58, MH-60, MH-62)
+
+Sau khi PR #11 merge. Căn cứ:
+- Các bảng `QtTongQuan`, `QtKhachThue`, `QtKhachThueChiTiet`, `QtKhoaCoSo`, `QtGiaHan`, `QtGoiVaGia` (bảng ở `design/README.md`). Khung quản trị (`app/mock/admin/admin-frame.tsx`) đã có từ MH-59, dùng lại.
+- Quy tắc BR-63, BR-75, BR-79 đến BR-91.
+
+Chữ và số trên bảng là minh họa; trong mock mọi số đều tính từ dữ liệu. Làm trên nhánh `feat/mock-admin`, mỗi mục 17a–17f một commit, mở PR mới, không merge.
+
+### 17a. Dữ liệu và quy tắc của nền tảng
+
+- `mock/fixtures/platform.ts`:
+  - **23 cơ sở** như số trên bảng: tên, slug, ngành, gói, ngày tạo, ngày cuối dùng thử hoặc kỳ đã trả, chủ cơ sở, cờ khóa. Tóc Mây, Pawpaw, Tiệm gội Bống, Nail Hạ Vy khớp `workspaces` ở `accounts.ts` và gói ở `mock/subscription.ts` (Tóc Mây Chuyên nghiệp, Pawpaw Cơ bản, cùng hết 28/11/2026). Các cơ sở còn lại chỉ là dữ liệu.
+  - Thanh toán gói, số tổng của từng cơ sở (chi nhánh, thành viên, lịch hẹn, khách đã lưu), nhật ký nền tảng mẫu (lần gia hạn thủ công 22/09 của Tóc Mây).
+- **Giá gói vào store:** hai gói và % giảm theo kỳ thành dữ liệu sửa được. Trang Gói Sapio (MH-61), trang giới thiệu (`mock/landing.ts`) và phần tính tiền nâng gói đọc từ đó, không còn đọc hằng số.
+- `mock/platform.ts` (hàm thuần, nhận `now`):
+  - trạng thái gói của một cơ sở: Dùng thử, Đang dùng, Hết hạn, số ngày còn; cờ khóa tính riêng (BR-89);
+  - số của trang tổng quan, lọc và tìm danh sách;
+  - kiểm lý do khóa (ít nhất 20 ký tự) và mở khóa (BR-90);
+  - hạn mới khi gia hạn thủ công (BR-91);
+  - giá kỳ theo giá tháng và % giảm (BR-84), và kiểm thay đổi gói: thay đổi nào cần xác nhận, bao nhiêu cơ sở bị ảnh hưởng (BR-83).
+- `scripts/check-platform.ts` và lệnh `pnpm check:platform`, mỗi ca đặt tên theo BR. Tối thiểu có các ca sau:
+  - Nail Hạ Vy hết hạn 31/10, gia hạn 7 ngày vào 07/11 thì hạn mới là 13/11; cơ sở còn hạn đến 28/11 gia hạn 7 ngày thành 05/12; đang dùng thử thì kéo dài dùng thử; 91 ngày bị từ chối;
+  - lý do khóa 19 ký tự bị từ chối, 20 ký tự thì được; khóa không đổi hạn của gói;
+  - giá Cơ bản 219.000 ₫: 3 tháng 591.000 ₫, 12 tháng 2.102.000 ₫;
+  - tắt một tính năng của gói Chuyên nghiệp cần xác nhận và báo đúng số cơ sở; bật thêm thì không;
+  - số trên trang tổng quan cộng khớp với danh sách 23 cơ sở.
+
+### 17b. Tổng quan nền tảng (MH-60)
+
+- `/mock/admin` đúng `QtTongQuan`, mọi số tính từ 17a.
+- Mỗi dòng ở "Cơ sở mới" và "Sắp hết hạn" mở chi tiết cơ sở.
+
+### 17c. Danh sách khách thuê (MH-58)
+
+- `/mock/admin/tenants` đúng `QtKhachThue`: tìm theo tên, slug, email chủ cơ sở; lọc theo trạng thái, gói, ngành, bị khóa; phân trang. Bộ lọc nằm trên URL.
+
+### 17d. Chi tiết, khóa, gia hạn (MH-58)
+
+- `/mock/admin/tenants/[id]` đúng `QtKhachThueChiTiet`: chỉ số tổng, không có link vào dữ liệu của cơ sở (BR-89).
+- **Khóa:** hộp theo `QtKhoaCoSo`. Khóa xong:
+  - ghi vào cùng chỗ với công cụ mock "Khóa cơ sở" của Bước 16, nên `/mock/app/[tenant]` hiện `CoSoBiKhoa` với đúng lý do vừa nhập;
+  - thư báo chủ cơ sở hiện trong hộp thư mẫu;
+  - nút đổi thành "Mở khóa", hộp mở khóa cũng có lý do.
+- **Gia hạn thủ công:** hộp theo `QtGiaHan`, hạn mới tính ngay khi đổi số ngày. Gia hạn Tóc Mây hoặc Pawpaw thì trang Gói Sapio của cơ sở đó hiện hạn mới.
+- Khóa, mở khóa, gia hạn đều ghi vào nhật ký quản trị của cơ sở và vào `/mock/admin/audit-log`. Trang này dùng lại bảng của MH-57.
+
+### 17e. Gói và giá (MH-62)
+
+- `/mock/admin/plans` đúng `QtGoiVaGia`: bảng giá kỳ tính lại khi gõ, giá đang áp trong ngoặc; thanh "Chưa lưu" chỉ hiện khi có thay đổi.
+- Tắt tính năng hoặc giảm số chi nhánh thì hỏi lại, kèm số cơ sở bị ảnh hưởng.
+- Lưu xong thì trang giới thiệu và trang Gói Sapio hiện giá mới; kỳ đã trả trong lịch sử thanh toán giữ giá cũ.
+
+### 17f. Hoàn tất
+
+- `mock/screens.ts`: MH-58, MH-60, MH-62 thành "Đang làm", có link tới route mới; sửa ghi chú MH-58 (bỏ chữ "Duyệt").
+- Các lệnh kiểm phải xanh: `pnpm check:availability`, `pnpm check:money`, `pnpm check:shop`, `pnpm check:reports`, `pnpm check:account`, `pnpm check:platform`, `pnpm build`, `pnpm typecheck`, `prettier --check`.
+- Mở PR mới, mô tả theo 17a–17f, có mục "Tự quyết". Ghi một mục Tiến độ.
+
+**Xong khi** (người dùng tự kiểm):
+- **Tổng quan:** 23 cơ sở = 15 trả phí + 5 dùng thử + 3 hết hạn; bấm "Spa Mèo Ú" thì mở chi tiết.
+- **Danh sách:** lọc "Bị khóa" chỉ còn Nail Xinh 247; tìm `tocmay` ra Salon Tóc Mây.
+- **Khóa:** khóa Tóc Mây với lý do 19 ký tự thì bị chặn; đủ 20 ký tự thì khóa được. Vào `/mock/app/toc-may` bằng vai chủ cơ sở thì thấy lý do vừa nhập; mở khóa thì vào lại bình thường.
+- **Gia hạn:** Nail Hạ Vy thêm 7 ngày thì hạn mới 13/11; Tóc Mây thêm 7 ngày thì trang Gói Sapio của Tóc Mây hiện 05/12.
+- **Giá:** đổi giá Cơ bản thành 219.000 ₫ thì bảng kỳ hiện 591.000 ₫ và 2.102.000 ₫; lưu xong trang giới thiệu hiện 219.000 ₫. Tắt "Chatbot đặt lịch" của gói Chuyên nghiệp thì có hộp hỏi lại.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -1294,4 +1359,16 @@ design/README.md (các bảng của đợt F). Làm Bước 16 trong datn-docs/c
 mục 16a đến 16g, mỗi mục một commit. Bố cục theo bảng; chữ lấy từ store, logic là hàm thuần ở mock/ nhận
 `now`, không gọi Date.now(). Chỉ chạy các lệnh kiểm trong CLAUDE.md và các lệnh check của mục 16g. Mở PR
 mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 17:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-admin.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, BR-63, BR-75, BR-79 đến
+BR-91 trong quy-tac.md, và design/README.md (các bảng của đợt G). Làm Bước 17 trong
+datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 17a đến 17f, mỗi mục một commit. Bố cục theo
+bảng; chữ và số tính từ store bằng hàm thuần ở mock/ nhận `now`, tiền là bigint, không gọi Date.now().
+Chỉ chạy các lệnh kiểm trong CLAUDE.md và các lệnh check của mục 17f. Mở PR mới, không merge. Dừng lại
+hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
 ```

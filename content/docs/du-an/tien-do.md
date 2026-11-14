@@ -7,6 +7,27 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 14/11/2026 (chiều muộn): chốt đợt G, quản trị nền tảng
+
+- **Đã làm:**
+  - Vẽ và chốt đợt G (6 bảng):
+    - MH-60 tổng quan nền tảng;
+    - MH-58 danh sách khách thuê, chi tiết cơ sở, hộp khóa cơ sở, hộp gia hạn thủ công;
+    - MH-62 gói và giá.
+  - Quy tắc:
+    - BR-83 thêm phần quản trị sửa gói: đổi giá chỉ áp lần thanh toán sau; tắt tính năng hoặc giảm chi nhánh phải xác nhận.
+    - BR-89 quản trị nền tảng chỉ thấy số tổng; trạng thái gói tách khỏi cờ khóa.
+    - BR-90 khóa, mở khóa có lý do; gói vẫn chạy khi khóa.
+    - BR-91 gia hạn thủ công tối đa 90 ngày, không tạo khoản thu.
+  - Viết Bước 17 (`feat/mock-admin`).
+- **Ghi chú cho ERD:**
+  - `tenants`: thêm `unlocked_at`, `unlock_reason` (hoặc bảng `tenant_locks` giữ lịch sử khóa, mở khóa).
+  - `subscription_adjustments`: tenant_id, days, old_end, new_end, reason, admin_id, created_at (gia hạn thủ công, không vào sổ).
+  - `plans`: code, name, monthly_price_vnd, short_note, max_branches (null là không giới hạn), features; `period_discounts`: months, percent. Thanh toán gói lưu giá lúc trả.
+  - `platform_audit_log` cho khóa, mở khóa, gia hạn, đổi gói.
+  - Tài khoản quản trị nền tảng là cờ trên `users`, không phải thành viên của cơ sở.
+- **Tiếp theo:** Claude Code làm Bước 17; phiên claude.ai vẽ đợt H (MH-22 chatbot).
+
 ### 14/11/2026 (tối, sau review): chốt Bước 16
 
 - **Đã làm:**
