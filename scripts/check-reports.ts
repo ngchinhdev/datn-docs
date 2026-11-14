@@ -16,10 +16,13 @@ import {
   periodTotals,
   postEntries,
   ruleFor,
+  ruleScopeLabel,
 } from '../mock/commission.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
 import type { CommissionRule, Invoice, InvoiceLine } from '../mock/fixtures/types.ts';
 import { chooseRange, compareText, rangeText, reportCsv, reportData } from '../mock/report-view.ts';
+import { periodCsv, periodLines } from '../mock/commission-view.ts';
+import { saveRule } from '../mock/commission-rules.ts';
 import { todoItems } from '../mock/overview.ts';
 import { collect, type Ctx, type World } from '../mock/money-ops.ts';
 import { approveRefund } from '../mock/money-refunds.ts';
@@ -810,6 +813,125 @@ const week = { from: '2026-11-02', to: '2026-11-08' };
     'CSV: có dấu BOM, ô có dấu phẩy và ngoặc kép được bọc, đủ số liệu và 7 dòng theo ngày',
     lines.slice(0, 6).join(' | '),
   );
+}
+
+// ---- BR-41, BR-63: editing rules; lines of a period ----
+
+{
+  const now = '2026-11-07T03:20:00Z';
+  const actor = { name: 'Chính Nguyễn', role: 'Chủ cơ sở' };
+  const ctx = { now, actor, label: (r: CommissionRule) => ruleScopeLabel(r, salon.services) };
+  const wash = {
+    scope: 'service' as const,
+    serviceId: 'may-wash',
+    percent: 15,
+    effectiveFrom: '2026-11-07',
+  };
+  const added = saveRule(salon.money, wash, ctx);
+  report(
+    added.error === null &&
+      added.money.commissionRules.length === rules.length + 1 &&
+      added.money.audit.at(-1)?.action === 'Thêm quy tắc hoa hồng',
+    'BR-41, BR-63: thêm "Gội sấy, mọi cấp, 15%, từ hôm nay" thêm một quy tắc và ghi nhật ký',
+    added.error ?? '',
+  );
+  const past = saveRule(salon.money, { ...wash, effectiveFrom: '2026-11-06' }, ctx);
+  report(past.error !== null, 'BR-41: ngày hiệu lực trước hôm nay bị từ chối');
+  report(
+    saveRule(salon.money, { ...wash, percent: 101 }, ctx).error !== null &&
+      saveRule(salon.money, { ...wash, percent: 7.5 }, ctx).error !== null &&
+      saveRule(salon.money, { ...wash, serviceId: undefined }, ctx).error !== null,
+    'Tỉ lệ ngoài 0–100, số lẻ, hoặc thiếu dịch vụ bị từ chối',
+  );
+
+  // Collect a wash after the new rule: 15%, a cut still 10%.
+  const lan = (id: string, variant: string, price: bigint) =>
+    line({ id, unitPriceVnd: price, staffResourceId: 'may-lan', serviceVariantId: variant });
+  const lines = [lan('w', 'may-wash-std', 80_000n), lan('c', 'may-cut-short', 150_000n)];
+  const got = earnEntries({
+    invoice: { id: 'inv-n' } as Invoice,
+    lines,
+    discountVnd: 0n,
+    rules: added.money.commissionRules,
+    services: salon.services,
+    levelOf,
+    at: now,
+  });
+  report(
+    got.find((e) => e.lineId === 'w')?.percent === 15 &&
+      got.find((e) => e.lineId === 'c')?.percent === 10,
+    'BR-41: sau khi thêm, lịch gội sấy được 15%, lịch cắt tóc vẫn 10%',
+  );
+
+  const first = salon.money.commissionRules[0]!;
+  const edited = saveRule(
+    salon.money,
+    { scope: first.scope, percent: 12, effectiveFrom: '2026-11-10', editId: first.id },
+    ctx,
+  );
+  report(
+    edited.error === null &&
+      edited.money.commissionRules.length === rules.length + 1 &&
+      edited.money.commissionRules.find((r) => r.id === first.id)?.percent === 10 &&
+      edited.money.audit.at(-1)?.detail.includes('quy tắc cũ giữ nguyên') === true,
+    'BR-41: sửa quy tắc đã áp tạo quy tắc mới từ ngày chọn, quy tắc cũ giữ nguyên',
+    edited.error ?? '',
+  );
+  const query = { retail: false, serviceId: 'may-cut', level: 1 } as const;
+  report(
+    ruleFor(edited.money.commissionRules, { ...query, date: '2026-11-09' })?.percent === 10 &&
+      ruleFor(edited.money.commissionRules, { ...query, date: '2026-11-10' })?.percent === 12,
+    'BR-41: hóa đơn trước 10/11 vẫn 10%, từ 10/11 là 12%',
+  );
+  const pendingRule = salon.money.commissionRules.find((r) => r.effectiveFrom > '2026-11-07')!;
+  const changed = saveRule(
+    salon.money,
+    {
+      scope: pendingRule.scope,
+      percent: 13,
+      effectiveFrom: pendingRule.effectiveFrom,
+      editId: pendingRule.id,
+    },
+    ctx,
+  );
+  report(
+    changed.error === null &&
+      changed.money.commissionRules.length === rules.length &&
+      changed.money.commissionRules.find((r) => r.id === pendingRule.id)?.percent === 13,
+    'BR-41: quy tắc chưa tới ngày hiệu lực được sửa tại chỗ, không thêm quy tắc mới',
+  );
+  report(
+    saveRule(
+      salon.money,
+      { scope: first.scope, percent: 10, effectiveFrom: first.effectiveFrom, editId: first.id },
+      ctx,
+    ).error !== null,
+    'Lưu quy tắc mà không đổi gì thì báo, không thêm dòng',
+  );
+
+  const mai = periodLines(salon.money, '2026-11', 'may-mai');
+  const total = mai.reduce((m, l) => m + l.amountVnd, 0n);
+  const row = periodTotals(salon.money.commission, '2026-11').find(
+    (r) => r.staffResourceId === 'may-mai',
+  )!;
+  report(
+    total === row.totalVnd &&
+      mai.some((l) => l.clawback && l.amountVnd === -15_000n && l.text.includes('HĐ kỳ 10/2026')),
+    'Hoa hồng của Mai kỳ 11/2026: tổng các dòng bằng tổng của kỳ, có dòng thu hồi −15.000 ₫ ghi HĐ kỳ 10/2026',
+    show(mai.map((l) => l.text)),
+  );
+  const sessions = periodLines(salon.money, '2026-11', 'may-lan').filter((l) =>
+    l.text.includes('buổi'),
+  );
+  report(
+    sessions.every((l) => l.baseVnd === 70_000n && l.percent === 10),
+    'Dòng buổi gói ghi tính trên 70.000 ₫, tỉ lệ 10%',
+    show(sessions.map((l) => l.text)),
+  );
+  const csvLines = periodCsv({ periodLabel: '11/2026', staffName: 'Mai', lines: mai }).split(
+    '\r\n',
+  );
+  report(csvLines.length === mai.length + 4, 'CSV của kỳ: mỗi dòng một hàng');
 }
 
 console.log(failures === 0 ? '\nTất cả đạt.' : `\n${failures} lỗi.`);
