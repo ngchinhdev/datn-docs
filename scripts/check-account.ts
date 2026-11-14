@@ -329,7 +329,7 @@ report(
   'BR-78: lễ tân chọn được, không chọn thì không có cột lịch',
 );
 
-const resent = resendInvitation(invitations, 'inv-thao', at(60), 'moi-thao-2');
+const resent = resendInvitation(invitations, 'inv-thao', 'owner', at(60), 'moi-thao-2');
 const stateOf = (token: string, list = resent.invitations) =>
   inviteView(list, accounts, token, null, at(61));
 report(
@@ -344,21 +344,46 @@ report(
 );
 const expiredKhoa = invitations.find((i) => i.id === 'inv-khoa')!;
 report(inviteState(expiredKhoa, MOCK_NOW) === 'expired', 'BR-78: lời mời 29/10 đã hết hạn');
-const reinvited = resendInvitation(invitations, 'inv-khoa', MOCK_NOW, 'moi-khoa-2');
+const reinvited = resendInvitation(invitations, 'inv-khoa', 'owner', MOCK_NOW, 'moi-khoa-2');
 report(
   reinvited.invitation !== null && inviteState(reinvited.invitation, MOCK_NOW) === 'pending',
   'BR-78: mời lại lời mời hết hạn thì thành đang chờ',
 );
 
-const revoked = revokeInvitation(invitations, 'inv-thao', at(5));
+const revoked = revokeInvitation(invitations, 'inv-thao', 'owner', at(5));
 const revokedView = inviteView(revoked.invitations, accounts, 'moi-thao', null, at(6));
 report(
   revokedView.kind === 'dead' && revokedView.reason === 'revoked',
   'BR-78: thu hồi thì link báo đã thu hồi',
 );
 report(
-  revokeInvitation(revoked.invitations, 'inv-thao', at(7)).invitation === null,
+  revokeInvitation(revoked.invitations, 'inv-thao', 'owner', at(7)).invitation === null,
   'BR-78: lời mời đã thu hồi không thu hồi lần nữa',
+);
+
+const managerInvite = { ...thao, id: 'inv-qly', role: 'manager' as const, token: 'moi-qly' };
+const withManager = [...invitations, managerInvite];
+const byManagerResend = resendInvitation(withManager, 'inv-qly', 'manager', MOCK_NOW, 'moi-qly-2');
+const byManagerRevoke = revokeInvitation(withManager, 'inv-qly', 'manager', MOCK_NOW);
+report(
+  byManagerResend.invitation === null &&
+    byManagerRevoke.invitation === null &&
+    byManagerResend.invitations.find((i) => i.id === 'inv-qly')?.token === 'moi-qly' &&
+    byManagerRevoke.invitations.find((i) => i.id === 'inv-qly')?.status === 'pending',
+  'BR-78: quản lý không gửi lại, không thu hồi lời mời vai Quản lý; lời mời giữ nguyên',
+);
+report(
+  resendInvitation(withManager, 'inv-qly', 'owner', MOCK_NOW, 'moi-qly-2').invitation !== null &&
+    revokeInvitation(withManager, 'inv-qly', 'owner', MOCK_NOW).invitation !== null &&
+    resendInvitation(withManager, 'inv-thao', 'manager', MOCK_NOW, 'moi-thao-3').invitation !==
+      null &&
+    revokeInvitation(withManager, 'inv-thao', 'manager', MOCK_NOW).invitation !== null,
+  'BR-78: chủ cơ sở xử lý được mọi lời mời; quản lý xử lý được lời mời Lễ tân và Kỹ thuật viên',
+);
+report(
+  resendInvitation(withManager, 'inv-thao', 'receptionist', MOCK_NOW, 'x').invitation === null &&
+    revokeInvitation(withManager, 'inv-thao', 'technician', MOCK_NOW).invitation === null,
+  'BR-78: lễ tân và kỹ thuật viên không gửi lại, không thu hồi lời mời nào',
 );
 
 const view = (token: string, session: string | null = null) =>

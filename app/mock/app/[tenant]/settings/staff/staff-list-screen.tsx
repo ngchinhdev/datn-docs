@@ -317,7 +317,7 @@ export function StaffListScreen({ tenantSlug }: { tenantSlug: string }) {
                           )}
                         </td>
                         <td>
-                          {me && (
+                          {me && invitableRoles(me.role).includes(invitation.role) && (
                             <span className="flex gap-1">
                               <Button
                                 size="sm"

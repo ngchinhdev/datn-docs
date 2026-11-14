@@ -184,7 +184,13 @@ export function useInvitations() {
     (by: Member, id: string) => {
       const old = invitations.find((i) => i.id === id);
       if (!old) return null;
-      const result = resendInvitation(invitations, id, now, `${id}-${old.oldTokens.length + 2}`);
+      const result = resendInvitation(
+        invitations,
+        id,
+        by.role,
+        now,
+        `${id}-${old.oldTokens.length + 2}`,
+      );
       const sent = result.invitation;
       if (!sent) return null;
       patch((d) => ({
@@ -203,7 +209,7 @@ export function useInvitations() {
 
   const revoke = useCallback(
     (by: Member, id: string) => {
-      const result = revokeInvitation(invitations, id, now);
+      const result = revokeInvitation(invitations, id, by.role, now);
       const revoked = result.invitation;
       if (!revoked) return null;
       patch(() => ({ invitations: result.invitations }));

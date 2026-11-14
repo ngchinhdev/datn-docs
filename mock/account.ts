@@ -303,16 +303,22 @@ export function sendInvitation(
   return { ok: true, invitations: [...invitations, invitation], invitation };
 }
 
-/** Sending again, or inviting again after it ran out: a new link, and the old one stops working. */
+/**
+ * Sending again, or inviting again after it ran out: a new link, and the old one stops working.
+ * Only a role that can invite `invitation.role` may do it (BR-78).
+ */
 export function resendInvitation(
   invitations: readonly Invitation[],
   id: string,
+  by: StaffRoleId,
   now: string,
   token: string,
 ): { invitations: Invitation[]; invitation: Invitation | null } {
   let sent: Invitation | null = null;
   const next = invitations.map((inv) => {
-    if (inv.id !== id || inv.status !== 'pending') return inv;
+    if (inv.id !== id || inv.status !== 'pending' || !invitableRoles(by).includes(inv.role)) {
+      return inv;
+    }
     sent = {
       ...inv,
       token,
@@ -325,15 +331,18 @@ export function resendInvitation(
   return { invitations: next, invitation: sent };
 }
 
-/** The link of a revoked invitation says it was revoked. */
+/** The link of a revoked invitation says it was revoked. Same limit on the role as sending again. */
 export function revokeInvitation(
   invitations: readonly Invitation[],
   id: string,
+  by: StaffRoleId,
   now: string,
 ): { invitations: Invitation[]; invitation: Invitation | null } {
   let revoked: Invitation | null = null;
   const next = invitations.map((inv) => {
-    if (inv.id !== id || inv.status !== 'pending') return inv;
+    if (inv.id !== id || inv.status !== 'pending' || !invitableRoles(by).includes(inv.role)) {
+      return inv;
+    }
     revoked = { ...inv, status: 'revoked' as const, decidedAt: now };
     return revoked;
   });
