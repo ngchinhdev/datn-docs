@@ -2,12 +2,13 @@
 
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { settingsEntries } from '@/components/mock/app-nav';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { SettingsNav } from '@/components/sapio/settings-nav';
+import { staffRoleOf } from '@/mock/selection';
 
 /**
  * Settings pages: the menu on the left from 900px; below that the menu is the page `/settings`
@@ -23,6 +24,10 @@ export function SettingsFrame({
   const pathname = usePathname();
   const appHref = useAppHref(tenantSlug);
   const { can } = useSubscription();
+  // A manager reaches Nhân sự only (BR-78); the other settings are the owner's.
+  const role = staffRoleOf(useSearchParams().get('role'));
+  const entries =
+    role === 'manager' ? settingsEntries.filter((e) => e.id === 'staff') : settingsEntries;
   const base = `/mock/app/${tenantSlug}`;
   const isRoot = pathname === `${base}/settings`;
   // A page inside a section ("Dịch vụ › Nhuộm tóc") goes back to the section, not to the menu.
@@ -36,7 +41,7 @@ export function SettingsFrame({
       <div className="flex flex-wrap items-start gap-(--space-6)">
         {!detail && (
           <SettingsNav
-            items={settingsEntries.map((entry) => ({
+            items={entries.map((entry) => ({
               id: entry.id,
               label: entry.label,
               href: appHref(entry.path),
