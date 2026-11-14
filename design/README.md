@@ -93,5 +93,10 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `ThongBao.dc.html` | MH-53 Thông báo, xem trước email | **Đã chọn** | `/mock/app/[tenant]/settings/notifications` |
 | `ChatbotCaiDat.dc.html` | MH-54 Chatbot | **Đã chọn** | `/mock/app/[tenant]/settings/chatbot` |
 | `NhatKy.dc.html` | MH-57 Nhật ký thao tác | **Đã chọn** | `/mock/app/[tenant]/audit-log` |
+| `TongQuan.dc.html` | MH-41 Tổng quan: bốn ô số, việc cần xử lý, lịch đang diễn ra, lấp đầy 7 ngày tới | **Đã chọn** | `/mock/app/[tenant]` (Bước 15) |
+| `BaoCao.dc.html` | MH-55 Báo cáo: năm ô số, theo ngày, theo nhân viên, theo dịch vụ | **Đã chọn** | `/mock/app/[tenant]/reports` |
+| `HoaHong.dc.html` | MH-56 Hoa hồng: quy tắc, các kỳ, chốt kỳ | **Đã chọn** | `/mock/app/[tenant]/commission` |
+| `HoaHongKy.dc.html` | MH-56 Kỳ hoa hồng của một người: từng dòng, thu hồi | **Đã chọn** | `/mock/app/[tenant]/commission/periods/[id]?staff=` |
+| `KtvHoaHong.dc.html` | MH-37 Hoa hồng tạm tính của kỹ thuật viên (điện thoại) | **Đã chọn** | `/mock/app/[tenant]/my/commission` |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-63 đến BR-67, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
