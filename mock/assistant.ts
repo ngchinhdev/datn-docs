@@ -266,6 +266,14 @@ type Period = 'morning' | 'afternoon' | 'evening';
 const isEvening = (text: string, folded: string) =>
   /(^|[^\p{L}])tối([^\p{L}]|$)/u.test(text.toLowerCase()) || /toi nay|buoi toi/.test(folded);
 
+/**
+ * "Mai" is tomorrow, unless it is a name: after a title ("thợ Mai", "chị Mai"), or capitalised
+ * inside a sentence.
+ */
+const maiIsName = (text: string, folded: string) =>
+  /(^|\s)(tho|chi|anh|ban|co|em)\s+mai\b/.test(folded) ||
+  /[\p{L}\p{N},]\s+Mai(?![\p{L}])/u.test(text.replace(/ngày\s+mai/gi, ''));
+
 /** The day and the part of the day a message asks about. */
 function readWhen(
   text: string,
@@ -279,7 +287,9 @@ function readWhen(
       : isEvening(text, folded)
         ? 'evening'
         : null;
-  if (/ngay mai/.test(folded)) return { date: addDays(today, 1), period };
+  if (/ngay mai/.test(folded) || (/\bmai\b/.test(folded) && !maiIsName(text, folded))) {
+    return { date: addDays(today, 1), period };
+  }
   if (/ngay kia|ngay mot/.test(folded)) return { date: addDays(today, 2), period };
   const explicit = /(\d{1,2})\/(\d{1,2})/.exec(folded);
   if (explicit) {
@@ -348,11 +358,14 @@ function readAttributes(fixture: TenantFixture, text: string, folded: string) {
 }
 
 /** The person the customer names, among those who do the service and take online bookings. */
-function readStaff(fixture: TenantFixture, folded: string) {
-  const text = folded.replace(/ngay mai/g, 'ngay_mai');
-  return fixture.staff.find(
-    (s) => s.profile.bookableOnline && wordsOf(text).has(fold(s.profile.displayName)),
-  );
+function readStaff(fixture: TenantFixture, text: string, folded: string) {
+  const words = wordsOf(folded.replace(/ngay mai/g, 'ngay_mai'));
+  return fixture.staff.find((s) => {
+    const name = fold(s.profile.displayName);
+    return (
+      s.profile.bookableOnline && words.has(name) && (name !== 'mai' || maiIsName(text, folded))
+    );
+  });
 }
 
 // ---- Building cards ----
@@ -589,7 +602,7 @@ function interpret(
     });
   }
   const when = readWhen(input.text, folded, today);
-  const staff = readStaff(fixture, folded);
+  const staff = readStaff(fixture, input.text, folded);
   const wantsList = hasAny(folded, PRICE_LIST);
   const wantsSlots =
     hasAny(folded, SLOT) || when.date !== null || staff !== undefined || TIME.test(folded);

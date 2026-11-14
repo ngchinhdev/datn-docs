@@ -21,7 +21,7 @@ import { spaThuCungPawpaw } from '../mock/fixtures/spa-thu-cung-pawpaw.ts';
 import type { TenantFixture } from '../mock/fixtures/types.ts';
 import { formatDuration, formatVnd } from '../mock/format.ts';
 import { bookingWindow } from '../mock/policy.ts';
-import { addMinutes, formatTime, MOCK_NOW, MOCK_TODAY } from '../mock/time.ts';
+import { addDays, addMinutes, formatTime, MOCK_NOW, MOCK_TODAY } from '../mock/time.ts';
 
 let failures = 0;
 const report = (ok: boolean, name: string, detail = '') => {
@@ -140,6 +140,33 @@ const paw = spaThuCungPawpaw;
     'BR-14: "Có thợ Mai không?" chỉ còn giờ của Mai',
     maiCard?.slots.map((s) => formatTime(s.startAt)).join(' '),
   );
+}
+
+{
+  const { last } = chat(may, ['Sáng mai cắt tóc ngắn còn giờ không?']);
+  const slots = card(last, 'slots');
+  const tomorrow = addDays(MOCK_TODAY, 1);
+  report(
+    slots !== undefined &&
+      slots.date === tomorrow &&
+      slots.askedDate === undefined &&
+      slots.staffResourceId === 'any' &&
+      slots.staffName === undefined &&
+      slots.slots.length > 0 &&
+      slots.slots.every((s) => formatTime(s.startAt) < '12:00'),
+    'BR-06, BR-14: "Sáng mai cắt tóc ngắn còn giờ không?" ra giờ buổi sáng ngày mai, thợ Bất kỳ ai',
+    slots
+      ? `${slots.date} ${slots.slots.map((s) => formatTime(s.startAt)).join(' ')}`
+      : last.intent,
+  );
+  const named = card(chat(may, ['Cắt tóc ngắn, có thợ Mai không?']).last, 'slots');
+  report(
+    named?.staffName === 'Mai' && named.date === MOCK_TODAY,
+    'BR-14: "thợ Mai" là tên thợ, không phải ngày mai',
+    `${named?.staffName} ${named?.date}`,
+  );
+  const mid = card(chat(may, ['Cắt tóc ngắn với Mai được không?']).last, 'slots');
+  report(mid?.staffName === 'Mai', 'BR-14: "Mai" viết hoa giữa câu là tên thợ', mid?.staffName);
 }
 
 // ---- A subject decides the variant (BR-13) ----
