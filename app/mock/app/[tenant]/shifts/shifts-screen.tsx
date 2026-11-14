@@ -19,17 +19,11 @@ import { Tip } from '@/components/sapio/tooltip';
 import { useToast } from '@/components/sapio/toast';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import type { Requeue, Shift } from '@/mock/fixtures';
-import { openingHours } from '@/mock/hours';
+import { openingWindows } from '@/mock/hours';
+import { openIntervals, uncoveredHours } from '@/mock/rota';
+import { windowsText } from '@/mock/shop';
 import { affectedByShifts } from '@/mock/leave';
-import { normalize, subtract, union, type Interval } from '@/mock/intervals';
-import {
-  hasRota,
-  localMinutes,
-  localTimeOf,
-  shiftsOf,
-  staffWindows,
-  weekHours,
-} from '@/mock/shifts';
+import { hasRota, localTimeOf, shiftsOf, weekHours } from '@/mock/shifts';
 import { addDays, dayOfMonth, formatDay, weekdayShort } from '@/mock/time';
 import { ShiftPanel, type CellChange } from './shift-panel';
 
@@ -86,8 +80,9 @@ export function ShiftsScreen({ tenantSlug }: { tenantSlug: string }) {
       title: member.profile.title,
       hours: hoursText(weekHours(current, id, days)),
       cells: days.map((date): ShiftCellData => {
-        const open = openingHours(fixture, date);
-        if (!open) return { date, blocks: [], fixed: 'Đóng cửa' };
+        if (openingWindows(fixture, date).length === 0) {
+          return { date, blocks: [], fixed: 'Đóng cửa' };
+        }
         if (!hasRota(current, date)) return { date, blocks: [], fixed: 'Giờ mở cửa' };
         const leave = leaveOn(id, date);
         const waiting = requeues.some((r) => r.resourceId === id && r.date === date);
@@ -106,29 +101,20 @@ export function ShiftsScreen({ tenantSlug }: { tenantSlug: string }) {
     };
   });
 
-  // Hours that are open and have nobody on shift.
+  // The row "Mở cửa": each window of the day, and the hours inside them nobody is on shift for.
   const footer: ShiftFooterCell[] = days.map((date) => {
-    const open = openingHours(fixture, date);
-    if (!open) return { text: 'Đóng cửa' };
-    const window: Interval = [localMinutes(date, open.open), localMinutes(date, open.close)];
-    if (!hasRota(current, date)) return { text: `${open.open}–${open.close}` };
-    const covered = fixture.staff.reduce<Interval[]>(
-      (all, member) =>
-        union(
-          all,
-          staffWindows({
-            shifts: current,
-            timeOff: fixture.staffTimeOff.filter((t) => t.status === 'approved'),
-            resourceId: member.resourceId,
-            date,
-            open: [window],
-          }),
-        ),
-      [],
-    );
-    const gaps = subtract(normalize([window]), covered);
+    const windows = openingWindows(fixture, date);
+    if (windows.length === 0) return { text: 'Đóng cửa' };
+    const text = windowsText(windows);
+    if (!hasRota(current, date)) return { text };
+    const gaps = uncoveredHours({
+      fixture,
+      shifts: current,
+      timeOff: fixture.staffTimeOff,
+      date,
+    });
     return {
-      text: `${open.open}–${open.close}`,
+      text,
       warnings: gaps.map(([a, b]) => `${localTimeOf(a)}–${localTimeOf(b)} không ai trực`),
     };
   });
@@ -172,14 +158,14 @@ export function ShiftsScreen({ tenantSlug }: { tenantSlug: string }) {
     const changes: CellChange[] = [];
     for (const member of fixture.staff) {
       for (const date of days) {
-        const open = openingHours(fixture, date);
-        if (!open) continue;
+        const open = openIntervals(fixture, date);
+        if (open.length === 0) continue;
         const affected = affectedByShifts({
           appointments,
           shiftsAfter: draft.shifts,
           resourceId: member.resourceId,
           date,
-          open: [[localMinutes(date, open.open), localMinutes(date, open.close)]],
+          open,
         });
         if (affected.length > 0) {
           changes.push({
@@ -210,7 +196,7 @@ export function ShiftsScreen({ tenantSlug }: { tenantSlug: string }) {
     }
     const copied = source
       .map((s) => ({ ...s, date: addDays(s.date, 7) }))
-      .filter((s) => openingHours(fixture, s.date));
+      .filter((s) => openingWindows(fixture, s.date).length > 0);
     setDraft({
       week: weekStart,
       shifts: [...shifts.filter((s) => !days.includes(s.date)), ...copied],

@@ -7,7 +7,9 @@ import { freeSlots } from '../mock/availability.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
 import type { TenantFixture } from '../mock/fixtures/types.ts';
 import { openingHours, openingWindows } from '../mock/hours.ts';
-import { localTimeOf } from '../mock/shifts.ts';
+import { subtract, type Interval } from '../mock/intervals.ts';
+import { openIntervals, uncoveredHours } from '../mock/rota.ts';
+import { localMinutes, localTimeOf } from '../mock/shifts.ts';
 import { topupBonus } from '../mock/money.ts';
 import { addAudit, addAudits, SYSTEM_ACTOR } from '../mock/audit.ts';
 import { chatbotPreview, chatbotProblem, limitExample } from '../mock/chatbot.ts';
@@ -31,6 +33,7 @@ import {
   outsideHours,
   toBusinessHours,
   windowsProblem,
+  windowsText,
 } from '../mock/shop.ts';
 import {
   earliestBooking,
@@ -663,6 +666,93 @@ const inRange = (times: string[], from: string, to: string) =>
   report(
     noShowsInSixMonths(appts, 'c', '2026-11-07T03:20:00Z') === 1,
     'BR-10: chỉ tính lần không đến của khách đó trong 6 tháng gần nhất',
+  );
+}
+
+// ---- BR-02, BR-35: the rota screens see every opening window ----
+
+{
+  const sunday = '2026-11-08';
+  const b = salon.branches[0]!;
+  const lunch = withBranch(salon, {
+    businessHours: [
+      ...b.businessHours.filter((h) => h.weekday !== 0),
+      { weekday: 0, open: '09:00', close: '12:00' },
+      { weekday: 0, open: '14:00', close: '20:00' },
+    ],
+  });
+  const m = (hhmm: string) => localMinutes(sunday, hhmm);
+  const windows = openIntervals(lunch, sunday);
+  report(
+    windowsText(openingWindows(lunch, sunday)) === '09:00–12:00, 14:00–20:00' &&
+      windows.length === 2 &&
+      windows[0]![0] === m('09:00') &&
+      windows[1]![1] === m('20:00'),
+    'BR-02: hàng "Mở cửa" Chủ Nhật ghi từng khung 09:00–12:00, 14:00–20:00',
+  );
+  const person = salon.staff[0]!;
+  const onlyPerson = { ...lunch, staff: [person] };
+  const block = (start: string, end: string) => ({
+    resourceId: person.resourceId,
+    date: sunday,
+    start: start as `${number}:${number}`,
+    end: end as `${number}:${number}`,
+  });
+  const gaps = (shifts: ReturnType<typeof block>[], branch = onlyPerson) =>
+    uncoveredHours({ fixture: branch, shifts, timeOff: [], date: sunday });
+  const both = [block('09:00', '12:00'), block('14:00', '20:00')];
+  report(
+    gaps(both).length === 0,
+    'BR-35: thợ làm 09:00–12:00 và 14:00–20:00, Chủ Nhật mở hai khung đó thì không có cảnh báo',
+    JSON.stringify(gaps(both)),
+  );
+  // What the single range would have said: the lunch break counted as an hour nobody covers.
+  const envelope: Interval[] = [[m('09:00'), m('20:00')]];
+  const covered = both.flatMap((s): Interval[] => [[m(s.start), m(s.end)]]);
+  report(
+    subtract(envelope, covered).length === 1,
+    'Đối chứng: tính theo một khoảng 09:00–20:00 thì nghỉ trưa 12:00–14:00 bị báo là không ai trực',
+  );
+  const morningOnly = gaps([block('09:00', '12:00')]);
+  report(
+    morningOnly.length === 1 &&
+      morningOnly[0]![0] === m('14:00') &&
+      morningOnly[0]![1] === m('20:00'),
+    'BR-35: thợ chỉ làm buổi sáng thì báo đúng khung chiều 14:00–20:00 không ai trực',
+    JSON.stringify(morningOnly),
+  );
+  const partial = gaps([block('09:00', '12:00'), block('14:00', '18:00')]);
+  report(
+    partial.length === 1 && partial[0]![0] === m('18:00') && partial[0]![1] === m('20:00'),
+    'BR-35: thợ làm tới 18:00 thì báo 18:00–20:00, không báo giờ nghỉ trưa',
+  );
+  report(
+    (() => {
+      const g = gaps(both, { ...salon, staff: [person] } as typeof onlyPerson);
+      return g.length === 1 && g[0]![0] === m('12:00') && g[0]![1] === m('14:00');
+    })(),
+    'BR-35: nếu Chủ Nhật mở cả ngày thì giờ nghỉ trưa mới là giờ không ai trực',
+  );
+  const away = uncoveredHours({
+    fixture: onlyPerson,
+    shifts: both,
+    timeOff: [
+      {
+        id: 'o',
+        resourceId: person.resourceId,
+        date: sunday,
+        from: '15:00',
+        to: '16:00',
+        reason: 'x',
+        status: 'approved',
+        sentAt: '2026-11-01T00:00:00Z',
+      },
+    ],
+    date: sunday,
+  });
+  report(
+    away.length === 1 && away[0]![0] === m('15:00') && away[0]![1] === m('16:00'),
+    'BR-35: nghỉ phép đã duyệt 15:00–16:00 trong khung chiều thì báo đúng giờ đó',
   );
 }
 

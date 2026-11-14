@@ -7,11 +7,11 @@ import { Field } from '@/components/sapio/form';
 import { SidePanel } from '@/components/sapio/side-panel';
 import { Tip } from '@/components/sapio/tooltip';
 import type { Appointment, LocalTime, Shift, TenantFixture } from '@/mock/fixtures';
-import { openingHours } from '@/mock/hours';
+import { openIntervals } from '@/mock/rota';
 import { affectedByShifts } from '@/mock/leave';
 import { parseTime } from '@/mock/placement';
 import { lookups } from '@/mock/reception';
-import { localMinutes, minutesOfDay } from '@/mock/shifts';
+import { minutesOfDay } from '@/mock/shifts';
 import { addDays, formatDay, formatTime, weekdayOf } from '@/mock/time';
 
 const MAX_BLOCKS = 3;
@@ -127,19 +127,20 @@ export function ShiftPanel({
     () =>
       valid
         ? dates.map((d) => {
-            const open = openingHours(fixture, d);
+            const open = openIntervals(fixture, d);
             return {
               resourceId,
               date: d,
-              appointments: open
-                ? affectedByShifts({
-                    appointments,
-                    shiftsAfter: next,
-                    resourceId,
-                    date: d,
-                    open: [[localMinutes(d, open.open), localMinutes(d, open.close)]],
-                  })
-                : [],
+              appointments:
+                open.length > 0
+                  ? affectedByShifts({
+                      appointments,
+                      shiftsAfter: next,
+                      resourceId,
+                      date: d,
+                      open,
+                    })
+                  : [],
               reason:
                 newBlocks.length > 0
                   ? `Còn làm ${newBlocks.map((b) => `${b.from}–${b.to}`).join(', ')}`
