@@ -7,6 +7,25 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 14/11/2026 (đêm muộn): mock trợ lý đặt lịch (Bước 18, đợt H)
+
+- **Đã làm** (nhánh `feat/mock-assistant`, mỗi mục 18a–18e một commit):
+  - 18a: `mock/assistant.ts`, hàm thuần nhận `now`: nhận ý định bằng từ khóa, trả tin kèm thẻ (dịch vụ, giờ trống, giữ chỗ, lễ tân, hết lượt), đếm lượt (BR-67), hàm cho biết nút có hiện không (BR-92).
+  - 18b: khung chat `components/mock/assistant-chat.tsx` và store trong layout trang khách; nút nổi trên `/mock/[tenant]` và các bước Dịch vụ, Ngày giờ; toàn màn hình trên điện thoại, góc phải dưới từ 1024 px.
+  - 18c: `mock/assistant-hold.ts`: bấm giờ trong thẻ tạo lịch trạng thái giữ chỗ 10 phút (chưa có khách) trên lịch cơ sở, rồi sang `/book?giu=1` qua `useBookingDraft`; thẻ giữ chỗ đọc trạng thái từ lịch (đếm ngược, đã dùng, đã trả lại); hết giờ thì đưa các giờ còn trống của thợ đó.
+  - 18d: công cụ mock "Tua 10 phút", "Dùng hết lượt hôm nay"; MH-22 "Đang làm".
+  - 18e: `pnpm check:assistant` (35 ca); các lệnh kiểm xanh.
+- **Tự quyết:**
+  - `ChatHoi` và `ChatGiuCho` đặt giờ trong câu chữ của trợ lý ("Mai còn trống 14:15 và 16:15"); BR-92 cấm, nên mock chỉ đặt giờ và tiền trong thẻ.
+  - `ChatGioiHan` hiện cả ba loại sau "Poodle, 6 kg"; Bước 18 và BR-13 yêu cầu đúng một loại, mock theo Bước 18 (Tắm chó nhỏ 150.000 ₫).
+  - Thẻ giá hiện giá thấp nhất và giá bậc cao nhất của những người nhận đặt online (BR-56): Nhuộm ngắn 500.000 ₫ và 550.000 ₫, vì bậc 600.000 ₫ không có người nhận online.
+  - Spa thú cưng: "Xác nhận bằng email" mở bước `subject` thay cho `info`, vì tên bé bắt buộc mà trợ lý không hỏi; loài và cân nặng đã điền sẵn, đồng hồ giữ chỗ chạy ở cả hai bước.
+  - Dùng thử (`?plan=trial`) vẫn có nút theo BR-92 nhưng không giữ chỗ, vì cơ sở chưa nhận đặt lịch online (BR-81); trợ lý vẫn hỏi giá và giờ.
+  - Khung chat không hiện khi đang đổi giờ một lịch có sẵn (`?doi=`).
+  - Câu "Trợ lý nghỉ đến 00:00" nằm trong thẻ hết lượt, không nằm trong câu của trợ lý.
+- **Ghi chú cho ERD:** giữ chỗ của trợ lý là một dòng `appointments` trạng thái `held`, `customer_id` null, giống giữ chỗ của luồng đặt lịch; hết hạn thì loại khỏi giờ bận bằng `hold_expires_at` (VD9).
+- **Tiếp theo:** người dùng kiểm "Xong khi" của Bước 18 và review PR.
+
 ### 14/11/2026 (đêm muộn): merge Bước 17, chốt đợt H, trợ lý đặt lịch
 
 - **Đã làm:**
@@ -204,6 +223,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 - **Tiếp theo:** người dùng kiểm Bước 14 và review PR; phiên claude.ai vẽ đợt E (quản lý, báo cáo: MH-37, MH-41, MH-55, MH-56).
 
 ### 13/11/2026 (tối): chốt đợt D, cấu hình cơ sở
+
 - **Đã làm:**
   - Vẽ và chốt đợt D (9 bảng):
     - MH-43 chi tiết chi nhánh;
@@ -217,6 +237,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
     - MH-57 nhật ký thao tác.
 
     MH-42 dùng mẫu danh sách, không vẽ riêng.
+
   - Quy tắc:
     - BR-02 thêm nhiều khung giờ, đổi giờ thì xếp lại, giá riêng chi nhánh.
     - BR-37 tạm ngưng tài nguyên.
@@ -240,6 +261,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - Phiên claude.ai vẽ đợt E (quản lý, báo cáo: MH-37, MH-41, MH-55, MH-56).
 
 ### 13/11/2026 (tối): merge PR #8 (Bước 13)
+
 - **Đã làm:**
   - Review PR #8. Sửa hai chỗ trên cùng nhánh rồi người dùng merge:
     - Cọc thừa vào ví thành tiền thật.
@@ -281,6 +303,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 - **Tiếp theo:** người dùng kiểm Bước 13 và review PR; phiên claude.ai vẽ đợt D (cấu hình cơ sở).
 
 ### 13/11/2026: merge PR #7 (Bước 12), chốt đợt C, tiền
+
 - **Đã làm:**
   - Review PR #7. Sửa trên cùng nhánh rồi người dùng merge:
     - BR-06 cho giờ trống phía khách;

@@ -49,6 +49,8 @@ export interface BookingDraft {
   id: string;
   tenantSlug: string;
   newCustomer: boolean;
+  /** Who filled the choices in: the assistant of the customer page, for the line the booking page shows. */
+  source?: 'assistant';
   state: BookingState;
   refs: BookingItemRef[];
   mode: BookingMode;

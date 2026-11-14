@@ -17,6 +17,7 @@
     "check:reports": "node scripts/check-reports.ts",
     "check:account": "node scripts/check-account.ts",
     "check:platform": "node scripts/check-platform.ts",
+    "check:assistant": "node scripts/check-assistant.ts",
     "format": "prettier --write app components lib mock"
   },
   "dependencies": {
