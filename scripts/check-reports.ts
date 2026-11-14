@@ -19,6 +19,7 @@ import {
 } from '../mock/commission.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
 import type { CommissionRule, Invoice, InvoiceLine } from '../mock/fixtures/types.ts';
+import { todoItems } from '../mock/overview.ts';
 import { collect, type Ctx, type World } from '../mock/money-ops.ts';
 import { approveRefund } from '../mock/money-refunds.ts';
 import {
@@ -670,6 +671,75 @@ const week = { from: '2026-11-02', to: '2026-11-08' };
       ns.depositKeptVnd === 100_000n,
     'BR-47: không đến = 1 / 3 lịch đã tới giờ (hủy và chưa tới không tính), mất 150.000 ₫, giữ 100.000 ₫ cọc',
     show(ns),
+  );
+}
+
+// ---- Tổng quan: the work waiting ----
+
+{
+  const nameOf = (id: string) => salon.resources.find((r) => r.id === id)?.name ?? id;
+  const args = {
+    leaves: salon.staffTimeOff,
+    requeues: [],
+    money: salon.money,
+    appointments: salon.appointments,
+    nameOf,
+    today: MOCK_TODAY,
+    showCommission: true,
+  };
+  const all = todoItems(args);
+  report(
+    all.some((i) => i.title === 'Kỳ hoa hồng 10/2026 chưa chốt' && i.href === 'commission'),
+    'BR-42: Tổng quan có dòng "Kỳ hoa hồng 10/2026 chưa chốt" dẫn tới Hoa hồng',
+    all.map((i) => i.title).join(' | '),
+  );
+  report(
+    !todoItems({ ...args, showCommission: false }).some((i) => i.id.startsWith('period-')),
+    'BR-42: quản lý không thấy dòng nhắc chốt kỳ, chỉ chủ cơ sở',
+  );
+  const actor = { name: 'Chính Nguyễn', role: 'Chủ cơ sở' };
+  const closed = closePeriod(salon.money, '2026-10', { now: MOCK_NOW, actor });
+  report(
+    !todoItems({ ...args, money: closed.money }).some((i) => i.id === 'period-2026-10'),
+    'Chốt kỳ 10/2026 xong thì dòng nhắc mất',
+  );
+  const pendingLeave = salon.staffTimeOff.find((l) => l.status === 'pending');
+  if (pendingLeave) {
+    const mine = (list: typeof all) => list.filter((i) => i.id === 'leave-' + pendingLeave.id);
+    const after = todoItems({
+      ...args,
+      leaves: salon.staffTimeOff.map((l) =>
+        l.id === pendingLeave.id ? { ...l, status: 'approved' as const } : l,
+      ),
+    });
+    report(
+      mine(all).length === 1 && mine(after).length === 0,
+      'Duyệt đơn nghỉ thì dòng của đơn đó mất khỏi Việc cần xử lý',
+    );
+  }
+  const refund = all.find((i) => i.id === 'refund-rf-0184');
+  report(
+    refund?.title === 'Hoàn 80.000 ₫ cho Chị Diệu' && refund.href === 'refunds',
+    'Yêu cầu hoàn đang chờ duyệt có dòng riêng dẫn tới Hoàn tiền',
+    refund?.title,
+  );
+  const withRequeue = todoItems({
+    ...args,
+    requeues: [
+      {
+        id: 'rq',
+        resourceId: 'may-hung',
+        date: '2026-11-06',
+        reason: 'Còn làm 10:00–15:00',
+        createdAt: MOCK_NOW,
+        appointmentIds: ['a', 'b'],
+        handling: {},
+      },
+    ],
+  });
+  report(
+    withRequeue.some((i) => i.title === '2 lịch cần xếp lại' && i.href === 'time-off/rq'),
+    'Lịch cần xếp lại có dòng dẫn tới nơi xử lý của nó',
   );
 }
 

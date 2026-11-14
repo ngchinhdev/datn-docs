@@ -29,3 +29,11 @@ export const formatDuration = (minutes: number) => {
   const rest = minutes % 60;
   return `${Math.floor(minutes / 60)} giờ${rest ? ` ${rest}` : ''}`;
 };
+
+/** `3,3%` from tenths of a percent (`33`). */
+export const formatPercentTenths = (tenths: number) =>
+  `${(tenths / 10).toString().replace('.', ',')}%`;
+
+/** `+8%`, `−3%`, `0%`: a change in whole percent. */
+export const formatSigned = (value: number, unit = '%') =>
+  `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value)}${unit}`;
