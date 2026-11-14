@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { useAccountStore } from '@/components/mock/account-store';
 import { tenantFixtures, type Staff } from '@/mock/fixtures';
 
 interface StaffStore {
@@ -20,7 +21,8 @@ export function StaffStoreProvider({
   children: ReactNode;
 }) {
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
-  const [staff, setStaff] = useState(fixture.staff);
+  const { joiners } = useAccountStore();
+  const [staff, setStaff] = useState(() => [...fixture.staff, ...(joiners[tenantSlug] ?? [])]);
   const save = useCallback((member: Staff) => {
     setStaff((list) => list.map((s) => (s.resourceId === member.resourceId ? member : s)));
   }, []);

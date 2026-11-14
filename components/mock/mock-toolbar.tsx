@@ -5,6 +5,8 @@ import { ChevronDown, Monitor, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useAccountStore, workspaceBySlug } from '@/components/mock/account-store';
+import { SAMPLE_LOCK_REASON } from '@/components/mock/locked-workspace';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { tenantFixtures } from '@/mock/fixtures';
@@ -155,8 +157,36 @@ export function MockToolbar() {
           </div>
         </>
       )}
+      <SiteLockTool slug={pathname.split('/')[2] ?? ''} />
       <ThemeSwitch />
     </div>
+  );
+}
+
+/** Locks or opens the tenant of the customer page being looked at: the platform's doing (BR-75). */
+function SiteLockTool({ slug }: { slug: string }) {
+  const { locks, now, patch } = useAccountStore();
+  const workspace = slug === 'app' || slug === 'admin' ? undefined : workspaceBySlug(slug);
+  if (!workspace) return null;
+  const locked = Boolean(locks[workspace.id]);
+  return (
+    <button
+      type="button"
+      aria-pressed={locked}
+      className={buttonVariants({ variant: locked ? 'default' : 'outline', size: 'sm' })}
+      onClick={() =>
+        patch((d) => {
+          const { [workspace.id]: _opened, ...rest } = d.locks;
+          return {
+            locks: locked
+              ? rest
+              : { ...d.locks, [workspace.id]: { at: now, reason: SAMPLE_LOCK_REASON } },
+          };
+        })
+      }
+    >
+      {locked ? 'Mở khóa cơ sở' : 'Khóa cơ sở'}
+    </button>
   );
 }
 

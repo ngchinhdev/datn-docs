@@ -52,13 +52,13 @@ const METHOD_WORD: Record<PaymentMethod, string> = {
 
 /** What the log of 04/11 to 06/11 holds: the refunds above and the two things the system did. */
 function sampleAudit(octRefund: { number: string; id: string; detail: string }): AuditEntry[] {
-  const lan: Actor = { name: 'Lan', role: 'Lễ tân' };
+  const linh: Actor = { name: 'Linh', role: 'Lễ tân' };
   const hung: Actor = { name: 'Hùng', role: 'Quản lý' };
   let log: AuditEntry[] = [];
   const add = (when: string, actor: Actor, input: AuditInput) => {
     log = addAudit(log, when, actor, input);
   };
-  add(at('2026-11-04', '11:02'), lan, {
+  add(at('2026-11-04', '11:02'), linh, {
     action: 'Tạo yêu cầu hoàn',
     object: 'HĐ-0182',
     href: 'invoices/inv-0182',
@@ -76,7 +76,7 @@ function sampleAudit(octRefund: { number: string; id: string; detail: string }):
     href: 'customers/may-c-phuc',
     detail: 'Không đến lần thứ 2 (BR-10)',
   });
-  add(at('2026-11-05', '09:10'), lan, {
+  add(at('2026-11-05', '09:10'), linh, {
     action: 'Tạo yêu cầu hoàn',
     object: octRefund.number,
     href: `invoices/${octRefund.id}`,
@@ -94,7 +94,7 @@ function sampleAudit(octRefund: { number: string; id: string; detail: string }):
     href: 'refunds',
     detail: '100.000 ₫ · giờ đã có người đặt (BR-29)',
   });
-  add(at('2026-11-06', '17:45'), lan, {
+  add(at('2026-11-06', '17:45'), linh, {
     action: 'Tạo yêu cầu hoàn',
     object: 'HĐ-0183',
     href: 'invoices/inv-0183',
@@ -106,7 +106,7 @@ function sampleAudit(octRefund: { number: string; id: string; detail: string }):
     href: 'invoices/inv-0183',
     detail: '50.000 ₫ về thẻ · Tính nhầm giá tóc dài',
   });
-  add(at('2026-11-06', '19:40'), lan, {
+  add(at('2026-11-06', '19:40'), linh, {
     action: 'Tạo yêu cầu hoàn',
     object: 'HĐ-0184',
     href: 'invoices/inv-0184',
@@ -163,7 +163,7 @@ export function salonMoney(
       lines,
       depositVnd: 0n,
       paidAt: input.when,
-      collectedBy: 'Lan',
+      collectedBy: 'Linh',
     });
     payments.push({
       id: `pay-${input.no}`,
@@ -311,7 +311,7 @@ export function salonMoney(
   const history = buildHistory(
     [...early, ...late],
     [...early.map((_, i) => 181 - early.length + 1 + i), ...late.map((_, i) => 190 + i)],
-    { services, staff, rules, collectors: ['Lan', 'Hùng'] },
+    { services, staff, rules, collectors: ['Linh', 'Hùng'] },
   );
   invoices.push(...history.invoices);
   payments.push(...history.payments);
@@ -340,7 +340,7 @@ export function salonMoney(
       lines: [line],
       depositVnd: 0n,
       paidAt: when,
-      collectedBy: 'Lan',
+      collectedBy: 'Linh',
     };
     invoices.push(invoice);
     commission.push(
@@ -446,7 +446,7 @@ export function salonMoney(
     amountVnd: 150_000n,
     method: octPayment.method,
     reason: 'Khách chưa hài lòng với màu, hoàn một phần',
-    createdBy: 'Lan',
+    createdBy: 'Linh',
     createdAt: at('2026-11-05', '09:10'),
     status: 'approved',
     decidedBy: 'Hùng',
@@ -478,7 +478,7 @@ export function salonMoney(
       amountVnd: wash,
       method: 'cash',
       reason: 'Khách không hài lòng, sấy chưa khô',
-      createdBy: 'Lan',
+      createdBy: 'Linh',
       createdAt: at('2026-11-06', '19:40'),
       status: 'pending',
       lineId: 'inv-0184-l0',
@@ -493,7 +493,7 @@ export function salonMoney(
       amountVnd: 50_000n,
       method: 'card',
       reason: 'Tính nhầm giá tóc dài',
-      createdBy: 'Lan',
+      createdBy: 'Linh',
       createdAt: at('2026-11-06', '17:45'),
       status: 'approved',
       decidedBy: 'Hùng',
@@ -525,7 +525,7 @@ export function salonMoney(
       amountVnd: 410_000n,
       method: 'transfer',
       reason: 'Chuyển nhà, xin hoàn gói: 700.000 − 3 × 80.000 − phí 50.000 (BR-27)',
-      createdBy: 'Lan',
+      createdBy: 'Linh',
       createdAt: at('2026-11-04', '11:02'),
       status: 'rejected',
       decidedBy: 'Hùng',

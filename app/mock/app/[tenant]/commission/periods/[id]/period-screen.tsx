@@ -41,7 +41,7 @@ export function PeriodScreen({ tenantSlug, periodId }: { tenantSlug: string; per
 }
 
 function Period({ tenantSlug, periodId }: { tenantSlug: string; periodId: string }) {
-  const { fixture, role } = useDesk(tenantSlug);
+  const { fixture } = useDesk(tenantSlug);
   const { money } = useScheduleStore();
   const appHref = useAppHref(tenantSlug);
   const toast = useToast();
@@ -51,13 +51,6 @@ function Period({ tenantSlug, periodId }: { tenantSlug: string; periodId: string
   const [picked, setPicked] = useQueryState('staff', '');
   const staffId = people.includes(picked) ? picked : (withLines[0] ?? people[0] ?? '');
 
-  if (role !== 'owner') {
-    return (
-      <div className="sp-shell__content">
-        <p className="sp-empty m-0">Hoa hồng của từng người chỉ chủ cơ sở xem (BR-44).</p>
-      </div>
-    );
-  }
   const period = money.periods.find((p) => p.id === periodId);
   if (!period) {
     return (

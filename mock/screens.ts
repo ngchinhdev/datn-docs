@@ -98,11 +98,43 @@ const customerAppointmentId = (slug: string) => {
 
 /** Screens that have a mock page, with the links that open them. Everything else is not built. */
 const built: Record<string, ScreenLink[]> = {
+  'MH-01': [{ label: 'Trang giới thiệu', href: () => '/mock/landing', platform: true }],
   'MH-02': [{ label: 'Đăng ký cơ sở', href: () => '/mock/signup', platform: true }],
+  'MH-03': [
+    { label: 'Đăng nhập', href: () => '/mock/login', platform: true },
+    {
+      label: 'Đăng nhập, email của Linh',
+      href: () => '/mock/login?email=linh.pham%40email.vn',
+      platform: true,
+    },
+  ],
+  'MH-04': [
+    { label: 'Quên mật khẩu', href: () => '/mock/forgot-password', platform: true },
+    { label: 'Hộp thư mẫu (link đặt lại)', href: () => '/mock/mailbox', platform: true },
+  ],
+  'MH-05': [
+    {
+      label: 'Nhận lời mời, email chưa có tài khoản',
+      href: () => '/mock/invite/moi-thao',
+      platform: true,
+    },
+    {
+      label: 'Nhận lời mời, email đã có tài khoản',
+      href: () => '/mock/invite/moi-nam',
+      platform: true,
+    },
+    { label: 'Lời mời hết hạn', href: () => '/mock/invite/moi-khoa', platform: true },
+  ],
+  'MH-06': [{ label: 'Chọn cơ sở', href: () => '/mock/select-workspace', platform: true }],
   'MH-07': [{ label: 'Khung ứng dụng', href: app('customers') }],
   'MH-08': [{ label: 'Khách hàng', href: app('customers') }],
   'MH-09': [
     { label: 'Hồ sơ nhân viên', href: (slug) => app(`settings/staff/${firstStaffId(slug)}`)(slug) },
+  ],
+  'MH-10': [
+    { label: '403, lễ tân mở Báo cáo', href: app('reports?role=receptionist') },
+    { label: '404, cơ sở không có', href: () => '/mock/toc-mayy', platform: true },
+    { label: '500', href: () => '/mock/server-error', platform: true },
   ],
   'MH-11': [{ label: 'Trang cơ sở', href: site('') }],
   'MH-12': [{ label: 'Đặt lịch', href: site('/book') }],
@@ -169,7 +201,10 @@ const built: Record<string, ScreenLink[]> = {
       href: (slug) => app(`settings/services/${waitingServiceId(slug)}`)(slug),
     },
   ],
-  'MH-47': [{ label: 'Nhân sự', href: app('settings/staff') }],
+  'MH-47': [
+    { label: 'Nhân sự', href: app('settings/staff') },
+    { label: 'Nhân sự, vai Quản lý', href: app('settings/staff?role=manager') },
+  ],
   'MH-41': [{ label: 'Tổng quan', href: app('?role=owner') }],
   'MH-42': [{ label: 'Chi nhánh', href: app('settings/branches') }],
   'MH-43': [
@@ -681,11 +716,11 @@ const rows: Row[] = [
     code: 'MH-47',
     title: 'Nhân sự',
     zone: 'G',
-    roles: ['owner'],
+    roles: ['owner', 'manager'],
     wave: 1,
     level: 'DS',
     routes: ['/app/[tenant]/settings/staff'],
-    note: 'Mời, vai trò, chi nhánh, nhận đặt online',
+    note: 'Mọi thành viên kèm cột "Nhận khách trên lịch", lời mời đang chờ (gửi lại, thu hồi, mời lại), hộp "Mời nhân viên". Quản lý chỉ mời Lễ tân và Kỹ thuật viên (BR-78)',
   },
   {
     code: 'MH-48',

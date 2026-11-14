@@ -465,6 +465,13 @@ export function ScheduleStoreProvider({
   return <ScheduleContext.Provider value={value}>{children}</ScheduleContext.Provider>;
 }
 
+/** The data of every tenant, for a page outside the app that has to change one (accepting an invitation). */
+export function useScheduleRoot(): ScheduleRootContextValue {
+  const root = useContext(ScheduleRootContext);
+  if (!root) throw new Error('useScheduleRoot() needs <ScheduleRootProvider>');
+  return root;
+}
+
 export function useScheduleStore() {
   const store = useContext(ScheduleContext);
   if (!store) throw new Error('useScheduleStore() needs <ScheduleStoreProvider>');

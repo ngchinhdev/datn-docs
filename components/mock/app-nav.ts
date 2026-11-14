@@ -9,6 +9,7 @@ import {
   Receipt,
   SlidersHorizontal,
   Undo2,
+  UserCog,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -62,6 +63,14 @@ const timeOff: NavEntry = {
   group: 'Nhân sự',
   badge: 2,
 };
+/** BR-78: a manager invites receptionists and technicians, so Nhân sự opens for them alone. */
+const staffEntry: NavEntry = {
+  id: 'staff',
+  label: 'Nhân viên',
+  path: 'settings/staff',
+  icon: UserCog,
+  group: 'Nhân sự',
+};
 const reports: NavEntry = {
   id: 'reports',
   label: 'Báo cáo',
@@ -86,8 +95,20 @@ const settings: NavEntry = {
   group: 'Cơ sở',
 };
 
+/** A member with a calendar column who is not a technician sees only their own commission (BR-44). */
+export const ownCommission: NavEntry = {
+  id: 'my-commission',
+  label: 'Hoa hồng của tôi',
+  tabLabel: 'Hoa hồng',
+  path: 'my/commission',
+  icon: Percent,
+  group: 'Kinh doanh',
+  feature: 'commission',
+};
+
 const reception = [today, calendar, customers, invoices, refunds];
 const management = [...reception, shifts, timeOff, reports];
+const managerNav = [...reception, shifts, timeOff, staffEntry, reports];
 
 /** What each role sees in the sidebar (AppShell README). */
 export const navByRole: Record<StaffRole, NavEntry[]> = {
@@ -97,7 +118,7 @@ export const navByRole: Record<StaffRole, NavEntry[]> = {
     { id: 'my-time-off', label: 'Xin nghỉ', path: 'my/time-off', icon: CalendarX },
     { id: 'my-commission', label: 'Hoa hồng', path: 'my/commission', icon: Percent },
   ],
-  manager: [overview, ...management],
+  manager: [overview, ...managerNav],
   owner: [overview, ...management, commission, settings],
 };
 

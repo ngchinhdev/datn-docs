@@ -75,18 +75,6 @@ function Commission({ tenantSlug }: { tenantSlug: string }) {
   const [picked, setPicked] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
 
-  if (role !== 'owner') {
-    return (
-      <div className="sp-shell__content">
-        <p className="sp-empty m-0">
-          <Lock size={16} aria-hidden="true" className="me-1 inline" />
-          Quy tắc và các kỳ hoa hồng chỉ chủ cơ sở xem. Kỹ thuật viên xem hoa hồng của mình ở mục
-          Hoa hồng trên điện thoại (BR-44).
-        </p>
-      </div>
-    );
-  }
-
   const periods = [...money.periods].sort((a, b) => (a.id < b.id ? 1 : -1));
   const ended = periods.filter((p) => periodState(p, MOCK_TODAY) === 'ended');
   const toClose: CommissionPeriod | undefined =

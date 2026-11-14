@@ -34,14 +34,6 @@ export function OverviewScreen({ tenantSlug }: { tenantSlug: string }) {
   const L = useMemo(() => lookups(fixture as Parameters<typeof lookups>[0]), [fixture]);
   const today = MOCK_TODAY;
 
-  if (role !== 'owner' && role !== 'manager') {
-    return (
-      <div className="sp-shell__content">
-        <p className="sp-empty m-0">Tổng quan do chủ cơ sở và quản lý xem.</p>
-      </div>
-    );
-  }
-
   const summary = todaySummary(appointments, today);
   const day = { from: today, to: today };
   const takenToday = cashIn(input, day).totalVnd;

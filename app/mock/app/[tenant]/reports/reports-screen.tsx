@@ -69,14 +69,6 @@ function Reports({ tenantSlug }: { tenantSlug: string }) {
   const data = useMemo(() => reportData(input, range, previous), [input, range, previous]);
   const f = data.figures;
 
-  if (desk.role !== 'owner' && desk.role !== 'manager') {
-    return (
-      <div className="sp-shell__content">
-        <p className="sp-empty m-0">Báo cáo do chủ cơ sở và quản lý xem.</p>
-      </div>
-    );
-  }
-
   const revenueTotal = data.staff.reduce((m, s) => m + s.revenueVnd, 0n);
   const tone = (n: number | null) => (n === null ? 'muted' : n >= 0 ? 'good' : 'bad');
 

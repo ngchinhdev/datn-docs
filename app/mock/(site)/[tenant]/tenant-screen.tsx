@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo } from 'react';
+import { SuspendedGate } from '@/components/mock/site-suspended';
 import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { bookingWindow } from '@/mock/policy';
 import { branchPhone } from '@/mock/site';
@@ -57,7 +58,16 @@ function formatHoursGroup(hours: BusinessHours[]): { label: string; time: string
   }));
 }
 
+/** The shop's page; a paused one (locked, or the plan ended) shows only the notice (BR-75, BR-82). */
 export function TenantScreen({ tenantSlug }: { tenantSlug: string }) {
+  return (
+    <SuspendedGate tenantSlug={tenantSlug}>
+      <TenantContent tenantSlug={tenantSlug} />
+    </SuspendedGate>
+  );
+}
+
+function TenantContent({ tenantSlug }: { tenantSlug: string }) {
   const fixture = useLiveFixture(tenantSlug);
   const { customer, isLoggedIn } = useCustomerSession();
 

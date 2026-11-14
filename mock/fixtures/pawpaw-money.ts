@@ -49,7 +49,7 @@ export function pawpawMoney(
   const history = buildHistory(
     sales,
     sales.map((_, i) => i + 1),
-    { services, staff, rules, collectors: ['Vy', 'Khoa'] },
+    { services, staff, rules, collectors: ['Linh', 'Khoa'] },
   );
   invoices.push(...history.invoices);
   payments.push(...history.payments);
@@ -61,7 +61,7 @@ export function pawpawMoney(
   if (group) {
     const { invoice } = draftInvoice(group, services, invoiceNumber(next), '2026-11-07T02:00:00Z');
     const amountVnd = invoice.lines.reduce((m, l) => m + BigInt(l.quantity) * l.unitPriceVnd, 0n);
-    const paid: Invoice = { ...invoice, paidAt: '2026-11-07T02:05:00Z', collectedBy: 'Vy' };
+    const paid: Invoice = { ...invoice, paidAt: '2026-11-07T02:05:00Z', collectedBy: 'Linh' };
     invoices.push(paid);
     commission.push(
       ...earnEntries({
