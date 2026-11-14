@@ -19,6 +19,7 @@ import {
 } from '../mock/commission.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
 import type { CommissionRule, Invoice, InvoiceLine } from '../mock/fixtures/types.ts';
+import { chooseRange, compareText, rangeText, reportCsv, reportData } from '../mock/report-view.ts';
 import { todoItems } from '../mock/overview.ts';
 import { collect, type Ctx, type World } from '../mock/money-ops.ts';
 import { approveRefund } from '../mock/money-refunds.ts';
@@ -740,6 +741,74 @@ const week = { from: '2026-11-02', to: '2026-11-08' };
   report(
     withRequeue.some((i) => i.title === '2 lịch cần xếp lại' && i.href === 'time-off/rq'),
     'Lịch cần xếp lại có dòng dẫn tới nơi xử lý của nó',
+  );
+}
+
+// ---- Báo cáo: ranges and CSV ----
+
+{
+  const today = '2026-11-07';
+  const seven = chooseRange('7', today);
+  const month = chooseRange('month', today);
+  const day = chooseRange('today', today);
+  report(
+    seven.range.from === '2026-11-01' &&
+      seven.range.to === today &&
+      seven.previous.from === '2026-10-25' &&
+      seven.previous.to === '2026-10-31',
+    '7 ngày: 01–07/11 so với 7 ngày liền trước (25–31/10)',
+    show(seven),
+  );
+  report(
+    month.range.from === '2026-11-01' &&
+      month.previous.from === '2026-10-01' &&
+      month.previous.to === '2026-10-07' &&
+      rangeText(month.range) === '01/11 – 07/11/2026' &&
+      compareText(month.previous) === '01/10 – 07/10',
+    'Tháng này: 01/11 – 07/11/2026 so với 01/10 – 07/10',
+  );
+  report(day.range.from === today && day.previous.from === '2026-11-06', 'Hôm nay so với hôm qua');
+  const custom = chooseRange('custom', today, { from: '2026-11-05', to: '2026-11-03' });
+  report(
+    custom.range.from === '2026-11-03' && custom.range.to === '2026-11-05',
+    'Tùy chọn: ngày đầu sau ngày cuối thì đổi chỗ',
+  );
+
+  const input = inputOf(salon.money, {
+    appointments: salon.appointments,
+    shifts: salon.shifts,
+    timeOff: salon.staffTimeOff,
+  });
+  const a = reportData(input, month.range, month.previous);
+  const b = reportData(input, seven.range, seven.previous);
+  report(
+    a.figures.revenueVnd === b.figures.revenueVnd &&
+      a.figures.revenueVnd === a.staff.reduce((m, s) => m + s.revenueVnd, 0n),
+    'Ngày 07/11: Tháng này và 7 ngày cùng bao các ngày 01–07/11 nên cùng doanh thu; tổng theo nhân viên khớp',
+  );
+  const oct = reportData(
+    input,
+    { from: '2026-10-01', to: '2026-10-31' },
+    { from: '2026-09-01', to: '2026-09-30' },
+  );
+  report(
+    oct.figures.revenueChange === null,
+    'Khoảng trước không có doanh thu thì không có % thay đổi',
+  );
+  const csv = reportCsv({
+    branchName: 'Tóc Mây "Quận 3", cơ sở 1',
+    range: month.range,
+    data: a,
+    nameOf: (id) => id,
+  });
+  const lines = csv.split('\r\n');
+  report(
+    csv.startsWith('﻿') &&
+      lines[0] === '﻿Báo cáo,"Tóc Mây ""Quận 3"", cơ sở 1"' &&
+      lines.some((l) => l === 'Doanh thu thực hiện (₫),' + a.figures.revenueVnd) &&
+      lines.filter((l) => /^\d\d\/11\/2026,/.test(l)).length === 7,
+    'CSV: có dấu BOM, ô có dấu phẩy và ngoặc kép được bọc, đủ số liệu và 7 dòng theo ngày',
+    lines.slice(0, 6).join(' | '),
   );
 }
 

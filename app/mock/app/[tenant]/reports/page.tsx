@@ -1,12 +1,14 @@
 import { notFound } from 'next/navigation';
-import { GatedPage } from '@/components/mock/locked-feature';
+import { Suspense } from 'react';
 import { fixtureBySlug } from '@/mock/selection';
+import { ReportsScreen } from './reports-screen';
 
-/** Not built yet; the plan decides whether it shows "Chưa làm" or the page that explains the lock. */
 export default async function Page({ params }: PageProps<'/mock/app/[tenant]/reports'>) {
   const { tenant } = await params;
   if (!fixtureBySlug(tenant)) notFound();
   return (
-    <GatedPage feature="full_reports" tenantSlug={tenant} path={['reports']} inSettings={false} />
+    <Suspense fallback={null}>
+      <ReportsScreen tenantSlug={tenant} />
+    </Suspense>
   );
 }

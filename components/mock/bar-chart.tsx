@@ -59,6 +59,8 @@ export function BarChart({
   const y = (v: number) => TOP + plotHeight - (Math.max(0, v) / max) * plotHeight;
   const slot = (width - LEFT) / Math.max(1, groups.length);
   const bar = Math.min(18, (slot - 12) / Math.max(1, series.length) - 3);
+  // Long ranges label every few bars so the dates do not run into each other.
+  const every = Math.max(1, Math.ceil(groups.length / 12));
   const cluster = series.length * bar + (series.length - 1) * 3;
 
   return (
@@ -133,15 +135,17 @@ export function BarChart({
                   {g.mark}
                 </text>
               )}
-              <text
-                x={LEFT + gi * slot + slot / 2}
-                y={height - 6}
-                textAnchor="middle"
-                fontSize="12"
-                fill="var(--ink-muted)"
-              >
-                {g.label}
-              </text>
+              {gi % every === 0 && (
+                <text
+                  x={LEFT + gi * slot + slot / 2}
+                  y={height - 6}
+                  textAnchor="middle"
+                  fontSize="12"
+                  fill="var(--ink-muted)"
+                >
+                  {g.label}
+                </text>
+              )}
             </g>
           );
         })}
