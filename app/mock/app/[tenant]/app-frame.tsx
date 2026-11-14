@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import { navByRole, tabIds } from '@/components/mock/app-nav';
+import { useAccountStore, workspaceBySlug } from '@/components/mock/account-store';
+import { navByRole, ownCommission, tabIds } from '@/components/mock/app-nav';
 import { ExpiredScreen } from '@/components/mock/expired-screen';
 import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useStaffStore } from '@/components/mock/staff-store';
@@ -13,6 +14,7 @@ import { AppShell, type ShellNavItem } from '@/components/sapio/app-shell';
 import { Banner } from '@/components/sapio/banner';
 import { useToast } from '@/components/sapio/toast';
 import { cn } from '@/lib/utils';
+import { hasOwnCommission, memberForRole } from '@/mock/account';
 import { tenantFixtures } from '@/mock/fixtures';
 import { fixtureBySlug, roleLabel, staffRoleOf, type StaffRole } from '@/mock/selection';
 import { PLAN_OVERRIDES, planOverrideOf, plans } from '@/mock/subscription';
@@ -20,13 +22,6 @@ import { formatFullDate } from '@/mock/time';
 
 /** Roles the mock lets you try; the sidebar and the allowed pages follow the role. */
 const STAFF_ROLES: StaffRole[] = ['receptionist', 'technician', 'manager', 'owner'];
-
-/** Person shown in the account row for each role. */
-const PEOPLE: Record<Exclude<StaffRole, 'technician'>, string> = {
-  owner: 'Chính Nguyễn',
-  manager: 'Thu Hương',
-  receptionist: 'Minh Anh',
-};
 
 const initialsOf = (name: string) =>
   name
@@ -47,6 +42,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   const toast = useToast();
   const router = useRouter();
   const { staff } = useStaffStore();
+  const { accounts, members } = useAccountStore();
   const { leaves, requeues, money } = useScheduleStore();
   /** Refund requests waiting for a manager (BR-28). */
   const pendingRefunds = money.refunds.filter((r) => r.status === 'pending').length;
@@ -73,7 +69,14 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
   const badgeOf = (entry: (typeof navByRole)[StaffRole][number]) =>
     entry.id === 'time-off' ? waiting : entry.id === 'refunds' ? pendingRefunds : entry.badge;
 
-  const items: ShellNavItem[] = navByRole[role].map((entry) => ({
+  // BR-44: a manager with a column on the calendar also has a commission of their own.
+  const manager = memberForRole(members, workspaceBySlug(tenantSlug)?.id ?? '', 'manager');
+  const entries =
+    role === 'manager' && hasOwnCommission(manager)
+      ? [...navByRole.manager, ownCommission]
+      : navByRole[role];
+
+  const items: ShellNavItem[] = entries.map((entry) => ({
     id: entry.id,
     label: entry.label,
     href: appHref(entry.path),
@@ -88,7 +91,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
     .map((id) => items.find((i) => i.id === id))
     .filter((i): i is ShellNavItem => Boolean(i))
     .map((item) => {
-      const tabLabel = navByRole[role].find((e) => e.id === item.id)?.tabLabel;
+      const tabLabel = entries.find((e) => e.id === item.id)?.tabLabel;
       return tabLabel ? { ...item, label: tabLabel } : item;
     });
 
@@ -96,7 +99,10 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
     role === 'technician'
       ? ((staff.find((s) => s.resourceId === searchParams.get('me')) ?? staff[0])?.profile
           .displayName ?? 'Kỹ thuật viên')
-      : PEOPLE[role];
+      : (accounts.find(
+          (a) =>
+            a.id === memberForRole(members, workspaceBySlug(tenantSlug)?.id ?? '', role)?.accountId,
+        )?.fullName ?? roleLabel(role));
 
   const withQuery = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams);

@@ -1,15 +1,13 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { useScheduleStore } from '@/components/mock/schedule-store';
 import { StatTile } from '@/components/mock/stat-tile';
 import { useSubscription } from '@/components/mock/subscription-store';
-import { useTechnician } from '@/components/mock/use-technician';
+import { useOwnStaff } from '@/components/mock/use-technician';
 import { GatedPage } from '@/components/mock/locked-feature';
 import { periodLabelOf, periodOfInstant, periodRange, periodState } from '@/mock/commission';
 import { periodLines } from '@/mock/commission-view';
 import { formatVnd } from '@/mock/format';
-import { staffRoleOf } from '@/mock/selection';
 import { formatFullDate, MOCK_NOW, MOCK_TODAY } from '@/mock/time';
 
 /** How many recent lines the phone shows. */
@@ -31,19 +29,19 @@ export function MyCommissionScreen({ tenantSlug }: { tenantSlug: string }) {
       />
     );
   }
-  return <MyCommission />;
+  return <MyCommission tenantSlug={tenantSlug} />;
 }
 
-function MyCommission() {
-  const me = useTechnician();
+function MyCommission({ tenantSlug }: { tenantSlug: string }) {
+  const me = useOwnStaff(tenantSlug);
   const { money, customers } = useScheduleStore();
-  const role = staffRoleOf(useSearchParams().get('role'));
 
-  if (role !== 'technician') {
+  if (!me) {
     return (
       <div className="sp-shell__content">
         <p className="sp-empty m-0">
-          Màn này là hoa hồng của kỹ thuật viên đang đăng nhập. Chọn vai Kỹ thuật viên để xem.
+          Màn này là hoa hồng của người có cột trên lịch: kỹ thuật viên, hoặc quản lý nhận khách.
+          Chọn vai Kỹ thuật viên hoặc Quản lý để xem.
         </p>
       </div>
     );

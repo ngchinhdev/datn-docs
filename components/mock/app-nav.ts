@@ -86,6 +86,17 @@ const settings: NavEntry = {
   group: 'Cơ sở',
 };
 
+/** A member with a calendar column who is not a technician sees only their own commission (BR-44). */
+export const ownCommission: NavEntry = {
+  id: 'my-commission',
+  label: 'Hoa hồng của tôi',
+  tabLabel: 'Hoa hồng',
+  path: 'my/commission',
+  icon: Percent,
+  group: 'Kinh doanh',
+  feature: 'commission',
+};
+
 const reception = [today, calendar, customers, invoices, refunds];
 const management = [...reception, shifts, timeOff, reports];
 
