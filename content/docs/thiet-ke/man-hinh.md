@@ -82,7 +82,7 @@ Route trong bảng là đường dẫn trên tên miền con của cơ sở (ví
 | MH-19 | Đối tượng được phục vụ | `/me/subjects` | KH | 1 | Form | **Đã chọn.** Thuộc tính theo schema của ngành (BR-71). Ngành không có đối tượng khác thì không hiện mục này |
 | MH-20 | Gói và ví | `/me/wallet` | KH | 2 | Nhẹ | **Đã chọn.** Số buổi còn và hạn của gói; số dư tiền thật, tiền tặng; lịch sử |
 | MH-21 | Thông tin cá nhân | `/me/profile` | KH | 1 | Form | **Đã chọn.** Họ tên, số điện thoại, email; đồng ý nhận quảng cáo (BR-64) |
-| MH-22 | Khung chat đặt lịch | nổi trên MH-11, MH-12 | KH | 3 | Vẽ | BT7: hỏi giá, giờ; giữ chỗ rồi chuyển sang bước OTP; "Gặp lễ tân" |
+| MH-22 | Khung chat đặt lịch | nổi trên MH-11, MH-12 | KH | 3 | Vẽ | **Đã chọn.** BT7, BR-92: hỏi giá, giờ; giữ chỗ rồi chuyển sang bước Thông tin liên hệ (OTP); "Gặp lễ tân"; hết lượt (BR-67); điện thoại toàn màn hình, máy tính khung góc phải |
 | MH-23 | Email gửi khách | | KH | 1 (OTP), 3 | Nhẹ | **Đã chọn.** Mã OTP, xác nhận lịch, nhắc 24h và 2h, đã đổi, đã hủy, đã hoàn tiền |
 
 ## D. Lễ tân và thu ngân: `/app/[tenant]`

@@ -1224,6 +1224,71 @@ Chữ và số trên bảng là minh họa; trong mock mọi số đều tính t
 - **Gia hạn:** Nail Hạ Vy thêm 7 ngày thì hạn mới 13/11; Tóc Mây thêm 7 ngày thì trang Gói Sapio của Tóc Mây hiện 05/12.
 - **Giá:** đổi giá Cơ bản thành 219.000 ₫ thì bảng kỳ hiện 591.000 ₫ và 2.102.000 ₫; lưu xong trang giới thiệu hiện 219.000 ₫. Tắt "Chatbot đặt lịch" của gói Chuyên nghiệp thì có hộp hỏi lại.
 
+## Bước 18. Đợt H: trợ lý đặt lịch (MH-22)
+
+Sau khi PR #12 merge. Căn cứ:
+- Các bảng `ChatHoi`, `ChatGiuCho`, `ChatGioiHan`, `ChatMayTinh` (bảng ở `design/README.md`).
+- Quy tắc BR-06, BR-07, BR-13, BR-14, BR-16, BR-17, BR-67, BR-79, BR-82, BR-92. Mục BT7 trong `roadmap.md`.
+- Đã có: cấu hình chatbot của cơ sở (`config.chatbot`, `mock/chatbot.ts`, Bước 14), giờ trống (`mock/availability.ts`), luồng đặt lịch và giữ chỗ (`book/booking-flow.tsx`, `useBookingDraft`), tính năng gói (`can('chatbot')`).
+
+Mock **không gọi AI**. Trợ lý là hàm thuần nhận câu khách gõ, nhận ra ý định bằng từ khóa đơn giản và trả về tin nhắn kèm thẻ. Mọi số trong thẻ tính từ fixture bằng các hàm đã có, đúng tinh thần "chỉ gọi tool". Câu không nhận ra thì coi là "không hiểu". Làm trên nhánh `feat/mock-assistant`, mỗi mục 18a–18e một commit, mở PR mới, không merge.
+
+### 18a. Bộ não của trợ lý (hàm thuần)
+
+- `mock/assistant.ts`, nhận `now`, không React:
+  - **Ý định:** bảng giá, giá một dịch vụ (kèm biến thể: tóc ngắn, tóc dài; chó dưới 10 kg, từ 10 kg, mèo), giờ trống (hôm nay, chiều nay, ngày mai, thứ trong tuần), lọc theo tên thợ, chọn một giờ, gặp lễ tân, ngoài phạm vi, chào hỏi. Từ khóa dịch vụ và thuộc tính đối tượng lấy từ fixture và gói cấu hình ngành, không viết cứng tên ngành.
+  - **Thẻ** (dữ liệu, không phải chữ): thẻ dịch vụ (giá, thời lượng, cọc, giá thợ chính nếu có), thẻ giờ trống (tối đa 6 giờ, dùng `freeSlots` với khung BR-06), thẻ giữ chỗ, thẻ đã đặt, thẻ lễ tân (số điện thoại, giờ mở cửa, ngoài giờ thì giờ mở lại), thẻ hết lượt.
+  - Câu chữ của trợ lý không chứa số tiền hay giờ trống; con số chỉ nằm trong thẻ (BR-92). Hàm kiểm điều này có trong 18e.
+  - Giá tùy đối tượng mà chưa biết thì hỏi lại kèm gợi ý thuộc tính (BR-13); khách gõ "Poodle, 6 kg" thì chọn đúng biến thể.
+  - Không hiểu hai lần liền thì đưa thẻ lễ tân.
+  - Nhiều dịch vụ, đặt nhóm, đổi giờ, hủy lịch: trả link sang `/book` hoặc `/me`.
+  - **Lượt** (BR-67, BR-92): đếm câu khách gửi và gợi ý đã bấm; nút trong thẻ không tính. Hết lượt ngày hoặc lượt tháng (`usedThisMonth` ≥ `perShopPerMonth`) thì không xử lý câu, trả thẻ hết lượt.
+  - **Hiện nút:** hàm cho biết nút "Hỏi trợ lý" có hiện không, theo `config.chatbot.enabled`, `can('chatbot')`, trang tạm dừng và bước của luồng đặt lịch.
+
+### 18b. Khung chat
+
+- Component dùng chung `components/mock/assistant-chat.tsx` theo bảng: đầu khung (tên trợ lý, "Tự động · số liệu từ hệ thống của tiệm", nút đóng), lời chào lấy từ `config.chatbot.greeting`, dòng "không tự đặt lịch", gợi ý nhanh, ô nhập, các loại thẻ.
+- Điện thoại: toàn màn hình; máy tính (từ 1024 px): khung 400 × 620 ở góc phải dưới (`ChatMayTinh`). Đóng thì về đúng chỗ đang xem.
+- Nút nổi "Hỏi trợ lý" trên `/mock/[tenant]` và các bước Dịch vụ, Ngày giờ của `/mock/[tenant]/book`; ẩn ở Thông tin liên hệ, Xác nhận, Trả cọc.
+- Cuộc trò chuyện giữ khi đóng mở khung và khi chuyển giữa trang cơ sở và trang đặt lịch (store trong layout của trang khách). Gói Cơ bản (Pawpaw mặc định) không có nút; `?plan=trial` thì có.
+- Bàn phím: Enter gửi, Esc đóng, focus vào ô nhập khi mở; thẻ giờ trống là nhóm nút có `aria-pressed`.
+
+### 18c. Giữ chỗ và chuyển sang luồng đặt lịch
+
+- Bấm một giờ trong thẻ: tạo giữ chỗ 10 phút như luồng đặt lịch (thợ "Bất kỳ ai" thì xếp theo cách luồng đặt lịch đang xếp), hiện thẻ giữ chỗ có đếm ngược theo đồng hồ mock.
+- Mỗi khung chat có tối đa một giữ chỗ; chọn giờ khác thì trả giờ cũ.
+- "Xác nhận bằng email": mở `/mock/[tenant]/book?step=info` với dịch vụ, giờ, thợ và giữ chỗ đã điền, dùng cơ chế nháp `useBookingDraft` đang có (như lúc quay lại từ trang trả cọc). Ở bước này có dòng "Trợ lý đã điền sẵn dịch vụ, giờ và thợ".
+- Đặt xong (qua OTP như bình thường) thì mở lại khung chat thấy thẻ "Đã đặt lịch" và thẻ giữ chỗ cũ chuyển sang đã dùng.
+- Hết 10 phút chưa xác nhận: thẻ giữ chỗ chuyển "Đã trả lại", trợ lý đưa giờ còn trống của thợ đó (BR-07).
+- Dịch vụ có cọc: sau OTP đi tiếp bước Trả cọc như luồng thường.
+
+### 18d. Công cụ mock
+
+- Trong khung chat (chỉ có ở mock): "Tua 10 phút" (cho giữ chỗ hết hạn) và "Dùng hết lượt hôm nay" (đặt số lượt bằng giới hạn).
+- `mock/screens.ts`: MH-22 thành "Đang làm", link tới `/mock/toc-may?chat=1`, `/mock/pawpaw?plan=trial&chat=1`. `?chat=1` mở sẵn khung chat.
+
+### 18e. Kiểm và hoàn tất
+
+- `scripts/check-assistant.ts` và lệnh `pnpm check:assistant`, mỗi ca đặt tên theo BR. Tối thiểu:
+  - "Nhuộm tóc ngắn bao nhiêu tiền?" ra thẻ 500.000 ₫, 1 giờ 45 phút, cọc 100.000 ₫; câu chữ không chứa số tiền;
+  - "Chiều nay cắt tóc ngắn còn giờ không?" ra đúng các giờ của `freeSlots` sau 12:00, tối đa 6; "Có thợ Mai không?" chỉ còn giờ của Mai;
+  - Pawpaw "Tắm cho chó bao nhiêu?" hỏi lại cân nặng; "Poodle, 6 kg" ra Tắm chó nhỏ 150.000 ₫;
+  - câu ngoài phạm vi ra thẻ lễ tân; không hiểu hai lần liền cũng ra thẻ lễ tân;
+  - câu thứ 21 trong ngày (giới hạn 20) ra thẻ hết lượt, không xử lý câu; lượt tháng của cơ sở hết cũng vậy;
+  - giữ giờ khác thì trả giờ cũ; giữ chỗ quá 10 phút thì hết hạn;
+  - gói Cơ bản, chatbot tắt, trang tạm dừng thì không có nút;
+  - không ca nào trợ lý tạo lịch hẹn.
+- Các lệnh kiểm phải xanh: `pnpm check:availability`, `pnpm check:shop`, `pnpm check:account`, `pnpm check:platform`, `pnpm check:assistant`, `pnpm build`, `pnpm typecheck`, `prettier --check`.
+- Mở PR mới, mô tả theo 18a–18e, có mục "Tự quyết". Ghi một mục Tiến độ.
+
+**Xong khi** (người dùng tự kiểm):
+- **Hỏi:** ở `/mock/toc-may` bấm "Hỏi trợ lý", hỏi giá nhuộm tóc ngắn thì ra thẻ đúng bảng giá; hỏi giờ chiều nay thì giờ khớp trang đặt lịch.
+- **Giữ chỗ:** chọn một giờ trong thẻ, bấm "Xác nhận bằng email" thì sang bước Thông tin liên hệ đã điền sẵn, đồng hồ giữ chỗ chạy tiếp; nhập mã xong, mở lại khung chat thấy "Đã đặt lịch". Lịch mới hiện trên lịch lễ tân.
+- **Hết giờ giữ:** "Tua 10 phút" thì thẻ chuyển "Đã trả lại" và trợ lý đưa giờ còn trống.
+- **Giới hạn:** "Dùng hết lượt hôm nay" thì ô nhập khóa, có "Đặt trên trang" và "Gọi".
+- **Gói:** `/mock/pawpaw` (Cơ bản) không có nút; `/mock/pawpaw?plan=trial` có, hỏi giá tắm thì trợ lý hỏi cân nặng.
+- **Máy tính:** khung chat ở góc phải dưới, trang vẫn cuộn được phía sau.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -1371,4 +1436,16 @@ datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 17a đến 17f, mỗi
 bảng; chữ và số tính từ store bằng hàm thuần ở mock/ nhận `now`, tiền là bigint, không gọi Date.now().
 Chỉ chạy các lệnh kiểm trong CLAUDE.md và các lệnh check của mục 17f. Mở PR mới, không merge. Dừng lại
 hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 18:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-assistant.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, BR-06, BR-07, BR-13, BR-14,
+BR-16, BR-17, BR-67, BR-79, BR-82, BR-92 trong quy-tac.md, mục BT7 trong roadmap.md, và design/README.md
+(các bảng của đợt H). Làm Bước 18 trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 18a đến
+18e, mỗi mục một commit. Mock không gọi AI: trợ lý là hàm thuần ở mock/ nhận `now`, số liệu chỉ nằm trong
+thẻ, tiền là bigint, không gọi Date.now(). Chỉ chạy các lệnh kiểm trong CLAUDE.md và các lệnh check của
+mục 18e. Mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
 ```

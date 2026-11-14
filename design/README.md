@@ -118,5 +118,9 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `QtKhoaCoSo.dc.html` | MH-58 Hộp khóa cơ sở có lý do | **Đã chọn** | nút "Khóa cơ sở" ở chi tiết |
 | `QtGiaHan.dc.html` | MH-58 Hộp gia hạn thủ công (cơ sở đã hết hạn) | **Đã chọn** | nút "Gia hạn thủ công" ở chi tiết |
 | `QtGoiVaGia.dc.html` | MH-62 Gói và giá: hai gói, giá theo kỳ, thay đổi chưa lưu | **Đã chọn** | `/mock/admin/plans` |
+| `ChatHoi.dc.html` | MH-22 Trợ lý: nút trên trang cơ sở, lời chào, hỏi giá, hỏi giờ, lọc theo thợ | **Đã chọn** | `/mock/[tenant]` (Bước 18) |
+| `ChatGiuCho.dc.html` | MH-22 Giữ chỗ 10 phút, sang bước Thông tin liên hệ, đã đặt, hết giữ chỗ | **Đã chọn** | `/mock/[tenant]`, `/mock/[tenant]/book?step=info` |
+| `ChatGioiHan.dc.html` | MH-22 Gặp lễ tân, hết lượt trong ngày, spa thú cưng hỏi theo bé | **Đã chọn** | `/mock/[tenant]` |
+| `ChatMayTinh.dc.html` | MH-22 Máy tính: khung chat ở góc phải dưới | **Đã chọn** | `/mock/[tenant]` |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70, BR-73, BR-75, BR-76 đến BR-79, BR-83, BR-84, BR-89 đến BR-91 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70, BR-73, BR-75, BR-76 đến BR-79, BR-83, BR-84, BR-89 đến BR-92 trong `content/docs/nghiep-vu/quy-tac.md`.

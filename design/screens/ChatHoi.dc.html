@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MH-22 · Trợ lý: mở, hỏi giá, hỏi giờ</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 1314px; height: 972px; box-sizing: border-box; padding: 24px 32px; display: flex; gap: 40px; align-items: flex-start; background: var(--surface-sunken, var(--fill-tonal)); color: var(--ink); font-family: var(--font-sans);">
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<p style="margin: 0; font: 600 14px/20px var(--font-sans); color: var(--ink-muted);">1. Nút "Hỏi trợ lý" trên trang cơ sở</p>
+<div class="sp-tenant-may" style="position: relative; width: 390px; height: 900px; flex: none; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans); box-shadow: 0 0 0 1px var(--line); border-radius: 12px;">
+  <header style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px 8px 16px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <a href="#" style="color: var(--accent); display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none;"><span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent); width: 32px; height: 32px; font-size: 14px; border-radius: 8px;">M</span><span style="font: 600 15px/20px var(--font-sans);">Salon Tóc Mây</span></a>
+    <a href="#" class="sp-btn sp-btn--ghost sp-btn--sm" style="text-decoration: none;">Đăng nhập</a>
+  </header>
+  <div style="display: flex; flex-direction: column; gap: 20px; padding: 16px 16px 120px;">
+    <div aria-hidden="true" style="height: 140px; margin: -16px -16px 0; background: linear-gradient(135deg, var(--accent-soft), var(--fill-tonal)); display: flex; align-items: flex-end; padding: 16px;"><span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent); width: 64px; height: 64px; font-size: 24px; border-radius: 16px;">M</span></div>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <h1 style="margin: 0; font: 700 26px/32px var(--font-sans); letter-spacing: -0.02em;">Salon Tóc Mây</h1>
+      <p style="margin: 0; font: 400 14px/20px var(--font-sans); color: var(--ink-muted);">Cắt, gội, nhuộm cho nam và nữ. Chuyên nhuộm màu thời trang.</p>
+      <span class="sp-num" style="display: flex; gap: 6px; align-items: center; font: 400 14px/20px var(--font-sans);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><span><strong>Đang mở</strong> · hôm nay 08:00–20:00</span></span>
+    </div>
+    <section style="display: flex; flex-direction: column; gap: 8px;">
+      <h2 style="margin: 0; font: 600 17px/24px var(--font-sans); letter-spacing: -0.01em;">Dịch vụ và giá</h2>
+      <section style="display: flex; flex-direction: column;">
+        <h3 style="margin: 0 0 4px; font: 600 13px/18px var(--font-sans); color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em;">Cắt</h3>
+        <ul style="margin: 0; padding: 0; list-style: none;"><li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line);">
+          <span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;"><span style="font: 500 15px/22px var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Cắt tóc</span><span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Tóc ngắn 45 phút · Tóc dài 1 giờ</span></span>
+          <span class="sp-num" style="font: 600 15px/22px var(--font-sans); white-space: nowrap;">từ 150.000 ₫</span>
+          <a href="#" class="sp-btn sp-btn--secondary sp-btn--sm" style="text-decoration: none;" aria-label="Đặt Cắt tóc">Đặt</a>
+        </li></ul>
+      </section><section style="display: flex; flex-direction: column;">
+        <h3 style="margin: 0 0 4px; font: 600 13px/18px var(--font-sans); color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em;">Gội</h3>
+        <ul style="margin: 0; padding: 0; list-style: none;"><li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line);">
+          <span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;"><span style="font: 500 15px/22px var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Gội sấy</span><span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">30 phút</span></span>
+          <span class="sp-num" style="font: 600 15px/22px var(--font-sans); white-space: nowrap;">80.000 ₫</span>
+          <a href="#" class="sp-btn sp-btn--secondary sp-btn--sm" style="text-decoration: none;" aria-label="Đặt Gội sấy">Đặt</a>
+        </li></ul>
+      </section><section style="display: flex; flex-direction: column;">
+        <h3 style="margin: 0 0 4px; font: 600 13px/18px var(--font-sans); color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.04em;">Nhuộm và uốn</h3>
+        <ul style="margin: 0; padding: 0; list-style: none;"><li style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line);">
+          <span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;"><span style="font: 500 15px/22px var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Nhuộm tóc</span><span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Tóc ngắn 1 giờ 45 phút · cọc 100.000 ₫</span></span>
+          <span class="sp-num" style="font: 600 15px/22px var(--font-sans); white-space: nowrap;">từ 500.000 ₫</span>
+          <a href="#" class="sp-btn sp-btn--secondary sp-btn--sm" style="text-decoration: none;" aria-label="Đặt Nhuộm tóc">Đặt</a>
+        </li></ul>
+      </section>
+    </section>
+  </div>
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 12px; padding: 12px 16px 20px; background: var(--surface-raised); box-shadow: 0 -1px 0 var(--line);">
+    <div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;">
+      <span class="sp-num" style="font: 600 15px/22px var(--font-sans);">Đặt lịch online</span>
+      <span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Hôm nay còn giờ từ 13:45</span>
+    </div>
+    <button type="button" class="sp-btn sp-btn--accent sp-btn--lg">Đặt lịch</button>
+  </div>
+  <button type="button" class="sp-btn" style="position: absolute; right: 16px; bottom: 96px; display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 18px 0 14px; border-radius: 999px; background: var(--surface-raised); color: var(--ink); box-shadow: 0 0 0 1px var(--line), 0 8px 24px rgba(0,0,0,.14); font: 600 15px/20px var(--font-sans);"><span style="display: inline-flex; color: var(--accent);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path></svg></span>Hỏi trợ lý</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<p style="margin: 0; font: 600 14px/20px var(--font-sans); color: var(--ink-muted);">2. Lời chào, hỏi giá: số trong thẻ, không trong câu</p>
+<div class="sp-tenant-may" style="position: relative; width: 390px; height: 900px; flex: none; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans); box-shadow: 0 0 0 1px var(--line); border-radius: 12px;">
+  <header style="display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 16px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent); width: 32px; height: 32px; font-size: 14px; border-radius: 8px;">M</span>
+    <span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;"><span style="font: 600 15px/20px var(--font-sans);">Trợ lý Tóc Mây</span><span style="font: 400 12px/16px var(--font-sans); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tự động · số liệu từ hệ thống của tiệm</span></span>
+    <button type="button" class="sp-icon-btn" aria-label="Đóng khung chat" style="width: 44px; height: 44px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+  </header>
+  <div style="display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 110px;">
+    <div style="align-self: flex-start; max-width: 86%; padding: 10px 14px; border-radius: 4px 16px 16px 16px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line); font: 400 15px/22px var(--font-sans);">Chào bạn, mình là trợ lý của Salon Tóc Mây. Mình xem giá, giờ trống và giữ chỗ giúp bạn.</div>
+    <p style="margin: 0; padding: 0 4px; font: 400 12px/17px var(--font-sans); color: var(--ink-muted);">Mình không tự đặt lịch: lịch chỉ được đặt khi bạn nhập mã 6 số gửi qua email.</p>
+    <div class="sp-chips" style="align-self: stretch;"><button type="button" class="sp-chip">Bảng giá</button><button type="button" class="sp-chip">Giờ trống hôm nay</button><button type="button" class="sp-chip">Gặp lễ tân</button></div>
+    <div style="align-self: flex-end; max-width: 80%; padding: 10px 14px; border-radius: 16px 4px 16px 16px; background: var(--accent); color: var(--on-accent); font: 400 15px/22px var(--font-sans);">Nhuộm tóc ngắn bao nhiêu tiền?</div>
+    <div style="align-self: flex-start; max-width: 86%; padding: 10px 14px; border-radius: 4px 16px 16px 16px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line); font: 400 15px/22px var(--font-sans);">Nhuộm tóc ngắn ở Tóc Mây:</div>
+    <div style="align-self: stretch; display: flex; flex-direction: column; gap: 6px;">
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line);"><div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline;"><span style="display: flex; flex-direction: column;"><span style="font: 600 15px/22px var(--font-sans);">Nhuộm tóc · Tóc ngắn</span><span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">1 giờ 45 phút</span></span><span class="sp-num" style="font: 700 17px/24px var(--font-sans); white-space: nowrap;">500.000 ₫</span></div><div style="display: flex; justify-content: space-between; gap: 12px; font: 400 14px/20px var(--font-sans);"><span style="color: var(--ink-muted);">Chọn đích danh Thợ chính</span><span class="sp-num" style="font-weight: 400; text-align: right;">550.000 ₫</span></div><div style="display: flex; justify-content: space-between; gap: 12px; font: 400 14px/20px var(--font-sans);"><span style="color: var(--ink-muted);">Cọc khi đặt online</span><span class="sp-num" style="font-weight: 400; text-align: right;">100.000 ₫</span></div><div style="display: flex; gap: 8px;"><button type="button" class="sp-btn sp-btn--secondary sp-btn--sm">Xem giờ trống</button><button type="button" class="sp-btn sp-btn--ghost sp-btn--sm">Tóc dài</button></div></div><div style="padding: 0 2px;"><span style="display: inline-flex; align-items: center; gap: 6px; font: 400 12px/16px var(--font-sans); color: var(--ink-muted);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14a9 3 0 0 0 18 0V5"></path><path d="M3 12a9 3 0 0 0 18 0"></path></svg>Lấy từ bảng giá của tiệm</span></div>
+    </div>
+  </div>
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 16px; background: var(--surface-raised); box-shadow: 0 -1px 0 var(--line);">
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <label class="sp-field__control" style="flex: 1 1 auto; height: 44px; border-radius: 999px;"><input aria-label="Câu hỏi" placeholder="Hỏi giá, giờ trống…" style="padding: 0 16px; font-size: 15px;"></label>
+      <button type="button" class="sp-btn sp-btn--accent" aria-label="Gửi" style="width: 44px; height: 44px; padding: 0; border-radius: 999px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></button>
+    </div>
+  </div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<p style="margin: 0; font: 600 14px/20px var(--font-sans); color: var(--ink-muted);">3. Hỏi giờ trống, lọc theo thợ</p>
+<div class="sp-tenant-may" style="position: relative; width: 390px; height: 900px; flex: none; overflow: hidden; box-sizing: border-box; background: var(--surface); color: var(--ink); font-family: var(--font-sans); box-shadow: 0 0 0 1px var(--line); border-radius: 12px;">
+  <header style="display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 16px; background: var(--surface-raised); box-shadow: 0 1px 0 var(--line);">
+    <span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent); width: 32px; height: 32px; font-size: 14px; border-radius: 8px;">M</span>
+    <span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;"><span style="font: 600 15px/20px var(--font-sans);">Trợ lý Tóc Mây</span><span style="font: 400 12px/16px var(--font-sans); color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tự động · số liệu từ hệ thống của tiệm</span></span>
+    <button type="button" class="sp-icon-btn" aria-label="Đóng khung chat" style="width: 44px; height: 44px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+  </header>
+  <div style="display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 110px;">
+    <div style="align-self: flex-end; max-width: 80%; padding: 10px 14px; border-radius: 16px 4px 16px 16px; background: var(--accent); color: var(--on-accent); font: 400 15px/22px var(--font-sans);">Chiều nay cắt tóc ngắn còn giờ không?</div>
+    <div style="align-self: flex-start; max-width: 86%; padding: 10px 14px; border-radius: 4px 16px 16px 16px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line); font: 400 15px/22px var(--font-sans);">Chiều nay, Thứ Bảy 07/11, còn mấy giờ này. Bạn chọn một giờ, mình giữ chỗ 10 phút để bạn xác nhận.</div>
+    <div style="align-self: stretch; display: flex; flex-direction: column; gap: 6px;">
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line);"><div style="display: flex; justify-content: space-between; gap: 12px; align-items: baseline;"><span style="display: flex; flex-direction: column;"><span style="font: 600 15px/22px var(--font-sans);">Cắt tóc · Tóc ngắn</span><span class="sp-num" style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">45 phút · trả ở tiệm</span></span><span class="sp-num" style="font: 700 17px/24px var(--font-sans); white-space: nowrap;">150.000 ₫</span></div><p style="margin: 0; font: 500 13px/18px var(--font-sans); color: var(--ink-muted);">Thợ: Bất kỳ ai</p><div class="sp-slots" role="group" aria-label="Giờ trống" style="grid-template-columns: repeat(3, minmax(0, 1fr));"><button class="sp-slot" type="button" aria-pressed="false">13:45</button><button class="sp-slot" type="button" aria-pressed="false">14:15</button><button class="sp-slot" type="button" aria-pressed="false">15:00</button><button class="sp-slot" type="button" aria-pressed="false">15:30</button><button class="sp-slot" type="button" aria-pressed="false">16:15</button><button class="sp-slot" type="button" aria-pressed="false">17:00</button></div><a href="#" style="color: var(--accent); font: 500 14px/20px var(--font-sans); text-decoration: none;">Ngày khác, thợ khác: mở trang đặt lịch</a></div><div style="padding: 0 2px;"><span style="display: inline-flex; align-items: center; gap: 6px; font: 400 12px/16px var(--font-sans); color: var(--ink-muted);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14a9 3 0 0 0 18 0V5"></path><path d="M3 12a9 3 0 0 0 18 0"></path></svg>Giờ trống tính lúc 10:20, có thể thay đổi</span></div>
+    </div>
+    <div style="align-self: flex-end; max-width: 80%; padding: 10px 14px; border-radius: 16px 4px 16px 16px; background: var(--accent); color: var(--on-accent); font: 400 15px/22px var(--font-sans);">Có thợ Mai không?</div>
+    <div style="align-self: flex-start; max-width: 86%; padding: 10px 14px; border-radius: 4px 16px 16px 16px; background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line); font: 400 15px/22px var(--font-sans);">Mai còn trống 14:15 và 16:15 chiều nay. Chọn đích danh Mai giá vẫn 150.000 ₫.</div>
+    <div style="align-self: stretch; display: flex; flex-direction: column; gap: 6px;">
+      <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line);"><p style="margin: 0; font: 500 13px/18px var(--font-sans); color: var(--ink-muted);">Cắt ngắn · Thợ: Mai</p><div class="sp-slots" role="group" aria-label="Giờ trống" style="grid-template-columns: repeat(3, minmax(0, 1fr));"><button class="sp-slot" type="button" aria-pressed="false">14:15</button><button class="sp-slot" type="button" aria-pressed="false">16:15</button></div></div>
+    </div>
+  </div>
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 16px; background: var(--surface-raised); box-shadow: 0 -1px 0 var(--line);">
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <label class="sp-field__control" style="flex: 1 1 auto; height: 44px; border-radius: 999px;"><input aria-label="Câu hỏi" placeholder="Hỏi giá, giờ trống…" style="padding: 0 16px; font-size: 15px;"></label>
+      <button type="button" class="sp-btn sp-btn--accent" aria-label="Gửi" style="width: 44px; height: 44px; padding: 0; border-radius: 999px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"></path><path d="m21.854 2.147-10.94 10.939"></path></svg></button>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1314,"height":972}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

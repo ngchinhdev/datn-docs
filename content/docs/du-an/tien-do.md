@@ -7,6 +7,21 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 14/11/2026 (đêm muộn): merge Bước 17, chốt đợt H, trợ lý đặt lịch
+
+- **Đã làm:**
+  - Review và merge PR #12 (Bước 17). Người dùng tự kiểm mục "Xong khi" sau.
+  - Vẽ và chốt đợt H (4 bảng, MH-22): nút "Hỏi trợ lý" và hỏi giá, hỏi giờ; giữ chỗ rồi sang bước Thông tin liên hệ; gặp lễ tân, hết lượt, spa thú cưng; khung chat trên máy tính.
+  - Quy tắc: BR-92 trợ lý đặt lịch (khi nào hiện, số liệu chỉ trong thẻ, một dịch vụ một người, giữ chỗ rồi OTP, gặp lễ tân, đếm lượt, lưu 30 ngày).
+  - Viết Bước 18 (`feat/mock-assistant`).
+- **Vướng:** khách sửa hoặc mua gói ở trang Gói Sapio thì trang quản trị nền tảng không thấy (store của cơ sở không ghi về store nền tảng). Chỉ là giới hạn của mock; app thật có một bảng `subscriptions`.
+- **Ghi chú cho ERD:**
+  - `chat_conversations`: tenant_id, customer_id (null khi chưa có phiên), browser_key, started_at, hold_id (giữ chỗ đang mở, tối đa một).
+  - `chat_messages`: conversation_id, role (khách, trợ lý, hệ thống), text, cards (jsonb: loại thẻ và tham số tool đã gọi), created_at; xóa sau 30 ngày.
+  - Đếm lượt: theo `chat_messages` của khách trong ngày (giờ chi nhánh) và trong tháng của cơ sở; `chatbot_settings.used_this_month` có thể là số đếm dẫn xuất.
+  - Giữ chỗ từ trợ lý dùng chung bảng `holds` với luồng đặt lịch, thêm `source` (web, assistant).
+- **Tiếp theo:** Claude Code làm Bước 18; người dùng kiểm Bước 17; báo cô D-15.
+
 ### 14/11/2026 (đêm): mock quản trị nền tảng (Bước 17, đợt G)
 
 - **Đã làm** (nhánh `feat/mock-admin`, mỗi mục 17a–17f một commit):
