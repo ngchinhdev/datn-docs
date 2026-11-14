@@ -13,6 +13,7 @@ import {
   type Member,
   type Workspace,
 } from '@/mock/fixtures/accounts';
+import type { Staff } from '@/mock/fixtures';
 import { addMinutes, MOCK_NOW } from '@/mock/time';
 
 interface AccountData {
@@ -32,6 +33,8 @@ interface AccountData {
   mails: AccountMail[];
   /** The tenant each account used last (`last_tenant_id`). */
   lastWorkspace: Record<string, string>;
+  /** Staff made by accepting an invitation, by tenant slug: they join the staff list of the app. */
+  joiners: Record<string, Staff[]>;
 }
 
 const INITIAL: AccountData = {
@@ -45,6 +48,7 @@ const INITIAL: AccountData = {
   resetSentAt: {},
   mails: [],
   lastWorkspace: { 'acc-linh': 'may' },
+  joiners: {},
 };
 
 interface AccountStore extends AccountData {

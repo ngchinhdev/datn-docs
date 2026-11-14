@@ -5,6 +5,7 @@
  */
 import type { Account, Invitation, InviteRole, Member, Workspace } from './fixtures/accounts.ts';
 import type { Resource, Staff, StaffRoleId } from './fixtures/types.ts';
+import { tenantFixtures } from './fixtures/index.ts';
 import { addMinutes, localDate } from './time.ts';
 
 export const normalizeEmail = (email: string) => email.trim().toLowerCase();
@@ -651,4 +652,14 @@ export function entryHref(workspace: Workspace, member: Member, entry: DoorEntry
   const query = params.toString();
   const path = entry === 'locked' ? base : `${base}/${HOME[member.role]}`;
   return query ? `${path}?${query}` : path;
+}
+
+/** The branch name; every branch for `null`. */
+export function branchLabel(branchId: string | null): string {
+  if (branchId === null) return 'Tất cả chi nhánh';
+  for (const fixture of tenantFixtures) {
+    const branch = fixture.branches.find((b) => b.id === branchId);
+    if (branch) return branch.name;
+  }
+  return branchId;
 }

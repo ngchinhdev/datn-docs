@@ -2,7 +2,7 @@
  * The emails of the account pages: the link to reset a password, the notice of a lock, the
  * invitation. The mock has no mail server, so they land in a sample mailbox. Pure.
  */
-import type { Account } from './fixtures/accounts.ts';
+import type { Account, Invitation } from './fixtures/accounts.ts';
 import { formatTime, localDate } from './time.ts';
 
 export interface AccountMail {
@@ -68,5 +68,32 @@ export function lockMail(account: Account, until: string, now: string, seq: numb
       href: `/mock/forgot-password?email=${encodeURIComponent(account.email)}`,
     },
     notes: ['Không phải bạn? Đặt lại mật khẩu để mở khóa ngay và chặn người lạ.'],
+  };
+}
+
+/** The invitation as the person invited receives it (BR-78). */
+export function inviteMail(input: {
+  invitation: Invitation;
+  workspaceName: string;
+  roleLabel: string;
+  branchLabel: string;
+  now: string;
+  seq: number;
+}): AccountMail {
+  const { invitation } = input;
+  return {
+    id: `mail-invite-${input.seq}`,
+    at: input.now,
+    to: invitation.email,
+    subject: `${invitation.invitedBy.split(',')[0]} mời bạn vào ${input.workspaceName} trên Sapio`,
+    lead: `Bạn được mời làm ${input.roleLabel} ở ${input.workspaceName}.`,
+    rows: [
+      ['Vai trò', input.roleLabel],
+      ['Chi nhánh', input.branchLabel],
+      ['Người mời', invitation.invitedBy],
+      ['Hết hạn', formatMoment(invitation.expiresAt)],
+    ],
+    action: { label: 'Nhận lời mời', href: `/mock/invite/${invitation.token}` },
+    notes: ['Link dùng một lần. Không quen người mời thì bỏ qua email này.'],
   };
 }

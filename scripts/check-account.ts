@@ -8,6 +8,7 @@ import {
   afterLogin,
   attemptLogin,
   blankStaffMember,
+  branchLabel,
   declineInvitation,
   doorEntry,
   entryHref,
@@ -42,7 +43,7 @@ import {
   workspaces,
   SAMPLE_PASSWORD,
 } from '../mock/fixtures/accounts.ts';
-import { formatWait, resetMail } from '../mock/account-mail.ts';
+import { formatWait, inviteMail, resetMail } from '../mock/account-mail.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
 import { addMinutes, localToUtc, MOCK_NOW } from '../mock/time.ts';
 
@@ -614,6 +615,22 @@ report(
     mail.rows[0]?.[1] === '10:50, 07/11/2026',
   'BR-77: thư đặt lại có link bấm được và giờ hết hạn',
   show(mail.rows),
+);
+const invite = inviteMail({
+  invitation: thao,
+  workspaceName: 'Salon Tóc Mây',
+  roleLabel: 'Kỹ thuật viên',
+  branchLabel: branchLabel(thao.branchId),
+  now: MOCK_NOW,
+  seq: 1,
+});
+report(
+  invite.action?.href === '/mock/invite/moi-thao' &&
+    invite.rows.some(([k, v]) => k === 'Hết hạn' && v === '10:05, 14/11/2026') &&
+    branchLabel(null) === 'Tất cả chi nhánh' &&
+    branchLabel('may-q3') !== 'may-q3',
+  'BR-78: thư mời có link nhận và hạn 10:05, 14/11/2026',
+  show(invite.rows),
 );
 report(
   formatWait(900) === '15:00' && formatWait(45) === '0:45',
