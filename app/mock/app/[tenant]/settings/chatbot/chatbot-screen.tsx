@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState, type FormEvent } from 'react';
 import { GatedPage } from '@/components/mock/locked-feature';
 import { useScheduleStore } from '@/components/mock/schedule-store';
+import { usePlatform } from '@/components/mock/platform-store';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { useDesk } from '@/components/mock/use-desk';
@@ -14,7 +15,6 @@ import { useToast } from '@/components/sapio/toast';
 import { useUnsavedGuard } from '@/components/sapio/use-unsaved-guard';
 import { chatbotPreview, chatbotProblem, GREETING_MAX, limitExample } from '@/mock/chatbot';
 import { siteHost } from '@/mock/site';
-import { plans } from '@/mock/subscription';
 import { MOCK_NOW } from '@/mock/time';
 
 const number = new Intl.NumberFormat('vi-VN');
@@ -41,6 +41,7 @@ function ChatbotSettingsForm({ tenantSlug }: { tenantSlug: string }) {
   const toast = useToast();
   const { fixture, ctx } = useDesk(tenantSlug);
   const { subscription } = useSubscription();
+  const { catalog } = usePlatform();
   const { config, saveSettings } = useScheduleStore();
   const saved = config.chatbot;
   const [enabled, setEnabled] = useState(saved.enabled);
@@ -139,7 +140,7 @@ function ChatbotSettingsForm({ tenantSlug }: { tenantSlug: string }) {
       <PageHeader
         crumbs={[{ label: 'Cài đặt', href: appHref('settings') }, { label: 'Chatbot' }]}
         title="Chatbot"
-        sub={`Gói ${plans[subscription.planCode].name}`}
+        sub={`Gói ${catalog.plans[subscription.planCode].name}`}
       />
       <div className="flex flex-wrap items-start gap-6">
         <Form onSubmit={onSubmit} className="min-w-0 flex-[1_1_420px] gap-5">

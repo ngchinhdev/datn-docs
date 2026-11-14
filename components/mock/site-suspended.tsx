@@ -2,12 +2,12 @@
 
 import { Phone } from 'lucide-react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { Suspense, type ReactNode } from 'react';
 import { useAccountStore, workspaceBySlug } from '@/components/mock/account-store';
+import { useTenantSubscription } from '@/components/mock/platform-store';
 import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { branchPhone, siteHost } from '@/mock/site';
-import { entitlements, mockSubscription, planOverrideOf } from '@/mock/subscription';
+import { entitlements } from '@/mock/subscription';
 import { MOCK_NOW } from '@/mock/time';
 
 /**
@@ -15,13 +15,10 @@ import { MOCK_NOW } from '@/mock/time';
  * plan ended (BR-82). Customers see the same page for both, with no reason.
  */
 export function useSiteSuspended(tenantSlug: string): boolean {
-  const query = useSearchParams();
   const { locks } = useAccountStore();
+  const { subscription, catalog } = useTenantSubscription(tenantSlug);
   const workspace = workspaceBySlug(tenantSlug);
-  const mode = entitlements(
-    mockSubscription(tenantSlug, planOverrideOf(query.get('plan')), query.get('periodEnd')),
-    MOCK_NOW,
-  ).mode;
+  const mode = entitlements(subscription, MOCK_NOW, catalog).mode;
   return mode === 'expired' || mode === 'locked' || Boolean(workspace && locks[workspace.id]);
 }
 

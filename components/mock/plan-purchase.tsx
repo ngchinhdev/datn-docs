@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
+import { usePlatform } from '@/components/mock/platform-store';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { ConfirmDialog, type ConfirmFact } from '@/components/sapio/confirm-dialog';
 import { PeriodSwitch, PlanCards, type PlanCardData } from '@/components/sapio/plan-cards';
 import { useToast } from '@/components/sapio/toast';
 import { formatVnd } from '@/mock/format';
 import {
-  PERIODS,
   PLAN_CODES,
   daysLeft,
   downgradeBlock,
@@ -16,8 +16,8 @@ import {
   periodPrice,
   planFeatureList,
   planHasAll,
-  plans,
   upgradeCharge,
+  type Catalog,
   type PeriodMonths,
   type Plan,
   type Purchase,
@@ -47,8 +47,13 @@ interface Described {
 }
 
 /** What the confirm box says for each kind of purchase, in the words of BR-84 and BR-85. */
-function describe(p: Purchase, current: Plan, periodEndsOn: string | null): Described {
-  const plan = plans[p.planCode];
+function describe(
+  p: Purchase,
+  current: Plan,
+  periodEndsOn: string | null,
+  catalog: Catalog,
+): Described {
+  const plan = catalog.plans[p.planCode];
   const today = MOCK_TODAY;
   switch (p.kind) {
     case 'buy': {
@@ -59,7 +64,11 @@ function describe(p: Purchase, current: Plan, periodEndsOn: string | null): Desc
           { term: 'Gói', value: plan.name },
           { term: 'Thời hạn', value: `${p.months} tháng` },
           { term: 'Dùng đến hết', value: formatFullDate(end) },
-          { term: 'Tổng tiền', value: formatVnd(periodPrice(plan, p.months)), total: true },
+          {
+            term: 'Tổng tiền',
+            value: formatVnd(periodPrice(plan, p.months, catalog.periods)),
+            total: true,
+          },
         ],
         confirmLabel: 'Giả lập thanh toán thành công',
         pays: true,
@@ -75,7 +84,11 @@ function describe(p: Purchase, current: Plan, periodEndsOn: string | null): Desc
           { term: 'Gói', value: plan.name },
           { term: 'Thời hạn', value: `${p.months} tháng` },
           { term: 'Dùng đến hết', value: formatFullDate(end) },
-          { term: 'Tổng tiền', value: formatVnd(periodPrice(plan, p.months)), total: true },
+          {
+            term: 'Tổng tiền',
+            value: formatVnd(periodPrice(plan, p.months, catalog.periods)),
+            total: true,
+          },
         ],
         confirmLabel: 'Giả lập thanh toán thành công',
         pays: true,
@@ -128,11 +141,12 @@ function describe(p: Purchase, current: Plan, periodEndsOn: string | null): Desc
 /** The confirm box of a purchase and the function that opens it. */
 export function usePurchaseDialog() {
   const { subscription, buy } = useSubscription();
+  const { catalog } = usePlatform();
   const toast = useToast();
   const [pending, setPending] = useState<Purchase | null>(null);
-  const current = plans[subscription.planCode];
+  const current = catalog.plans[subscription.planCode];
 
-  const described = pending ? describe(pending, current, subscription.periodEndsOn) : null;
+  const described = pending ? describe(pending, current, subscription.periodEndsOn, catalog) : null;
   const dialog =
     pending && described ? (
       <ConfirmDialog
@@ -161,8 +175,13 @@ export function usePurchaseDialog() {
   return { ask: setPending, dialog };
 }
 
-const FOOTNOTE =
-  'Mua 3 tháng giảm 10%, 12 tháng giảm 20%. Thanh toán bằng QR. Nâng gói có hiệu lực ngay, chỉ trả phần chênh cho số ngày còn lại của kỳ; hạ gói có hiệu lực từ kỳ sau.';
+const footnote = (catalog: Catalog) =>
+  `Mua ${catalog.periods
+    .filter((p) => p.discountPercent > 0)
+    .map((p) => `${p.months} tháng giảm ${p.discountPercent}%`)
+    .join(
+      ', ',
+    )}. Thanh toán bằng QR. Nâng gói có hiệu lực ngay, chỉ trả phần chênh cho số ngày còn lại của kỳ; hạ gói có hiệu lực từ kỳ sau.`;
 
 /**
  * Choose a period and a plan (MH-61): the same block on the settings page and on the screen of an
@@ -171,18 +190,22 @@ const FOOTNOTE =
 export function PlanPurchase({ heading, headingId }: { heading: string; headingId: string }) {
   const { subscription, entitlements: e, daysLeft: left, branches } = useSubscription();
   const { ask, dialog } = usePurchaseDialog();
+  const { catalog } = usePlatform();
   const [months, setMonths] = useState<PeriodMonths>(1);
-  const current = plans[subscription.planCode];
+  const current = catalog.plans[subscription.planCode];
   const end = subscription.periodEndsOn;
 
   const cards: PlanCardData[] = PLAN_CODES.map((code): PlanCardData => {
-    const plan = plans[code];
-    const total = periodPrice(plan, months);
+    const plan = catalog.plans[code];
+    const total = periodPrice(plan, months, catalog.periods);
     const isCurrent = code === subscription.planCode;
     const shared = {
       id: code,
       name: plan.name,
-      price: months === 1 ? formatVnd(total) : `≈ ${formatVnd(monthlyEquivalent(plan, months))}`,
+      price:
+        months === 1
+          ? formatVnd(total)
+          : `≈ ${formatVnd(monthlyEquivalent(plan, months, catalog.periods))}`,
       unit: ' / tháng',
       note:
         months === 1
@@ -265,7 +288,7 @@ export function PlanPurchase({ heading, headingId }: { heading: string; headingI
           label="Thời hạn"
           value={String(months)}
           onChange={(value) => setMonths(Number(value) as PeriodMonths)}
-          options={PERIODS.map((p) => ({
+          options={catalog.periods.map((p) => ({
             value: String(p.months),
             label: `${p.months} tháng`,
             ...(p.discountPercent ? { discount: `−${p.discountPercent}%` } : {}),
@@ -273,7 +296,7 @@ export function PlanPurchase({ heading, headingId }: { heading: string; headingI
         />
       </div>
       <PlanCards plans={cards} />
-      <p className="sp-plan__note m-0">{FOOTNOTE}</p>
+      <p className="sp-plan__note m-0">{footnote(catalog)}</p>
       {dialog}
     </section>
   );

@@ -4,13 +4,14 @@ import { CircleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { PlanPurchase } from '@/components/mock/plan-purchase';
+import { usePlatform } from '@/components/mock/platform-store';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { useToast } from '@/components/sapio/toast';
 import { AuthPage } from '@/components/sapio/signup-layout';
 import type { TenantFixture } from '@/mock/fixtures';
 import { formatPhone } from '@/mock/format';
 import { lookups } from '@/mock/reception';
-import { PLAN_OVERRIDES, planOverrideOf, plans } from '@/mock/subscription';
+import { PLAN_OVERRIDES, planOverrideOf } from '@/mock/subscription';
 import { formatFullDate, formatTime, localDate } from '@/mock/time';
 
 const LIST_LIMIT = 10;
@@ -49,8 +50,9 @@ function bookingsAfter(fixture: TenantFixture, endsOn: string) {
  */
 export function ExpiredScreen({ fixture }: { fixture: TenantFixture }) {
   const { subscription } = useSubscription();
+  const { catalog } = usePlatform();
   const toast = useToast();
-  const plan = plans[subscription.planCode];
+  const plan = catalog.plans[subscription.planCode];
   const endsOn = subscription.periodEndsOn ?? subscription.trialEndsOn ?? '';
   const rows = bookingsAfter(fixture, endsOn);
   const initials = 'CN';

@@ -2,6 +2,7 @@
 
 import { Check, CreditCard, PawPrint, CalendarCheck, Layers, Minus, Scissors } from 'lucide-react';
 import Link from 'next/link';
+import { usePlatform } from '@/components/mock/platform-store';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
 import { tenantFixtures } from '@/mock/fixtures';
 import { industryTemplates } from '@/mock/fixtures/templates';
@@ -15,6 +16,7 @@ const noop = () => {};
 
 /** MH-01: what Sapio is, the calendar of the sample tenant, the industries and the plans. */
 export function LandingScreen() {
+  const { catalog } = usePlatform();
   const salon = tenantFixtures.find((f) => f.tenant.slug === 'toc-may')!;
   const hours = dayHours(salon, MOCK_TODAY);
   const columns = staffColumns(salon, salon.appointments, MOCK_NOW, null, noop, MOCK_TODAY);
@@ -94,7 +96,7 @@ export function LandingScreen() {
                 Xem trang đặt lịch mẫu
               </Link>
             </div>
-            <p className="m-0 text-sm leading-5 text-(--ink-muted)">{trialNote()}</p>
+            <p className="m-0 text-sm leading-5 text-(--ink-muted)">{trialNote(catalog)}</p>
           </div>
           <figure className="sp-tenant-may m-0 min-w-0 flex-[1_1_480px] rounded-(--radius-lg) bg-(--surface-raised) p-4 shadow-[0_0_0_1px_var(--line),var(--shadow-card)]">
             <figcaption className="flex flex-wrap justify-between gap-2 px-1 pb-3 text-sm leading-5 font-semibold">
@@ -173,11 +175,11 @@ export function LandingScreen() {
               Bảng giá
             </h2>
             <p className="m-0 text-[15px] leading-[22px] text-(--ink-muted)">
-              Không giới hạn nhân viên và lịch hẹn. {discountLine()}
+              Không giới hạn nhân viên và lịch hẹn. {discountLine(catalog)}
             </p>
           </div>
           <div className="sp-plans">
-            {pricingCards().map((card) => (
+            {pricingCards(catalog).map((card) => (
               <section key={card.code} className="sp-plan" aria-labelledby={`lp-plan-${card.code}`}>
                 <div className="sp-plan__head">
                   <h3 className="sp-plan__name" id={`lp-plan-${card.code}`}>

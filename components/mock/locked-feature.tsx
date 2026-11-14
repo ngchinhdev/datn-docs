@@ -4,6 +4,7 @@ import { Lock } from 'lucide-react';
 import Link from 'next/link';
 import { NotBuilt } from '@/components/mock/not-built';
 import { PurchaseDialogHost } from '@/components/mock/plan-purchase';
+import { usePlatform } from '@/components/mock/platform-store';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { Button } from '@/components/sapio/button';
@@ -11,7 +12,7 @@ import { PageHeader } from '@/components/sapio/page-header';
 import { formatVnd } from '@/mock/format';
 import { screenForAppPath } from '@/mock/screens';
 import { fixtureBySlug } from '@/mock/selection';
-import { featureInfo, plans, upgradeCharge, type FeatureCode } from '@/mock/subscription';
+import { featureInfo, upgradeCharge, type FeatureCode } from '@/mock/subscription';
 import { addDays, formatFullDate } from '@/mock/time';
 
 /** The page of a feature the plan does not have: what it does, what upgrading costs today (BR-85, BR-87). */
@@ -25,6 +26,8 @@ function LockedFeature({
   inSettings: boolean;
 }) {
   const { subscription, daysLeft } = useSubscription();
+  const { catalog } = usePlatform();
+  const { plans } = catalog;
   const appHref = useAppHref(tenantSlug);
   const info = featureInfo[feature];
   const tenant = fixtureBySlug(tenantSlug)?.tenant;

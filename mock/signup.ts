@@ -326,4 +326,4 @@ export function describeResources(draft: SignupDraft, template: IndustryTemplate
 }
 
 /** BR-80: a new tenant tries Sapio for 7 days, counting the day it was created. */
-export const TRIAL_DAYS = 7;
+export { TRIAL_DAYS } from './subscription';

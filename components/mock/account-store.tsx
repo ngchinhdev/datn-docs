@@ -14,6 +14,7 @@ import {
   type Workspace,
 } from '@/mock/fixtures/accounts';
 import type { Staff } from '@/mock/fixtures';
+import { SEED_LOCKS } from '@/mock/fixtures/platform';
 import { addMinutes, MOCK_NOW } from '@/mock/time';
 
 interface AccountData {
@@ -53,7 +54,7 @@ const INITIAL: AccountData = {
   mails: [],
   lastWorkspace: { 'acc-linh': 'may' },
   joiners: {},
-  locks: {},
+  locks: SEED_LOCKS,
   offlineSince: null,
 };
 

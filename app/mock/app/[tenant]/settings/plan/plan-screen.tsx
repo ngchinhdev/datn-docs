@@ -1,18 +1,20 @@
 'use client';
 
 import { PlanPurchase } from '@/components/mock/plan-purchase';
+import { usePlatform } from '@/components/mock/platform-store';
 import { useSubscription } from '@/components/mock/subscription-store';
 import { useAppHref } from '@/components/mock/use-app-href';
 import { PageHeader } from '@/components/sapio/page-header';
 import { formatVnd } from '@/mock/format';
 import { fixtureBySlug } from '@/mock/selection';
-import { plans } from '@/mock/subscription';
 import { formatFullDate } from '@/mock/time';
 
 /** Cài đặt › Gói Sapio (MH-61): where the tenant stands, the plans to buy, the payments so far. */
 export function PlanScreen({ tenantSlug }: { tenantSlug: string }) {
   const appHref = useAppHref(tenantSlug);
   const { subscription, entitlements: e, daysLeft, payments, branches } = useSubscription();
+  const { catalog } = usePlatform();
+  const { plans } = catalog;
   const tenant = fixtureBySlug(tenantSlug)?.tenant;
   const plan = plans[subscription.planCode];
   const trial = e.mode === 'trial';

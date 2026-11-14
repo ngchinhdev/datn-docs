@@ -5,8 +5,10 @@
  * functions, money as integer VND (`bigint`), dates as local `YYYY-MM-DD` strings, and the
  * current time always an argument, never read from a clock (rule 2). Nothing here touches React.
  */
-import { TRIAL_DAYS } from './signup';
-import { addDays, localToUtc, MOCK_TODAY } from './time';
+import { addDays, localToUtc, MOCK_TODAY } from './time.ts';
+
+/** Days of the trial, the day of sign-up included (BR-80). */
+export const TRIAL_DAYS = 7;
 
 export type FeatureCode =
   'multi_branch' | 'packages_wallet' | 'commission' | 'full_reports' | 'chatbot';
@@ -25,24 +27,46 @@ export interface Plan {
   note: string;
 }
 
-/** BR-83: data the platform admin edits, not constants of the code. */
-export const plans: Record<PlanCode, Plan> = {
-  basic: {
-    code: 'basic',
-    name: 'Cơ bản',
-    monthlyPriceVnd: 199_000n,
-    features: [],
-    limits: { branches: 1 },
-    note: '1 chi nhánh',
+export const PERIOD_MONTHS = [1, 3, 12] as const;
+
+export type PeriodMonths = (typeof PERIOD_MONTHS)[number];
+
+/** Discount of buying `months` at once (BR-84); one month has none. */
+export interface Period {
+  months: PeriodMonths;
+  discountPercent: number;
+}
+
+/** What the platform admin edits (BR-83): the two plans and the discount of each period. */
+export interface Catalog {
+  plans: Record<PlanCode, Plan>;
+  periods: Period[];
+}
+
+export const DEFAULT_CATALOG: Catalog = {
+  plans: {
+    basic: {
+      code: 'basic',
+      name: 'Cơ bản',
+      monthlyPriceVnd: 199_000n,
+      features: [],
+      limits: { branches: 1 },
+      note: '1 chi nhánh',
+    },
+    pro: {
+      code: 'pro',
+      name: 'Chuyên nghiệp',
+      monthlyPriceVnd: 399_000n,
+      features: ['multi_branch', 'packages_wallet', 'commission', 'full_reports', 'chatbot'],
+      limits: { branches: null },
+      note: 'Không giới hạn chi nhánh',
+    },
   },
-  pro: {
-    code: 'pro',
-    name: 'Chuyên nghiệp',
-    monthlyPriceVnd: 399_000n,
-    features: ['multi_branch', 'packages_wallet', 'commission', 'full_reports', 'chatbot'],
-    limits: { branches: null },
-    note: 'Không giới hạn chi nhánh',
-  },
+  periods: [
+    { months: 1, discountPercent: 0 },
+    { months: 3, discountPercent: 10 },
+    { months: 12, discountPercent: 20 },
+  ],
 };
 
 export const PLAN_CODES: PlanCode[] = ['basic', 'pro'];
@@ -88,18 +112,25 @@ export interface Entitlements {
 
 const endOfDay = (date: string) => Date.parse(localToUtc(date, '23:59')) + 59_999;
 
+/** The state of the plan alone, from the dates and `now`; a platform lock is not part of it (BR-89). */
+export function planMode(
+  sub: Pick<Subscription, 'trialEndsOn' | 'periodEndsOn'>,
+  now: string,
+): 'trial' | 'active' | 'expired' {
+  const at = Date.parse(now);
+  if (sub.periodEndsOn) return at <= endOfDay(sub.periodEndsOn) ? 'active' : 'expired';
+  if (sub.trialEndsOn) return at <= endOfDay(sub.trialEndsOn) ? 'trial' : 'expired';
+  return 'expired';
+}
+
 /**
  * T-17: the mode comes from comparing `now` with the stored dates, never from a status a job
  * had to flip. A trial has every feature of the Professional plan (BR-81); an expired or
  * locked tenant has none.
  */
-export function entitlements(sub: Subscription, now: string): Entitlements {
-  const at = Date.parse(now);
-  let mode: Mode;
-  if (sub.locked) mode = 'locked';
-  else if (sub.periodEndsOn) mode = at <= endOfDay(sub.periodEndsOn) ? 'active' : 'expired';
-  else if (sub.trialEndsOn) mode = at <= endOfDay(sub.trialEndsOn) ? 'trial' : 'expired';
-  else mode = 'expired';
+export function entitlements(sub: Subscription, now: string, catalog: Catalog): Entitlements {
+  const { plans } = catalog;
+  const mode: Mode = sub.locked ? 'locked' : planMode(sub, now);
 
   const plan = plans[sub.planCode];
   const features = mode === 'trial' ? plans.pro.features : mode === 'active' ? plan.features : [];
@@ -130,30 +161,20 @@ export const endsOn = (e: Entitlements) => (e.mode === 'trial' ? e.trialEndsOn :
 // ---------------------------------------------------------------------------------------------
 // Prices (BR-84, BR-85)
 
-export const PERIODS = [
-  { months: 1, discountPercent: 0 },
-  { months: 3, discountPercent: 10 },
-  { months: 12, discountPercent: 20 },
-] as const;
-
-export type PeriodMonths = (typeof PERIODS)[number]['months'];
-
 const THOUSAND = 1000n;
 
 /** Rounds to the nearest thousand: 1.077.300 becomes 1.077.000. */
 const roundToThousand = (amount: bigint) => ((amount + THOUSAND / 2n) / THOUSAND) * THOUSAND;
 
-const ceilToThousand = (amount: bigint) => ((amount + THOUSAND - 1n) / THOUSAND) * THOUSAND;
-
 /** BR-84: what a plan costs for `months`, discounted and rounded to a thousand. */
-export function periodPrice(plan: Plan, months: PeriodMonths): bigint {
-  const discount = BigInt(PERIODS.find((p) => p.months === months)?.discountPercent ?? 0);
+export function periodPrice(plan: Plan, months: PeriodMonths, periods: Period[]): bigint {
+  const discount = BigInt(periods.find((p) => p.months === months)?.discountPercent ?? 0);
   return roundToThousand((plan.monthlyPriceVnd * BigInt(months) * (100n - discount)) / 100n);
 }
 
 /** What a month costs on average in a period, to the nearest thousand: 3.830.000 over 12 months is 319.000. */
-export const monthlyEquivalent = (plan: Plan, months: PeriodMonths) =>
-  roundToThousand(periodPrice(plan, months) / BigInt(months));
+export const monthlyEquivalent = (plan: Plan, months: PeriodMonths, periods: Period[]) =>
+  roundToThousand(periodPrice(plan, months, periods) / BigInt(months));
 
 /**
  * BR-85: moving up in the middle of a period costs the difference of the monthly prices for the
@@ -211,7 +232,9 @@ export function purchase(
   sub: Subscription,
   p: Purchase,
   today: string,
+  catalog: Catalog,
 ): { subscription: Subscription; payment: Payment } {
+  const { plans, periods } = catalog;
   const plan = plans[p.planCode];
   switch (p.kind) {
     case 'buy': {
@@ -228,7 +251,7 @@ export function purchase(
           id: `pay-${today}-${p.planCode}`,
           date: today,
           label: `Kích hoạt gói ${plan.name}, ${p.months} tháng`,
-          amountVnd: periodPrice(plan, p.months),
+          amountVnd: periodPrice(plan, p.months, periods),
         },
       };
     }
@@ -245,7 +268,7 @@ export function purchase(
           id: `pay-${today}-renew-${p.planCode}`,
           date: today,
           label: `Gia hạn gói ${plan.name}, ${p.months} tháng`,
-          amountVnd: periodPrice(plan, p.months),
+          amountVnd: periodPrice(plan, p.months, periods),
         },
       };
     }
@@ -309,17 +332,19 @@ export const PLAN_OVERRIDES: { value: PlanOverride; label: string }[] = [
 export const planOverrideOf = (value: string | null | undefined): PlanOverride | null =>
   PLAN_OVERRIDES.find((o) => o.value === value)?.value ?? null;
 
-/** The subscription a tenant has in the mock; `plan` and `periodEnd` come from the query string. */
+/**
+ * The subscription a tenant has in the mock; `plan` and `periodEnd` come from the query string.
+ * `base` is what the platform holds for the tenant: its dates move when the admin extends it.
+ */
 export function mockSubscription(
   tenantSlug: string,
   override: PlanOverride | null,
   periodEndParam?: string | null,
+  base?: Subscription,
 ): Subscription {
-  const own = DEFAULT_PLAN[tenantSlug] ?? 'pro';
-  const periodEnd =
-    periodEndParam && /^\d{4}-\d{2}-\d{2}$/.test(periodEndParam)
-      ? periodEndParam
-      : DEFAULT_PERIOD_END;
+  const own = base?.planCode ?? DEFAULT_PLAN[tenantSlug] ?? 'pro';
+  const validParam = Boolean(periodEndParam && /^\d{4}-\d{2}-\d{2}$/.test(periodEndParam));
+  const periodEnd = validParam && periodEndParam ? periodEndParam : DEFAULT_PERIOD_END;
   switch (override) {
     case 'trial':
       return { planCode: 'pro', trialEndsOn: TRIAL_ENDS_ON, periodEndsOn: null };
@@ -329,21 +354,25 @@ export function mockSubscription(
     case 'expired':
       return { planCode: own, trialEndsOn: null, periodEndsOn: EXPIRED_PERIOD_END };
     default:
+      if (base && !validParam) return base;
       return { planCode: own, trialEndsOn: null, periodEndsOn: periodEnd };
   }
 }
 
-/** The payment that started the current period, for the history of a tenant that has paid. */
+/**
+ * The payment that started the current period, for a tenant the platform holds no payments of.
+ * It costs what the default plans cost: a period already paid keeps the price of its day.
+ */
 export function seedPayments(sub: Subscription): Payment[] {
   if (!sub.periodEndsOn) return [];
-  const plan = plans[sub.planCode];
+  const plan = DEFAULT_CATALOG.plans[sub.planCode];
   const start = addMonths(addDays(sub.periodEndsOn, 1), -1);
   return [
     {
       id: 'pay-seed',
       date: start,
       label: `Kích hoạt gói ${plan.name}, 1 tháng`,
-      amountVnd: periodPrice(plan, 1),
+      amountVnd: periodPrice(plan, 1, DEFAULT_CATALOG.periods),
     },
   ];
 }
