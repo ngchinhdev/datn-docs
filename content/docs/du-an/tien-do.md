@@ -38,7 +38,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - `chat_conversations`: tenant_id, customer_id (null khi chưa có phiên), browser_key, started_at, hold_id (giữ chỗ đang mở, tối đa một).
   - `chat_messages`: conversation_id, role (khách, trợ lý, hệ thống), text, cards (jsonb: loại thẻ và tham số tool đã gọi), created_at; xóa sau 30 ngày.
   - Đếm lượt: theo `chat_messages` của khách trong ngày (giờ chi nhánh) và trong tháng của cơ sở; `chatbot_settings.used_this_month` có thể là số đếm dẫn xuất.
-  - Giữ chỗ từ trợ lý dùng chung bảng `holds` với luồng đặt lịch, thêm `source` (web, assistant).
+  - Giữ chỗ từ trợ lý dùng chung cơ chế với luồng đặt lịch: lịch hẹn trạng thái `held` (ERD không có bảng `holds`), thêm cột `source` (web, assistant) vào `appointments`. Mock Bước 18 đã làm đúng cách này.
 - **Tiếp theo:** Claude Code làm Bước 18; người dùng kiểm Bước 17; báo cô D-15.
 
 ### 14/11/2026 (đêm): mock quản trị nền tảng (Bước 17, đợt G)
