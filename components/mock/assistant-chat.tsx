@@ -538,7 +538,7 @@ function HoldCard({ card }: { card: Extract<AssistantCard, { kind: 'hold' }> }) 
     const booked = appointment?.status === 'confirmed';
     return (
       <>
-        <div className={frame}>
+        <div className={`${frame} opacity-80`}>
           <span className="body font-semibold">
             Đã giữ {formatTime(start)}, chuyển sang xác nhận
           </span>
