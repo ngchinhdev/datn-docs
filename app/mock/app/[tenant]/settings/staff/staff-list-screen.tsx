@@ -424,6 +424,7 @@ function InviteDialog({
   const [chosen, setChosen] = useState(false);
   const [branchId, setBranchId] = useState<string>(branches[0]?.id ?? '');
   const [touched, setTouched] = useState(false);
+  const [rejected, setRejected] = useState<string | null>(null);
 
   const error = inviteEmailError(email, existing);
   const takes = takesBookingsFor(role, chosen);
@@ -437,12 +438,16 @@ function InviteDialog({
       document.getElementById('iv-email')?.focus();
       return;
     }
-    onSend({
+    const result = onSend({
       email,
       role,
       branchId: branchId === '' ? null : branchId,
       takesBookings: takes,
     });
+    if (!result.ok && result.field === 'email') {
+      setRejected(result.error);
+      document.getElementById('iv-email')?.focus();
+    }
   }
 
   return (
@@ -458,16 +463,19 @@ function InviteDialog({
         id="iv-email"
         label="Email"
         help="Người được mời nhận link qua email này; link dùng một lần, hết hạn sau 7 ngày."
-        error={touched ? error : null}
+        error={touched ? (error ?? rejected) : null}
       >
         <input
           id="iv-email"
           type="email"
           autoComplete="off"
           value={email}
-          aria-invalid={touched && error ? true : undefined}
+          aria-invalid={touched && (error ?? rejected) ? true : undefined}
           aria-describedby="iv-email-help"
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setRejected(null);
+          }}
         />
       </Field>
       <fieldset className="m-0 flex flex-col gap-(--space-2) border-0 p-0">

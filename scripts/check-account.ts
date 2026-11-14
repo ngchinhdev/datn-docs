@@ -386,6 +386,59 @@ report(
   'BR-78: lễ tân và kỹ thuật viên không gửi lại, không thu hồi lời mời nào',
 );
 
+const sendTo = (email: string, list: typeof invitations, now = MOCK_NOW) =>
+  sendInvitation(
+    list,
+    mayMembers,
+    {
+      workspaceId: 'may',
+      email,
+      role: 'receptionist',
+      branchId: 'may-q3',
+      takesBookings: false,
+      inviter: { accountId: 'acc-chinh', label: 'Chính Nguyễn, chủ cơ sở', role: 'owner' },
+    },
+    now,
+    'moi-moi',
+  );
+const dupPending = sendTo(' Thao.Nguyen@email.vn ', invitations);
+report(
+  !dupPending.ok &&
+    dupPending.field === 'email' &&
+    dupPending.error === 'Email này đang có lời mời chờ nhận. Dùng Gửi lại ở bảng bên dưới.',
+  'BR-78: email đang có lời mời chờ nhận thì báo lỗi ở ô email, không tạo lời mời thứ hai',
+  show(dupPending),
+);
+report(
+  sendTo('khoa.do@email.vn', invitations).ok &&
+    sendTo('thao.nguyen@email.vn', invitations, expiry).ok,
+  'BR-78: lời mời đã hết hạn thì vẫn mời mới được (theo inviteState)',
+);
+report(
+  sendTo('moi.hoan.toan@email.vn', invitations).ok &&
+    sendTo(
+      'thao.nguyen@email.vn',
+      invitations.filter((i) => i.id !== 'inv-thao'),
+    ).ok &&
+    sendTo('thao.nguyen@email.vn', revoked.invitations).ok,
+  'BR-78: email chưa có lời mời, hoặc lời mời đã thu hồi, thì mời được',
+);
+const otherTenant = sendInvitation(
+  invitations,
+  memberEmails(accounts, members, 'pawpaw'),
+  {
+    workspaceId: 'pawpaw',
+    email: 'thao.nguyen@email.vn',
+    role: 'receptionist',
+    branchId: 'pawpaw-td',
+    takesBookings: false,
+    inviter: { accountId: 'acc-ha', label: 'Lê Thu Hà, chủ cơ sở', role: 'owner' },
+  },
+  MOCK_NOW,
+  'moi-paw',
+);
+report(otherTenant.ok, 'BR-78: lời mời chờ nhận ở cơ sở khác không cản việc mời ở cơ sở này');
+
 const view = (token: string, session: string | null = null) =>
   inviteView(invitations, accounts, token, session, MOCK_NOW);
 report(view('moi-thao').kind === 'new-account', 'BR-78: email chưa có tài khoản thì tạo tài khoản');

@@ -282,6 +282,22 @@ export function sendInvitation(
 ): SendResult {
   const error = inviteEmailError(input.email, existingMembers);
   if (error) return { ok: false, field: 'email', error };
+  const email = normalizeEmail(input.email);
+  // A link still waiting is sent again, not doubled; one that ran out lets a new invitation in.
+  if (
+    invitations.some(
+      (inv) =>
+        inv.workspaceId === input.workspaceId &&
+        inv.email === email &&
+        inviteState(inv, now) === 'pending',
+    )
+  ) {
+    return {
+      ok: false,
+      field: 'email',
+      error: 'Email này đang có lời mời chờ nhận. Dùng Gửi lại ở bảng bên dưới.',
+    };
+  }
   if (!invitableRoles(input.inviter.role).includes(input.role)) {
     return { ok: false, field: 'role', error: 'Vai trò này bạn chưa mời được.' };
   }
