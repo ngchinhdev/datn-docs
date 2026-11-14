@@ -19,6 +19,7 @@ import {
   initialState,
   limitReached,
   quickSuggestions,
+  withDayUsedUp,
   type AskInput,
   type AssistantCard,
   type AssistantReply,
@@ -29,7 +30,7 @@ import {
 import { holdState, makeHold } from '@/mock/assistant-hold';
 import { ANY_STAFF } from '@/mock/availability';
 import type { TenantFixture } from '@/mock/fixtures';
-import { formatDay, formatRange, formatTime, localDate } from '@/mock/time';
+import { addMinutes, formatDay, formatRange, formatTime, localDate } from '@/mock/time';
 
 /** One line of the chat: what the customer sent, or what the assistant answered with. */
 export interface ChatMessage {
@@ -75,6 +76,10 @@ interface AssistantValue {
   latestHoldId: string | null;
   /** Holds the customer gave up or replaced, as opposed to the ones that ran out. */
   droppedIds: string[];
+  /** Mock tool: moves the clock of the chat forward, so a hold can run out. */
+  skipAhead: (minutes: number) => void;
+  /** Mock tool: spends today's turns (BR-67). */
+  spendToday: () => void;
 }
 
 const AssistantContext = createContext<AssistantValue | null>(null);
@@ -102,7 +107,9 @@ export function AssistantProvider({
   const fixture = useLiveFixture(tenantSlug);
   const store = useScheduleStore();
   const { setDraft } = useBookingDraft();
-  const now = useMockNow();
+  const running = useMockNow();
+  const [skipped, setSkipped] = useState(0);
+  const now = addMinutes(running, skipped);
   const [open, setOpen] = useState(false);
   const [holdOpen, setHoldOpen] = useState(true);
   const [state, setState] = useState<AssistantState>(() => initialState(now));
@@ -313,6 +320,11 @@ export function AssistantProvider({
     }
   }, [now, holdIds, fixture.appointments, store]);
 
+  const skipAhead = useCallback((minutes: number) => setSkipped((cur) => cur + minutes), []);
+  const spendToday = useCallback(
+    () => setState((cur) => withDayUsedUp(cur, fixture.config.chatbot, now)),
+    [fixture, now],
+  );
   const limit = limitReached(fixture.config.chatbot, state, now);
   const holdSlot = useCallback((target: HoldTarget) => holdSlotWith(target), [holdSlotWith]);
 
@@ -332,6 +344,8 @@ export function AssistantProvider({
       dropHold,
       latestHoldId,
       droppedIds,
+      skipAhead,
+      spendToday,
     }),
     [
       tenantSlug,
@@ -346,6 +360,8 @@ export function AssistantProvider({
       dropHold,
       latestHoldId,
       droppedIds,
+      skipAhead,
+      spendToday,
     ],
   );
   return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;

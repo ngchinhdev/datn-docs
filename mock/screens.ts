@@ -152,6 +152,13 @@ const built: Record<string, ScreenLink[]> = {
   'MH-19': [{ label: 'Bé của tôi', href: site('/me/subjects') }],
   'MH-20': [{ label: 'Gói và ví', href: site('/me/wallet') }],
   'MH-21': [{ label: 'Thông tin', href: site('/me/profile') }],
+  'MH-22': [
+    {
+      label: 'Khung chat',
+      href: (slug) =>
+        slug === 'pawpaw' ? '/mock/pawpaw?plan=trial&chat=1' : `/mock/${slug}?chat=1`,
+    },
+  ],
   'MH-23': [{ label: 'Các mẫu email', href: site('/emails') }],
   'MH-24': [
     { label: 'Theo nhân viên', href: app('calendar') },

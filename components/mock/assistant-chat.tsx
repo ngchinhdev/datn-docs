@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { HoldBanner } from '@/components/sapio/hold-banner';
+import { useBookingDraft } from '@/components/mock/booking-draft';
 import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useAssistant, type ChatMessage } from '@/components/mock/assistant-store';
 import { useTenantSubscription } from '@/components/mock/platform-store';
@@ -98,7 +99,7 @@ export function AssistantDock() {
 }
 
 function AssistantWindow() {
-  const { fixture, setOpen, messages, send, limit } = useAssistant();
+  const { fixture, setOpen, messages, send, limit, skipAhead, spendToday } = useAssistant();
   const [text, setText] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const end = useRef<HTMLDivElement>(null);
@@ -168,6 +169,20 @@ function AssistantWindow() {
           </p>
         )}
         <div ref={end} />
+      </div>
+
+      <div className="flex items-center gap-(--space-2) px-(--space-3) py-(--space-2) shadow-[0_-1px_0_var(--line)]">
+        <span className="caption text-(--ink-muted)">Công cụ mock</span>
+        <button
+          type="button"
+          className="sp-btn sp-btn--ghost sp-btn--sm"
+          onClick={() => skipAhead(10)}
+        >
+          Tua 10 phút
+        </button>
+        <button type="button" className="sp-btn sp-btn--ghost sp-btn--sm" onClick={spendToday}>
+          Dùng hết lượt hôm nay
+        </button>
       </div>
 
       <form
@@ -428,6 +443,7 @@ function HoldCard({ card }: { card: Extract<AssistantCard, { kind: 'hold' }> }) 
   const { customers } = useScheduleStore();
   const router = useRouter();
   const query = useSearchParams();
+  const { draft, setDraft } = useBookingDraft();
   const appointment = fixture.appointments.find((a) => a.id === card.appointmentId);
   const state = holdState(appointment, now);
   const service = fixture.services.find((s) => s.id === card.serviceId);
@@ -470,9 +486,12 @@ function HoldCard({ card }: { card: Extract<AssistantCard, { kind: 'hold' }> }) 
           <button
             type="button"
             className="sp-btn sp-btn--accent flex-1"
-            onClick={() =>
-              router.push(bookHref(tenantSlug, asksSubject ? 'subject' : 'info', query))
-            }
+            onClick={() => {
+              // The booking page carries on from the clock of the chat, tool or not.
+              if (draft && card.appointmentId.endsWith(`-a-web${draft.id}`))
+                setDraft({ ...draft, now });
+              router.push(bookHref(tenantSlug, asksSubject ? 'subject' : 'info', query));
+            }}
           >
             Xác nhận bằng email
           </button>
