@@ -7,7 +7,6 @@
 import type {
   Appointment,
   BonusTier,
-  CommissionPeriod,
   CustomerPackage,
   Discount,
   Invoice,
@@ -251,7 +250,7 @@ export function packageUsable(pkg: CustomerPackage, variantId: string, now: stri
   );
 }
 
-// --- Commission (BR-40, BR-42) ---------------------------------------------------------------
+// --- Commission base (BR-40) ---------------------------------------------------------------
 
 export interface StaffAmount {
   staffResourceId: string;
@@ -259,79 +258,12 @@ export interface StaffAmount {
 }
 
 /** What each line is worth after its share of the discount; the base of commission (BR-40). */
-function netByLine(lines: readonly InvoiceLine[], discount: bigint) {
+export function netByLine(lines: readonly InvoiceLine[], discount: bigint) {
   const net = sum(lines.map(lineAmount));
   return lines.map((line) => {
     const own = lineAmount(line);
     return { line, net: net > 0n ? own - (discount * own) / net : 0n };
   });
-}
-
-function addTo(list: StaffAmount[], staffResourceId: string, amountVnd: bigint) {
-  const found = list.find((e) => e.staffResourceId === staffResourceId);
-  if (found) found.amountVnd += amountVnd;
-  else list.push({ staffResourceId, amountVnd });
-}
-
-/** BR-40: commission is `percent` of what was really collected for each person's lines, after the discount. */
-export function commissionEarned(
-  lines: readonly InvoiceLine[],
-  discount: bigint,
-  percent: number,
-): StaffAmount[] {
-  const out: StaffAmount[] = [];
-  for (const { line, net } of netByLine(lines, discount)) {
-    if (!line.staffResourceId || net <= 0n) continue;
-    addTo(out, line.staffResourceId, (net * BigInt(percent)) / 100n);
-  }
-  return out;
-}
-
-/**
- * BR-26, BR-40: a package session is worth its revenue, `price / sessions`; the person who did it
- * earns commission on that, not on the 0 ₫ the line is collected for.
- */
-export function packageSessionCommission(
-  lines: readonly InvoiceLine[],
-  percent: number,
-): StaffAmount[] {
-  const out: StaffAmount[] = [];
-  for (const line of lines) {
-    if (!line.packageId || !line.staffResourceId || !line.sessionRevenueVnd) continue;
-    addTo(out, line.staffResourceId, (line.sessionRevenueVnd * BigInt(percent)) / 100n);
-  }
-  return out;
-}
-
-/**
- * BR-28, BR-42: a refund takes commission back as a negative posting in the open period, never in
- * a period that is closed. A refund about one line takes it from that line's person; otherwise
- * from everyone in proportion to what they earned.
- */
-export function commissionClawback(input: {
-  refundVnd: bigint;
-  percent: number;
-  lines: readonly InvoiceLine[];
-  discountVnd: bigint;
-  lineId?: string;
-  periods: readonly CommissionPeriod[];
-}): { entries: StaffAmount[]; period: CommissionPeriod } {
-  const period = input.periods.find((p) => p.status === 'open');
-  if (!period) throw new Error('no open commission period');
-  const back = (input.refundVnd * BigInt(input.percent)) / 100n;
-  const line = input.lines.find((l) => l.id === input.lineId);
-  if (line?.staffResourceId) {
-    return { entries: [{ staffResourceId: line.staffResourceId, amountVnd: -back }], period };
-  }
-  const shares = netByLine(input.lines, input.discountVnd).filter(
-    (s) => s.line.staffResourceId && s.net > 0n,
-  );
-  const total = sum(shares.map((s) => s.net));
-  const entries: StaffAmount[] = [];
-  if (total > 0n) {
-    for (const s of shares) addTo(entries, s.line.staffResourceId!, -((back * s.net) / total));
-  }
-  return { entries, period };
 }
 
 // --- Status of an invoice --------------------------------------------------------------------

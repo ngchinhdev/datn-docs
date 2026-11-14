@@ -151,6 +151,17 @@ export function CheckoutScreen({ tenantSlug, target }: { tenantSlug: string; tar
   function setLine(id: string, patch: Partial<InvoiceLine>) {
     edit((i) => ({ ...i, lines: i.lines.map((l) => (l.id === id ? { ...l, ...patch } : l)) }));
   }
+  /** BR-40: the person who sold a retail line earns on it; "Không ai" leaves it without commission. */
+  function setSeller(id: string, staffResourceId: string) {
+    edit((i) => ({
+      ...i,
+      lines: i.lines.map((l) => {
+        if (l.id !== id) return l;
+        const { staffResourceId: _old, ...rest } = l;
+        return staffResourceId ? { ...rest, staffResourceId } : rest;
+      }),
+    }));
+  }
   function removeLine(id: string) {
     edit((i) => ({ ...i, lines: i.lines.filter((l) => l.id !== id) }));
   }
@@ -332,7 +343,30 @@ export function CheckoutScreen({ tenantSlug, target }: { tenantSlug: string; tar
                               </span>
                             </span>
                           </td>
-                          <td>{line.staffResourceId ? L.name(line.staffResourceId) : ''}</td>
+                          <td>
+                            {line.kind === 'retail' && !locked ? (
+                              <span className="sp-field__control">
+                                <select
+                                  aria-label={`Người bán ${line.description}`}
+                                  value={line.staffResourceId ?? ''}
+                                  onChange={(e) => setSeller(line.id, e.target.value)}
+                                >
+                                  <option value="">Không ai</option>
+                                  {fixture.staff.map((s) => (
+                                    <option key={s.resourceId} value={s.resourceId}>
+                                      {L.name(s.resourceId)}
+                                    </option>
+                                  ))}
+                                </select>
+                              </span>
+                            ) : line.staffResourceId ? (
+                              L.name(line.staffResourceId)
+                            ) : line.kind === 'retail' ? (
+                              'Không ai'
+                            ) : (
+                              ''
+                            )}
+                          </td>
                           <td className="sp-table__num sp-num">{line.quantity}</td>
                           <td className="sp-table__num sp-num">{formatVnd(line.unitPriceVnd)}</td>
                           <td className="sp-table__num sp-num">{formatVnd(lineAmount(line))}</td>

@@ -14,6 +14,7 @@
     "check:availability": "node scripts/check-availability.ts",
     "check:money": "node scripts/check-money.ts",
     "check:shop": "node scripts/check-shop.ts",
+    "check:reports": "node scripts/check-reports.ts",
     "format": "prettier --write app components lib mock"
   },
   "dependencies": {

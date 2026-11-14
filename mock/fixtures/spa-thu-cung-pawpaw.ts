@@ -515,8 +515,7 @@ export const spaThuCungPawpaw: TenantFixture = {
     },
   ],
   topupBonusTiers: [{ minVnd: 1_000_000n, percent: 10 }],
-  commissionPercent: 10,
   actors: { receptionist: 'Vy', manager: 'Khoa', owner: 'Chủ cơ sở' },
-  money: pawpawMoney(services, appointments),
+  money: pawpawMoney(services, appointments, staffList),
   config: pawpawConfig,
 };

@@ -4,12 +4,16 @@
  * requests. The drafts of today's appointments wait to be collected.
  */
 import { addAudit, SYSTEM_ACTOR, type Actor, type AuditInput } from '../audit.ts';
+import { clawbackEntries, earnEntries } from '../commission.ts';
 import { draftInvoice } from '../money.ts';
 import { MOCK_NOW } from '../time.ts';
+import { buildHistory, planSales } from './sales-history.ts';
 import type {
   Appointment,
   AuditEntry,
+  Customer,
   CommissionEntry,
+  CommissionRule,
   Invoice,
   InvoiceLine,
   MoneyState,
@@ -17,14 +21,37 @@ import type {
   PaymentMethod,
   RefundRequest,
   Service,
+  Staff,
   WalletEntry,
 } from './types.ts';
 
 /** Local `YYYY-MM-DD` and `HH:mm` as a UTC instant. */
 const at = (date: string, hhmm: string) => new Date(`${date}T${hhmm}:00+07:00`).toISOString();
 
+/** BR-41: every service 10%, retail 5%, and a higher rate for the senior dyer from 01/12. */
+export const salonCommissionRules: CommissionRule[] = [
+  { id: 'may-rule-1', scope: 'all', percent: 10, effectiveFrom: '2026-10-01' },
+  { id: 'may-rule-2', scope: 'retail', percent: 5, effectiveFrom: '2026-10-01' },
+  {
+    id: 'may-rule-3',
+    scope: 'service',
+    serviceId: 'may-dye',
+    level: 2,
+    percent: 12,
+    effectiveFrom: '2026-12-01',
+  },
+];
+
+const METHOD_WORD: Record<PaymentMethod, string> = {
+  cash: 'tiền mặt',
+  transfer: 'chuyển khoản',
+  card: 'thẻ',
+  wallet: 'ví',
+  gateway: 'cổng thanh toán',
+};
+
 /** What the log of 04/11 to 06/11 holds: the refunds above and the two things the system did. */
-function sampleAudit(): AuditEntry[] {
+function sampleAudit(octRefund: { number: string; id: string; detail: string }): AuditEntry[] {
   const lan: Actor = { name: 'Lan', role: 'Lễ tân' };
   const hung: Actor = { name: 'Hùng', role: 'Quản lý' };
   let log: AuditEntry[] = [];
@@ -48,6 +75,18 @@ function sampleAudit(): AuditEntry[] {
     object: 'Bùi Hữu Phúc',
     href: 'customers/may-c-phuc',
     detail: 'Không đến lần thứ 2 (BR-10)',
+  });
+  add(at('2026-11-05', '09:10'), lan, {
+    action: 'Tạo yêu cầu hoàn',
+    object: octRefund.number,
+    href: `invoices/${octRefund.id}`,
+    detail: octRefund.detail,
+  });
+  add(at('2026-11-05', '09:40'), hung, {
+    action: 'Duyệt hoàn tiền',
+    object: octRefund.number,
+    href: `invoices/${octRefund.id}`,
+    detail: octRefund.detail,
   });
   add(at('2026-11-06', '14:11'), SYSTEM_ACTOR, {
     action: 'Hoàn cọc tự động',
@@ -76,7 +115,14 @@ function sampleAudit(): AuditEntry[] {
   return log;
 }
 
-export function salonMoney(services: Service[], appointments: Appointment[]): MoneyState {
+export function salonMoney(
+  services: Service[],
+  appointments: Appointment[],
+  staff: Staff[],
+  customers: Customer[],
+): MoneyState {
+  const rules = salonCommissionRules;
+  const levelOf = (id: string) => staff.find((s) => s.resourceId === id)?.level;
   const priceOf = (variantId: string) => {
     for (const s of services) {
       const v = s.variants.find((x) => x.id === variantId);
@@ -97,8 +143,6 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
     lines: Omit<InvoiceLine, 'id'>[];
     method: PaymentMethod;
     appointmentId?: string;
-    period: string;
-    earn?: { staffResourceId: string; amountVnd: bigint };
   }) {
     const id = `inv-${input.no}`;
     const lines = input.lines.map((l, i) => ({ ...l, id: `${id}-l${i}` }));
@@ -133,23 +177,24 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
       status: 'paid',
       idempotencyKey: `seed:${id}`,
     });
-    if (input.earn) {
-      commission.push({
-        id: `com-${input.no}`,
-        ...input.earn,
-        periodId: input.period,
-        invoiceId: id,
-        kind: 'earn',
+    commission.push(
+      ...earnEntries({
+        invoice: invoices[invoices.length - 1]!,
+        lines,
+        discountVnd: 0n,
+        rules,
+        services,
+        levelOf,
         at: input.when,
-      });
-    }
+      }),
+    );
     return id;
   }
 
   const wash = priceOf('may-wash-std');
   const cut = priceOf('may-cut-short');
 
-  // Bought in October, so its commission period is already closed (BR-42).
+  // Bought at the end of October; its price becomes revenue as the sessions are used (BR-26).
   paidInvoice({
     no: '0182',
     customerId: 'may-c-phuc',
@@ -165,7 +210,6 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
       },
     ],
     method: 'transfer',
-    period: '2026-10',
   });
   paidInvoice({
     no: '0183',
@@ -182,8 +226,6 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
       },
     ],
     method: 'card',
-    period: '2026-11',
-    earn: { staffResourceId: 'may-lan', amountVnd: cut / 10n },
   });
   paidInvoice({
     no: '0184',
@@ -200,8 +242,6 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
       },
     ],
     method: 'cash',
-    period: '2026-11',
-    earn: { staffResourceId: 'may-lan', amountVnd: wash / 10n },
   });
   paidInvoice({
     no: '0185',
@@ -218,7 +258,6 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
       },
     ],
     method: 'transfer',
-    period: '2026-11',
   });
   paidInvoice({
     no: '0186',
@@ -237,8 +276,6 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
       },
     ],
     method: 'cash',
-    period: '2026-11',
-    earn: { staffResourceId: 'may-lan', amountVnd: wash / 10n },
   });
 
   // Today's appointments that are done and not yet collected: Hà, Bảo An, Tuấn.
@@ -248,6 +285,75 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
     const draft = draftInvoice(appt, services, `HĐ-${String(187 + i).padStart(4, '0')}`, MOCK_NOW);
     invoices.push(draft.invoice);
     payments.push(...draft.payments);
+  });
+
+  // Anh Phúc's three sessions of the package (BR-26): the sale is worth 700.000 ₫, each session 70.000 ₫.
+  const sessionDays: [string, string, string][] = [
+    ['2026-11-02', '14:20', 'may-mai'],
+    ['2026-11-04', '10:40', 'may-lan'],
+    ['2026-11-05', '16:05', 'may-mai'],
+  ];
+
+  const invoicedAlready = new Set(
+    ['may-a-vy', 'may-a-ha', 'may-a-an', 'may-a-tuan'].filter((id) =>
+      appointments.some((a) => a.id === id),
+    ),
+  );
+  const cutoff = at('2026-10-30', '15:05');
+  const sales = planSales(
+    appointments,
+    { fromDate: '2026-10-01', before: MOCK_NOW },
+    invoicedAlready,
+  );
+  const early = sales.filter((s) => s.paidAt < cutoff);
+  const late = sales.filter((s) => s.paidAt >= cutoff);
+  // The sample invoices start at HĐ-0182: older sales count back from HĐ-0181, newer ones go on from HĐ-0190.
+  const history = buildHistory(
+    [...early, ...late],
+    [...early.map((_, i) => 181 - early.length + 1 + i), ...late.map((_, i) => 190 + i)],
+    { services, staff, rules, collectors: ['Lan', 'Hùng'] },
+  );
+  invoices.push(...history.invoices);
+  payments.push(...history.payments);
+  commission.push(...history.commission);
+  sessionDays.forEach(([date, time, staffId], i) => {
+    const no = String(190 + late.length + i).padStart(4, '0');
+    const when = at(date, time);
+    const line: InvoiceLine = {
+      id: `inv-${no}-l0`,
+      kind: 'service',
+      description: 'Gội sấy',
+      detail: `Buổi ${i + 1} của Gói 10 lần gội sấy`,
+      quantity: 1,
+      unitPriceVnd: wash,
+      staffResourceId: staffId,
+      serviceVariantId: 'may-wash-std',
+      packageId: 'may-pkg-phuc-1',
+      sessionRevenueVnd: 70_000n,
+      sessionNo: i + 1,
+    };
+    const invoice: Invoice = {
+      id: `inv-${no}`,
+      number: `HĐ-${no}`,
+      customerId: 'may-c-phuc',
+      createdAt: when,
+      lines: [line],
+      depositVnd: 0n,
+      paidAt: when,
+      collectedBy: 'Lan',
+    };
+    invoices.push(invoice);
+    commission.push(
+      ...earnEntries({
+        invoice,
+        lines: [line],
+        discountVnd: 0n,
+        rules,
+        services,
+        levelOf,
+        at: when,
+      }),
+    );
   });
 
   const entry = (
@@ -273,6 +379,7 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
 
   // Chị Hà: 1.000.000 ₫ and 100.000 ₫ bonus in, 850.000 ₫ spent; the rest is 150.000 ₫ real and 100.000 ₫ bonus.
   const walletEntries: WalletEntry[] = [
+    ...history.walletEntries,
     entry(
       'ha-1',
       'may-c-ha',
@@ -312,6 +419,52 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
       'inv-0185',
     ),
   ];
+
+  // An invoice of October that Hùng approved a partial refund for on 05/11: its commission goes back
+  // in November and October stays as it was (BR-42).
+  const octInvoice = history.invoices.find(
+    (i) =>
+      i.paidAt!.startsWith('2026-10') &&
+      !i.discount &&
+      i.depositVnd === 0n &&
+      i.lines[0]?.staffResourceId === 'may-mai' &&
+      i.lines[0].kind === 'service' &&
+      i.lines[0].unitPriceVnd >= 150_000n,
+  );
+  if (!octInvoice) throw new Error('No October invoice of Mai to refund');
+  const octPayment = history.payments.find(
+    (p) => p.invoiceId === octInvoice.id && p.purpose === 'invoice',
+  )!;
+  const octCustomer = customers.find((c) => c.id === octInvoice.customerId);
+  const octRefund: RefundRequest = {
+    id: `rf-${octInvoice.number.slice(3)}-1`,
+    invoiceId: octInvoice.id,
+    paymentId: octPayment.id,
+    customerId: octInvoice.customerId,
+    who: octCustomer?.callName ?? 'Khách',
+    what: `${octInvoice.number} · ${octInvoice.lines[0]!.description.split(' · ')[0]}`,
+    amountVnd: 150_000n,
+    method: octPayment.method,
+    reason: 'Khách chưa hài lòng với màu, hoàn một phần',
+    createdBy: 'Lan',
+    createdAt: at('2026-11-05', '09:10'),
+    status: 'approved',
+    decidedBy: 'Hùng',
+    decidedAt: at('2026-11-05', '09:40'),
+    lineId: octInvoice.lines[0]!.id,
+  };
+  commission.push(
+    ...clawbackEntries({
+      refundId: octRefund.id,
+      invoice: octInvoice,
+      earned: commission.filter((c) => c.invoiceId === octInvoice.id),
+      refundVnd: octRefund.amountVnd,
+      lineId: octRefund.lineId!,
+      discountVnd: 0n,
+      at: octRefund.decidedAt!,
+      fallback: () => null,
+    }),
+  );
 
   const request = (r: Omit<RefundRequest, 'customerId'> & { customerId: string | null }) => r;
   const refunds: RefundRequest[] = [
@@ -361,6 +514,7 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
       createdAt: at('2026-11-06', '14:11'),
       status: 'auto',
     }),
+    octRefund,
     request({
       id: 'rf-0182',
       invoiceId: 'inv-0182',
@@ -383,26 +537,41 @@ export function salonMoney(services: Service[], appointments: Appointment[]): Mo
   ];
 
   // Khánh's approved refund takes back its share of Lan's commission, in the period it was approved.
-  commission.push({
-    id: 'com-0183-back',
-    staffResourceId: 'may-lan',
-    periodId: '2026-11',
-    amountVnd: -5_000n,
-    invoiceId: 'inv-0183',
-    kind: 'clawback',
-    at: at('2026-11-06', '18:05'),
-  });
+  commission.push(
+    ...clawbackEntries({
+      refundId: 'rf-0183',
+      invoice: invoices.find((i) => i.id === 'inv-0183')!,
+      earned: commission.filter((c) => c.invoiceId === 'inv-0183'),
+      refundVnd: 50_000n,
+      lineId: 'inv-0183-l0',
+      discountVnd: 0n,
+      at: at('2026-11-06', '18:05'),
+      fallback: () => null,
+    }),
+  );
 
   return {
+    commissionRules: rules,
     invoices,
     payments,
     walletEntries,
     refunds,
     commission,
     periods: [
-      { id: '2026-10', label: '10/2026', status: 'closed' },
       { id: '2026-11', label: '11/2026', status: 'open' },
+      { id: '2026-10', label: '10/2026', status: 'open' },
+      {
+        id: '2026-09',
+        label: '09/2026',
+        status: 'closed',
+        closedAt: at('2026-10-05', '09:12'),
+        closedBy: 'Chính Nguyễn',
+      },
     ],
-    audit: sampleAudit(),
+    audit: sampleAudit({
+      number: octInvoice.number,
+      id: octInvoice.id,
+      detail: `150.000 ₫ ${METHOD_WORD[octPayment.method]} · ${octRefund.reason}`,
+    }),
   };
 }

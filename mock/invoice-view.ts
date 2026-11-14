@@ -126,12 +126,15 @@ export function invoiceHistory(
     }
     const period = money.commission.find((c) => c.invoiceId === invoice.id && c.kind === 'earn');
     const label = money.periods.find((p) => p.id === period?.periodId)?.label;
-    for (const c of money.commission.filter(
-      (x) => x.invoiceId === invoice.id && x.kind === 'earn',
-    )) {
+    const earners = new Set(
+      money.commission
+        .filter((x) => x.invoiceId === invoice.id && x.kind === 'earn')
+        .map((x) => x.staffResourceId),
+    );
+    for (const id of earners) {
       out.push({
         at: invoice.paidAt,
-        text: `Hoa hồng của ${names.staff(c.staffResourceId)} ghi vào kỳ ${label ?? ''}`.trim(),
+        text: `Hoa hồng của ${names.staff(id)} ghi vào kỳ ${label ?? ''}`.trim(),
       });
     }
   }

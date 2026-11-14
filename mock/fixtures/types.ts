@@ -515,8 +515,6 @@ export interface TenantFixture {
   packageCatalog: PackageProduct[];
   /** Top-up bonus tiers of the payment settings (BR-25), highest `minVnd` last. */
   topupBonusTiers: BonusTier[];
-  /** Percent of the one commission rule that covers every line (BR-40). */
-  commissionPercent: number;
   /** Who does what at the desk, as the screens write it: "Lan thu", "Hùng duyệt". */
   actors: Record<'receptionist' | 'manager' | 'owner', string>;
   /** Invoices, payments, wallet entries, refunds, commission. */
@@ -563,6 +561,8 @@ export interface InvoiceLine {
   productId?: string;
   /** Set when collected, on a line that took a package session: the revenue of that session (BR-26). */
   sessionRevenueVnd?: bigint;
+  /** Set with `sessionRevenueVnd`: the number of the session, `4` for the fourth. */
+  sessionNo?: number;
   /** `wallet_topup`: the bonus that comes with it (BR-25). */
   bonusVnd?: bigint;
 }
@@ -679,14 +679,39 @@ export interface RefundRequest {
   walletBonusVnd?: bigint;
 }
 
+/** One month in the branch time zone (BR-42); once `closed`, no entry is added to it. */
 export interface CommissionPeriod {
+  /** `2026-11`. */
   id: string;
   /** `11/2026`. */
   label: string;
   status: 'open' | 'closed';
+  /** ISO 8601, UTC. Closed only. */
+  closedAt?: string;
+  /** Closed only: who locked it. */
+  closedBy?: string;
 }
 
-/** A commission posting of one person; the clawback of a refund is negative (BR-28, BR-42). */
+/**
+ * What a commission rule covers (BR-41): every service, one service, or retail lines. `level` is
+ * the 1-based index into `TenantFixture.staffLevels`; absent means every level.
+ */
+export interface CommissionRule {
+  id: string;
+  scope: 'all' | 'service' | 'retail';
+  /** `service` only. */
+  serviceId?: string;
+  level?: number;
+  /** Whole percent. */
+  percent: number;
+  /** Local date `YYYY-MM-DD`; the rule counts for invoices collected from this day on. */
+  effectiveFrom: string;
+}
+
+/**
+ * A commission posting of one person for one invoice line; the clawback of a refund is negative
+ * and keeps the percent of the line it takes back (BR-28, BR-40, BR-42).
+ */
 export interface CommissionEntry {
   id: string;
   staffResourceId: string;
@@ -697,6 +722,18 @@ export interface CommissionEntry {
   kind: 'earn' | 'clawback';
   /** ISO 8601, UTC. */
   at: string;
+  /** The invoice line it is about. */
+  lineId: string;
+  /** The rule that gave the percent. */
+  ruleId?: string;
+  /** Whole percent applied. */
+  percent: number;
+  /** What the percent was taken of; negative on a clawback. Integer VND. */
+  baseVnd: bigint;
+  /** A service line (package sessions included) or a retail line. */
+  source: 'service' | 'retail';
+  /** A package session: the number of the session (BR-26). */
+  sessionNo?: number;
 }
 
 /** A sensitive action and who did it; entries are only added (BR-63). */
@@ -799,6 +836,7 @@ export interface ShopConfig {
 }
 
 export interface MoneyState {
+  commissionRules: CommissionRule[];
   invoices: Invoice[];
   payments: Payment[];
   walletEntries: WalletEntry[];

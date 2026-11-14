@@ -955,8 +955,7 @@ export const salonTocMay: TenantFixture = {
     },
   ],
   topupBonusTiers: [{ minVnd: 1_000_000n, percent: 10 }],
-  commissionPercent: 10,
   actors: { receptionist: 'Lan', manager: 'Hùng', owner: 'Chủ cơ sở' },
-  money: salonMoney(services, appointments),
+  money: salonMoney(services, appointments, staffList, everyone),
   config: salonConfig,
 };
