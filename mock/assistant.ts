@@ -259,13 +259,24 @@ const WEEKDAYS: [RegExp, number][] = [
 
 type Period = 'morning' | 'afternoon' | 'evening';
 
+/**
+ * "Tối" as the evening: with its accent in the message, or "tối nay" / "buổi tối" typed without
+ * accents. Without accents a lone "toi" is "tôi", the pronoun.
+ */
+const isEvening = (text: string, folded: string) =>
+  /(^|[^\p{L}])tối([^\p{L}]|$)/u.test(text.toLowerCase()) || /toi nay|buoi toi/.test(folded);
+
 /** The day and the part of the day a message asks about. */
-function readWhen(folded: string, today: string): { date: string | null; period: Period | null } {
+function readWhen(
+  text: string,
+  folded: string,
+  today: string,
+): { date: string | null; period: Period | null } {
   const period: Period | null = /\bsang\b/.test(folded)
     ? 'morning'
     : /\bchieu\b/.test(folded)
       ? 'afternoon'
-      : /\btoi\b/.test(folded)
+      : isEvening(text, folded)
         ? 'evening'
         : null;
   if (/ngay mai/.test(folded)) return { date: addDays(today, 1), period };
@@ -577,7 +588,7 @@ function interpret(
         .map((s) => ({ label: s.name })),
     });
   }
-  const when = readWhen(folded, today);
+  const when = readWhen(input.text, folded, today);
   const staff = readStaff(fixture, folded);
   const wantsList = hasAny(folded, PRICE_LIST);
   const wantsSlots =

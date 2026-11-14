@@ -78,6 +78,22 @@ const paw = spaThuCungPawpaw;
   );
 }
 
+{
+  const { last } = chat(may, ['Tôi muốn hỏi giá cắt tóc ngắn']);
+  const line = card(last, 'service')?.lines[0];
+  report(
+    last.intent === 'price' && line?.priceVnd === 150_000n,
+    'BR-92: "Tôi muốn hỏi giá cắt tóc ngắn" ra thẻ giá, "tôi" không phải buổi tối',
+    last.intent,
+  );
+  const plain = chat(may, ['toi muon hoi gia cat toc ngan']).last;
+  report(
+    plain.intent === 'price',
+    'BR-92: "toi" không dấu đứng một mình cũng không phải buổi tối',
+    plain.intent,
+  );
+}
+
 // ---- Free times ----
 {
   const { last } = chat(may, ['Chiều nay cắt tóc ngắn còn giờ không?']);
