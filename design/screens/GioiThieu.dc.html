@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MH-01 · Trang giới thiệu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-auth" style="width: 1440px; height: 2140px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <header class="sp-auth__top" style="padding: 20px 80px;">
+    <span class="sp-brand__name" style="font-size: 20px;">Sapio</span>
+    <nav aria-label="Trang giới thiệu" style="display: flex; gap: 28px; font: 500 15px/22px var(--font-sans);"><a href="#tinh-nang" style="color: var(--ink); text-decoration: none;">Tính năng</a><a href="#nganh" style="color: var(--ink); text-decoration: none;">Ngành</a><a href="#gia" style="color: var(--ink); text-decoration: none;">Bảng giá</a></nav>
+    <div style="display: flex; gap: 8px; align-items: center;"><a href="#" style="font: 600 14px/20px var(--font-sans); text-decoration: none;">Đăng nhập</a><span style="width: 12px;"></span><button type="button" class="sp-btn sp-btn--primary">Đăng ký cơ sở</button></div>
+  </header>
+  <main style="display: flex; flex-direction: column; gap: 96px; padding: 48px 80px 0;">
+    <section style="display: flex; gap: 56px; align-items: center;" aria-labelledby="lp-h">
+      <div style="flex: 0 0 480px; display: flex; flex-direction: column; gap: 20px;">
+        <h1 id="lp-h" style="margin: 0; font: 700 48px/58px var(--font-sans); letter-spacing: -0.02em;">Sắp lịch cho người, ghế và phòng cùng lúc</h1>
+        <p style="margin: 0; font: 400 18px/28px var(--font-sans); color: var(--ink-muted);">Sapio giữ lịch hẹn cho tiệm tóc, nail, spa và spa thú cưng. Khách tự đặt trên trang riêng của tiệm; lễ tân thấy cả ngày trên một màn; không ai bị xếp trùng.</p>
+        <div style="display: flex; gap: 12px;"><button type="button" style="height: 48px; padding: 0 22px;" class="sp-btn sp-btn--primary">Dùng thử 7 ngày</button><button type="button" style="height: 48px; padding: 0 22px;" class="sp-btn sp-btn--secondary">Xem trang đặt lịch mẫu</button></div>
+        <p style="margin: 0; font: 400 14px/20px var(--font-sans); color: var(--ink-muted);">Không cần thẻ. Hết 7 ngày, chọn gói từ 199.000 ₫ mỗi tháng.</p>
+      </div>
+      <figure class="sp-tenant-may" style="flex: 1 1 auto; min-width: 0; margin: 0; padding: 16px; border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line), var(--shadow-card);">
+        <figcaption style="display: flex; justify-content: space-between; padding: 0 4px 12px; font: 600 14px/20px var(--font-sans);"><span>Salon Tóc Mây · Thứ Bảy, 07/11</span><span style="color: var(--ink-muted); font-weight: 400;">Lịch theo nhân viên</span></figcaption>
+        <div class="sp-cal-wrap" style="pointer-events: none;"><div class="sp-cal" style="--cols: 3;" role="grid" aria-label="Lịch">
+<div class="sp-cal__head"></div><div class="sp-cal__head"><div class="sp-cal__name">Mai</div><div class="sp-cal__kind">Thợ chính · 5 lịch</div></div><div class="sp-cal__head"><div class="sp-cal__name">Lan</div><div class="sp-cal__kind">Thợ · 4 lịch</div></div><div class="sp-cal__head"><div class="sp-cal__name">Hùng</div><div class="sp-cal__kind">Thợ chính · 3 lịch</div></div>
+<div class="sp-cal__ruler" style="height: 352px;"><span class="sp-cal__hour" style="top: 32px;">09:00</span><span class="sp-cal__hour" style="top: 96px;">10:00</span><span class="sp-cal__hour" style="top: 160px;">11:00</span><span class="sp-cal__hour" style="top: 224px;">12:00</span><span class="sp-cal__hour" style="top: 288px;">13:00</span><span class="sp-cal__hour" style="top: 352px;">14:00</span></div>
+<div class="sp-cal__col" style="height: 352px;"><div class="sp-cal__closed" style="top: 0px; height: 32px;"></div><div class="sp-appt sp-appt--checked-in" style="top: 16px; height: 128px; background: transparent;"><div class="sp-appt__seg sp-appt__seg--buffer" style="height: 16px;">Pha thuốc</div><div class="sp-appt__seg" style="height: 32px; background: var(--appt-soft);"><div class="sp-appt__title">Chị Hà · Nhuộm ngắn</div></div><div class="sp-appt__seg sp-appt__seg--wait" style="height: 48px;"></div><div class="sp-appt__seg" style="height: 32px; background: var(--appt-soft);"><div class="sp-appt__meta">09:00–10:45 · Ghế 1</div></div></div><div class="sp-appt sp-appt--completed sp-appt--inset" style="top: 64px; height: 48px;"><div class="sp-appt__seg" style="height: 48px;"><div class="sp-appt__title">Anh Tuấn · Cắt ngắn</div><div class="sp-appt__meta">09:30–10:15 · Ghế 2</div></div></div><div class="sp-appt sp-appt--confirmed" style="top: 160px; height: 64px;"><div class="sp-appt__seg" style="height: 64px;"><div class="sp-appt__title">Chị Ngọc · Cắt dài</div><div class="sp-appt__meta">11:00–12:00 · Ghế 1 · chọn Mai</div></div></div><div class="sp-appt sp-appt--confirmed" style="top: 320px; height: 48px;"><div class="sp-appt__seg" style="height: 48px;"><div class="sp-appt__title">Chị Lam · Cắt ngắn</div><div class="sp-appt__meta">13:30–14:15 · Ghế 1</div></div></div><div class="sp-appt sp-appt--confirmed" style="top: 416px; height: 32px;"><div class="sp-appt__seg" style="height: 32px;"><div class="sp-appt__title">Chị Diệu · Gội sấy</div></div></div><div class="sp-cal__now" style="top: 117px;"></div></div>
+<div class="sp-cal__col" style="height: 352px;"><div class="sp-cal__closed" style="top: 0px; height: 32px;"></div><div class="sp-appt sp-appt--completed" style="top: 32px; height: 32px;"><div class="sp-appt__seg" style="height: 32px;"><div class="sp-appt__title">Chị Vy · Gội sấy</div></div></div><div class="sp-appt sp-appt--no-show" style="top: 64px; height: 48px;"><div class="sp-appt__seg" style="height: 48px;"><div class="sp-appt__title">Anh Phúc · Cắt ngắn</div><div class="sp-appt__meta">Không đến · Ghế 3 đã trả</div></div></div><div class="sp-appt sp-appt--hold" style="top: 128px; height: 48px;"><div class="sp-appt__seg" style="height: 48px;"><div class="sp-appt__title">Đang giữ chỗ · đặt online</div><div class="sp-appt__meta">10:30–11:15 · Ghế 2 · còn 07:42</div></div></div><div class="sp-appt sp-appt--confirmed" style="top: 288px; height: 48px;"><div class="sp-appt__seg" style="height: 48px;"><div class="sp-appt__title">Anh Khánh · Cắt ngắn</div><div class="sp-appt__meta">13:00–13:45 · Ghế 2</div></div></div><div class="sp-appt sp-appt--confirmed" style="top: 416px; height: 64px;"><div class="sp-appt__seg" style="height: 64px;"><div class="sp-appt__title">Chị Quyên · Cắt dài</div><div class="sp-appt__meta">15:00–16:00 · Ghế 2</div></div></div><div class="sp-cal__now" style="top: 117px;"></div></div>
+<div class="sp-cal__col" style="height: 352px;"><div class="sp-cal__closed" style="top: 0px; height: 32px;"></div><div class="sp-appt sp-appt--checked-in" style="top: 64px; height: 80px;"><div class="sp-appt__seg" style="height: 80px;"><div class="sp-appt__title">Anh Bảo An · Gội, cắt</div><div class="sp-appt__meta">09:30–10:45 · Giường gội 1, Ghế 3</div></div></div><div class="sp-appt sp-appt--confirmed" style="top: 192px; height: 48px;"><div class="sp-appt__seg" style="height: 48px;"><div class="sp-appt__title">Chị Vân · Cắt ngắn</div><div class="sp-appt__meta">11:30–12:15 · Ghế 2</div></div></div><div class="sp-appt sp-appt--confirmed" style="top: 272px; height: 144px; background: transparent;"><div class="sp-appt__seg sp-appt__seg--buffer" style="height: 16px;">Pha thuốc</div><div class="sp-appt__seg" style="height: 43px; background: var(--appt-soft);"><div class="sp-appt__title">Chị Thư · Nhuộm dài</div></div><div class="sp-appt__seg sp-appt__seg--wait" style="height: 48px;"><div class="sp-appt__meta">Chờ lên màu · Hùng rảnh</div></div><div class="sp-appt__seg" style="height: 37px; background: var(--appt-soft);"><div class="sp-appt__meta">13:00–15:00 · Ghế 3</div></div></div><div class="sp-cal__now" style="top: 117px;"></div></div>
+</div>
+</div>
+      </figure>
+    </section>
+    <section id="tinh-nang" style="display: flex; flex-direction: column; gap: 24px;" aria-labelledby="lp-f">
+      <h2 id="lp-f" style="margin: 0; font: 700 32px/40px var(--font-sans); letter-spacing: -0.01em;">Một lịch hẹn giữ đủ mọi thứ nó cần</h2>
+      <div style="display: flex; gap: 20px;">
+        <section class="sp-panel" style="flex: 1 1 0; gap: 10px; padding: 24px;">
+          <span style="display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--brand-soft); color: var(--brand);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg></span>
+          <h3 style="margin: 0; font: 600 18px/26px var(--font-sans);">Lịch theo tài nguyên</h3>
+          <p style="margin: 0; font: 400 15px/22px var(--font-sans); color: var(--ink-muted);">Nhuộm tóc giữ thợ, ghế và giường gội đúng từng đoạn. Lúc chờ lên màu, thợ rảnh để nhận khách khác; ghế vẫn giữ.</p>
+        </section>
+        <section class="sp-panel" style="flex: 1 1 0; gap: 10px; padding: 24px;">
+          <span style="display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--brand-soft); color: var(--brand);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+          <h3 style="margin: 0; font: 600 18px/26px var(--font-sans);">Khách tự đặt</h3>
+          <p style="margin: 0; font: 400 15px/22px var(--font-sans); color: var(--ink-muted);">Trang riêng toc-may.sapio.vn chỉ hiện giờ còn trống thật. Giữ chỗ 10 phút, cọc qua QR, nhắc lịch qua email.</p>
+        </section>
+        <section class="sp-panel" style="flex: 1 1 0; gap: 10px; padding: 24px;">
+          <span style="display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--brand-soft); color: var(--brand);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><path d="M12 17.5v-11"></path></svg></span>
+          <h3 style="margin: 0; font: 600 18px/26px var(--font-sans);">Thu tiền và nhân sự</h3>
+          <p style="margin: 0; font: 400 15px/22px var(--font-sans); color: var(--ink-muted);">Hóa đơn, gói liệu trình, ví trả trước. Xếp ca, duyệt nghỉ có xử lý lịch bị ảnh hưởng, hoa hồng chốt theo tháng.</p>
+        </section>
+      </div>
+    </section>
+    <section id="nganh" style="display: flex; flex-direction: column; gap: 24px;" aria-labelledby="lp-n">
+      <h2 id="lp-n" style="margin: 0; font: 700 32px/40px var(--font-sans); letter-spacing: -0.01em;">Chọn ngành, tiệm có sẵn dịch vụ mẫu</h2>
+      <div style="display: flex; gap: 20px;">
+        <section class="sp-panel" style="flex: 1 1 0; gap: 10px; padding: 24px;">
+          <span style="display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--brand-soft); color: var(--brand);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"></circle><path d="M8.12 8.12 12 12"></path><path d="M20 4 8.12 15.88"></path><circle cx="6" cy="18" r="3"></circle><path d="M14.8 14.8 20 20"></path></svg></span>
+          <h3 style="margin: 0; font: 600 18px/26px var(--font-sans);">Salon tóc, nail, spa</h3>
+          <p style="margin: 0; font: 400 15px/22px var(--font-sans); color: var(--ink-muted);">Dịch vụ, thời lượng, giá theo cấp thợ, ghế và giường đã điền sẵn. Sửa lại cho đúng tiệm trong vài phút.</p>
+        </section>
+        <section class="sp-panel" style="flex: 1 1 0; gap: 10px; padding: 24px;">
+          <span style="display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: var(--radius-md); background: var(--brand-soft); color: var(--brand);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"></circle><circle cx="18" cy="8" r="2"></circle><circle cx="20" cy="16" r="2"></circle><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"></path></svg></span>
+          <h3 style="margin: 0; font: 600 18px/26px var(--font-sans);">Spa thú cưng</h3>
+          <p style="margin: 0; font: 400 15px/22px var(--font-sans); color: var(--ink-muted);">Khách khai báo bé: loài, cân nặng, lông. Giá và thời gian tắm sấy đổi theo bé, không cần hỏi qua tin nhắn.</p>
+        </section>
+      </div>
+    </section>
+    <section id="gia" style="display: flex; flex-direction: column; gap: 24px;" aria-labelledby="lp-g">
+      <div><h2 id="lp-g" style="margin: 0; font: 700 32px/40px var(--font-sans); letter-spacing: -0.01em;">Bảng giá</h2><p style="margin: 6px 0 0; font: 400 16px/24px var(--font-sans); color: var(--ink-muted);">Không giới hạn nhân viên và lịch hẹn. Trả 3 tháng giảm 10%, 12 tháng giảm 20%.</p></div>
+      <div class="sp-plans" style="max-width: 860px;">
+          <section class="sp-plan" aria-labelledby="lp-Cơ">
+            <div class="sp-plan__head"><h3 class="sp-plan__name" id="lp-Cơ">Cơ bản</h3></div>
+            <div><span class="sp-plan__price">199.000 ₫</span><span class="sp-plan__unit"> / tháng</span><div class="sp-plan__note">1 chi nhánh</div></div>
+            <ul class="sp-plan__features"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Đặt lịch online trên trang riêng</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Lịch nhân viên và tài nguyên</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Thu tiền, cọc online, nhắc lịch</li><li data-off=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg><span><span class="sp-sr-only">Không có: </span>Nhiều chi nhánh</span></li><li data-off=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg><span><span class="sp-sr-only">Không có: </span>Gói liệu trình, ví trả trước</span></li><li data-off=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg><span><span class="sp-sr-only">Không có: </span>Hoa hồng, báo cáo đầy đủ</span></li><li data-off=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path></svg><span><span class="sp-sr-only">Không có: </span>Chatbot đặt lịch</span></li></ul>
+            <button type="button" class="sp-btn sp-btn--secondary">Dùng thử 7 ngày</button>
+          </section>
+          <section class="sp-plan" aria-labelledby="lp-Ch">
+            <div class="sp-plan__head"><h3 class="sp-plan__name" id="lp-Ch">Chuyên nghiệp</h3></div>
+            <div><span class="sp-plan__price">399.000 ₫</span><span class="sp-plan__unit"> / tháng</span><div class="sp-plan__note">Không giới hạn chi nhánh</div></div>
+            <ul class="sp-plan__features"><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Mọi thứ của gói Cơ bản</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Nhiều chi nhánh</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Gói liệu trình, ví trả trước</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Hoa hồng, báo cáo đầy đủ</li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Chatbot đặt lịch</li></ul>
+            <button type="button" class="sp-btn sp-btn--primary">Dùng thử 7 ngày</button>
+          </section>
+      </div>
+    </section>
+  </main>
+  <footer style="margin-top: 96px; padding: 24px 80px; display: flex; justify-content: space-between; font: 400 14px/20px var(--font-sans); color: var(--ink-muted); box-shadow: 0 -1px 0 var(--line);"><span>Sapio · đồ án tốt nghiệp, Trường Đại học Công nghệ Thông tin</span><span><a href="#">Điều khoản</a> · <a href="#">Quyền riêng tư</a> · <a href="#">Đăng nhập</a></span></footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":2140}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

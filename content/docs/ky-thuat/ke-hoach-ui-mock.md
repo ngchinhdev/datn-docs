@@ -1048,6 +1048,117 @@ Chữ và số trên bảng là minh họa; mock tính từ store bằng hàm th
 - **Kỹ thuật viên:** vào vai Mai thì thấy đúng 794.000 ₫ như chủ cơ sở thấy ở kỳ 11/2026 của Mai (số có thể khác bảng vẽ nếu dữ liệu mẫu khác, nhưng hai màn phải bằng nhau).
 - **Ngày đặc biệt:** thêm 20/11 mở 09:00–12:00 và 15:00–20:00 thì trang khách ngày đó không có giờ 12:00–15:00.
 
+## Bước 16. Đợt F: tài khoản và khung (MH-01, MH-03 đến MH-06, MH-10, MH-47)
+
+Sau khi PR #10 merge. Căn cứ:
+- Các bảng `GioiThieu`, `DangNhap`, `DangNhapKhoa`, `QuenMatKhau`, `DatLaiMatKhau`, `NhanLoiMoi`, `NhanLoiMoiCoTaiKhoan`, `ChonCoSo`, `MoiNhanVien`, `Loi403`, `LoiTrang`, `MatKetNoi`, `CoSoBiKhoa`, `CoSoBiKhoaKhach` (bảng ở `design/README.md`).
+- Quy tắc BR-03, BR-44, BR-63, BR-73, BR-75, BR-76 đến BR-79, BR-82, BR-83.
+
+Chữ và số trên bảng là minh họa. Mock không có máy chủ: "gửi email" nghĩa là hiện thư trong một hộp thư mẫu, link trong thư bấm được. Trang thư mẫu hiện có (`/mock/[tenant]/emails`) gắn với một cơ sở, còn thư đặt lại mật khẩu thì không; chỗ hiện các thư này do Claude Code chọn, ghi vào mục "Tự quyết". Kiểm mật khẩu dùng `passwordError` ở `mock/signup.ts`. Làm trên nhánh `feat/mock-account`, mỗi mục 16a–16g một commit, mở PR mới, không merge.
+
+### 16a. Tài khoản và thành viên trong store (BR-76 đến BR-79)
+
+- `mock/fixtures/accounts.ts`:
+  - **Tài khoản:** email, họ tên, mật khẩu mẫu là một câu từ 15 ký tự, ghi ngay trong file để người kiểm đăng nhập được.
+  - **Thành viên:** cơ sở, tài khoản, vai trò, chi nhánh hoặc tất cả, `staffResourceId?`.
+- **Tách lễ tân khỏi kỹ thuật viên:**
+  - Thêm Phạm Khánh Linh (`linh.pham@email.vn`), Lễ tân ở Tóc Mây và ở Pawpaw, không nhận khách trên lịch. `actors.receptionist` của cả hai cơ sở thành Linh.
+  - Lan (Tóc Mây) và Vy (Pawpaw) chỉ còn là Kỹ thuật viên.
+  - Bộ chọn vai trò gắn mỗi vai trò với một thành viên: Lễ tân là Linh, Quản lý là Hùng (Pawpaw là Khoa), Kỹ thuật viên giữ người đang dùng.
+- **Việc còn lại từ Bước 15:** `/my/commission` mở cho mọi thành viên có `staffResourceId`, kể cả quản lý có cột lịch như Hùng (BR-44). Mục "Hoa hồng của tôi" chỉ hiện với người có cột lịch.
+- `mock/account.ts` (hàm thuần, nhận `now`):
+  - đăng nhập: đúng, sai còn n lần, tạm khóa tới;
+  - đặt lại mật khẩu: tạo link, hết hạn, đã dùng, link mới làm link cũ hết hiệu lực;
+  - trạng thái lời mời: đang chờ, hết hạn, thu hồi, đã nhận, từ chối;
+  - ai được mời vai trò nào;
+  - sau đăng nhập đi đâu: một cơ sở, nhiều cơ sở, cơ sở hết gói, cơ sở bị khóa.
+- `scripts/check-account.ts` và lệnh `pnpm check:account`, mỗi ca đặt tên theo BR. Tối thiểu có các ca sau:
+  - sai lần 3 báo còn 2 lần, sai lần 5 khóa 15 phút, hết 15 phút thì thử lại được;
+  - email không có tài khoản báo y hệt email có tài khoản;
+  - đặt lại mật khẩu thì mở khóa;
+  - link đặt lại quá 30 phút thì hết hạn;
+  - lời mời gửi 07/11 10:05 hết hạn đúng 14/11 10:05;
+  - quản lý không mời được Quản lý;
+  - không mời email đã là thành viên.
+
+### 16b. Đăng nhập, quên và đặt lại mật khẩu (MH-03, MH-04)
+
+- Mỗi trang đúng bảng của nó:
+  - `/mock/login` theo `DangNhap`, và `DangNhapKhoa` khi bị tạm khóa;
+  - `/mock/forgot-password` theo `QuenMatKhau`;
+  - `/mock/reset-password?token=` theo `DatLaiMatKhau`.
+- **Đồng hồ đứng ở `MOCK_NOW`:** công cụ mock có nút "Cho thời gian trôi 15 phút" để thử hết khóa và hết hạn link.
+- **Mật khẩu mới:** kiểm theo BR-73 bằng `passwordError`.
+- **Đặt xong mật khẩu:** báo đã đăng xuất các máy khác, rồi vào cơ sở dùng gần nhất.
+- **Sau đăng nhập:** đi theo BR-79, dùng hàm ở 16a.
+
+### 16c. Nhận lời mời và chọn cơ sở (MH-05, MH-06)
+
+- `/mock/invite/[token]`:
+  - email chưa có tài khoản theo `NhanLoiMoi`; đã có tài khoản theo `NhanLoiMoiCoTaiKhoan`;
+  - lời mời hết hạn, bị thu hồi hoặc đã dùng: trang trống kiểu `LoiTrang`, có nút liên hệ người mời;
+  - đang đăng nhập bằng email khác thì báo như ghi chú trên bảng.
+- **Nhận xong:**
+  - tạo thành viên; người nhận khách có thêm tài nguyên nhân sự với hồ sơ trống (BR-78);
+  - ghi nhật ký, rồi vào cơ sở.
+- `/mock/select-workspace` đúng `ChonCoSo`:
+  - cơ sở hết gói ở trạng thái "Tạm dừng", không bấm được;
+  - lời mời đang chờ nhận hoặc từ chối ngay tại trang;
+  - dòng "Nail Hạ Vy" chỉ là dữ liệu của tài khoản, không cần dựng cả cơ sở.
+
+### 16d. Mời nhân viên (MH-47)
+
+- `/settings/staff` thêm hai phần theo `MoiNhanVien`:
+  - **Bảng "Nhân viên":** liệt kê mọi thành viên, có cột "Nhận khách trên lịch", nên thấy cả Linh.
+  - **Bảng "Lời mời đang chờ":** gửi lại, thu hồi, mời lại lời mời hết hạn.
+- **Hộp "Mời nhân viên":**
+  - Kỹ thuật viên luôn nhận khách trên lịch; Quản lý và Lễ tân chọn được.
+  - Vào vai Quản lý thì không có lựa chọn Quản lý.
+  - Mời email đã là thành viên thì báo lỗi tại ô.
+- Gửi, gửi lại, thu hồi đều ghi nhật ký và hiện thư mời trong hộp thư mẫu.
+
+### 16e. Trang lỗi và trạng thái (MH-10)
+
+- **403:**
+  - Vai trò mở trang ngoài quyền thì hiện "Không có quyền" trong khung theo `Loi403`, thay cho cách xử lý hiện có.
+  - Một hàm quyền dùng chung cho menu và trang.
+- **404 và 500:**
+  - 404 trong khu nội bộ, và 404 khi tên cơ sở trên đường dẫn trang khách không có, theo `LoiTrang`.
+  - Thêm một trang lỗi 500 mẫu, công cụ mock mở được, có mã lỗi.
+- **Cơ sở bị khóa:** công cụ mock có nút "Khóa cơ sở".
+  - Khu nội bộ theo `CoSoBiKhoa`: chủ cơ sở thấy lý do, nhân viên không thấy.
+  - Trang khách theo `CoSoBiKhoaKhach`; vẫn vào "Lịch của tôi" để xem và hủy lịch.
+  - Gói hết hạn (BR-82) dùng cùng trang khách này.
+- **Mất kết nối:** công cụ mock có nút "Mất kết nối".
+  - Trên lịch hiện dải báo theo `MatKetNoi`; vẫn tạo, sửa được.
+  - Tắt nút thì hiện toast "Đã nối lại".
+
+### 16f. Trang giới thiệu (MH-01)
+
+- `/mock/landing` đúng `GioiThieu`. Không dùng `/mock`, vì `/mock` đang là danh mục màn hình.
+- Bảng giá lấy từ dữ liệu gói Sapio đã có (BR-83), không ghi tay.
+- Các nút dẫn tới `/mock/signup` và `/mock/login`.
+
+### 16g. Hoàn tất
+
+- `mock/screens.ts`:
+  - MH-01, MH-03 đến MH-06 và MH-10 thành "Đang làm", có link tới route mới;
+  - cập nhật ghi chú của MH-47.
+- Các lệnh kiểm phải xanh: `pnpm check:availability`, `pnpm check:money`, `pnpm check:shop`, `pnpm check:reports`, `pnpm check:account`, `pnpm build`, `pnpm typecheck`, `prettier --check`.
+- Mở PR mới, mô tả theo 16a–16g, có mục "Tự quyết". Ghi một mục Tiến độ.
+
+**Xong khi** (người dùng tự kiểm):
+- **Đăng nhập:** sai mật khẩu Linh 3 lần thì báo còn 2 lần; sai đủ 5 lần thì thấy tạm khóa tới 10:35. Bấm "Cho thời gian trôi 15 phút" thì đăng nhập lại được.
+- **Đặt lại mật khẩu:** gửi link, mở thư mẫu, đặt mật khẩu 14 ký tự thì bị chặn; 15 ký tự thì vào thẳng Tóc Mây, nếu đó là cơ sở dùng gần nhất.
+- **Chọn cơ sở:** Linh có Tóc Mây, Pawpaw, và Nail Hạ Vy ở trạng thái "Tạm dừng" không bấm được.
+- **Mời:**
+  - Chủ cơ sở mời `thao.nguyen@email.vn` làm Kỹ thuật viên, mở thư, tạo tài khoản. Thảo có trong danh sách nhân viên và có cột lịch trống.
+  - Vào vai Quản lý thì hộp mời không có Quản lý.
+- **Lỗi:**
+  - Vai Lễ tân mở `/reports` thì thấy "Không có quyền" trong khung.
+  - Bật "Khóa cơ sở" thì trang khách báo tạm dừng nhưng vẫn hủy được lịch đã đặt.
+- **Hoa hồng:** vào vai Quản lý (Hùng) thì có "Hoa hồng của tôi" với đúng số của Hùng.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -1171,4 +1282,16 @@ trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 15a đến 15g,
 theo bảng; chữ và số tính từ store bằng hàm thuần ở mock/, tiền là bigint. Chỉ chạy các lệnh kiểm trong
 CLAUDE.md và các lệnh check của mục 15g. Mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu
 thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 16:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-account.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, BR-03, BR-44, BR-63, BR-73,
+BR-75, BR-76 đến BR-79, BR-82, BR-83 trong quy-tac.md, T-16 trong quyet-dinh-ky-thuat.md, và
+design/README.md (các bảng của đợt F). Làm Bước 16 trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md,
+mục 16a đến 16g, mỗi mục một commit. Bố cục theo bảng; chữ lấy từ store, logic là hàm thuần ở mock/ nhận
+`now`, không gọi Date.now(). Chỉ chạy các lệnh kiểm trong CLAUDE.md và các lệnh check của mục 16g. Mở PR
+mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
 ```

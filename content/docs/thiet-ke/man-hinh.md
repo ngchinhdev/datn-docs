@@ -49,12 +49,12 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-01 | Trang giới thiệu Sapio | `/` | Ai cũng xem | 1 | Nhẹ | Sapio là gì, ảnh lịch nhiều cột, nút "Đăng ký cơ sở" |
+| MH-01 | Trang giới thiệu Sapio | `/` | Ai cũng xem | 1 | Vẽ | **Đã chọn.** Một trang: lời giới thiệu kèm ảnh lịch nhiều cột, tính năng chính, chọn ngành có sẵn dịch vụ mẫu, bảng giá hai gói lấy từ dữ liệu (BR-83), nút "Đăng ký cơ sở" và "Đăng nhập" |
 | MH-02 | Đăng ký cơ sở | `/signup?step=account\|verify\|industry\|business\|done` | CCS | 1 | Vẽ | **Đã chọn.** Tài khoản (mật khẩu BR-73) → mã 6 số qua email → **chọn ngành** có xem trước gói → tên, địa chỉ `toc-may.sapio.vn`, chi nhánh đầu, giờ mở cửa, số tài nguyên → đã tạo, **dùng thử 7 ngày**. BR-70, BR-72, BR-74, BR-80 |
-| MH-03 | Đăng nhập | `/login` | Nhân sự | 1 | Nhẹ | Email + mật khẩu; khóa tạm sau nhiều lần sai |
-| MH-04 | Quên và đặt lại mật khẩu | `/forgot-password`, `/reset-password` | Nhân sự | 1 | Nhẹ | |
-| MH-05 | Nhận lời mời | `/invite/[token]` | LT, KTV, QL | 1 | Nhẹ | Thấy tên cơ sở, vai trò được mời; đặt mật khẩu hoặc nhận bằng tài khoản có sẵn |
-| MH-06 | Chọn cơ sở | `/select-workspace` | Nhân sự | 1 | Nhẹ | Khi tài khoản thuộc nhiều cơ sở |
+| MH-03 | Đăng nhập | `/login` | Nhân sự | 1 | Vẽ | **Đã chọn.** Email + mật khẩu, "Giữ đăng nhập trên máy này"; sai thì báo chung, từ lần 3 báo số lần còn lại, sai 5 lần tạm khóa 15 phút (BR-76) |
+| MH-04 | Quên và đặt lại mật khẩu | `/forgot-password`, `/reset-password` | Nhân sự | 1 | Vẽ | **Đã chọn.** Luôn báo cùng một câu; link 30 phút, dùng một lần, gửi lại sau 60 giây; đặt xong đăng xuất máy khác, vào cơ sở dùng gần nhất (BR-73, BR-77) |
+| MH-05 | Nhận lời mời | `/invite/[token]` | LT, KTV, QL | 1 | Vẽ | **Đã chọn.** Thẻ lời mời (vai trò, chi nhánh, người mời, hết hạn). Email chưa có tài khoản: điền tên, tạo mật khẩu; đã có: đăng nhập đúng email đó. Từ chối được; hết hạn, thu hồi, đã dùng có trang riêng (BR-78) |
+| MH-06 | Chọn cơ sở | `/select-workspace` | Nhân sự | 1 | Vẽ | **Đã chọn.** Danh sách cơ sở kèm vai trò, chi nhánh, nhãn "Dùng gần nhất"; cơ sở hết gói ở trạng thái "Tạm dừng"; lời mời đang chờ nhận hoặc từ chối ngay tại đây (BR-79) |
 
 ## B. Khung chung
 
@@ -63,7 +63,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 | MH-07 | Khung ứng dụng | mọi route `/app/[tenant]` | Nhân sự | 1 | Vẽ | Thanh bên theo vai trò, đổi chi nhánh, tìm nhanh khách, menu tài khoản, nút sáng/tối. Máy tính: thanh bên; iPad: thu gọn thành icon; điện thoại: thanh điều hướng dưới (như `LeTanDienThoai`). Dải báo dùng thử, sắp hết hạn (`Banner`, BR-86); mục ngoài gói có ổ khóa (BR-87) |
 | MH-08 | Mẫu trang danh sách | | | 1 | Vẽ | Dùng cho mọi màn mức DS |
 | MH-09 | Mẫu trang form | | | 1 | Vẽ | Dùng cho mọi màn mức Form; có thanh "Còn thay đổi chưa lưu" |
-| MH-10 | Trang lỗi và trạng thái | | Mọi người | 1 | Nhẹ | 404, 403 "Không có quyền", lỗi máy chủ, cơ sở bị khóa (trang khách và nội bộ nói khác nhau), mất kết nối realtime |
+| MH-10 | Trang lỗi và trạng thái | | Mọi người | 1 | Vẽ | **Đã chọn.** 403 trong khung; 404 nội bộ và 404 tên miền con không có; 500 kèm mã lỗi; cơ sở bị khóa (chủ thấy lý do, nhân viên và khách không); mất kết nối realtime trên lịch (BR-75, BR-79) |
 
 ## C. Khách hàng: `[tenant].<domain>`
 
@@ -129,7 +129,7 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | MH-44 | Dịch vụ | `/app/[tenant]/settings/services` | CCS | 1 | DS | Nhóm dịch vụ, kéo đổi thứ tự, bật/tắt đặt online |
 | MH-45 | Chi tiết dịch vụ | `/app/[tenant]/settings/services/[id]` | CCS | 1 | Vẽ | **Đã chọn. Màn đặc trưng thứ hai.** Biến thể khách tự chọn hoặc theo thuộc tính đối tượng, kiểm điều kiện phủ đủ, không trùng (BR-13, BR-55); trục thời gian theo từng loại tài nguyên, đoạn Chuẩn bị, Làm, Chờ, dọn dẹp theo loại tài nguyên (BR-50 đến BR-52); giá theo cấp nhân viên (BR-56); ai làm được (BR-03); cột phải xem trước trên lịch lễ tân và thẻ khách thấy; lịch đã đặt giữ thời gian, giá cũ (BR-59) |
 | MH-46 | Tài nguyên | `/app/[tenant]/settings/resources` | CCS | 1 | DS | **Đã chọn.** Nhóm theo loại (từ gói ngành), chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng |
-| MH-47 | Nhân sự | `/app/[tenant]/settings/staff` | CCS | 1 | DS | Mời, vai trò, chi nhánh, nhận đặt online |
+| MH-47 | Nhân sự | `/app/[tenant]/settings/staff` | CCS | 1 | DS | Mời, vai trò, chi nhánh, nhận đặt online. Phần mời **đã chọn**: hộp "Mời nhân viên", bảng lời mời đang chờ, gửi lại, thu hồi (BR-78) |
 | MH-48 | Hồ sơ nhân viên | `/app/[tenant]/settings/staff/[id]` | CCS | 1 | Form | Hai lớp hồ sơ (BR-15), kỹ năng, cấp, chi nhánh, vai trò |
 | MH-49 | Chính sách | `/app/[tenant]/settings/policies` | CCS | 1 (cọc ở 2) | Form | **Đã chọn.** Tham số X, Y, N, M, K của BR-06 đến BR-10; mức hoàn cọc (BR-23); mỗi trường có câu giải thích bằng ví dụ |
 | MH-50 | Thương hiệu và trang đặt lịch | `/app/[tenant]/settings/branding` | CCS | 1 | Form | **Đã chọn.** Logo, ảnh bìa, màu nhấn (kiểm tương phản 4.5:1 như token `tenant-*`), slug, xem trước MH-11 |

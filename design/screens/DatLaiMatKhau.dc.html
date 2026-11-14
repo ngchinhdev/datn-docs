@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Đặt lại mật khẩu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-auth" style="width: 390px; height: 844px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <header class="sp-auth__top">
+    <span class="sp-brand__name">Sapio</span>
+    
+  </header>
+  <main class="sp-auth__main" style="padding-top: 8px;">
+    <div>
+      <h1 class="sp-auth__title">Đặt mật khẩu mới</h1>
+      <p class="sp-auth__lead">Cho tài khoản linh.pham@email.vn.</p>
+    </div>
+    <form style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="sp-field "><label class="sp-field__label" for="rs-pass">Mật khẩu mới</label><div class="sp-field__control"><input id="rs-pass" type="password" value="••••••••••••••••••••••" autocomplete="new-password" aria-describedby="rs-pass-help"><button type="button" class="sp-icon-btn" aria-label="Hiện mật khẩu" aria-pressed="false" style="margin-right: 4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div><span class="sp-field__help" id="rs-pass-help">Ít nhất 15 ký tự. Một câu dễ nhớ là đủ.</span></div>
+        <ul style="margin: -4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px;">
+          <li><p class="sp-fit sp-fit--ok" style="margin: 0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span>22 ký tự</span></p></li>
+          <li><p class="sp-fit sp-fit--ok" style="margin: 0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg><span>Không nằm trong danh sách mật khẩu phổ biến hay đã lộ</span></p></li>
+        </ul>
+<div role="note" style="display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--radius-md); background: var(--fill-tonal); font: 400 14px/20px var(--font-sans);"><span style="flex: none; display: inline-flex; margin-top: 1px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg></span><div>Đặt xong, các máy khác đang đăng nhập bằng tài khoản này sẽ bị đăng xuất. Bạn vào thẳng cơ sở dùng gần nhất.</div></div>        <button type="submit" class="sp-btn sp-btn--primary" style="height: 48px;">Lưu mật khẩu và đăng nhập</button>
+    </form>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

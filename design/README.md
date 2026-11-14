@@ -98,5 +98,19 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `HoaHong.dc.html` | MH-56 Hoa hồng: quy tắc, các kỳ, chốt kỳ | **Đã chọn** | `/mock/app/[tenant]/commission` |
 | `HoaHongKy.dc.html` | MH-56 Kỳ hoa hồng của một người: từng dòng, thu hồi | **Đã chọn** | `/mock/app/[tenant]/commission/periods/[id]?staff=` |
 | `KtvHoaHong.dc.html` | MH-37 Hoa hồng tạm tính của kỹ thuật viên (điện thoại) | **Đã chọn** | `/mock/app/[tenant]/my/commission` |
+| `GioiThieu.dc.html` | MH-01 Trang giới thiệu Sapio, bảng giá hai gói | **Đã chọn** | `/mock/landing` (Bước 16) |
+| `DangNhap.dc.html` | MH-03 Đăng nhập, báo sai còn số lần thử | **Đã chọn** | `/mock/login` |
+| `DangNhapKhoa.dc.html` | MH-03 Đăng nhập bị tạm khóa (điện thoại) | **Đã chọn** | như trên |
+| `QuenMatKhau.dc.html` | MH-04 Quên mật khẩu, đã gửi link (điện thoại) | **Đã chọn** | `/mock/forgot-password` |
+| `DatLaiMatKhau.dc.html` | MH-04 Đặt mật khẩu mới (điện thoại) | **Đã chọn** | `/mock/reset-password` |
+| `NhanLoiMoi.dc.html` | MH-05 Nhận lời mời, email chưa có tài khoản | **Đã chọn** | `/mock/invite/[token]` |
+| `NhanLoiMoiCoTaiKhoan.dc.html` | MH-05 Nhận lời mời, email đã có tài khoản | **Đã chọn** | như trên |
+| `ChonCoSo.dc.html` | MH-06 Chọn cơ sở, cơ sở tạm dừng, lời mời đang chờ | **Đã chọn** | `/mock/select-workspace` |
+| `MoiNhanVien.dc.html` | MH-47 Nhân sự: hộp mời nhân viên, lời mời đang chờ | **Đã chọn** | `/mock/app/[tenant]/settings/staff` |
+| `Loi403.dc.html` | MH-10 Không có quyền, trong khung (lễ tân mở Báo cáo) | **Đã chọn** | trang ngoài quyền của vai trò |
+| `LoiTrang.dc.html` | MH-10 404 nội bộ, 404 tên miền con, 500 kèm mã lỗi | **Đã chọn** | `not-found` và trang lỗi mẫu |
+| `MatKetNoi.dc.html` | MH-10 Mất kết nối realtime trên lịch lễ tân | **Đã chọn** | `/mock/app/[tenant]/calendar` (công cụ mock) |
+| `CoSoBiKhoa.dc.html` | MH-10 Cơ sở bị khóa, khu nội bộ | **Đã chọn** | công cụ mock "Khóa cơ sở" |
+| `CoSoBiKhoaKhach.dc.html` | MH-10 Trang khách tạm dừng (điện thoại) | **Đã chọn** | `/mock/[tenant]` khi cơ sở bị khóa hoặc hết gói |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70, BR-73, BR-75, BR-76 đến BR-79 trong `content/docs/nghiep-vu/quy-tac.md`.

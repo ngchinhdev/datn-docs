@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Nhận lời mời</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-auth" style="width: 390px; height: 900px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <header class="sp-auth__top">
+    <span class="sp-brand__name">Sapio</span>
+    
+  </header>
+  <main class="sp-auth__main" style="padding-top: 8px; gap: 20px;">
+    <div>
+      <h1 class="sp-auth__title">Bạn được mời vào Salon Tóc Mây</h1>
+    </div>
+    <section class="sp-auth__card" style="gap: 12px; padding: 16px;" aria-label="Lời mời">
+      <div style="display: flex; align-items: center; gap: 12px;"><span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent);">M</span><div><div style="font: 600 16px/22px var(--font-sans);">Salon Tóc Mây</div><div style="font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">toc-may.sapio.vn</div></div></div>
+      <dl class="sp-kv" style="margin: 0;"><dt>Vai trò</dt><dd>Kỹ thuật viên</dd><dt>Chi nhánh</dt><dd>Quận 3</dd><dt>Người mời</dt><dd>Chính Nguyễn, chủ cơ sở</dd><dt>Hết hạn</dt><dd class="sp-num">10:05, 14/11/2026</dd></dl>
+    </section>
+    <form style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="sp-field "><label class="sp-field__label" for="iv-mail">Email</label><div class="sp-field__control"><input id="iv-mail" type="email" value="thao.nguyen@email.vn" aria-describedby="iv-mail-help" readonly></div><span class="sp-field__help" id="iv-mail-help">Lời mời gắn với email này, không đổi được.</span></div>
+        <div class="sp-field "><label class="sp-field__label" for="iv-name">Họ và tên</label><div class="sp-field__control"><input id="iv-name" type="text" value="Nguyễn Phương Thảo" autocomplete="name"></div></div>
+        <div class="sp-field "><label class="sp-field__label" for="iv-pass">Tạo mật khẩu</label><div class="sp-field__control"><input id="iv-pass" type="password" autocomplete="new-password" aria-describedby="iv-pass-help"><button type="button" class="sp-icon-btn" aria-label="Hiện mật khẩu" aria-pressed="false" style="margin-right: 4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div><span class="sp-field__help" id="iv-pass-help">Ít nhất 15 ký tự. Một câu dễ nhớ là đủ.</span></div>
+        <button type="submit" class="sp-btn sp-btn--primary" style="height: 48px;">Tạo tài khoản và nhận lời mời</button>
+        <button type="button" class="sp-btn sp-btn--ghost">Từ chối lời mời</button>
+    </form>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":390,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

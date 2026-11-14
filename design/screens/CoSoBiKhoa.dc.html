@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MH-10 · Cơ sở bị khóa</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-auth" style="width: 1440px; height: 900px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <header class="sp-auth__top">
+    <span class="sp-brand__name">Sapio</span>
+    <span style="display: flex; align-items: center; gap: 8px; font: 500 14px/20px var(--font-sans);"><span class="sp-avatar sp-avatar--sm">CN</span>Chính Nguyễn</span>
+  </header>
+  <main class="sp-auth__main" style="max-width: 560px; padding-top: 72px;">
+    <div style="display: flex; align-items: center; gap: 12px;"><span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent);">M</span><span style="font: 600 15px/22px var(--font-sans);">Salon Tóc Mây</span></div>
+    <div>
+      <h1 class="sp-auth__title">Cơ sở đang bị khóa</h1>
+      <p class="sp-auth__lead">Quản trị Sapio khóa cơ sở này lúc 16:40, 12/11/2026. Khu nội bộ và trang đặt lịch đều dừng; dữ liệu giữ nguyên.</p>
+    </div>
+    <section class="sp-auth__card" style="gap: 12px;" aria-label="Lý do">
+      <dl class="sp-kv" style="margin: 0;"><dt>Lý do</dt><dd>Nhiều khách báo bị thu cọc nhưng không có lịch</dd><dt>Khách đã đặt</dt><dd>Vẫn xem và hủy được lịch của mình</dd><dt>Liên hệ</dt><dd><a href="#">hotro@sapio.vn</a></dd></dl>
+    </section>
+    <div class="sp-auth__actions" style="justify-content: flex-start;"><button type="button" class="sp-btn sp-btn--secondary">Chọn cơ sở khác</button><button type="button" class="sp-btn sp-btn--ghost">Đăng xuất</button></div>
+    <p style="margin: 0; font: 400 13px/18px var(--font-sans); color: var(--ink-muted);">Nhân viên thấy cùng trang này, không kèm lý do. Khóa không phụ thuộc gói: gia hạn không mở được (BR-75).</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

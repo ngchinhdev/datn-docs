@@ -7,6 +7,31 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 14/11/2026 (chiều): chốt đợt F, tài khoản và khung
+
+- **Đã làm:**
+  - Review PR #10 (Bước 15): thu hồi hoa hồng khi hoàn không theo dòng tính dư nếu hóa đơn có dòng bán lẻ không ghi người bán; Claude Code sửa mẫu số cho giống `revenueItems` và thêm ca vào `check:reports`. Người dùng đã merge.
+  - Vẽ và chốt đợt F (14 bảng):
+    - MH-01 trang giới thiệu;
+    - MH-03 đăng nhập, bị tạm khóa;
+    - MH-04 quên mật khẩu, đặt mật khẩu mới;
+    - MH-05 nhận lời mời (chưa có và đã có tài khoản);
+    - MH-06 chọn cơ sở;
+    - MH-47 phần mời nhân viên;
+    - MH-10 403, 404 và 500, mất kết nối, cơ sở bị khóa (nội bộ và trang khách).
+  - Quy tắc mới BR-76 (đăng nhập, tạm khóa, phiên), BR-77 (đặt lại mật khẩu), BR-78 (lời mời, một vai trò mỗi cơ sở), BR-79 (vào cơ sở, cơ sở tạm dừng hoặc bị khóa, trang lỗi).
+  - Dữ liệu mẫu trên bảng: thêm lễ tân Phạm Khánh Linh (không nhận khách trên lịch); Lan chỉ là kỹ thuật viên, khớp "một vai trò mỗi cơ sở".
+  - Sửa ghi chú bảng `HoaHong`: quy tắc mới chỉ áp cho hóa đơn thu từ ngày hiệu lực (BR-41).
+  - Kế hoạch Bước 16 (nhánh `feat/mock-account`), gồm việc còn lại của Bước 15: thành viên có cột lịch (như quản lý Hùng) xem được hoa hồng của mình.
+- **Ghi chú cho ERD:**
+  - `users`: `email` duy nhất, `password_hash`, `failed_login_count`, `locked_until`, `last_tenant_id`.
+  - `sessions`: `token_hash`, `user_id`, `persistent`, `expires_at`, `last_used_at`; đổi mật khẩu thì xóa các phiên khác.
+  - `password_reset_tokens`: `token_hash`, `user_id`, `expires_at`, `used_at`; tạo token mới thì token cũ hết hiệu lực.
+  - `invitations`: `tenant_id`, `email`, `role`, `branch_id?` (rỗng là tất cả), `takes_bookings`, `token_hash`, `invited_by`, `expires_at`, `status` (`pending`, `accepted`, `declined`, `revoked`), `accepted_at`; hết hạn tính từ `expires_at`, không cần job.
+  - `memberships`: duy nhất theo (`tenant_id`, `user_id`), `role`, `branch_id?`, `staff_resource_id?`.
+  - `tenants`: `locked_at`, `locked_reason`, `locked_by`.
+- **Tiếp theo:** Claude Code làm Bước 16; phiên claude.ai vẽ đợt G (quản trị nền tảng: MH-58, MH-60, MH-62).
+
 ### 14/11/2026 (tối): mock tổng quan, báo cáo, hoa hồng (Bước 15, đợt E)
 
 - **Đã làm** (nhánh `feat/mock-reports`, mỗi mục 15a–15g một commit):

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>MH-10 · Không có quyền</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-shell sp-tenant-may" style="position: relative; height: 900px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <nav class="sp-shell__side" id="app-sidebar" aria-label="Điều hướng chính">
+    <div class="sp-brand">
+      <span class="sp-brand__name">Sapio</span>
+      <button type="button" class="sp-icon-btn" aria-label="Thu gọn thanh bên" aria-expanded="true" aria-controls="app-sidebar" title="Thu gọn thanh bên"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path><path d="m16 15-3-3 3-3"></path></svg></button>
+    </div>
+    <button class="sp-switcher" type="button" aria-haspopup="menu" aria-expanded="false">
+      <span class="sp-switcher__mark sp-tenant-may" aria-hidden="true" style="background: var(--accent-soft); color: var(--accent);">M</span>
+      <span class="sp-switcher__text"><span class="sp-sr-only">Đổi cơ sở hoặc chi nhánh:</span><span class="sp-switcher__name">Salon Tóc Mây</span><span class="sp-switcher__sub">Chi nhánh Quận 3</span></span>
+      <svg class="sp-switcher__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+    </button>
+    <div class="sp-nav">
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 17 2 2 4-4"></path><path d="m3 7 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path></svg><span class="sp-nav__label">Hôm nay</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg><span class="sp-nav__label">Lịch</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span class="sp-nav__label">Khách hàng</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><path d="M12 17.5v-11"></path></svg><span class="sp-nav__label">Hóa đơn</span></a>
+      <a class="sp-nav__item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg><span class="sp-nav__label">Hoàn tiền</span><span class="sp-nav__badge">1</span></a>
+    </div>
+    <div class="sp-account">
+      <span class="sp-avatar sp-avatar--sm">KL</span>
+      <span class="sp-account__text"><span class="sp-switcher__name" style="font-size: 13px; line-height: 18px;">Phạm Khánh Linh</span><span class="sp-switcher__sub">Lễ tân</span></span>
+      <button type="button" class="sp-icon-btn" aria-label="Chuyển sang giao diện tối" title="Chuyển sang giao diện tối"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></button>
+    </div>
+  </nav>
+  <main class="sp-shell__main" style="overflow: auto;">
+    <div class="sp-shell__content sp-shell__content--wide">
+      <div style="padding-top: 160px;"><div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; max-width: 460px; margin: 0 auto;">
+        <span style="display: inline-flex; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 999px; background: var(--fill-tonal); color: var(--ink-muted);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+        <h1 style="margin: 0; font: 700 22px/30px var(--font-sans);">Không có quyền xem Báo cáo</h1>
+        <p style="margin: 0; font: 400 15px/22px var(--font-sans); color: var(--ink-muted);">Vai trò Lễ tân của bạn ở Salon Tóc Mây không mở được trang này. Cần thì nhờ chủ cơ sở hoặc quản lý xem giúp, hoặc xin thêm vai trò.</p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;"><button type="button" class="sp-btn sp-btn--primary">Về Hôm nay</button><button type="button" class="sp-btn sp-btn--secondary">Chọn cơ sở khác</button></div>
+      </div></div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>

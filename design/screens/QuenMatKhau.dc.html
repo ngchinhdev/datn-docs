@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Quên mật khẩu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/sapio/tokens.css">
+<link rel="stylesheet" href="ds/sapio/components/bundle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{color:var(--ink)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" class="sp-auth" style="width: 390px; height: 844px; min-height: 0; overflow: hidden; font-family: var(--font-sans);">
+  <header class="sp-auth__top">
+    <span class="sp-brand__name">Sapio</span>
+    <a href="#" style="font: 600 14px/20px var(--font-sans); text-decoration: none;">Đăng nhập</a>
+  </header>
+  <main class="sp-auth__main" style="padding-top: 8px;">
+    <div>
+      <h1 class="sp-auth__title">Quên mật khẩu</h1>
+      <p class="sp-auth__lead">Nhập email đăng nhập. Sapio gửi một link để đặt mật khẩu mới.</p>
+    </div>
+    <form style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="sp-field "><label class="sp-field__label" for="fg-mail">Email</label><div class="sp-field__control"><input id="fg-mail" type="email" value="linh.pham@email.vn" autocomplete="email"></div></div>
+<div role="status" style="display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--radius-md); background: var(--brand-soft); font: 400 14px/20px var(--font-sans);"><span style="flex: none; display: inline-flex; margin-top: 1px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg></span><div>Nếu <strong>linh.pham@email.vn</strong> có tài khoản Sapio, link đặt lại vừa được gửi tới đó. Link dùng được <strong>30 phút</strong> và chỉ một lần. Không thấy thì xem thư mục Spam.</div></div>        <button type="submit" class="sp-btn sp-btn--secondary" style="height: 48px;" disabled>Gửi lại sau 0:45</button>
+    </form>
+    <a href="#" style="align-self: center; font: 500 14px/20px var(--font-sans);">Quay lại đăng nhập</a>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false,"section":"Giao diện"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { theme: this.props.dark ? 'dark' : 'light' };
+  }
+}
+</script>
+</body>
+</html>
