@@ -59,12 +59,15 @@ export type AssistantCard =
     }
   | {
       kind: 'hold';
+      /** The held appointment on the calendar; its state is read from there. */
+      appointmentId: string;
       serviceId: string;
       variantId: string;
+      /** `ANY_STAFF` or the person asked for (BR-14). */
+      staffChoice: string;
       slot: SlotChoice;
       /** ISO 8601, UTC (BR-07). */
       expiresAt: string;
-      state: 'active' | 'returned' | 'used';
     }
   | { kind: 'booked'; appointmentId: string; serviceId: string; variantId: string; startAt: string }
   | {
@@ -343,7 +346,11 @@ function readStaff(fixture: TenantFixture, folded: string) {
 
 // ---- Building cards ----
 
-function lineOf(fixture: TenantFixture, service: Service, variant: ServiceVariant): ServiceLine {
+export function lineOf(
+  fixture: TenantFixture,
+  service: Service,
+  variant: ServiceVariant,
+): ServiceLine {
   const staff = fixture.staff
     .filter((s) => s.profile.bookableOnline && s.skillServiceIds.includes(service.id))
     .map((s) => ({ resourceId: s.resourceId, level: s.level }));
@@ -427,7 +434,7 @@ export interface AskInput {
 }
 
 /** Times on one day for one variant, by the rules of the booking page (BR-06, BR-14). */
-function slotsOn(
+export function slotsOn(
   fixture: TenantFixture,
   service: Service,
   variant: ServiceVariant,

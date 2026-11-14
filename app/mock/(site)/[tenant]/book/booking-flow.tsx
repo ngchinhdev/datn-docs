@@ -812,13 +812,20 @@ export function BookingFlow({
     </div>
   );
 
-  const hold = holdExpiresAt && slot && !confirmed && (step === 'info' || step === 'confirm') && (
-    <HoldBanner
-      expiresAt={holdExpiresAt}
-      now={now}
-      note={`${slotLine} · ${peopleNames}`}
-      onExpire={releaseHold}
-    />
+  const hold = holdExpiresAt &&
+    slot &&
+    !confirmed &&
+    (step === 'subject' || step === 'info' || step === 'confirm') && (
+      <HoldBanner
+        expiresAt={holdExpiresAt}
+        now={now}
+        note={`${slotLine} · ${peopleNames}`}
+        onExpire={releaseHold}
+      />
+    );
+
+  const assistantNote = resume?.source === 'assistant' && (
+    <p className="body-sm m-0 text-(--ink-muted)">Trợ lý đã điền sẵn dịch vụ, giờ và thợ.</p>
   );
 
   /** The picker's props: the same for the phone row and the desktop list. */
@@ -1080,6 +1087,8 @@ export function BookingFlow({
     title = vocabulary.subjectQuestion ?? '';
     body = (
       <div className="sp-stack">
+        {hold}
+        {assistantNote}
         <p className="body-sm m-0 text-(--ink-muted)">
           Chọn nhiều {subjectNoun} để đặt chung một lần, tối đa {MAX_PARTY}.
         </p>
@@ -1411,6 +1420,7 @@ export function BookingFlow({
     body = (
       <div className="sp-stack">
         {hold}
+        {assistantNote}
         <Field id="booking-name" label="Họ và tên">
           <input
             id="booking-name"
