@@ -9,7 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { ResetMockButton } from '@/components/mock/reset-mock-button';
 import { tenantFixtures, type BusinessHours } from '@/mock/fixtures';
+import { PLATFORM_ADMIN_EMAIL } from '@/mock/fixtures/accounts';
 import { visibleMinutes } from '@/mock/occupation';
 import {
   mockScreens,
@@ -61,10 +63,68 @@ export default async function MockIndexPage({ searchParams }: PageProps<'/mock'>
     return text ? `/mock?${text}` : '/mock';
   };
 
+  const doors = [
+    {
+      title: 'Khách đặt lịch',
+      note: 'Vào trang đặt lịch của một cơ sở, đặt lịch bằng mã gửi qua email.',
+      links: tenantFixtures.map((f) => ({ href: `/mock/${f.tenant.slug}`, label: f.tenant.name })),
+    },
+    {
+      title: 'Nhân sự cơ sở',
+      note: 'Đăng nhập bằng tài khoản mẫu: chủ, quản lý, lễ tân hoặc thợ.',
+      links: [{ href: '/mock/login', label: 'Đăng nhập' }],
+    },
+    {
+      title: 'Quản trị nền tảng',
+      note: 'Cơ sở, gói và giá, mẫu ngành, nhật ký quản trị.',
+      links: [
+        {
+          href: `/mock/login?email=${encodeURIComponent(PLATFORM_ADMIN_EMAIL)}`,
+          label: 'Đăng nhập quản trị',
+        },
+      ],
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-8">
+      <section aria-labelledby="doors" className="flex flex-col gap-3">
+        <h1 id="doors" className="text-2xl font-semibold">
+          Bắt đầu
+        </h1>
+        <ul className="grid gap-4 sm:grid-cols-3">
+          {doors.map((door) => (
+            <li key={door.title}>
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle>{door.title}</CardTitle>
+                  <CardDescription>{door.note}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-1 text-sm">
+                  {door.links.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            </li>
+          ))}
+        </ul>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          <Link href="/mock/landing" className="font-medium text-primary hover:underline">
+            Trang giới thiệu Sapio
+          </Link>
+          <ResetMockButton />
+        </div>
+      </section>
+
       <section className="flex flex-col gap-3">
-        <h1 className="text-2xl font-semibold">Màn hình mock</h1>
+        <h2 className="text-2xl font-semibold">Mở thẳng từng màn hình</h2>
         <p className="text-sm text-muted-foreground">
           <strong className="text-foreground">
             {count('in_progress')}/{mockScreens.length} đang làm

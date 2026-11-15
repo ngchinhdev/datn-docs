@@ -8,6 +8,9 @@ import type { StaffRoleId } from './types.ts';
 /** Every sample account signs in with this sentence (23 characters, BR-73). */
 export const SAMPLE_PASSWORD = 'ca phe sua da buoi sang';
 
+/** The account of the platform administration: it belongs to no tenant. */
+export const PLATFORM_ADMIN_EMAIL = 'quantri@sapio.vn';
+
 export interface Account {
   id: string;
   /** Lower case; the address is unique (BR-76). */
