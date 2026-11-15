@@ -1289,6 +1289,73 @@ Mock **không gọi AI**. Trợ lý là hàm thuần nhận câu khách gõ, nh�
 - **Gói:** `/mock/pawpaw` (Cơ bản) không có nút; `/mock/pawpaw?plan=trial` có, hỏi giá tắm thì trợ lý hỏi cân nặng.
 - **Máy tính:** khung chat ở góc phải dưới, trang vẫn cuộn được phía sau.
 
+## Bước 19. Đi liền một luồng
+
+Sau khi PR #13 merge. Đủ 62 màn hình nhưng chưa đi liền được từ đầu đến cuối:
+- `/mock` chỉ là danh sách màn hình; không link nào trỏ tới trang giới thiệu `/mock/landing`.
+- Trang đăng nhập không cho biết tài khoản mẫu (mật khẩu chỉ nằm trong `mock/fixtures/accounts.ts`), nên phải mở thẳng từng màn.
+- Không có tài khoản quản trị nền tảng; khu `/mock/admin` chỉ vào được qua menu "Xem mock với vai trò", và nút đăng xuất ở đó chưa làm.
+- Mọi store chỉ giữ trong bộ nhớ: tải lại trang, gõ URL hay mở tab mới là mất dữ liệu vừa tạo.
+- `StaffStoreProvider`, `ServiceStoreProvider`, `SubscriptionProvider` nằm trong layout của từng khu, nên khu nhân sự và trang khách giữ hai bản riêng. Ví dụ sửa giá dịch vụ ở quản trị thì trang đặt lịch vẫn giá cũ. Chỉ lịch hẹn dùng chung (`ScheduleRootProvider`).
+
+Bước này không thêm màn hình mới. Không chặn trang khi chưa đăng nhập: danh sách màn hình vẫn mở thẳng được mọi màn. Làm trên nhánh `feat/mock-flow`, mỗi mục 19a–19g một commit, mở PR mới, không merge.
+
+### 19a. Một kho dữ liệu cho mỗi cơ sở
+
+- Đưa trạng thái nhân sự, dịch vụ, gói của cơ sở lên `app/mock/layout.tsx`, theo slug, như `ScheduleRootProvider` đang làm với lịch hẹn. Provider trong layout của từng khu chỉ còn chọn phần của cơ sở đang xem.
+- Hook (`useStaffStore`, `useServiceStore`, `useSubscription`) giữ nguyên chữ ký, để các màn không phải sửa.
+- Kiểm bằng tay sau khi xong: sửa giá một dịch vụ ở `settings/services/[id]` rồi sang `/mock/toc-may/book` thì thấy giá mới. Thêm nhân viên ở quản trị thì trang đặt lịch có thợ đó, nếu nhân viên nhận khách trên lịch.
+
+### 19b. Giữ dữ liệu khi tải lại trang
+
+- Các store ở tầng gốc (tài khoản, nền tảng, gói cấu hình ngành, lịch hẹn và tiền, nhân sự, dịch vụ, gói của cơ sở, phiên của khách, nháp đặt lịch, trợ lý, đồng hồ mock) lưu vào `sessionStorage` của tab, dưới một khóa có số phiên bản (`sapio-mock-v1`).
+- Đọc sau khi gắn component (không đọc lúc render ở server) để không lệch hydration. Mọi lần đọc, ghi bọc `try/catch`; đọc lỗi hoặc khác phiên bản thì dùng dữ liệu gốc.
+- Tiền là `bigint` nên JSON cần hàm chuyển riêng; viết một cặp hàm `serialize`/`deserialize` dùng chung, có ca kiểm (19g).
+- Đóng tab là dữ liệu sạch, đúng ý "mỗi lần demo bắt đầu từ dữ liệu gốc". Không dùng `localStorage`.
+- Nút **"Đặt lại dữ liệu mock"** (xóa khóa, tải lại trang) có ở trang bắt đầu và trong mục "Công cụ mock" của menu tài khoản.
+
+### 19c. Trang bắt đầu `/mock`
+
+- Đầu trang là ba cửa, mỗi cửa một thẻ:
+  - **Khách đặt lịch:** vào `/mock/toc-may` hoặc `/mock/pawpaw`.
+  - **Nhân sự cơ sở:** vào `/mock/login`.
+  - **Quản trị nền tảng:** vào `/mock/login?email=` của tài khoản quản trị (19e).
+- Thêm một dòng "Trang giới thiệu Sapio" tới `/mock/landing`, và nút "Đặt lại dữ liệu mock".
+- Danh sách 62 màn hình giữ nguyên, nằm dưới ba cửa với tiêu đề "Mở thẳng từng màn hình". Bộ lọc vẫn giữ trên URL.
+
+### 19d. Tài khoản mẫu ở trang đăng nhập
+
+- Trong `AccountTools` của `/mock/login` (chỉ có ở mock): nút "Tài khoản mẫu" mở danh sách mọi tài khoản nhân sự trong fixture, mỗi dòng có tên, cơ sở và vai trò, ví dụ "Chính Nguyễn · chủ Tóc Mây", "Phạm Khánh Linh · lễ tân 3 cơ sở".
+- Bấm một dòng thì điền email và mật khẩu mẫu vào form; người dùng tự bấm "Đăng nhập", để đường đi qua đúng `attemptLogin` và `afterLogin` (một cơ sở thì vào thẳng, nhiều cơ sở thì sang chọn cơ sở).
+- Thêm một dòng ghi mật khẩu mẫu, để thử nhập sai, khóa 15 phút (BR-76) vẫn được.
+
+### 19e. Tài khoản quản trị nền tảng
+
+- Thêm một tài khoản quản trị nền tảng vào `mock/fixtures/accounts.ts` (không thuộc cơ sở nào, cờ `platformAdmin`). Đăng nhập bằng tài khoản này thì vào `/mock/admin`, không qua chọn cơ sở.
+- Khu `/mock/admin`: tên người ở menu tài khoản lấy từ phiên; "Đăng xuất" xóa phiên và về `/mock/login`, như khu nhân sự.
+- Tài khoản này nằm trong danh sách tài khoản mẫu của 19d.
+
+### 19f. Nối các link còn thiếu
+
+- Khu nhân sự, menu tài khoản: "Xem trang đặt lịch" mở `/mock/[tenant]` của cơ sở đang xem (tab mới không cần, vì dữ liệu đã giữ ở 19b).
+- Chân trang của trang khách (`/mock/[tenant]`): dòng nhỏ "Nhân viên của tiệm? Đăng nhập" tới `/mock/login`.
+- Trang giới thiệu `/mock/landing`: logo Sapio về `/mock/landing`; thêm link "Xem mock" tới `/mock` ở chân trang.
+- Đăng xuất ở khu nhân sự và ở khu quản trị nền tảng về `/mock/login`. Trang chọn cơ sở có "Đăng xuất".
+- Rà các màn còn lại: màn nào chỉ vào được từ danh sách màn hình thì thêm đường vào từ màn liền trước trong luồng, ghi danh sách đã nối vào mô tả PR. Hộp thư của khách (`/mock/[tenant]/emails`) hiện chưa có link nào trỏ tới.
+
+### 19g. Kiểm và hoàn tất
+
+- Ca kiểm cho `serialize`/`deserialize` (có `bigint`, ngày giờ, mảng lồng nhau) trong một lệnh check đang có hoặc `pnpm check:flow` mới.
+- Các lệnh kiểm phải xanh: `pnpm check:availability`, `pnpm check:shop`, `pnpm check:account`, `pnpm check:platform`, `pnpm check:assistant`, `pnpm build`, `pnpm typecheck`, `prettier --check`.
+- Mở PR mới, mô tả theo 19a–19g, có mục "Tự quyết". Ghi một mục Tiến độ.
+
+**Xong khi** (người dùng tự kiểm, trong một tab, không mở danh sách màn hình):
+- **Khách:** từ `/mock` bấm cửa Khách, vào Tóc Mây, đặt một lịch qua OTP, thấy lịch ở "Lịch của tôi".
+- **Lễ tân:** quay về `/mock`, cửa Nhân sự, chọn tài khoản mẫu Linh, đăng nhập, chọn Tóc Mây; lịch vừa đặt có trên lịch; check-in, thu tiền, mở hóa đơn.
+- **Chủ cơ sở:** đăng xuất, đăng nhập Chính; sửa giá một dịch vụ; "Xem trang đặt lịch" thấy giá mới; tổng quan có doanh thu vừa thu.
+- **Quản trị nền tảng:** đăng xuất, đăng nhập tài khoản quản trị, vào thẳng `/mock/admin`; đăng xuất về trang đăng nhập.
+- **Tải lại:** F5 ở bất kỳ bước nào thì vẫn thấy lịch đã đặt, giá đã sửa, vẫn đăng nhập. "Đặt lại dữ liệu mock" thì về dữ liệu gốc.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -1448,4 +1515,16 @@ BR-16, BR-17, BR-67, BR-79, BR-82, BR-92 trong quy-tac.md, mục BT7 trong roadm
 18e, mỗi mục một commit. Mock không gọi AI: trợ lý là hàm thuần ở mock/ nhận `now`, số liệu chỉ nằm trong
 thẻ, tiền là bigint, không gọi Date.now(). Chỉ chạy các lệnh kiểm trong CLAUDE.md và các lệnh check của
 mục 18e. Mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 19:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-flow.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, các store trong
+components/mock/ và app/mock/layout.tsx. Làm Bước 19 trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md,
+mục 19a đến 19g, mỗi mục một commit. Không thêm màn hình mới, không đổi chữ ký các hook store, không chặn
+trang khi chưa đăng nhập. Lưu bằng sessionStorage, đọc sau khi gắn component, bọc try/catch; tiền vẫn là
+bigint. Chỉ chạy các lệnh kiểm trong CLAUDE.md và các lệnh check của mục 19g. Mở PR mới, không merge.
+Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
 ```
