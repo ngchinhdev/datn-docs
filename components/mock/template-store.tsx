@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { usePersistedState } from '@/components/mock/use-persisted-state';
 import { industryTemplates } from '@/mock/fixtures/templates';
 import type { IndustryTemplate, TemplateContent } from '@/mock/fixtures';
 import { contentOf } from '@/mock/template-view';
@@ -20,7 +21,10 @@ const TemplateContext = createContext<TemplateStore | null>(null);
 
 /** Templates of the platform, so the list and the detail pages show the same drafts. */
 export function TemplateStoreProvider({ children }: { children: ReactNode }) {
-  const [templates, setTemplates] = useState(industryTemplates);
+  const [templates, setTemplates] = usePersistedState<IndustryTemplate[]>(
+    'templates',
+    industryTemplates,
+  );
   const update = (id: string, change: (t: IndustryTemplate) => IndustryTemplate) =>
     setTemplates((list) => list.map((t) => (t.id === id ? change(t) : t)));
 

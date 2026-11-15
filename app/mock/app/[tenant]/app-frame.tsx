@@ -19,6 +19,7 @@ import { useToast } from '@/components/sapio/toast';
 import { cn } from '@/lib/utils';
 import { hasOwnCommission, memberForRole } from '@/mock/account';
 import { tenantFixtures } from '@/mock/fixtures';
+import { resetMockData } from '@/mock/persist';
 import { canOpenPage } from '@/mock/permissions';
 import { fixtureBySlug, roleLabel, staffRoleOf, type StaffRole } from '@/mock/selection';
 import { PLAN_OVERRIDES, planOverrideOf } from '@/mock/subscription';
@@ -197,6 +198,13 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
       }}
       accountExtra={(kind) => (
         <>
+          <Link
+            href={`/mock/${tenantSlug}`}
+            className={cn('sp-menu__item', kind === 'list' && 'min-h-11')}
+            {...(kind === 'menu' ? { role: 'menuitem' } : {})}
+          >
+            Xem trang đặt lịch
+          </Link>
           <div className={kind === 'menu' ? 'sp-menu__label' : 'sp-menu__label mt-(--space-2)'}>
             Xem mock với vai trò
           </div>
@@ -279,6 +287,14 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
           >
             Danh sách màn hình mock
           </Link>
+          <button
+            type="button"
+            className={cn('sp-menu__item', kind === 'list' && 'min-h-11')}
+            {...(kind === 'menu' ? { role: 'menuitem' } : {})}
+            onClick={resetMockData}
+          >
+            Đặt lại dữ liệu mock
+          </button>
         </>
       )}
     >

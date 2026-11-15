@@ -19,17 +19,18 @@ export function MeShell({ tenantSlug, children }: { tenantSlug: string; children
   const { tenant, template } = fixture;
   const router = useRouter();
   const pathname = usePathname();
-  const { isLoggedIn } = useCustomerSession();
+  const { isLoggedIn, hydrated } = useCustomerSession();
   const base = `/mock/${tenantSlug}/me`;
   const subject = template.vocabulary.subject;
 
   // Sent to the login only when the page opens without a session: a page that logs out goes
   // wherever it likes.
-  const hadSession = useRef(isLoggedIn);
+  const hadSession = useRef(false);
   useEffect(() => {
+    if (!hydrated) return;
     if (isLoggedIn) hadSession.current = true;
     else if (!hadSession.current) router.replace(`/mock/${tenantSlug}/login`);
-  }, [isLoggedIn, router, tenantSlug]);
+  }, [hydrated, isLoggedIn, router, tenantSlug]);
 
   const tabs = [
     { path: '', label: 'Lịch hẹn' },

@@ -694,3 +694,31 @@ export const lockedStatuses = (
   locks: Record<string, unknown>,
 ): Record<string, Workspace['status']> =>
   Object.fromEntries(Object.keys(locks).map((id) => [id, 'locked' as const]));
+
+// ---------------------------------------------------------------------------------------------
+// Sample accounts of the sign-in page
+
+const ROLE_SHORT: Record<StaffRoleId, string> = {
+  owner: 'chủ',
+  manager: 'quản lý',
+  receptionist: 'lễ tân',
+  technician: 'thợ',
+};
+
+/** One line for the list of sample accounts: who, and what they are where, e.g. `lễ tân 3 cơ sở`. */
+export function sampleAccountLine(
+  account: Account,
+  members: readonly Member[],
+  workspaces: readonly Workspace[],
+): string {
+  const mine = members.filter((m) => m.accountId === account.id);
+  if (account.platformAdmin) return `${account.fullName} · quản trị nền tảng`;
+  if (mine.length === 0) return `${account.fullName} · chưa thuộc cơ sở nào`;
+  const roles = new Set(mine.map((m) => m.role));
+  const role = roles.size === 1 ? ROLE_SHORT[mine[0]!.role] : null;
+  if (mine.length === 1) {
+    const name = workspaces.find((w) => w.id === mine[0]!.workspaceId)?.name ?? '';
+    return `${account.fullName} · ${role} ${name}`;
+  }
+  return `${account.fullName} · ${role ? `${role} ` : ''}${mine.length} cơ sở`;
+}

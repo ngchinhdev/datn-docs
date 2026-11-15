@@ -6,10 +6,10 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from 'react';
+import { usePersistedState } from '@/components/mock/use-persisted-state';
 import { nextDraftId, useBookingDraft, type BookingDraft } from '@/components/mock/booking-draft';
 import { useScheduleStore } from '@/components/mock/schedule-store';
 import { useLiveFixture } from '@/components/mock/use-live-fixture';
@@ -95,7 +95,7 @@ type Draft = Omit<ChatMessage, 'id'>;
 /**
  * The chat of the customer page. It lives in the layout of the tenant, so the conversation stays
  * while the window opens and closes and while the customer moves between the shop page and the
- * booking page (BR-92). In memory: a reload starts a new chat.
+ * booking page (BR-92). The tab keeps the chat until it closes.
  */
 export function AssistantProvider({
   tenantSlug,
@@ -108,13 +108,15 @@ export function AssistantProvider({
   const store = useScheduleStore();
   const { setDraft } = useBookingDraft();
   const running = useMockNow();
-  const [skipped, setSkipped] = useState(0);
+  const key = `assistant:${tenantSlug}`;
+  const [skipped, setSkipped] = usePersistedState(`${key}:skipped`, 0);
   const now = addMinutes(running, skipped);
   const [open, setOpen] = useState(false);
-  const [holdOpen, setHoldOpen] = useState(true);
-  const [state, setState] = useState<AssistantState>(() => initialState(now));
-  const counter = useRef(0);
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [
+  const [holdOpen, setHoldOpen] = usePersistedState(`${key}:hold-open`, true);
+  const [state, setState] = usePersistedState<AssistantState>(`${key}:state`, () =>
+    initialState(now),
+  );
+  const [messages, setMessages] = usePersistedState<ChatMessage[]>(`${key}:messages`, () => [
     {
       id: 'm0',
       from: 'assistant',
@@ -125,14 +127,11 @@ export function AssistantProvider({
       at: now,
     },
   ]);
-  const [holdIds, setHoldIds] = useState<string[]>([]);
-  const [droppedIds, setDroppedIds] = useState<string[]>([]);
+  const [holdIds, setHoldIds] = usePersistedState<string[]>(`${key}:holds`, []);
+  const [droppedIds, setDroppedIds] = usePersistedState<string[]>(`${key}:dropped`, []);
 
   const append = useCallback((...added: Draft[]) => {
-    setMessages((cur) => [
-      ...cur,
-      ...added.map((m) => ({ ...m, id: `m${(counter.current += 1)}` })),
-    ]);
+    setMessages((cur) => [...cur, ...added.map((m, i) => ({ ...m, id: `m${cur.length + i}` }))]);
   }, []);
 
   const latestHoldId = holdIds.at(-1) ?? null;

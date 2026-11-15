@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { usePersistedState } from '@/components/mock/use-persisted-state';
 import {
   tenantFixtures,
   type Appointment,
@@ -136,13 +137,16 @@ function initialTenantData(slug: string): TenantScheduleData {
 }
 
 export function ScheduleRootProvider({ children }: { children: ReactNode }) {
-  const [tenants, setTenants] = useState<Record<string, TenantScheduleData>>(() => {
-    const init: Record<string, TenantScheduleData> = {};
-    for (const f of tenantFixtures) {
-      init[f.tenant.slug] = initialTenantData(f.tenant.slug);
-    }
-    return init;
-  });
+  const [tenants, setTenants] = usePersistedState<Record<string, TenantScheduleData>>(
+    'schedule',
+    () => {
+      const init: Record<string, TenantScheduleData> = {};
+      for (const f of tenantFixtures) {
+        init[f.tenant.slug] = initialTenantData(f.tenant.slug);
+      }
+      return init;
+    },
+  );
 
   const updateTenant = useCallback(
     (tenantSlug: string, updater: (prev: TenantScheduleData) => TenantScheduleData) => {

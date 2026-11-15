@@ -1,7 +1,8 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { usePersistedState } from '@/components/mock/use-persisted-state';
 import { useAccountStore } from '@/components/mock/account-store';
 import {
   SEED_LOG,
@@ -52,10 +53,10 @@ const PlatformContext = createContext<PlatformStore | null>(null);
 /**
  * The platform side of the sample data, above every page of `/mock`: the plans and prices, what each
  * tenant holds, the admin's log. The tenant pages read the same plans and dates the admin edits.
- * Nothing is saved: a reload starts from the sample data.
+ * The tab keeps it until it closes.
  */
 export function PlatformProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<PlatformData>(INITIAL);
+  const [data, setData] = usePersistedState<PlatformData>('platform', INITIAL);
   const patch = useCallback(
     (fn: (data: PlatformData) => Partial<PlatformData>) => setData((d) => ({ ...d, ...fn(d) })),
     [],

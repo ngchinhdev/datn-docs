@@ -1,8 +1,9 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { usePlatform } from '@/components/mock/platform-store';
+import { useTenantRoot } from '@/components/mock/tenant-root';
 import {
   canBook,
   can,
@@ -39,30 +40,40 @@ interface SubscriptionStore {
 const SubscriptionContext = createContext<SubscriptionStore | null>(null);
 
 function Provider({
+  tenantSlug,
+  scenario,
   initial,
   initialPayments,
   catalog,
   branches,
   children,
 }: {
+  tenantSlug: string;
+  scenario: string;
   initial: Subscription;
   initialPayments: Payment[];
   catalog: Catalog;
   branches: number;
   children: ReactNode;
 }) {
-  const [subscription, setSubscription] = useState(initial);
-  const [payments, setPayments] = useState(initialPayments);
+  const { plans, setPlan } = useTenantRoot();
+  // What the root holds counts only while it belongs to the scenario on screen.
+  const held = plans[tenantSlug]?.key === scenario ? plans[tenantSlug] : undefined;
+  const subscription = held?.subscription ?? initial;
+  const payments = held?.payments ?? initialPayments;
 
   const buy = useCallback(
     (p: Purchase) => {
       const result = purchase(subscription, p, MOCK_TODAY, catalog);
-      setSubscription(result.subscription);
       // Newest first, as a history reads.
-      setPayments((list) => [result.payment, ...list]);
+      setPlan(tenantSlug, {
+        key: scenario,
+        subscription: result.subscription,
+        payments: [result.payment, ...payments],
+      });
       return result.subscription;
     },
-    [subscription, catalog],
+    [subscription, payments, catalog, setPlan, tenantSlug, scenario],
   );
 
   const value = useMemo<SubscriptionStore>(() => {
@@ -85,8 +96,8 @@ function Provider({
 
 /**
  * The plan of the tenant being viewed: what the platform holds for it, or what `?plan=` and
- * `?periodEnd=` say instead (BR-80 to BR-87). The state lives for the page: a simulated payment
- * changes every screen at once, a new `?plan=` or a date the platform moved starts over.
+ * `?periodEnd=` say instead (BR-80 to BR-87). A simulated payment changes every
+ * screen at once; a new `?plan=` or a date the platform moved starts over.
  */
 export function SubscriptionProvider({
   tenantSlug,
@@ -107,8 +118,9 @@ export function SubscriptionProvider({
   const heldPayments = overridden ? undefined : paymentsBySlug(tenantSlug);
   return (
     <Provider
+      tenantSlug={tenantSlug}
       // A different override, or a date the platform moved, is a different scenario.
-      key={`${tenantSlug}|${plan}|${periodEnd}|${JSON.stringify(initial)}`}
+      scenario={`${plan}|${periodEnd}|${JSON.stringify(initial)}`}
       initial={initial}
       initialPayments={heldPayments ?? seedPayments(initial)}
       catalog={catalog}

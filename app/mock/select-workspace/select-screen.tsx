@@ -35,12 +35,13 @@ const NOTE: Record<DoorEntry, string | null> = {
 export function SelectScreen() {
   const router = useRouter();
   const toast = useToast();
-  const { now, members, invitations, signedIn, lastWorkspace, locks, patch } = useAccountStore();
+  const { now, members, invitations, signedIn, lastWorkspace, locks, patch, hydrated } =
+    useAccountStore();
   const { accept, decline } = useInvitations();
 
   useEffect(() => {
-    if (!signedIn) router.replace('/mock/login');
-  }, [signedIn, router]);
+    if (hydrated && !signedIn) router.replace('/mock/login');
+  }, [hydrated, signedIn, router]);
   if (!signedIn) return null;
 
   const doors = doorsOf(signedIn.id, members, workspaces, lockedStatuses(locks));

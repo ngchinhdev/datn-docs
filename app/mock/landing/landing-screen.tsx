@@ -44,7 +44,9 @@ export function LandingScreen() {
   return (
     <div className="sp-auth">
       <header className="sp-auth__top max-md:flex-wrap! md:px-20! md:py-5!">
-        <span className="sp-brand__name text-xl">Sapio</span>
+        <Link href="/mock/landing" className="sp-brand__name text-xl no-underline">
+          Sapio
+        </Link>
         <nav
           aria-label="Trang giới thiệu"
           className="flex gap-7 text-[15px] leading-[22px] font-medium max-md:order-3 max-md:w-full"
@@ -219,6 +221,7 @@ export function LandingScreen() {
           <a href="#">Điều khoản</a>
           <a href="#">Quyền riêng tư</a>
           <Link href="/mock/login">Đăng nhập</Link>
+          <Link href="/mock">Xem mock</Link>
         </span>
       </footer>
     </div>
