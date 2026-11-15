@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { usePersistedState } from '@/components/mock/use-persisted-state';
 import type { AccountMail } from '@/mock/account-mail';
 import type { LoginRecords, ResetToken } from '@/mock/account';
 import {
@@ -66,16 +67,18 @@ interface AccountStore extends AccountData {
   advance: (minutes: number) => void;
   /** The signed-in account, or `undefined`. */
   signedIn: Account | undefined;
+  /** The saved data has been read; until then the sample data stands in (see `usePersistedState`). */
+  hydrated: boolean;
 }
 
 const AccountContext = createContext<AccountStore | null>(null);
 
 /**
  * Accounts of every tenant, above the pages of `/mock`, so the sign-in pages, the invitation pages
- * and the staff screen share them. Nothing is saved: a reload starts from the sample data.
+ * and the staff screen share them. The tab keeps it until it closes.
  */
 export function AccountProvider({ children }: { children: ReactNode }) {
-  const [data, setData] = useState<AccountData>(INITIAL);
+  const [data, setData, hydrated] = usePersistedState<AccountData>('account', INITIAL);
   const patch = useCallback(
     (fn: (data: AccountData) => Partial<AccountData>) => setData((d) => ({ ...d, ...fn(d) })),
     [],
@@ -91,8 +94,9 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       patch,
       advance,
       signedIn: data.accounts.find((a) => a.id === data.session?.accountId),
+      hydrated,
     }),
-    [data, patch, advance],
+    [data, patch, advance, hydrated],
   );
   return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;
 }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAccountStore } from '@/components/mock/account-store';
 import { Button } from '@/components/sapio/button';
 import { formatMoment } from '@/mock/account-mail';
+import { resetMockData } from '@/mock/persist';
 
 /** Mock-only controls of the account pages: the clock, which stands still, and the sample mailbox. */
 export function AccountTools() {
@@ -20,6 +21,9 @@ export function AccountTools() {
       <Link href="/mock/mailbox" className="font-medium">
         Hộp thư mẫu ({mails.length})
       </Link>
+      <Button size="sm" onClick={resetMockData}>
+        Đặt lại dữ liệu mock
+      </Button>
     </aside>
   );
 }

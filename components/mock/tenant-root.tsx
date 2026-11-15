@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { usePersistedState } from '@/components/mock/use-persisted-state';
 import type { Service, Staff } from '@/mock/fixtures';
 import type { Payment, Subscription } from '@/mock/subscription';
 
@@ -28,9 +29,12 @@ const TenantRootContext = createContext<TenantRoot | null>(null);
  * customer site read one copy of each tenant.
  */
 export function TenantRootProvider({ children }: { children: ReactNode }) {
-  const [staff, setStaffMap] = useState<Record<string, Staff[]>>({});
-  const [services, setServicesMap] = useState<Record<string, Service[]>>({});
-  const [plans, setPlans] = useState<Record<string, HeldPlan>>({});
+  const [staff, setStaffMap] = usePersistedState<Record<string, Staff[]>>('tenant-staff', {});
+  const [services, setServicesMap] = usePersistedState<Record<string, Service[]>>(
+    'tenant-services',
+    {},
+  );
+  const [plans, setPlans] = usePersistedState<Record<string, HeldPlan>>('tenant-plans', {});
 
   const setStaff = useCallback(
     (slug: string, list: Staff[]) => setStaffMap((m) => ({ ...m, [slug]: list })),

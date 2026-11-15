@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { usePersistedState } from './use-persisted-state';
 import { useScheduleStore } from './schedule-store';
 import type { Customer, CustomerPackage, CustomerWallet, ServedSubject } from '@/mock/fixtures';
 import { walletView } from '@/mock/wallet-view';
@@ -9,6 +10,8 @@ export interface CustomerSessionValue {
   customer: Customer | null;
   customerId: string | null;
   isLoggedIn: boolean;
+  /** The saved session has been read; until then the sample customer stands in. */
+  hydrated: boolean;
   /** The email they logged in with; a customer record may not exist yet (BR-16). */
   email: string | null;
   subjects: ServedSubject[];
@@ -46,8 +49,17 @@ export function CustomerSessionProvider({
     return customers[0]?.id ?? null;
   }, [tenantSlug, customers]);
 
-  const [currentId, setCurrentId] = useState<string | null>(defaultCustomerId);
-  const [guestEmail, setGuestEmail] = useState<string | null>(null);
+  const [who, setWho, hydrated] = usePersistedState<{
+    id: string | null;
+    guestEmail: string | null;
+  }>(`customer:${tenantSlug}`, { id: defaultCustomerId, guestEmail: null });
+  const currentId = who.id;
+  const guestEmail = who.guestEmail;
+  const setCurrentId = useCallback((id: string | null) => setWho((w) => ({ ...w, id })), [setWho]);
+  const setGuestEmail = useCallback(
+    (guestEmail: string | null) => setWho((w) => ({ ...w, guestEmail })),
+    [setWho],
+  );
 
   const customer = useMemo(() => {
     if (!currentId) return null;
@@ -114,6 +126,7 @@ export function CustomerSessionProvider({
       customer,
       customerId: currentId,
       isLoggedIn: !!customer || guestEmail !== null,
+      hydrated,
       email: customer?.email ?? guestEmail,
       subjects,
       packages,
@@ -128,6 +141,7 @@ export function CustomerSessionProvider({
       customer,
       currentId,
       guestEmail,
+      hydrated,
       subjects,
       packages,
       wallet,
