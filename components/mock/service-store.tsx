@@ -1,11 +1,12 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
+import { useTenantRoot } from '@/components/mock/tenant-root';
 import { tenantFixtures, type Service } from '@/mock/fixtures';
 
 interface ServiceStore {
   services: Service[];
-  /** Replaces one service; lives in page state, nothing is saved. */
+  /** Replaces one service. */
   save: (service: Service) => void;
 }
 
@@ -20,10 +21,17 @@ export function ServiceStoreProvider({
   children: ReactNode;
 }) {
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
-  const [services, setServices] = useState(fixture.services);
-  const save = useCallback((service: Service) => {
-    setServices((list) => list.map((s) => (s.id === service.id ? service : s)));
-  }, []);
+  const { services: edited, setServices } = useTenantRoot();
+  const services = edited[tenantSlug] ?? fixture.services;
+  const save = useCallback(
+    (service: Service) => {
+      setServices(
+        tenantSlug,
+        services.map((s) => (s.id === service.id ? service : s)),
+      );
+    },
+    [setServices, services, tenantSlug],
+  );
   const value = useMemo(() => ({ services, save }), [services, save]);
   return <ServiceContext.Provider value={value}>{children}</ServiceContext.Provider>;
 }

@@ -1,12 +1,13 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { useAccountStore } from '@/components/mock/account-store';
+import { useTenantRoot } from '@/components/mock/tenant-root';
 import { tenantFixtures, type Staff } from '@/mock/fixtures';
 
 interface StaffStore {
   staff: Staff[];
-  /** Replaces one member of staff; lives in page state, nothing is saved. */
+  /** Replaces one member of staff. */
   save: (member: Staff) => void;
 }
 
@@ -22,10 +23,24 @@ export function StaffStoreProvider({
 }) {
   const fixture = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
   const { joiners } = useAccountStore();
-  const [staff, setStaff] = useState(() => [...fixture.staff, ...(joiners[tenantSlug] ?? [])]);
-  const save = useCallback((member: Staff) => {
-    setStaff((list) => list.map((s) => (s.resourceId === member.resourceId ? member : s)));
-  }, []);
+  const root = useTenantRoot();
+  const edited = root.staff[tenantSlug];
+  const staff = useMemo(() => {
+    const joined = joiners[tenantSlug] ?? [];
+    if (!edited) return [...fixture.staff, ...joined];
+    // Someone who joined after the last edit still shows up.
+    return [...edited, ...joined.filter((j) => !edited.some((s) => s.resourceId === j.resourceId))];
+  }, [edited, fixture, joiners, tenantSlug]);
+  const { setStaff } = root;
+  const save = useCallback(
+    (member: Staff) => {
+      setStaff(
+        tenantSlug,
+        staff.map((s) => (s.resourceId === member.resourceId ? member : s)),
+      );
+    },
+    [setStaff, staff, tenantSlug],
+  );
   const value = useMemo(() => ({ staff, save }), [staff, save]);
   return <StaffContext.Provider value={value}>{children}</StaffContext.Provider>;
 }
