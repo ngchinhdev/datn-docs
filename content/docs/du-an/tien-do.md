@@ -7,6 +7,26 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 15/11/2026: mock đi liền một luồng (Bước 19)
+
+- **Đã làm** (nhánh `feat/mock-flow`, mỗi mục 19a–19g một commit, không thêm màn hình):
+  - 19a: `TenantRootProvider` giữ nhân sự, dịch vụ, gói của mọi cơ sở theo slug ở `app/mock/layout.tsx`; sửa giá ở quản trị thì trang đặt lịch thấy giá mới. Chữ ký `useStaffStore`, `useServiceStore`, `useSubscription` giữ nguyên.
+  - 19b: `mock/persist.ts` (`serialize`/`deserialize` có `bigint`, `Date`, `Set`, `Map`) và `usePersistedState`: các store ở tầng gốc lưu vào `sessionStorage` dưới khóa `sapio-mock-v1`, đọc sau khi gắn component, mọi lần đọc ghi bọc `try/catch`. Nút "Đặt lại dữ liệu mock" ở menu tài khoản và `AccountTools`.
+  - 19c: `/mock` có ba cửa (Khách, Nhân sự, Quản trị nền tảng), dòng tới trang giới thiệu và nút đặt lại; danh sách màn hình nằm dưới "Mở thẳng từng màn hình".
+  - 19d: nút "Tài khoản mẫu" ở `/mock/login`, bấm một dòng thì điền email và mật khẩu mẫu, người dùng tự bấm "Đăng nhập".
+  - 19e: tài khoản quản trị `quantri@sapio.vn` (cờ `platformAdmin`, không thuộc cơ sở nào) vào thẳng `/mock/admin`; "Đăng xuất" ở khu quản trị xóa phiên và về `/mock/login`.
+  - 19f: "Xem trang đặt lịch" ở menu tài khoản khu nhân sự; chân trang khách có "Nhân viên của tiệm? Đăng nhập" và link tới hộp thư khách `/emails`; logo Sapio và "Xem mock" ở trang giới thiệu.
+  - 19g: `pnpm check:flow` (23 ca); `check:availability`, `check:shop`, `check:account`, `check:platform`, `check:assistant`, `check:flow`, `typecheck`, `build`, `prettier --check` đều xanh.
+- **Tự quyết:**
+  - `useAccountStore` và `useCustomerSession` có thêm trường `hydrated`; trang chọn cơ sở và khu "Tài khoản" của khách chỉ chuyển về đăng nhập sau khi đã đọc xong dữ liệu lưu, nếu không F5 sẽ bị đẩy ra ngoài.
+  - `nextDraftId` lưu số thứ tự vào `sessionStorage` để id lịch giữ chỗ không trùng sau khi tải lại.
+  - Đồng hồ chạy (`useMockNow`) bắt đầu lại từ `MOCK_NOW` sau F5; phần được lưu là số phút "Cho thời gian trôi" và "Tua". Lịch giữ chỗ còn hạn trước F5 còn hạn trở lại.
+  - Khung chat mở hay đóng không lưu.
+  - `TemplateStoreProvider` chuyển từ layout `/mock/admin` lên layout `/mock`.
+  - Khóa bộ đếm đăng nhập sai (BR-76) nằm trong store tài khoản nên cũng được lưu: nhập sai 5 lần rồi F5 vẫn bị khóa đến hết 15 phút trên đồng hồ mock.
+  - Tất cả màn khác đã có đường vào từ menu, từ màn liền trước hoặc từ thư mẫu; chỉ hộp thư khách `/emails` chưa có link nên đã nối ở chân trang khách.
+- **Tiếp theo:** người dùng kiểm "Xong khi" của Bước 19 và review PR.
+
 ### 14/11/2026 (đêm muộn): mock trợ lý đặt lịch (Bước 18, đợt H)
 
 - **Đã làm** (nhánh `feat/mock-assistant`, mỗi mục 18a–18e một commit):
