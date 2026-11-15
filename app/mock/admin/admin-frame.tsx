@@ -2,11 +2,13 @@
 
 import { Building2, Layers, LayoutDashboard, ScrollText, Tag, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { useAccountStore } from '@/components/mock/account-store';
 import { AppShell, type ShellNavItem } from '@/components/sapio/app-shell';
 import { useToast } from '@/components/sapio/toast';
 import { tenantFixtures } from '@/mock/fixtures';
+import { initialsOfName } from '@/mock/people-format';
 
 interface AdminEntry {
   id: string;
@@ -27,6 +29,9 @@ const ENTRIES: AdminEntry[] = [
 export function AdminFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const toast = useToast();
+  const router = useRouter();
+  const { signedIn, patch } = useAccountStore();
+  const person = signedIn?.fullName ?? 'Quản trị Sapio';
   const isCurrent = (path: string) =>
     path === '/mock/admin'
       ? pathname === path
@@ -51,9 +56,12 @@ export function AdminFrame({ children }: { children: ReactNode }) {
       newWorkspaceHref="/mock/signup"
       items={items}
       tabs={tabs}
-      account={{ name: 'Chính Nguyễn', initials: 'CN', roleLabel: 'Quản trị nền tảng' }}
+      account={{ name: person, initials: initialsOfName(person), roleLabel: 'Quản trị nền tảng' }}
       onProfile={() => toast({ text: 'Hồ sơ cá nhân: chưa có trong mock.' })}
-      onSignOut={() => toast({ text: 'Đăng xuất: chưa có trong mock.' })}
+      onSignOut={() => {
+        patch(() => ({ session: null }));
+        router.push('/mock/login');
+      }}
       accountExtra={(kind) => (
         <>
           <div className={kind === 'menu' ? 'sp-menu__label' : 'sp-menu__label mt-(--space-2)'}>

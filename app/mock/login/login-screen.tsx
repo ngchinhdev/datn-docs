@@ -68,6 +68,10 @@ export function LoginScreen() {
 
     const { account } = outcome;
     patch(() => ({ session: { accountId: account.id, persistent } }));
+    if (account.platformAdmin) {
+      router.push('/mock/admin');
+      return;
+    }
     const doors = doorsOf(account.id, members, workspaces, lockedStatuses(store.locks));
     const last = store.lastWorkspace[account.id] ?? null;
     const destination = afterLogin(doors, last);

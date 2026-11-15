@@ -712,6 +712,7 @@ export function sampleAccountLine(
   workspaces: readonly Workspace[],
 ): string {
   const mine = members.filter((m) => m.accountId === account.id);
+  if (account.platformAdmin) return `${account.fullName} · quản trị nền tảng`;
   if (mine.length === 0) return `${account.fullName} · chưa thuộc cơ sở nào`;
   const roles = new Set(mine.map((m) => m.role));
   const role = roles.size === 1 ? ROLE_SHORT[mine[0]!.role] : null;

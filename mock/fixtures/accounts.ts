@@ -17,6 +17,8 @@ export interface Account {
   email: string;
   fullName: string;
   password: string;
+  /** Works for the platform, not for a tenant: signs in to the administration, no tenant to pick. */
+  platformAdmin?: boolean;
 }
 
 /** A tenant as the account pages list it. Tenants without a fixture have no screens behind them. */
@@ -117,6 +119,13 @@ export const accounts: Account[] = [
     email: 'chinh@tocmay.vn',
     fullName: 'Chính Nguyễn',
     password: SAMPLE_PASSWORD,
+  },
+  {
+    id: 'acc-quantri',
+    email: PLATFORM_ADMIN_EMAIL,
+    fullName: 'Quản trị Sapio',
+    password: SAMPLE_PASSWORD,
+    platformAdmin: true,
   },
   { id: 'acc-mai', email: 'mai@tocmay.vn', fullName: 'Trần Thị Mai', password: SAMPLE_PASSWORD },
   { id: 'acc-lan', email: 'lan@tocmay.vn', fullName: 'Phạm Ngọc Lan', password: SAMPLE_PASSWORD },
