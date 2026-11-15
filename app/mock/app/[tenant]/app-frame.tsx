@@ -198,6 +198,13 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
       }}
       accountExtra={(kind) => (
         <>
+          <Link
+            href={`/mock/${tenantSlug}`}
+            className={cn('sp-menu__item', kind === 'list' && 'min-h-11')}
+            {...(kind === 'menu' ? { role: 'menuitem' } : {})}
+          >
+            Xem trang đặt lịch
+          </Link>
           <div className={kind === 'menu' ? 'sp-menu__label' : 'sp-menu__label mt-(--space-2)'}>
             Xem mock với vai trò
           </div>

@@ -506,6 +506,13 @@ function TenantContent({ tenantSlug }: { tenantSlug: string }) {
         </aside>
       </div>
 
+      <footer className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 pt-6 pb-28 text-[13px] leading-[18px] text-(--ink-muted) min-[900px]:px-10 min-[900px]:pb-8">
+        <span>
+          Nhân viên của tiệm? <Link href="/mock/login">Đăng nhập</Link>
+        </span>
+        <Link href={`/mock/${fixture.tenant.slug}/emails`}>Email khách nhận</Link>
+      </footer>
+
       {/* Mobile Sticky Bottom Bar (< 900px) */}
       <div className="min-[900px]:hidden fixed left-0 right-0 bottom-0 z-20 flex items-center gap-3 p-3 px-4 pb-5 bg-(--surface-raised) shadow-[0_-1px_0_var(--line)]">
         <div className="flex-1 min-w-0 flex flex-col">
