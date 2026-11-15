@@ -11,6 +11,8 @@ Quyết định kỹ thuật chi tiết nằm ở [Quyết định kỹ thuật]
 
 ## D-01. Đề tài: nền tảng đặt lịch đa tài nguyên cho cơ sở dịch vụ theo lịch hẹn
 
+> **Thay thế một phần bởi [D-16](#d-16-thu-hẹp-phạm-vi-chỉ-cơ-sở-làm-đẹp-bỏ-đa-ngành-và-spa-thú-cưng)** (15/11/2026): chỉ làm cho cơ sở làm đẹp, bỏ đa ngành và spa thú cưng.
+
 - **Ngày:** 28/10/2026, chốt đề cương 03/11/2026.
 - **Bối cảnh:** sinh viên làm một mình, chuyên JavaScript/TypeScript (web), muốn đề tài có nghiệp vụ phức tạp thật, có người dùng thật, tự triển khai được mà không cần cơ quan nhà nước hay trường học phê duyệt.
 - **Các hướng đã cân nhắc và loại:**
@@ -28,6 +30,8 @@ Quyết định kỹ thuật chi tiết nằm ở [Quyết định kỹ thuật]
 - **Nguyên tắc rút ra:** "đã có sản phẩm tương tự" **không phải lý do để đổi đề tài**; đồ án được chấm ở độ sâu giải quyết vấn đề và bằng chứng thực nghiệm.
 
 ## D-02. Ngành chính salon, tóc, nail, spa; ngành chứng minh là spa thú cưng; bỏ nha khoa
+
+> **Thay thế một phần bởi [D-16](#d-16-thu-hẹp-phạm-vi-chỉ-cơ-sở-làm-đẹp-bỏ-đa-ngành-và-spa-thú-cưng)** (15/11/2026): chỉ làm cho cơ sở làm đẹp, bỏ đa ngành và spa thú cưng.
 
 - Nha khoa vướng hồ sơ bệnh án điện tử theo quy định của Bộ Y tế, dữ liệu sức khỏe nhạy cảm, sơ đồ răng: riêng nó đã là một đồ án khác.
 - Spa thú cưng được chọn làm ngành thứ hai vì có đoạn "bận – rảnh – bận" (lồng sấy), nhiều loại tài nguyên, và buộc mô hình phải có khái niệm **đối tượng được phục vụ** (thú cưng, không phải khách).
@@ -147,4 +151,16 @@ Chốt ngày 08/11/2026 khi thiết kế MH-02 Đăng ký cơ sở.
 - **Vì sao trong dùng thử không cho đặt lịch:** không có lịch hẹn nào treo khi hết hạn, và tiệm ảo không thu được tiền của khách. Nhờ vậy không cần duyệt tay.
 - **Vì sao hai gói:** giống sản phẩm thật. Kiến trúc "gói là dữ liệu, code hỏi qua `can()`" (T-17) cùng tinh thần với gói cấu hình ngành. Chi phí thêm khoảng 3–5 ngày, nằm ở giai đoạn 4.
 - **Demo khi bảo vệ:** cơ sở chính dùng gói Chuyên nghiệp; thêm một cơ sở gói Cơ bản để cho thấy chatbot bị khóa đúng cách; dùng `Clock` giả để tua tới lúc hết dùng thử.
+
+## D-16. Thu hẹp phạm vi: chỉ cơ sở làm đẹp, bỏ đa ngành và spa thú cưng
+
+Chốt ngày 15/11/2026 theo góp ý đề cương của cô.
+
+- **Bối cảnh:** cô góp ý "Nên nói gọn lại để thu hẹp lại 1 chút. Ko nên mở rộng quá sẽ khó đối với 1 đề tài ĐATN (ví dụ phòng khám hoặc spa...)". Đề cương cũ làm cho "các cơ sở dịch vụ theo lịch hẹn" và dùng spa thú cưng để chứng minh mở rộng sang ngành khác bằng cấu hình.
+- **Chọn:**
+  - Đề tài chỉ làm cho **cơ sở làm đẹp** (salon tóc, spa). Hai loại này cùng nghiệp vụ, chỉ khác danh sách dịch vụ mỗi tiệm tự nhập, nên không cần cấu hình riêng.
+  - Bỏ mục tiêu "tổng quát theo ngành bằng cấu hình", bỏ spa thú cưng, bỏ "đối tượng được phục vụ" (thú cưng của khách) và bước chọn ngành khi đăng ký.
+  - Giữ nguyên trọng tâm: đặt lịch đa tài nguyên, chống trùng lịch, SaaS nhiều cơ sở cô lập dữ liệu, thanh toán, ví, gói liệu trình, hoa hồng, chatbot.
+- **Không chọn phòng khám:** dính hồ sơ bệnh án, dữ liệu y tế; ít loại tài nguyên hơn spa nên yếu phần "đa tài nguyên".
+- **Việc kéo theo (chưa làm):** sửa roadmap, `CLAUDE.md`, các BR/T-xx nhắc đến `industryTemplate` và spa thú cưng; mock bỏ tenant Pawpaw, có thể thay bằng một tiệm spa mẫu. Ghi chú "lõi không biết ngành" (quy tắc 5) không còn bắt buộc.
 
