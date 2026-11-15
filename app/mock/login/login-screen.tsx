@@ -176,7 +176,13 @@ export function LoginScreen() {
           Chưa có cơ sở trên Sapio? <Link href="/mock/signup">Đăng ký, dùng thử 7 ngày</Link>
         </p>
       </AuthPage>
-      <AccountTools />
+      <AccountTools
+        onPickAccount={(account) => {
+          setEmail(account.email);
+          setPassword(account.password);
+          setFailed(false);
+        }}
+      />
     </>
   );
 }
