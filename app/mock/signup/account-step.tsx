@@ -144,8 +144,15 @@ export function AccountStep({
               onChange={(e) => update({ terms: e.target.checked })}
             />
             <span>
-              {text.termsBefore} <a href="#">{text.terms}</a> {text.termsAnd}{' '}
-              <a href="#">{text.privacy}</a> {text.termsAfter}
+              {text.termsBefore}{' '}
+              <a href="#" className="sp-link">
+                {text.terms}
+              </a>{' '}
+              {text.termsAnd}{' '}
+              <a href="#" className="sp-link">
+                {text.privacy}
+              </a>{' '}
+              {text.termsAfter}
             </span>
           </label>
           {shownError('terms') && (

@@ -930,8 +930,8 @@ dialog.sp-dialog::backdrop,
 .sp-auth__card { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-6); border-radius: var(--radius-lg); background: var(--surface-raised); box-shadow: 0 0 0 1px var(--line), var(--shadow-card); }
 .sp-auth__actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); }
 .sp-auth__actions .sp-btn { height: 48px; }
-.sp-auth a:not(.sp-btn) { color: var(--brand); font-weight: 600; text-decoration: none; }
-.sp-auth a:not(.sp-btn):hover { text-decoration: underline; }
+.sp-link { color: var(--brand); font-weight: 600; text-decoration: none; }
+.sp-link:hover { text-decoration: underline; }
 @media (max-width: 767px) {
   .sp-auth__top { padding: var(--space-3) var(--space-4); }
   .sp-auth__title { font-size: 24px; line-height: 32px; }

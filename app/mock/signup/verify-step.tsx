@@ -77,7 +77,9 @@ export function VerifyStep({
       lead={
         <>
           {text.sentTo} <strong className="font-semibold text-(--ink)">{draft.email}</strong>.{' '}
-          <Link href="/mock/signup?step=account">{text.editEmail}</Link>
+          <Link href="/mock/signup?step=account" className="sp-link">
+            {text.editEmail}
+          </Link>
         </>
       }
       top={

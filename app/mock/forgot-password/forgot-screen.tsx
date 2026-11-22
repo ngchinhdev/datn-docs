@@ -69,7 +69,7 @@ export function ForgotScreen() {
       <AuthPage
         aside="forgot"
         link={
-          <Link href="/mock/login" className="px-3 py-2.5 text-sm font-semibold no-underline">
+          <Link href="/mock/login" className="sp-link px-3 py-2.5 text-sm">
             {t.common.login}
           </Link>
         }
@@ -94,7 +94,7 @@ export function ForgotScreen() {
             <Notice tone="info" role="status" icon={<Mail size={18} aria-hidden="true" />}>
               {t.forgot.sentBefore} <strong>{sentTo}</strong> {t.forgot.sentAfter}{' '}
               <strong>{t.forgot.minutes(RESET_MINUTES)}</strong> {t.forgot.sentEnd}{' '}
-              <Link href="/mock/mailbox" className="font-medium">
+              <Link href="/mock/mailbox" className="sp-link">
                 {t.forgot.mailbox}
               </Link>
             </Notice>
@@ -109,7 +109,7 @@ export function ForgotScreen() {
             </Button>
           )}
         </form>
-        <Link href="/mock/login" className="self-center text-sm font-medium">
+        <Link href="/mock/login" className="sp-link self-center text-sm">
           {t.forgot.back}
         </Link>
       </AuthPage>

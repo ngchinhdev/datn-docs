@@ -297,7 +297,7 @@ function LiveInvite({
         {!isNew && !alreadyIn && (
           <Link
             href={`/mock/forgot-password?email=${encodeURIComponent(invitation.email)}`}
-            className="self-center text-sm font-medium"
+            className="sp-link self-center text-sm"
           >
             {t.common.forgot}
           </Link>

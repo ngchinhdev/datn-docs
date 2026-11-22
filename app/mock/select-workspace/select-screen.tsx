@@ -118,7 +118,7 @@ export function SelectScreen() {
               </>
             );
             const className =
-              'flex items-center gap-3.5 rounded-[14px] bg-(--fill-tonal) px-4 py-3.5 text-left font-normal! text-(--ink)! no-underline hover:bg-(--surface-hover)';
+              'flex items-center gap-3.5 rounded-[14px] bg-(--fill-tonal) px-4 py-3.5 text-left text-(--ink) no-underline hover:bg-(--surface-hover)';
             return (
               <li key={workspace.id}>
                 {href ? (
@@ -193,8 +193,15 @@ export function SelectScreen() {
           </section>
         )}
         <p className="m-0 text-center text-sm text-(--ink-muted)">
-          <Link href="/mock/signup">{t.select.own}</Link> ·{' '}
-          <Link href="/mock/login" onClick={() => patch(() => ({ session: null }))}>
+          <Link href="/mock/signup" className="sp-link">
+            {t.select.own}
+          </Link>{' '}
+          ·{' '}
+          <Link
+            href="/mock/login"
+            className="sp-link"
+            onClick={() => patch(() => ({ session: null }))}
+          >
             {t.common.signOut}
           </Link>
         </p>

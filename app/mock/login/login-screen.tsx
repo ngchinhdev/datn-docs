@@ -118,10 +118,7 @@ export function LoginScreen({ door = 'staff' }: { door?: LoginDoor }) {
         aside={isAdmin ? 'admin' : 'login'}
         link={
           isAdmin ? undefined : (
-            <Link
-              href="/mock/signup"
-              className="px-3 py-2.5 text-sm font-semibold no-underline max-[899px]:hidden"
-            >
+            <Link href="/mock/signup" className="sp-link px-3 py-2.5 text-sm max-[899px]:hidden">
               {t.login.signupTop}
             </Link>
           )
@@ -159,7 +156,13 @@ export function LoginScreen({ door = 'staff' }: { door?: LoginDoor }) {
             onChange={setPassword}
             autoComplete="current-password"
             error={errorText}
-            labelEnd={isAdmin ? undefined : <Link href={forgotHref}>{t.common.forgot}</Link>}
+            labelEnd={
+              isAdmin ? undefined : (
+                <Link href={forgotHref} className="sp-link">
+                  {t.common.forgot}
+                </Link>
+              )
+            }
           />
           {!isAdmin && (
             <label className="sp-check">
@@ -193,7 +196,10 @@ export function LoginScreen({ door = 'staff' }: { door?: LoginDoor }) {
               {t.login.guestNote}
             </p>
             <p className="m-0 text-center text-sm text-(--ink-muted)">
-              {t.login.noAccount} <Link href="/mock/signup">{t.login.noAccountLink}</Link>
+              {t.login.noAccount}{' '}
+              <Link href="/mock/signup" className="sp-link">
+                {t.login.noAccountLink}
+              </Link>
             </p>
           </>
         )}

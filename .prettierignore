@@ -1,2 +1,3 @@
 # Copied verbatim from design/sapio.
 app/sapio/
+content/**/*.md
