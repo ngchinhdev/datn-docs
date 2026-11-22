@@ -118,7 +118,7 @@ export function SelectScreen() {
               </>
             );
             const className =
-              'sp-choice flex flex-row items-center justify-start gap-3.5 px-4 py-3.5 text-left no-underline';
+              'flex items-center gap-3.5 rounded-[14px] bg-(--fill-tonal) px-4 py-3.5 text-left font-normal! text-(--ink)! no-underline hover:bg-(--surface-hover)';
             return (
               <li key={workspace.id}>
                 {href ? (

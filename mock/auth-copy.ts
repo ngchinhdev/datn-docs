@@ -121,7 +121,6 @@ const vi = {
   signup: {
     steps: ['Tài khoản', 'Xác minh email', 'Thông tin cơ sở'],
     stepsLabel: 'Các bước đăng ký',
-    stepOf: (current: number, total: number, name: string) => `Bước ${current}/${total} · ${name}`,
     account: {
       title: 'Tạo tài khoản chủ cơ sở',
       lead: 'Dùng tài khoản này để quản lý lịch, nhân viên và thu tiền.',
@@ -397,7 +396,6 @@ const en: AuthCopy = {
   signup: {
     steps: ['Account', 'Verify email', 'Business details'],
     stepsLabel: 'Sign-up steps',
-    stepOf: (current, total, name) => `Step ${current}/${total} · ${name}`,
     account: {
       title: 'Create the owner account',
       lead: 'You use this account to manage the calendar, staff and payments.',

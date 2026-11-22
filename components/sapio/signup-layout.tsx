@@ -133,34 +133,38 @@ export function AuthTop({ children }: { children?: ReactNode }) {
   );
 }
 
-/** Five bars and, on phones, one line of text instead of the labels. */
+/** The steps as numbered pills; the current and finished ones are brand-colored. */
 export function SignupSteps({ current }: { current: number }) {
   const { t } = useAuthText();
-  const steps = t.signup.steps;
-  // Past the last step (the page that follows sign-up) every step shows as done.
-  const shown = Math.min(current, steps.length);
-  const name = steps[shown - 1]!;
   return (
-    <div className="flex flex-col gap-(--space-2)">
-      <span className="sp-steps__caption">{t.signup.stepOf(shown, steps.length, name)}</span>
-      <ol className="sp-steps" aria-label={t.signup.stepsLabel}>
-        {steps.map((label, i) => {
-          const n = i + 1;
-          return (
-            <li
-              key={label}
-              className="sp-steps__item"
-              data-state={n < current ? 'done' : undefined}
-              aria-current={n === current ? 'step' : undefined}
+    <ol aria-label={t.signup.stepsLabel} className="m-0 flex list-none flex-wrap gap-2 p-0">
+      {t.signup.steps.map((label, i) => {
+        const n = i + 1;
+        const on = n <= current;
+        return (
+          <li
+            key={label}
+            aria-current={n === current ? 'step' : undefined}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full py-[5px] pr-2.5 pl-[5px] text-xs leading-4 font-medium',
+              on ? 'bg-(--brand-soft) text-(--brand)' : 'bg-(--fill-tonal) text-(--ink-muted)',
+            )}
+          >
+            <span
+              className={cn(
+                'sp-num inline-flex size-5 items-center justify-center rounded-full font-semibold',
+                on
+                  ? 'bg-(--primary) text-(--on-primary)'
+                  : 'bg-(--surface-raised) text-(--ink-muted)',
+              )}
             >
-              <span className="sp-steps__label">
-                {n}. {label}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
+              {n}
+            </span>
+            {label}
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
