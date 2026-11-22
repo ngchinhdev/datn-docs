@@ -251,6 +251,7 @@ const built: Record<string, ScreenLink[]> = {
     },
   ],
   'MH-60': [{ label: 'Tổng quan nền tảng', href: () => '/mock/admin', platform: true }],
+  'MH-63': [{ label: 'Đăng nhập quản trị', href: () => '/mock/admin/login', platform: true }],
   'MH-62': [{ label: 'Gói và giá', href: () => '/mock/admin/plans', platform: true }],
   'MH-61': [
     { label: 'Gói Sapio', href: app('settings/plan') },
@@ -876,6 +877,16 @@ const rows: Row[] = [
     level: 'Vẽ',
     routes: ['/app/[tenant]/settings/plan'],
     note: 'Trạng thái gói, hai thẻ gói, chọn kỳ 1/3/12 tháng, thanh toán QR, lịch sử thanh toán (BR-83, BR-84). Hết hạn: mọi route khu nội bộ chuyển về đây, kèm bảng lịch đã đặt sau hạn chỉ để đọc (BR-82). Trang của tính năng bị khóa có bảng tiền nâng gói (BR-85, BR-87)',
+  },
+  {
+    code: 'MH-63',
+    title: 'Đăng nhập quản trị nền tảng',
+    zone: 'H',
+    roles: ['admin'],
+    wave: 2,
+    level: 'Nhẹ',
+    routes: ['/admin/login'],
+    note: 'Email + mật khẩu của tài khoản quản trị, phiên và cookie riêng (T-18); sai cửa báo câu chung của BR-76',
   },
   {
     code: 'MH-62',

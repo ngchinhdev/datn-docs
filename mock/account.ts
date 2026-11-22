@@ -51,13 +51,20 @@ export function lockedUntil(records: LoginRecords, email: string, now: string): 
   return until !== null && Date.parse(now) < Date.parse(until) ? until : null;
 }
 
-/** A try to sign in. Wrong email and wrong password look the same, and both count. */
+/** Which sign-in page a try comes from: the platform administration has its own (T-18). */
+export type LoginDoor = 'staff' | 'admin';
+
+/**
+ * A try to sign in. Wrong email, wrong password and the wrong door (an administrator on the staff
+ * page, a staff account on the administration page) look the same, and all count.
+ */
 export function attemptLogin(
   accounts: readonly Account[],
   records: LoginRecords,
   email: string,
   password: string,
   now: string,
+  door: LoginDoor = 'staff',
 ): { outcome: LoginOutcome; records: LoginRecords } {
   const key = normalizeEmail(email);
   const until = lockedUntil(records, key, now);
@@ -69,7 +76,11 @@ export function attemptLogin(
   const account = accounts.find((a) => a.email === key);
   const { [key]: _gone, ...rest } = records;
 
-  if (account && account.password === password)
+  if (
+    account &&
+    account.password === password &&
+    Boolean(account.platformAdmin) === (door === 'admin')
+  )
     return { outcome: { kind: 'ok', account }, records: rest };
 
   const failed = failedBefore + 1;
@@ -135,7 +146,8 @@ export function requestReset(
   const wait = resendWait(lastSent, key, now);
   if (wait > 0) return { tokens: [...tokens], lastSent, issued: null, waitSeconds: wait };
 
-  const account = accounts.find((a) => a.email === key);
+  // An administrator has no self-service reset (T-18): the email is treated as unknown.
+  const account = accounts.find((a) => a.email === key && !a.platformAdmin);
   const next = { ...lastSent, [key]: now };
   if (!account)
     return { tokens: [...tokens], lastSent: next, issued: null, waitSeconds: RESEND_SECONDS };

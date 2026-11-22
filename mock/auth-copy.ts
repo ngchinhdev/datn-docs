@@ -109,6 +109,13 @@ const vi = {
     lockedBody: (max: number, email: string) =>
       `Mật khẩu sai ${max} lần liên tiếp. Đã gửi email báo cho ${email}. Muốn vào ngay thì đặt lại mật khẩu.`,
   },
+  adminLogin: {
+    title: 'Đăng nhập quản trị',
+    lead: 'Dành cho tài khoản quản trị nền tảng.',
+    note: 'Quên mật khẩu thì nhờ quản trị viên khác đặt lại.',
+    lockedBody: (max: number, email: string) =>
+      `Mật khẩu sai ${max} lần liên tiếp. Đã gửi email báo cho ${email}. Thử lại khi hết thời gian khóa, hoặc nhờ quản trị viên khác đặt lại mật khẩu.`,
+  },
   signup: {
     steps: ['Tài khoản', 'Xác minh email', 'Thông tin cơ sở'],
     stepsLabel: 'Các bước đăng ký',
@@ -375,6 +382,13 @@ const en: AuthCopy = {
     lockedTitle: (time) => `Sign-in is locked until ${time}.`,
     lockedBody: (max, email) =>
       `${max} wrong passwords in a row. We emailed ${email}. To get in now, reset the password.`,
+  },
+  adminLogin: {
+    title: 'Administrator sign-in',
+    lead: 'For platform administrator accounts.',
+    note: 'If you forgot your password, ask another administrator to reset it.',
+    lockedBody: (max, email) =>
+      `${max} wrong passwords in a row. We emailed ${email}. Try again when the lock ends, or ask another administrator to reset the password.`,
   },
   signup: {
     steps: ['Account', 'Verify email', 'Business details'],

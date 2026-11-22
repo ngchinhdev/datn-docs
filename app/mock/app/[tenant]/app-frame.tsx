@@ -281,7 +281,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
             Trang lỗi 500 mẫu
           </Link>
           <Link
-            href="/mock"
+            href="/mock/screens"
             className={cn('sp-menu__item', kind === 'list' && 'min-h-11')}
             {...(kind === 'menu' ? { role: 'menuitem' } : {})}
           >

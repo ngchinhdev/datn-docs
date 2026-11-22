@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useAccountStore } from '@/components/mock/account-store';
 import { Button } from '@/components/sapio/button';
 import { formatMoment } from '@/mock/account-mail';
-import { LOCK_MINUTES, MAX_FAILED, sampleAccountLine } from '@/mock/account';
+import { LOCK_MINUTES, MAX_FAILED, sampleAccountLine, type LoginDoor } from '@/mock/account';
 import { SAMPLE_PASSWORD, workspaces, type Account } from '@/mock/fixtures/accounts';
 import { resetMockData } from '@/mock/persist';
 
@@ -13,7 +13,14 @@ import { resetMockData } from '@/mock/persist';
  * Mock-only controls of the account pages: the clock, which stands still, the sample mailbox and,
  * on the sign-in page, the list of sample accounts (`onPickAccount` fills the form with one).
  */
-export function AccountTools({ onPickAccount }: { onPickAccount?: (account: Account) => void }) {
+export function AccountTools({
+  onPickAccount,
+  door = 'staff',
+}: {
+  onPickAccount?: (account: Account) => void;
+  /** Which accounts the list shows: staff accounts, or the platform administrators. */
+  door?: LoginDoor;
+}) {
   const { now, advance, mails, accounts, members } = useAccountStore();
   const [listOpen, setListOpen] = useState(false);
   return (
@@ -38,6 +45,9 @@ export function AccountTools({ onPickAccount }: { onPickAccount?: (account: Acco
       <Link href="/mock/mailbox" className="font-medium">
         Hộp thư mẫu ({mails.length})
       </Link>
+      <Link href="/mock/screens" className="font-medium">
+        Danh sách màn hình
+      </Link>
       <Button size="sm" onClick={resetMockData}>
         Đặt lại dữ liệu mock
       </Button>
@@ -47,23 +57,25 @@ export function AccountTools({ onPickAccount }: { onPickAccount?: (account: Acco
           className="basis-full border-t border-(--line) pt-(--space-2)"
         >
           <ul className="m-0 flex max-h-64 list-none flex-col overflow-y-auto p-0">
-            {accounts.map((account) => (
-              <li key={account.id}>
-                <button
-                  type="button"
-                  className="w-full rounded-(--radius-sm) px-(--space-2) py-(--space-1) text-left hover:bg-(--surface-sunken)"
-                  onClick={() => {
-                    onPickAccount(account);
-                    setListOpen(false);
-                  }}
-                >
-                  <span className="block font-medium">
-                    {sampleAccountLine(account, members, workspaces)}
-                  </span>
-                  <span className="text-xs text-(--ink-muted)">{account.email}</span>
-                </button>
-              </li>
-            ))}
+            {accounts
+              .filter((account) => Boolean(account.platformAdmin) === (door === 'admin'))
+              .map((account) => (
+                <li key={account.id}>
+                  <button
+                    type="button"
+                    className="w-full rounded-(--radius-sm) px-(--space-2) py-(--space-1) text-left hover:bg-(--surface-sunken)"
+                    onClick={() => {
+                      onPickAccount(account);
+                      setListOpen(false);
+                    }}
+                  >
+                    <span className="block font-medium">
+                      {sampleAccountLine(account, members, workspaces)}
+                    </span>
+                    <span className="text-xs text-(--ink-muted)">{account.email}</span>
+                  </button>
+                </li>
+              ))}
           </ul>
           <p className="m-0 pt-(--space-2) text-xs text-(--ink-muted)">
             Mật khẩu mẫu của mọi tài khoản:{' '}

@@ -44,7 +44,7 @@ const formatHours = (hours: BusinessHours[]) =>
 
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
-export default async function MockIndexPage({ searchParams }: PageProps<'/mock'>) {
+export default async function MockIndexPage({ searchParams }: PageProps<'/mock/screens'>) {
   const params = await searchParams;
   const wave = WAVES.find((w) => String(w) === first(params.wave));
   const status = STATUSES.find((s) => s === first(params.status));
@@ -60,7 +60,7 @@ export default async function MockIndexPage({ searchParams }: PageProps<'/mock'>
     const next = { wave: wave && String(wave), status, [key]: value };
     for (const [k, v] of Object.entries(next)) if (v) query.set(k, v);
     const text = query.toString();
-    return text ? `/mock?${text}` : '/mock';
+    return text ? `/mock/screens?${text}` : '/mock/screens';
   };
 
   const doors = [
@@ -79,7 +79,7 @@ export default async function MockIndexPage({ searchParams }: PageProps<'/mock'>
       note: 'Cơ sở, gói và giá, mẫu ngành, nhật ký quản trị.',
       links: [
         {
-          href: `/mock/login?email=${encodeURIComponent(PLATFORM_ADMIN_EMAIL)}`,
+          href: `/mock/admin/login?email=${encodeURIComponent(PLATFORM_ADMIN_EMAIL)}`,
           label: 'Đăng nhập quản trị',
         },
       ],
@@ -169,7 +169,7 @@ export default async function MockIndexPage({ searchParams }: PageProps<'/mock'>
         {shown.length === 0 && (
           <p className="text-sm text-muted-foreground">
             Không có màn nào khớp.{' '}
-            <Link href="/mock" className="font-medium text-primary hover:underline">
+            <Link href="/mock/screens" className="font-medium text-primary hover:underline">
               Bỏ lọc
             </Link>
           </p>
