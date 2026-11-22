@@ -25,7 +25,8 @@
   </div>
 
   <div style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
-    <div style="position: relative; z-index: 1; width: 420px; max-width: 100%; box-sizing: border-box; padding: 14px; border-radius: 14px; background: #ffffff; color: #121817; box-shadow: 0 2px 6px rgba(18,24,23,0.10), 0 16px 40px rgba(9,40,31,0.35); display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch;">
+    <div style="flex: 1.4 1 340px; min-width: 0; box-sizing: border-box; padding: 14px; border-radius: 14px; background: #ffffff; color: #121817; box-shadow: 0 2px 6px rgba(18,24,23,0.10), 0 16px 40px rgba(9,40,31,0.35); display: flex; flex-direction: column; gap: 10px;">
       <div style="display: flex; align-items: baseline; justify-content: space-between;">
         <span style="font-size: 13px; line-height: 18px; font-weight: 600;">{{t.today}}</span>
         <span style="font-size: 12px; line-height: 16px; color: #56625f;">{{t.date}}</span>
@@ -55,7 +56,8 @@
       </div>
     </div>
 
-    <div style="position: relative; z-index: 2; align-self: flex-end; margin-top: -28px; width: 260px; box-sizing: border-box; padding: 12px; border-radius: 12px; background: #ffffff; color: #121817; box-shadow: 0 2px 6px rgba(18,24,23,0.10), 0 12px 32px rgba(9,40,31,0.35); display: flex; gap: 10px; align-items: flex-start;">
+    <div style="flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 12px;">
+    <div style="box-sizing: border-box; padding: 12px; border-radius: 12px; background: #ffffff; color: #121817; box-shadow: 0 2px 6px rgba(18,24,23,0.10), 0 12px 32px rgba(9,40,31,0.35); display: flex; gap: 10px; align-items: flex-start;">
       <span style="flex: none; width: 32px; height: 32px; border-radius: 999px; background: #e1f0ea; color: #1a6650; display: flex; align-items: center; justify-content: center;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
       </span>
@@ -63,6 +65,19 @@
         <div style="display: flex; justify-content: space-between; font-size: 13px; line-height: 18px; font-weight: 600;"><span>{{t.newBooking}}</span><span style="font-weight: 500; color: #56625f; font-variant-numeric: tabular-nums;">09:15</span></div>
         <div style="font-size: 12px; line-height: 16px; color: #56625f;">{{t.newBookingMeta}}</div>
       </div>
+    </div>
+
+    <div style="flex: 1 1 auto; box-sizing: border-box; padding: 14px; border-radius: 12px; background: #ffffff; color: #121817; box-shadow: 0 2px 6px rgba(18,24,23,0.10), 0 12px 32px rgba(9,40,31,0.35); display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-size: 13px; line-height: 18px; font-weight: 600;">{{t.statsTitle}}</span>
+      <sc-for list="{{stats}}" as="st" hint-placeholder-count="3">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px;">
+          <span style="flex: none; width: 8px; height: 8px; border-radius: 999px; background: {{st.dot}};"></span>
+          <span style="flex: 1; color: #56625f;">{{st.label}}</span>
+          <span style="font-weight: 600; font-variant-numeric: tabular-nums;">{{st.value}}</span>
+        </div>
+      </sc-for>
+    </div>
+    </div>
     </div>
 
     <svg viewBox="0 0 560 220" preserveAspectRatio="xMidYMax meet" aria-hidden="true" style="flex: 1 1 auto; min-height: 150px; width: 100%; margin-top: 16px;">
@@ -111,7 +126,7 @@ const ASIDE_COPY = {
     signup: { kicker: 'Dùng thử 7 ngày', title: 'Mở trang đặt lịch cho tiệm ngay hôm nay', lead: 'Tạo tài khoản, xác minh email, nhập thông tin cơ sở. Hết 7 ngày dùng thử mới cần chọn gói.' },
     forgot: { kicker: 'Bảo vệ tài khoản', title: 'Lấy lại quyền vào tiệm', lead: 'Link đặt lại gửi về email đăng nhập và chỉ dùng được một lần.' },
     workspace: { kicker: 'Một tài khoản, nhiều cơ sở', title: 'Hôm nay bạn làm ở tiệm nào?', lead: 'Mỗi cơ sở có lịch, nhân viên và quyền riêng. Mở mỗi cơ sở ở một tab cũng được.' },
-    card: { today: 'Hôm nay', date: 'Thứ Bảy, 21/11', col1: 'Ghế 2 · Thợ Lan', col2: 'Giường 1 · KTV Vy', appt1: 'Chị Hạnh · Nhuộm', confirmed: 'Đã xác nhận', wait: 'Chờ lên màu', appt1b: 'Xả, sấy', appt2: 'Anh Minh · Đá nóng', checkedIn: 'Đã check-in', holding: 'Đang giữ chỗ', newBooking: 'Lịch mới', newBookingMeta: 'Chị Ngọc · Cắt + gội, 14:00 hôm nay' },
+    card: { today: 'Hôm nay', date: 'Thứ Bảy, 21/11', col1: 'Ghế 2 · Thợ Lan', col2: 'Giường 1 · KTV Vy', appt1: 'Chị Hạnh · Nhuộm', confirmed: 'Đã xác nhận', wait: 'Chờ lên màu', appt1b: 'Xả, sấy', appt2: 'Anh Minh · Đá nóng', checkedIn: 'Đã check-in', holding: 'Đang giữ chỗ', newBooking: 'Lịch mới', newBookingMeta: 'Chị Ngọc · Cắt + gội, 14:00 hôm nay', statsTitle: 'Tóm tắt hôm nay', stats: ['Lịch hẹn', 'Đã check-in', 'Đang giữ chỗ'] },
     chips: ['Lịch hẹn', 'Liệu trình', 'Nhân viên', 'Hoa hồng', 'Thanh toán']
   },
   en: {
@@ -119,7 +134,7 @@ const ASIDE_COPY = {
     signup: { kicker: '7-day free trial', title: 'Open your booking page today', lead: 'Create an account, verify your email, add your business. Pick a plan only after the 7-day trial.' },
     forgot: { kicker: 'Account security', title: 'Get back into your salon', lead: 'The reset link goes to your sign-in email and works only once.' },
     workspace: { kicker: 'One account, many businesses', title: 'Where are you working today?', lead: 'Each business has its own calendar, staff and permissions. Open each one in its own tab if you like.' },
-    card: { today: 'Today', date: 'Sat, 21 Nov', col1: 'Chair 2 · Lan', col2: 'Bed 1 · Vy', appt1: 'Ms. Hanh · Colour', confirmed: 'Confirmed', wait: 'Processing', appt1b: 'Rinse, dry', appt2: 'Mr. Minh · Hot stone', checkedIn: 'Checked in', holding: 'Holding', newBooking: 'New booking', newBookingMeta: 'Ms. Ngoc · Cut + wash, 14:00 today' },
+    card: { today: 'Today', date: 'Sat, 21 Nov', col1: 'Chair 2 · Lan', col2: 'Bed 1 · Vy', appt1: 'Ms. Hanh · Colour', confirmed: 'Confirmed', wait: 'Processing', appt1b: 'Rinse, dry', appt2: 'Mr. Minh · Hot stone', checkedIn: 'Checked in', holding: 'Holding', newBooking: 'New booking', newBookingMeta: 'Ms. Ngoc · Cut + wash, 14:00 today', statsTitle: 'Today at a glance', stats: ['Appointments', 'Checked in', 'Holding'] },
     chips: ['Appointments', 'Packages', 'Staff', 'Commission', 'Payments']
   }
 };
@@ -130,7 +145,8 @@ class Component extends DCLogic {
     const copy = ASIDE_COPY[lang];
     return {
       t: Object.assign({}, copy[variant], copy.card),
-      chips: copy.chips.map((label) => ({ label: label }))
+      chips: copy.chips.map((label) => ({ label: label })),
+      stats: copy.card.stats.map((label, i) => ({ label: label, value: ['18', '6', '1'][i], dot: ['#1d4ea8', '#1a6650', '#87938f'][i] }))
     };
   }
 }
