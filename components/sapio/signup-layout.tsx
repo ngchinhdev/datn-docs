@@ -99,7 +99,7 @@ export function AuthPage({
   }
 
   return (
-    <div className="sp-auth min-[900px]:flex-row min-[900px]:gap-4 min-[900px]:p-4">
+    <div className="sp-auth min-[900px]:flex-row! min-[900px]:gap-4! min-[900px]:p-4!">
       <AuthAside variant={aside} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-2 px-4 pt-4 min-[900px]:justify-end min-[900px]:p-0">
