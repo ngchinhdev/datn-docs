@@ -92,6 +92,7 @@ export function LoginScreen() {
     router.push('/mock/select-workspace');
   }
 
+  const forgotHref = `/mock/forgot-password?email=${encodeURIComponent(email.trim())}`;
   const errorText = failed
     ? remaining
       ? t.login.wrongRemaining(remaining, LOCK_MINUTES)
@@ -143,6 +144,7 @@ export function LoginScreen() {
             onChange={setPassword}
             autoComplete="current-password"
             error={errorText}
+            labelEnd={<Link href={forgotHref}>{t.common.forgot}</Link>}
           />
           <label className="sp-check">
             <input
@@ -158,19 +160,9 @@ export function LoginScreen() {
           <Button type="submit" variant="primary" className="h-12!" disabled={Boolean(until)}>
             {until ? t.login.submitLocked(formatWait(waitSeconds)) : t.login.submit}
           </Button>
-          {until ? (
-            <Link
-              href={`/mock/forgot-password?email=${encodeURIComponent(email.trim())}`}
-              className="sp-btn sp-btn--secondary h-12! no-underline"
-            >
+          {until && (
+            <Link href={forgotHref} className="sp-btn sp-btn--secondary h-12! no-underline">
               {t.login.resetPassword}
-            </Link>
-          ) : (
-            <Link
-              href={`/mock/forgot-password?email=${encodeURIComponent(email.trim())}`}
-              className="self-center text-sm font-medium"
-            >
-              {t.common.forgot}
             </Link>
           )}
         </form>
