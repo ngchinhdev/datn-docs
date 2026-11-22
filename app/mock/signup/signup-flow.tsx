@@ -13,7 +13,6 @@ import {
 import { AccountStep } from './account-step';
 import { BusinessStep } from './business-step';
 import { DoneStep } from './done-step';
-import { IndustryStep } from './industry-step';
 import { VerifyStep } from './verify-step';
 
 const STORAGE_KEY = 'sapio.signup';
@@ -32,13 +31,14 @@ function load(): SignupDraft {
 }
 
 /**
- * The five steps of MH-02. The step is in `?step=`; the draft lives in this component and in
+ * The three steps of MH-02 and the page that follows them. The step is in `?step=`; the draft lives in this component and in
  * `sessionStorage` (never the password), so a reload keeps it. A step opens only when the ones
  * before it are done, otherwise the address redirects to the furthest one allowed.
  */
 export function SignupFlow() {
   const router = useRouter();
-  const step = stepOf(useSearchParams().get('step'));
+  const rawStep = useSearchParams().get('step');
+  const step = stepOf(rawStep);
   const [draft, setDraft] = useState<SignupDraft>(emptyDraft);
   const [password, setPassword] = useState('');
   const [ready, setReady] = useState(false);
@@ -52,6 +52,11 @@ export function SignupFlow() {
   useEffect(() => {
     if (ready) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
   }, [draft, ready]);
+
+  // An old `?step=industry` link goes to the address of the step it became.
+  useEffect(() => {
+    if (rawStep === 'industry') router.replace(stepHref('business'));
+  }, [rawStep, router]);
 
   const allowed = canOpen(step, draft);
   useEffect(() => {
@@ -77,22 +82,13 @@ export function SignupFlow() {
         />
       );
     case 'verify':
-      return <VerifyStep draft={draft} update={update} onNext={() => go('industry')} />;
-    case 'industry':
-      return (
-        <IndustryStep
-          draft={draft}
-          update={update}
-          onBack={() => go('verify')}
-          onNext={() => go('business')}
-        />
-      );
+      return <VerifyStep draft={draft} update={update} onNext={() => go('business')} />;
     case 'business':
       return (
         <BusinessStep
           draft={draft}
           update={update}
-          onBack={() => go('industry')}
+          onBack={() => go('verify')}
           onNext={() => go('done')}
         />
       );

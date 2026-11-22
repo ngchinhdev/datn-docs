@@ -110,7 +110,7 @@ const vi = {
       `Mật khẩu sai ${max} lần liên tiếp. Đã gửi email báo cho ${email}. Muốn vào ngay thì đặt lại mật khẩu.`,
   },
   signup: {
-    steps: ['Tài khoản', 'Xác thực', 'Ngành', 'Cơ sở', 'Xong'],
+    steps: ['Tài khoản', 'Xác minh email', 'Thông tin cơ sở'],
     stepsLabel: 'Các bước đăng ký',
     stepOf: (current: number, total: number, name: string) => `Bước ${current}/${total} · ${name}`,
     account: {
@@ -143,7 +143,7 @@ const vi = {
     },
     business: {
       title: 'Thông tin cơ sở',
-      lead: (industry: string) => `${industry} · đổi ngành ở bước trước nếu chọn nhầm.`,
+      lead: 'Tên cơ sở, địa chỉ trang đặt lịch, chi nhánh đầu tiên và giờ mở cửa.',
       saveLater: 'Lưu và làm tiếp sau',
       saveLaterShort: 'Lưu, làm sau',
       saved: 'Đã lưu. Đăng nhập lại để làm tiếp (mock chưa có đăng nhập).',
@@ -377,7 +377,7 @@ const en: AuthCopy = {
       `${max} wrong passwords in a row. We emailed ${email}. To get in now, reset the password.`,
   },
   signup: {
-    steps: ['Account', 'Verify', 'Industry', 'Business', 'Done'],
+    steps: ['Account', 'Verify email', 'Business details'],
     stepsLabel: 'Sign-up steps',
     stepOf: (current, total, name) => `Step ${current}/${total} · ${name}`,
     account: {
@@ -410,7 +410,7 @@ const en: AuthCopy = {
     },
     business: {
       title: 'Business details',
-      lead: (industry) => `${industry} · go back a step to change the industry.`,
+      lead: 'Business name, booking page address, first branch and opening hours.',
       saveLater: 'Save and continue later',
       saveLaterShort: 'Save, later',
       saved: 'Saved. Sign in again to continue (the mock has no sign-in here).',

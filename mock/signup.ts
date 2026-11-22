@@ -6,11 +6,12 @@ import type { IndustryTemplate, SampleService, SampleServiceVariant } from './fi
 import { tenantFixtures } from './fixtures';
 import { formatDuration, formatVnd } from './format';
 
-export const STEPS = ['account', 'verify', 'industry', 'business', 'done'] as const;
+export const STEPS = ['account', 'verify', 'business', 'done'] as const;
 export type SignupStep = (typeof STEPS)[number];
 
+/** `?step=industry` is a step that no longer exists; it lands on `business`. */
 export const stepOf = (value: string | null | undefined): SignupStep =>
-  STEPS.find((s) => s === value) ?? 'account';
+  STEPS.find((s) => s === (value === 'industry' ? 'business' : value)) ?? 'account';
 
 // ---------------------------------------------------------------------------------------------
 // Password (BR-73)
@@ -123,6 +124,9 @@ export function slugFromName(name: string): string {
 
 export type IndustryId = 'salon' | 'nail' | 'spa' | 'pet';
 
+/** Every new tenant starts from the hair salon template; sign-up does not ask for an industry. */
+export const SIGNUP_INDUSTRY: IndustryId = 'salon';
+
 export interface IndustryOption {
   id: IndustryId;
   title: string;
@@ -221,7 +225,6 @@ export interface SignupDraft {
   passwordOk: boolean;
   terms: boolean;
   verified: boolean;
-  industry: IndustryId;
   businessName: string;
   slug: string;
   /** The owner typed in the address field, so the name no longer rewrites it. */
@@ -241,7 +244,6 @@ export const emptyDraft = (): SignupDraft => ({
   passwordOk: false,
   terms: false,
   verified: false,
-  industry: 'salon',
   businessName: '',
   slug: '',
   slugEdited: false,
@@ -264,10 +266,8 @@ export function canOpen(step: SignupStep, draft: SignupDraft): boolean {
       return true;
     case 'verify':
       return draft.passwordOk;
-    case 'industry':
-      return draft.passwordOk && draft.verified;
     case 'business':
-      return draft.passwordOk && draft.verified && Boolean(industryById(draft.industry)?.template);
+      return draft.passwordOk && draft.verified && Boolean(industryById(SIGNUP_INDUSTRY)?.template);
     case 'done':
       return draft.created;
   }

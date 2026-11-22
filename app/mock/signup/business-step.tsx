@@ -18,6 +18,7 @@ import {
   countOf,
   hasBusinessErrors,
   industryById,
+  SIGNUP_INDUSTRY,
   slugFormatError,
   slugFromName,
   slugTaken,
@@ -92,7 +93,7 @@ export function BusinessStep({
   const toast = useToast();
   const { lang, t } = useAuthText();
   const text = t.signup.business;
-  const template = industryById(draft.industry)?.template;
+  const template = industryById(SIGNUP_INDUSTRY)?.template;
   const [submitted, setSubmitted] = useState(false);
   const [slugBlurred, setSlugBlurred] = useState(false);
   const [check, setCheck] = useState<SlugCheck>('idle');
@@ -151,9 +152,9 @@ export function BusinessStep({
 
   return (
     <SignupLayout
-      current={4}
+      current={3}
       title={text.title}
-      lead={text.lead(template.name)}
+      lead={text.lead}
       maxWidth={720}
       top={
         <button

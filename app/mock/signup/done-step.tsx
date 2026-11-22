@@ -11,6 +11,7 @@ import {
   TRIAL_DAYS,
   describeResources,
   industryById,
+  SIGNUP_INDUSTRY,
   previewLines,
   type SignupDraft,
 } from '@/mock/signup';
@@ -30,7 +31,7 @@ export function DoneStep({ draft }: { draft: SignupDraft }) {
   const toast = useToast();
   const { t } = useAuthText();
   const text = t.signup.done;
-  const template = industryById(draft.industry)?.template;
+  const template = industryById(SIGNUP_INDUSTRY)?.template;
   if (!template) return null;
 
   const host = siteHost(draft.slug);
@@ -41,7 +42,7 @@ export function DoneStep({ draft }: { draft: SignupDraft }) {
 
   return (
     <SignupLayout
-      current={5}
+      current={4}
       title={text.title(draft.businessName.trim())}
       titleIcon={
         <CircleCheck

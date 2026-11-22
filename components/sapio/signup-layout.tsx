@@ -137,10 +137,12 @@ export function AuthTop({ children }: { children?: ReactNode }) {
 export function SignupSteps({ current }: { current: number }) {
   const { t } = useAuthText();
   const steps = t.signup.steps;
-  const name = steps[current - 1]!;
+  // Past the last step (the page that follows sign-up) every step shows as done.
+  const shown = Math.min(current, steps.length);
+  const name = steps[shown - 1]!;
   return (
     <div className="flex flex-col gap-(--space-2)">
-      <span className="sp-steps__caption">{t.signup.stepOf(current, steps.length, name)}</span>
+      <span className="sp-steps__caption">{t.signup.stepOf(shown, steps.length, name)}</span>
       <ol className="sp-steps" aria-label={t.signup.stepsLabel}>
         {steps.map((label, i) => {
           const n = i + 1;
