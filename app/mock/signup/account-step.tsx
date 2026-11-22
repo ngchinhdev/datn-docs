@@ -64,7 +64,7 @@ export function AccountStep({
       title={text.title}
       lead={text.lead}
       top={
-        <Link href="/mock/login" className="sp-btn sp-btn--ghost sp-btn--sm no-underline">
+        <Link href="/mock/login" className="sp-link px-3 py-2.5 text-sm">
           {t.common.login}
         </Link>
       }

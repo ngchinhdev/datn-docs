@@ -112,7 +112,10 @@ export function AuthPage({
         </header>
         <div className="flex flex-1 items-center justify-center px-4 py-8 min-[900px]:px-2">
           <main
-            className={cn('flex w-full flex-col gap-(--space-6)', padBottom)}
+            className={cn(
+              'flex w-full flex-col gap-[18px] [&_.sp-auth__lead]:mt-1.5 [&_.sp-auth__lead]:text-sm [&_.sp-auth__lead]:leading-5 [&_.sp-auth__title]:text-[26px] [&_.sp-auth__title]:leading-8 [&_.sp-auth__title]:font-semibold',
+              padBottom,
+            )}
             style={{ maxWidth: maxWidth ?? 400 }}
           >
             {children}

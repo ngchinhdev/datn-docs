@@ -61,9 +61,9 @@ export function SelectScreen() {
         aside="workspace"
         maxWidth={480}
         link={
-          <span className="flex items-center gap-2 px-2 text-sm font-medium">
+          <span className="flex min-w-0 items-center gap-2 px-2 text-sm font-medium">
             <span className="sp-avatar sp-avatar--sm">{initialsOfName(signedIn.fullName)}</span>
-            {signedIn.fullName}
+            <span className="truncate">{signedIn.fullName}</span>
           </span>
         }
       >
@@ -83,6 +83,7 @@ export function SelectScreen() {
             const sub = [
               ROLE_LABEL[member.role],
               member.branchId ? `${t.select.branchPrefix} ${branchLabel(member.branchId)}` : null,
+              entry === 'paused' ? note : null,
             ]
               .filter(Boolean)
               .join(' · ');
@@ -95,7 +96,7 @@ export function SelectScreen() {
                 >
                   {workspace.monogram}
                 </span>
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="flex items-center text-[15px] leading-[22px] font-semibold">
                     {workspace.name}
                     {workspace.id === last && (
@@ -107,7 +108,6 @@ export function SelectScreen() {
                 {entry === 'paused' ? (
                   <span className="ms-auto flex items-center gap-2">
                     <span className="sp-badge sp-badge--no-show">{t.select.paused}</span>
-                    <span className="text-[13px] leading-[18px] text-(--ink-muted)">{note}</span>
                   </span>
                 ) : (
                   <span className="ms-auto flex items-center gap-2 text-(--ink-muted)">

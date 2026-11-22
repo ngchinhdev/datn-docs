@@ -10,3 +10,4 @@ out/
 ~$*.docx
 next-env.d.ts
 *.tsbuildinfo
+.shots/

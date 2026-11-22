@@ -16,6 +16,7 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
   - 20e: cảnh báo Caps Lock ở `PasswordField`; "Quên mật khẩu?" lên hàng nhãn.
   - 20f: `/mock` chuyển tới `/mock/login`, danh sách màn hình ở `/mock/screens`; `/mock/admin/login` (MH-63) với `adminSession` riêng.
   - Sửa sau review: khối trái 50% có thẻ "Tóm tắt hôm nay", quy tắc link `.sp-auth a`, lề 16px, `AccountTools` thu thành nút tròn góc phải dưới.
+  - 20h: `pnpm shot` (Playwright, Chromium); chụp 5 route × sáng/điện thoại/tối, so với `TaiKhoan*.dc.html`, sửa tiêu đề 26/32, khoảng cách 18px, link `.sp-link`, dòng cơ sở tạm dừng, tên người dùng bị xuống dòng trên điện thoại.
   - 20g: thêm ca kiểm vào `check:account` (sai cửa bị từ chối và có đếm khóa, admin không cấp link đặt lại, `STEPS` không còn `industry`); `check:availability`, `check:account`, `check:platform`, `check:flow`, `typecheck`, `build`, `prettier --check` đều xanh.
 - **Tự quyết:**
   - `AuthPage` chỉ chia đôi khi có `aside`; hộp thư mẫu, trang lỗi, hết hạn, cơ sở bị khóa giữ một cột.
