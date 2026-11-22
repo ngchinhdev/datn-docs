@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Quản trị nền tảng – Khách thuê</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="--surface: {{c.surface}}; --raised: {{c.raised}}; --tonal: {{c.tonal}}; --line: {{c.line}}; --line-strong: {{c.lineStrong}}; --ink: {{c.ink}}; --muted: {{c.muted}}; --brand: {{c.brand}}; --brand-soft: {{c.brandSoft}}; height: 100vh; min-height: 640px; box-sizing: border-box; display: flex; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif; overflow: hidden;">
+
+  <nav aria-label="{{t.navLabel}}" style="flex: none; width: {{sideW}}; box-sizing: border-box; padding: 14px 10px 12px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 6px; min-height: 36px;">
+      <span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 10px; background: var(--brand); color: {{c.onBrand}}; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">S</span>
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}">
+        <span style="min-width: 0;">
+          <span style="display: block; font-size: 15px; line-height: 20px; font-weight: 700; letter-spacing: -0.01em;">Sapio</span>
+          <span style="display: block; font-size: 12px; line-height: 16px; color: var(--muted);">{{t.area}}</span>
+        </span>
+      </sc-if>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}">
+        <span style="padding: 4px 10px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--muted);">{{t.group}}</span>
+      </sc-if>
+      <sc-for list="{{nav}}" as="item" hint-placeholder-count="4">
+        <a href="#" aria-current="{{item.current}}" aria-label="{{item.aria}}" style="display: flex; align-items: center; justify-content: {{item.justify}}; gap: 10px; height: 38px; padding: 0 10px; border-radius: 10px; background: {{item.bg}}; color: {{item.fg}}; font-size: 14px; line-height: 20px; font-weight: {{item.weight}}; text-decoration: none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none;"><path d="{{item.d}}"></path></svg>
+          <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span>{{item.label}}</span></sc-if>
+        </a>
+      </sc-for>
+    </div>
+
+    <div style="flex: 1 1 auto;"></div>
+
+    <div style="display: flex; flex-direction: {{toolsDir}}; align-items: center; gap: 6px; padding: 0 4px;">
+      <button type="button" onClick="{{toggleLang}}" aria-label="{{t.langLabel}}" style="height: 36px; min-width: 36px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 10px; background: var(--tonal); color: var(--ink); font-size: 12px; line-height: 16px; font-weight: 600; font-family: inherit; cursor: pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span>{{langCode}}</span></sc-if>
+      </button>
+      <button type="button" onClick="{{toggleTheme}}" aria-label="{{t.themeLabel}}" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: var(--tonal); color: var(--ink); cursor: pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{themeIcon}}"></path></svg>
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 12px; background: {{accountBg}};">
+      <span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">CN</span>
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}">
+        <span style="flex: 1; min-width: 0;">
+          <span style="display: block; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Nguyễn Ngọc Chính</span>
+          <span style="display: block; font-size: 12px; line-height: 16px; color: var(--muted);">{{t.role}}</span>
+        </span>
+        <a href="TaiKhoanDangNhap.dc.html" aria-label="{{t.logout}}" style="flex: none; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--muted);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg>
+        </a>
+      </sc-if>
+    </div>
+  </nav>
+
+  <div style="flex: 1 1 auto; min-width: 0; margin: 8px 8px 8px 0; display: flex; flex-direction: column; background: var(--raised); border: 1px solid var(--line); border-radius: 16px; box-shadow: {{c.shadowCard}}; overflow: hidden;">
+    <header style="flex: none; height: 52px; box-sizing: border-box; padding: 0 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line);">
+      <button type="button" onClick="{{toggleSide}}" aria-label="{{sideLabel}}" aria-expanded="{{expandedStr}}" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 3v18"></path></svg>
+      </button>
+      <span aria-hidden="true" style="width: 1px; height: 18px; background: var(--line);"></span>
+      <nav aria-label="{{t.crumbLabel}}" style="font-size: 13px; line-height: 18px;">
+        <a href="#" style="color: var(--muted); text-decoration: none;">{{t.crumbRoot}}</a>
+        <span aria-hidden="true" style="color: var(--muted); padding: 0 6px;">/</span>
+        <span aria-current="page" style="font-weight: 600;">{{t.crumbPage}}</span>
+      </nav>
+    </header>
+
+    <main style="flex: 1 1 auto; min-height: 0; overflow: auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 20px;">
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.02em;">Khách thuê</h1>
+        <p style="margin: 0; font-size: 14px; line-height: 20px; color: var(--muted);">Mọi cơ sở trên Sapio, gói đang dùng và hạn. Cơ sở tự đăng ký, quản trị nền tảng chỉ khóa khi vi phạm.</p>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+        <label style="position: relative; flex: 0 1 320px; display: block;">
+          <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Tìm cơ sở</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; left: 12px; top: 12px; color: var(--muted);"><path d="M11 3a8 8 0 1 0 0 16a8 8 0 1 0 0-16M21 21l-4.3-4.3"></path></svg>
+          <input type="search" placeholder="Tên cơ sở, slug hoặc email chủ" style="width: 100%; height: 40px; box-sizing: border-box; padding: 0 12px 0 36px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--raised); color: var(--ink); font-size: 14px; font-family: inherit;">
+        </label>
+        <sc-for list="{{chips}}" as="chip" hint-placeholder-count="5">
+          <button type="button" aria-pressed="{{chip.pressed}}" style="height: 32px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; background: {{chip.bg}}; color: {{chip.fg}}; font-size: 13px; line-height: 18px; font-weight: 500; font-family: inherit; cursor: pointer;">{{chip.label}}<span style="font-variant-numeric: tabular-nums; color: var(--muted);">{{chip.count}}</span></button>
+        </sc-for>
+      </div>
+
+      <div style="border: 1px solid var(--line); border-radius: 12px; overflow-x: auto;">
+        <table style="width: 100%; min-width: 880px; border-collapse: collapse; font-size: 14px; line-height: 20px;">
+          <thead>
+            <tr style="background: var(--surface); color: var(--muted); font-size: 12px; line-height: 16px; text-align: left; text-transform: uppercase; letter-spacing: 0.04em;">
+              <th scope="col" style="padding: 10px 16px; font-weight: 500;">Cơ sở</th>
+              <th scope="col" style="padding: 10px 16px; font-weight: 500;">Gói</th>
+              <th scope="col" style="padding: 10px 16px; font-weight: 500;">Trạng thái</th>
+              <th scope="col" style="padding: 10px 16px; font-weight: 500;">Hạn</th>
+              <th scope="col" style="padding: 10px 16px; font-weight: 500;">Chủ cơ sở</th>
+              <th scope="col" style="padding: 10px 16px; font-weight: 500;"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Thao tác</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{rows}}" as="row" hint-placeholder-count="6">
+              <tr style="border-top: 1px solid var(--line);">
+                <td style="padding: 12px 16px;">
+                  <span style="display: flex; align-items: center; gap: 12px;">
+                    <span aria-hidden="true" style="flex: none; width: 34px; height: 34px; border-radius: 9px; background: {{row.markBg}}; color: {{row.markFg}}; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;">{{row.mono}}</span>
+                    <span>
+                      <span style="display: block; font-weight: 600;">{{row.name}}</span>
+                      <span style="display: block; font-size: 12px; line-height: 16px; color: var(--muted);">{{row.slug}}.sapio.vn</span>
+                    </span>
+                  </span>
+                </td>
+                <td style="padding: 12px 16px;">{{row.plan}}</td>
+                <td style="padding: 12px 16px;">
+                  <span style="display: inline-flex; flex-wrap: wrap; gap: 6px;">
+                    <span style="padding: 2px 8px; border-radius: 999px; background: {{row.stateBg}}; color: {{row.stateFg}}; font-size: 12px; line-height: 16px; font-weight: 500;">{{row.state}}</span>
+                    <sc-if value="{{row.locked}}" hint-placeholder-val="{{false}}"><span style="padding: 2px 8px; border-radius: 999px; background: {{c.dangerSoft}}; color: {{c.danger}}; font-size: 12px; line-height: 16px; font-weight: 500;">Bị khóa</span></sc-if>
+                  </span>
+                </td>
+                <td style="padding: 12px 16px; font-variant-numeric: tabular-nums;">{{row.ends}}</td>
+                <td style="padding: 12px 16px; color: var(--muted);">{{row.owner}}</td>
+                <td style="padding: 12px 16px; text-align: right;"><a href="#" style="display: inline-flex; align-items: center; height: 32px; padding: 0 10px; border-radius: 8px; color: var(--brand); font-size: 13px; font-weight: 600; text-decoration: none;">Mở</a></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 13px; line-height: 18px; color: var(--muted);">
+          <span style="font-variant-numeric: tabular-nums;">Hiện 1–6 trong 6 cơ sở</span>
+          <span style="display: inline-flex; align-items: center; gap: 12px;">
+            <label style="display: inline-flex; align-items: center;">
+              <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Số dòng mỗi trang</span>
+              <select style="height: 32px; padding: 0 8px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--raised); color: var(--ink); font-size: 13px; font-family: inherit;">
+                <option>20 / trang</option>
+                <option>50 / trang</option>
+                <option>100 / trang</option>
+              </select>
+            </label>
+          <span style="display: inline-flex; gap: 4px;">
+            <button type="button" disabled aria-label="Trang trước" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: var(--tonal); color: var(--muted);">‹</button>
+            <button type="button" aria-current="page" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: var(--brand-soft); color: var(--brand); font-weight: 600; font-family: inherit;">1</button>
+            <button type="button" disabled aria-label="Trang sau" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: var(--tonal); color: var(--muted);">›</button>
+          </span>
+          </span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"lang":{"editor":"enum","options":["vi","en"],"default":"vi"},"$preview":{"width":1440,"height":900}}'>
+const PALETTE = {
+  light: { surface: '#f7f9f8', raised: '#ffffff', tonal: '#eef2f1', line: '#e0e6e4', lineStrong: '#87938f', ink: '#121817', muted: '#56625f', brand: '#1a6650', brandSoft: '#e1f0ea', onBrand: '#ffffff', shadowCard: '0 1px 2px rgba(18,24,23,0.04), 0 4px 16px rgba(18,24,23,0.06)',
+    danger: '#b0202b', dangerSoft: '#fbe8e9', paid: ['#dcefe7', '#1a6650'], trial: ['#e6edfb', '#1d4ea8'], expired: ['#fbeadb', '#9a430a'],
+    marks: [['#f8e5ea', '#a63d57'], ['#ece6f6', '#5b3f99'], ['#e3e9e7', '#47524f'], ['#e1f0ea', '#1a6650'], ['#e6edfb', '#1d4ea8'], ['#fbeadb', '#9a430a']] },
+  dark: { surface: '#0f1413', raised: '#161c1b', tonal: '#1d2524', line: '#242d2b', lineStrong: '#66736f', ink: '#edf2f0', muted: '#a2aeaa', brand: '#5cc3a1', brandSoft: '#12302a', onBrand: '#0f1413', shadowCard: '0 1px 2px rgba(0,0,0,0.40), 0 4px 16px rgba(0,0,0,0.35)',
+    danger: '#ff8f95', dangerSoft: '#3b1518', paid: ['#12302a', '#5cc3a1'], trial: ['#17233f', '#94b4ff'], expired: ['#3a2210', '#f2a466'],
+    marks: [['#3a1922', '#e991a6'], ['#261d3a', '#c3a8f0'], ['#27312f', '#b5bfbc'], ['#12302a', '#5cc3a1'], ['#17233f', '#94b4ff'], ['#3a2210', '#f2a466']] }
+};
+const COPY = {
+  vi: { navLabel: 'Điều hướng chính', area: 'Quản trị nền tảng', group: 'Vận hành', nav: ['Tổng quan', 'Khách thuê', 'Gói và giá', 'Nhật ký'], langLabel: 'Đổi ngôn ngữ, đang dùng tiếng Việt', themeLabel: 'Đổi giao diện sáng hoặc tối', role: 'Super admin', logout: 'Đăng xuất', crumbLabel: 'Đường dẫn', crumbRoot: 'Vận hành', crumbPage: 'Khách thuê', collapse: 'Thu gọn thanh bên', expand: 'Mở rộng thanh bên' },
+  en: { navLabel: 'Main navigation', area: 'Platform admin', group: 'Operations', nav: ['Overview', 'Tenants', 'Plans and pricing', 'Audit log'], langLabel: 'Change language, currently English', themeLabel: 'Switch light or dark theme', role: 'Super admin', logout: 'Sign out', crumbLabel: 'Breadcrumb', crumbRoot: 'Operations', crumbPage: 'Tenants', collapse: 'Collapse sidebar', expand: 'Expand sidebar' }
+};
+const ICONS = [
+  'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',
+  'M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18zM6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2M10 6h4M10 10h4M10 14h4M10 18h4',
+  'M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4zM7.5 6a1.5 1.5 0 1 0 0 3a1.5 1.5 0 1 0 0-3',
+  'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'
+];
+const SUN = 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41';
+const MOON = 'M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z';
+const TENANTS = [
+  ['Salon Tóc Mây', 'toc-may', 'M', 'Chuyên nghiệp', 'paid', 'Đang trả phí', '28/12/2026', 'may@toc-may.vn', false],
+  ['Spa Lá Sen', 'la-sen', 'LS', 'Cơ bản', 'trial', 'Dùng thử · còn 4 ngày', '26/11/2026', 'hoa@lasen.vn', false],
+  ['Salon Mộc', 'moc', 'Mộ', 'Cơ bản', 'expired', 'Hết hạn', '15/11/2026', 'moc.salon@gmail.com', false],
+  ['Spa An Nhiên', 'an-nhien', 'AN', 'Chuyên nghiệp', 'paid', 'Đang trả phí', '03/02/2027', 'annhien.spa@gmail.com', false],
+  ['Barber Phố Cổ', 'pho-co', 'PC', 'Cơ bản', 'paid', 'Đang trả phí', '10/01/2027', 'phoco.barber@gmail.com', true],
+  ['Spa Thảo Mộc', 'thao-moc', 'TM', 'Cơ bản', 'trial', 'Dùng thử · còn 6 ngày', '28/11/2026', 'thaomoc@gmail.com', false]
+];
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const theme = s.theme || this.props.theme || 'light';
+    const lang = s.lang || this.props.lang || 'vi';
+    const collapsed = s.collapsed === undefined ? Boolean(this.props.collapsed) : s.collapsed;
+    const expanded = !collapsed;
+    const c = PALETTE[theme];
+    const t = COPY[lang];
+    return {
+      c: c,
+      t: t,
+      expanded: expanded,
+      expandedStr: expanded ? 'true' : 'false',
+      sideW: expanded ? '248px' : '68px',
+      sideLabel: expanded ? t.collapse : t.expand,
+      toolsDir: expanded ? 'row' : 'column',
+      accountBg: expanded ? c.tonal : 'transparent',
+      langCode: lang === 'vi' ? 'VI' : 'EN',
+      themeIcon: theme === 'dark' ? SUN : MOON,
+      nav: t.nav.map((label, i) => ({
+        label: label,
+        d: ICONS[i],
+        aria: expanded ? null : label,
+        current: i === 1 ? 'page' : null,
+        bg: i === 1 ? c.brandSoft : 'transparent',
+        fg: i === 1 ? c.brand : c.ink,
+        weight: i === 1 ? 600 : 500,
+        justify: expanded ? 'flex-start' : 'center'
+      })),
+      chips: [['Tất cả', 6], ['Dùng thử', 2], ['Đang trả phí', 3], ['Hết hạn', 1], ['Bị khóa', 1]].map((x, i) => ({
+        label: x[0], count: x[1], pressed: i === 0 ? 'true' : 'false',
+        bg: i === 0 ? c.brandSoft : c.tonal, fg: i === 0 ? c.brand : c.ink
+      })),
+      rows: TENANTS.map((r, i) => ({
+        name: r[0], slug: r[1], mono: r[2], plan: r[3],
+        stateBg: c[r[4]][0], stateFg: c[r[4]][1], state: r[5],
+        ends: r[6], owner: r[7], locked: r[8],
+        markBg: c.marks[i][0], markFg: c.marks[i][1]
+      })),
+      toggleSide: () => this.setState({ collapsed: expanded }),
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      toggleLang: () => this.setState({ lang: lang === 'vi' ? 'en' : 'vi' })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Đăng nhập</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:var(--brand)}a:hover{text-decoration:underline}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+@media (max-width: 899px){.aside-col{display:none !important}}
+</style>
+</helmet>
+<div style="--surface: {{c.surface}}; --raised: {{c.raised}}; --tonal: {{c.tonal}}; --line: {{c.line}}; --line-strong: {{c.lineStrong}}; --ink: {{c.ink}}; --muted: {{c.muted}}; --primary: {{c.primary}}; --on-primary: {{c.onPrimary}}; --brand: {{c.brand}}; --warn: {{c.warn}}; --warn-soft: {{c.warnSoft}}; --focus: {{c.brand}}; min-height: 100vh; box-sizing: border-box; padding: 16px; display: flex; gap: 16px; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif;">
+
+  <div class="aside-col" style="flex: 0 0 46%; max-width: 680px; display: flex;">
+    <dc-import name="TaiKhoanMinhHoa" variant="login" lang="{{lang}}" hint-size="100%,868px"></dc-import>
+  </div>
+
+  <main style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column;">
+    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap;">
+      <a href="TaiKhoanDangKy.dc.html" style="font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none; color: var(--brand); padding: 10px 12px;">{{t.signupTop}}</a>
+      <button type="button" onClick="{{toggleLang}}" aria-label="{{t.langLabel}}" style="height: 40px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 10px; background: var(--tonal); color: var(--ink); font-size: 13px; line-height: 18px; font-weight: 600; font-family: inherit; cursor: pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        {{langCode}}
+      </button>
+      <button type="button" onClick="{{toggleTheme}}" aria-label="{{t.themeLabel}}" style="width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: var(--tonal); color: var(--ink); cursor: pointer;">
+        <sc-if value="{{isDark}}" hint-placeholder-val="{{false}}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+        </sc-if>
+        <sc-if value="{{isLight}}" hint-placeholder-val="{{true}}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+        </sc-if>
+      </button>
+    </div>
+
+    <div style="flex: 1 1 auto; display: flex; align-items: center; justify-content: center; padding: 32px 8px;">
+      <form style="width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 18px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <h1 style="margin: 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.02em;">{{t.title}}</h1>
+          <p style="margin: 0; font-size: 14px; line-height: 20px; color: var(--muted);">{{t.lead}}</p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label for="li-mail" style="font-size: 13px; line-height: 18px; font-weight: 600;">Email</label>
+          <input id="li-mail" type="email" autocomplete="email" placeholder="{{t.emailPh}}" style="height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--raised); color: var(--ink); font-size: 16px; font-family: inherit;">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline;">
+            <label for="li-pass" style="font-size: 13px; line-height: 18px; font-weight: 600;">{{t.password}}</label>
+            <a href="TaiKhoanQuenMatKhau.dc.html" style="font-size: 13px; line-height: 18px; font-weight: 500;">{{t.forgot}}</a>
+          </div>
+          <div style="position: relative;">
+            <input id="li-pass" type="{{pwType}}" autocomplete="current-password" aria-describedby="li-caps" style="width: 100%; height: 48px; box-sizing: border-box; padding: 0 52px 0 14px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--raised); color: var(--ink); font-size: 16px; font-family: inherit;">
+            <button type="button" onClick="{{togglePw}}" aria-label="{{pwLabel}}" style="position: absolute; right: 4px; top: 4px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+          <sc-if value="{{caps}}" hint-placeholder-val="{{false}}">
+            <p id="li-caps" role="status" style="margin: 0; display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 10px; background: var(--warn-soft); color: var(--warn); font-size: 13px; line-height: 18px; font-weight: 500;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>
+              {{t.caps}}
+            </p>
+          </sc-if>
+        </div>
+
+        <label style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer;">
+          <input type="checkbox" style="width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--primary);">
+          <span style="font-size: 14px; line-height: 20px;">{{t.keep}}<span style="display: block; font-size: 13px; line-height: 18px; color: var(--muted);">{{t.keepHint}}</span></span>
+        </label>
+
+        <button type="submit" style="height: 48px; border: 0; border-radius: 12px; background: var(--primary); color: var(--on-primary); font-size: 15px; line-height: 20px; font-weight: 600; font-family: inherit; cursor: pointer; box-shadow: 0 1px 2px rgba(18,24,23,0.06);">{{t.submit}}</button>
+
+        <p style="margin: 0; padding-top: 14px; border-top: 1px solid var(--line); font-size: 13px; line-height: 18px; color: var(--muted);">{{t.guestNote}}</p>
+        <p style="margin: 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--muted);">{{t.noAccount}} <a href="TaiKhoanDangKy.dc.html" style="font-weight: 600;">{{t.noAccountLink}}</a></p>
+      </form>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"lang":{"editor":"enum","options":["vi","en"],"default":"vi"},"capsLock":{"editor":"boolean","default":false},"$preview":{"width":1440,"height":900}}'>
+const PALETTE = {
+  light: { surface: '#f7f9f8', raised: '#ffffff', tonal: '#eef2f1', line: '#e0e6e4', lineStrong: '#87938f', ink: '#121817', muted: '#56625f', primary: '#1a6650', onPrimary: '#ffffff', brand: '#1a6650', warn: '#9a430a', warnSoft: '#fbeadb' },
+  dark: { surface: '#0f1413', raised: '#161c1b', tonal: '#1d2524', line: '#242d2b', lineStrong: '#66736f', ink: '#edf2f0', muted: '#a2aeaa', primary: '#5cc3a1', onPrimary: '#0f1413', brand: '#5cc3a1', warn: '#f2a466', warnSoft: '#3a2210' }
+};
+const COPY = {
+  vi: { signupTop: 'Đăng ký cơ sở', langLabel: 'Đổi ngôn ngữ, đang dùng tiếng Việt', themeLabel: 'Đổi giao diện sáng hoặc tối', title: 'Đăng nhập', lead: 'Dành cho chủ cơ sở và nhân viên.', emailPh: 'Ví dụ: an@tiemcuaban.vn', password: 'Mật khẩu', forgot: 'Quên mật khẩu?', caps: 'Caps Lock đang bật.', show: 'Hiện mật khẩu', hide: 'Ẩn mật khẩu', keep: 'Giữ đăng nhập trên máy này', keepHint: 'Không chọn thì đăng xuất khi đóng trình duyệt hoặc sau 12 giờ.', submit: 'Đăng nhập', guestNote: 'Bạn là khách đặt lịch? Đăng nhập trên trang của tiệm bằng mã gửi qua email.', noAccount: 'Chưa có cơ sở trên Sapio?', noAccountLink: 'Đăng ký, dùng thử 7 ngày' },
+  en: { signupTop: 'Register a business', langLabel: 'Change language, currently English', themeLabel: 'Switch light or dark theme', title: 'Sign in', lead: 'For business owners and staff.', emailPh: 'e.g. an@yoursalon.com', password: 'Password', forgot: 'Forgot password?', caps: 'Caps Lock is on.', show: 'Show password', hide: 'Hide password', keep: 'Keep me signed in on this device', keepHint: 'Otherwise you are signed out when the browser closes or after 12 hours.', submit: 'Sign in', guestNote: 'Booking as a client? Sign in on the salon’s page with a code sent to your email.', noAccount: 'New to Sapio?', noAccountLink: 'Register, free for 7 days' }
+};
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const theme = s.theme || this.props.theme || 'light';
+    const lang = s.lang || this.props.lang || 'vi';
+    const t = COPY[lang];
+    return {
+      c: PALETTE[theme],
+      t: t,
+      lang: lang,
+      langCode: lang === 'vi' ? 'VI' : 'EN',
+      isDark: theme === 'dark',
+      isLight: theme !== 'dark',
+      caps: Boolean(this.props.capsLock),
+      pwType: s.showPw ? 'text' : 'password',
+      pwLabel: s.showPw ? t.hide : t.show,
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      toggleLang: () => this.setState({ lang: lang === 'vi' ? 'en' : 'vi' }),
+      togglePw: () => this.setState({ showPw: !s.showPw })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -7,6 +7,17 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 22/11/2026: review giao diện sau D-16, trang tài khoản và khung quản trị
+
+- **Đã làm** (phiên claude.ai):
+  - Vẽ canvas "Sapio – Trang tài khoản". Trang tài khoản: layout chia đôi, khối minh họa salon và spa, nút VI/EN và sáng/tối, đăng ký còn 3 bước. Khung quản trị: thanh bên nằm trên nền, nội dung trong card, breadcrumb. Bản sao ở `design/screens/TaiKhoan*` và `design/screens/Khung*`.
+  - Chốt [T-18](../ky-thuat/quyet-dinh-ky-thuat.md#t-18-quản-trị-nền-tảng-trên-tên-miền-con-riêng): super admin chạy trên `admin.sapio.vn`, có trang đăng nhập và cookie riêng.
+  - Viết Bước 20 trong kế hoạch mock: trang tài khoản mới; `/mock` vào thẳng trang đăng nhập, danh sách màn hình chuyển sang `/mock/screens`; đăng nhập super admin `/mock/admin/login`.
+- **Tiếp theo:**
+  - Claude Code làm Bước 20.
+  - Bước 21: khung quản trị theo `Khung*.dc.html`. Tiêu đề cột bảng viết hoa, nên phải sửa quy tắc "không viết hoa toàn bộ" trong README Sapio. Ô chọn số dòng đặt trước nút phân trang.
+  - Đợt dọn D-16: bỏ Pawpaw, `industryTemplate`, "Gói cấu hình ngành"; sửa roadmap và `CLAUDE.md`.
+
 ### 15/11/2026: mock đi liền một luồng (Bước 19)
 
 - **Đã làm** (nhánh `feat/mock-flow`, mỗi mục 19a–19g một commit, không thêm màn hình):

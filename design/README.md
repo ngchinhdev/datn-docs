@@ -6,6 +6,7 @@ Thư mục này là **bản sao** của hai trang thiết kế trên Claude Desi
 |---|---|
 | Sapio Design System: https://claude.ai/artifact/32PaNz4wzR7NcWXqxj5JzN | `design/sapio/` |
 | Canvas "Sapio · Màn hình đầu tiên": https://claude.ai/artifact/3uD469w5cf2gKYR7v4XQwd | `design/screens/` |
+| Canvas "Sapio – Trang tài khoản" (sửa giao diện sau D-16): https://claude.ai/artifact/TpDBCf2bmuaoPdrBQA6Tvg | `design/screens/TaiKhoan*`, `design/screens/Khung*` |
 
 Hai link trên là trang riêng tư của chủ repo; người khác chỉ mở được khi được chia sẻ.
 
@@ -122,5 +123,14 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `ChatGiuCho.dc.html` | MH-22 Giữ chỗ 10 phút, sang bước Thông tin liên hệ, đã đặt, hết giữ chỗ | **Đã chọn** | `/mock/[tenant]`, `/mock/[tenant]/book?step=info` |
 | `ChatGioiHan.dc.html` | MH-22 Gặp lễ tân, hết lượt trong ngày, spa thú cưng hỏi theo bé | **Đã chọn** | `/mock/[tenant]` |
 | `ChatMayTinh.dc.html` | MH-22 Máy tính: khung chat ở góc phải dưới | **Đã chọn** | `/mock/[tenant]` |
+| `TaiKhoanDangNhap.dc.html` | MH-03 Đăng nhập, layout chia đôi, nút VI/EN và sáng/tối (sau D-16) | **Đã chọn**, thay `DangNhap.dc.html` | `/mock/login` (Bước 20) |
+| `TaiKhoanDangKy.dc.html` | MH-02 Đăng ký bước 1, còn 3 bước (bỏ Chọn ngành) | **Đã chọn**, thay `DangKyTaiKhoan.dc.html` | `/mock/signup` |
+| `TaiKhoanQuenMatKhau.dc.html` | MH-04 Quên mật khẩu, đã gửi link, theme tối | **Đã chọn** | `/mock/forgot-password` |
+| `TaiKhoanChonCoSo.dc.html` | MH-06 Chọn cơ sở | **Đã chọn**, thay `ChonCoSo.dc.html` | `/mock/select-workspace` |
+| `TaiKhoanDienThoai.dc.html` | MH-03 Đăng nhập trên điện thoại, cảnh báo Caps Lock | **Đã chọn** | `/mock/login` dưới 900px |
+| `TaiKhoanMinhHoa.dc.html` | Khối minh họa bên trái dùng chung (hình salon/spa, thẻ lịch, chip tính năng) | **Đã chọn** | `AuthAside` trong `AuthPage` |
+| `KhungNoiBo.dc.html` | MH-07 Khung ứng dụng mới: thanh bên trên nền, nội dung trong card, breadcrumb (trang Lịch) | **Đã chọn**, thay phần khung của `QuanTri*.dc.html` | `/mock/app/[tenant]/*` (Bước 21) |
+| `KhungSuperAdmin.dc.html` | MH-58 Khách thuê trong khung mới, tiêu đề cột in hoa, ô số dòng trước phân trang | **Đã chọn** | `/mock/admin/tenants` (Bước 21) |
+| `KhungSuperAdminThuGon.dc.html` | Khung mới, thanh bên thu gọn 68px | **Đã chọn** | như trên, thu gọn |
 
 Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70, BR-73, BR-75, BR-76 đến BR-79, BR-83, BR-84, BR-89 đến BR-92 trong `content/docs/nghiep-vu/quy-tac.md`.

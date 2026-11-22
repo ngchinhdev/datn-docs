@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Salon Tóc Mây – Lịch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button:focus-visible,a:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.nav-item:hover{background:var(--hover)}
+</style>
+</helmet>
+<div style="--surface: {{c.surface}}; --raised: {{c.raised}}; --sunken: {{c.sunken}}; --tonal: {{c.tonal}}; --hover: {{c.hover}}; --line: {{c.line}}; --ink: {{c.ink}}; --muted: {{c.muted}}; --brand: {{c.brand}}; --brand-soft: {{c.brandSoft}}; --primary: {{c.brand}}; --on-primary: {{c.onBrand}}; height: 100vh; min-height: 640px; box-sizing: border-box; display: flex; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif; overflow: hidden;">
+
+  <nav aria-label="{{t.navLabel}}" style="flex: none; width: {{sideW}}; box-sizing: border-box; padding: 14px 10px 12px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 6px; min-height: 32px;">
+      <span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 10px; background: var(--brand); color: var(--on-primary); display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">S</span>
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span style="font-size: 16px; line-height: 20px; font-weight: 700; letter-spacing: -0.01em;">Sapio</span></sc-if>
+    </div>
+
+    <button type="button" aria-label="{{t.switcher}}" style="display: flex; align-items: center; justify-content: {{justify}}; gap: 10px; padding: 8px; border: 0; border-radius: 12px; background: var(--tonal); color: var(--ink); font-family: inherit; text-align: left; cursor: pointer;">
+      <span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 9px; background: {{c.mayBg}}; color: {{c.mayFg}}; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">M</span>
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}">
+        <span style="flex: 1; min-width: 0;">
+          <span style="display: block; font-size: 13px; line-height: 18px; font-weight: 600;">Salon Tóc Mây</span>
+          <span style="display: block; font-size: 12px; line-height: 16px; color: var(--muted);">{{t.branch}}</span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; color: var(--muted);"><path d="m7 15 5 5 5-5M7 9l5-5 5 5"></path></svg>
+      </sc-if>
+    </button>
+
+    <sc-for list="{{groups}}" as="group" hint-placeholder-count="3">
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}">
+          <span style="padding: 4px 10px; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--muted);">{{group.label}}</span>
+        </sc-if>
+        <sc-for list="{{group.items}}" as="item" hint-placeholder-count="4">
+          <a href="#" class="nav-item" aria-current="{{item.current}}" aria-label="{{item.aria}}" style="display: flex; align-items: center; justify-content: {{item.justify}}; gap: 10px; height: 36px; padding: 0 10px; border-radius: 10px; background: {{item.bg}}; color: {{item.fg}}; font-size: 14px; line-height: 20px; font-weight: {{item.weight}}; text-decoration: none;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none;"><path d="{{item.d}}"></path></svg>
+            <sc-if value="{{item.showLabel}}" hint-placeholder-val="{{true}}"><span>{{item.label}}</span></sc-if>
+          </a>
+        </sc-for>
+      </div>
+    </sc-for>
+
+    <div style="flex: 1 1 auto;"></div>
+
+    <div style="display: flex; flex-direction: {{toolsDir}}; align-items: center; gap: 6px; padding: 0 4px;">
+      <button type="button" onClick="{{toggleLang}}" aria-label="{{t.langLabel}}" style="height: 36px; min-width: 36px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 10px; background: var(--tonal); color: var(--ink); font-size: 12px; line-height: 16px; font-weight: 600; font-family: inherit; cursor: pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}"><span>{{langCode}}</span></sc-if>
+      </button>
+      <button type="button" onClick="{{toggleTheme}}" aria-label="{{t.themeLabel}}" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: var(--tonal); color: var(--ink); cursor: pointer;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{themeIcon}}"></path></svg>
+      </button>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 12px; background: {{accountBg}};">
+      <span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 999px; background: var(--brand-soft); color: var(--brand); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">NL</span>
+      <sc-if value="{{expanded}}" hint-placeholder-val="{{true}}">
+        <span style="flex: 1; min-width: 0;">
+          <span style="display: block; font-size: 13px; line-height: 18px; font-weight: 600;">Nguyễn Thị Lan</span>
+          <span style="display: block; font-size: 12px; line-height: 16px; color: var(--muted);">{{t.role}}</span>
+        </span>
+        <a href="TaiKhoanDangNhap.dc.html" aria-label="{{t.logout}}" style="flex: none; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--muted);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg>
+        </a>
+      </sc-if>
+    </div>
+  </nav>
+
+  <div style="flex: 1 1 auto; min-width: 0; margin: 8px 8px 8px 0; display: flex; flex-direction: column; background: var(--raised); border: 1px solid var(--line); border-radius: 16px; box-shadow: {{c.shadowCard}}; overflow: hidden;">
+    <header style="flex: none; height: 52px; box-sizing: border-box; padding: 0 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line);">
+      <button type="button" onClick="{{toggleSide}}" aria-label="{{sideLabel}}" aria-expanded="{{expandedStr}}" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 3v18"></path></svg>
+      </button>
+      <span aria-hidden="true" style="width: 1px; height: 18px; background: var(--line);"></span>
+      <nav aria-label="{{t.crumbLabel}}" style="font-size: 13px; line-height: 18px;">
+        <a href="#" style="color: var(--muted); text-decoration: none;">{{t.crumbRoot}}</a>
+        <span aria-hidden="true" style="color: var(--muted); padding: 0 6px;">/</span>
+        <span aria-current="page" style="font-weight: 600;">{{t.crumbPage}}</span>
+      </nav>
+    </header>
+
+    <main style="flex: 1 1 auto; min-height: 0; overflow: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+        <h1 style="margin: 0 8px 0 0; font-size: 26px; line-height: 32px; font-weight: 600; letter-spacing: -0.02em;">Lịch</h1>
+        <span style="display: inline-flex; align-items: center; gap: 4px;">
+          <button type="button" aria-label="Ngày trước" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: var(--tonal); color: var(--ink); cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
+          <button type="button" style="height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: var(--tonal); color: var(--ink); font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer;">Hôm nay</button>
+          <button type="button" aria-label="Ngày sau" style="width: 36px; height: 36px; border: 0; border-radius: 8px; background: var(--tonal); color: var(--ink); cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+        </span>
+        <span style="font-size: 15px; line-height: 22px; font-weight: 600;">Thứ Bảy, 21/11</span>
+        <span style="flex: 1 1 auto;"></span>
+        <span role="group" aria-label="Kiểu xem" style="display: inline-flex; padding: 3px; border-radius: 10px; background: var(--tonal);">
+          <button type="button" aria-pressed="true" style="height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: {{c.selected}}; color: var(--ink); font-size: 13px; font-weight: 600; font-family: inherit; box-shadow: 0 1px 2px rgba(18,24,23,0.08);">Nhân viên</button>
+          <button type="button" aria-pressed="false" style="height: 30px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 500; font-family: inherit;">Tài nguyên</button>
+        </span>
+        <button type="button" style="height: 36px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 8px; background: var(--primary); color: var(--on-primary); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5v14"></path></svg>Tạo lịch hẹn</button>
+      </div>
+
+      <div style="flex: 1 1 auto; min-height: 0; border: 1px solid var(--line); border-radius: 12px; overflow: auto;">
+        <div style="min-width: 680px; display: grid; grid-template-columns: 56px repeat(4, minmax(144px, 1fr));">
+          <div style="position: sticky; top: 0; z-index: 2; height: 52px; background: var(--raised); border-bottom: 1px solid var(--line);"></div>
+          <sc-for list="{{staff}}" as="col" hint-placeholder-count="4">
+            <div style="position: sticky; top: 0; z-index: 2; height: 52px; box-sizing: border-box; padding: 8px 10px; display: flex; align-items: center; gap: 8px; background: var(--raised); border-bottom: 1px solid var(--line); border-left: 1px solid var(--line);">
+              <span aria-hidden="true" style="width: 28px; height: 28px; border-radius: 999px; background: var(--tonal); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600;">{{col.initials}}</span>
+              <span><span style="display: block; font-size: 13px; line-height: 18px; font-weight: 600;">{{col.name}}</span><span style="display: block; font-size: 11px; line-height: 14px; color: var(--muted);">{{col.role}}</span></span>
+            </div>
+          </sc-for>
+
+          <div style="position: relative; height: 384px;">
+            <sc-for list="{{hours}}" as="h" hint-placeholder-count="6">
+              <span style="position: absolute; right: 8px; top: {{h.top}}; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums;">{{h.label}}</span>
+            </sc-for>
+          </div>
+          <sc-for list="{{staff}}" as="col" hint-placeholder-count="4">
+            <div style="position: relative; height: 384px; border-left: 1px solid var(--line); background-image: linear-gradient(var(--line) 1px, transparent 1px); background-size: 100% 64px;">
+              <sc-for list="{{col.blocks}}" as="b" hint-placeholder-count="2">
+                <div style="position: absolute; left: 3px; right: 3px; top: {{b.top}}; height: {{b.height}}; box-sizing: border-box; padding: 4px 8px; border-radius: 6px; background: {{b.bg}}; border: {{b.border}}; overflow: hidden;">
+                  <div style="display: flex; align-items: center; gap: 5px; font-size: 13px; line-height: 16px; font-weight: 600; text-decoration: {{b.strike}};"><span style="flex: none; width: 6px; height: 6px; border-radius: 999px; background: {{b.dot}};"></span>{{b.title}}</div>
+                  <div style="font-size: 12px; line-height: 16px; color: var(--muted); font-variant-numeric: tabular-nums;">{{b.meta}}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"collapsed":{"editor":"boolean","default":false},"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"lang":{"editor":"enum","options":["vi","en"],"default":"vi"},"$preview":{"width":1440,"height":900}}'>
+const PALETTE = {
+  light: { surface: '#f7f9f8', raised: '#ffffff', sunken: '#eef2f1', tonal: '#eef2f1', hover: '#e3e9e7', selected: '#ffffff', line: '#e0e6e4', ink: '#121817', muted: '#56625f', brand: '#1a6650', brandSoft: '#e1f0ea', onBrand: '#ffffff', mayBg: '#f8e5ea', mayFg: '#a63d57', shadowCard: '0 1px 2px rgba(18,24,23,0.04), 0 4px 16px rgba(18,24,23,0.06)',
+    st: { confirmed: ['#e6edfb', '#1d4ea8'], checkedIn: ['#dcefe7', '#1a6650'], completed: ['#eceff0', '#47524f'], noShow: ['#fbeadb', '#9a430a'] } },
+  dark: { surface: '#0f1413', raised: '#161c1b', sunken: '#0a0e0d', tonal: '#1d2524', hover: '#27312f', selected: '#2f3b38', line: '#242d2b', ink: '#edf2f0', muted: '#a2aeaa', brand: '#5cc3a1', brandSoft: '#12302a', onBrand: '#0f1413', mayBg: '#3a1922', mayFg: '#e991a6', shadowCard: '0 1px 2px rgba(0,0,0,0.40), 0 4px 16px rgba(0,0,0,0.35)',
+    st: { confirmed: ['#17233f', '#94b4ff'], checkedIn: ['#12302a', '#5cc3a1'], completed: ['#1d2524', '#b5bfbc'], noShow: ['#3a2210', '#f2a466'] } }
+};
+const COPY = {
+  vi: { navLabel: 'Điều hướng chính', switcher: 'Đổi cơ sở hoặc chi nhánh, đang ở Salon Tóc Mây, Quận 3', branch: 'Chi nhánh Quận 3', groups: [['Vận hành', ['Tổng quan', 'Hôm nay', 'Lịch', 'Khách hàng', 'Hóa đơn']], ['Nhân sự', ['Xếp ca', 'Nghỉ phép', 'Hoa hồng']], ['Quản lý', ['Báo cáo', 'Nhật ký thao tác', 'Cài đặt']]], langLabel: 'Đổi ngôn ngữ, đang dùng tiếng Việt', themeLabel: 'Đổi giao diện sáng hoặc tối', role: 'Chủ cơ sở', logout: 'Đăng xuất', crumbLabel: 'Đường dẫn', crumbRoot: 'Vận hành', crumbPage: 'Lịch', collapse: 'Thu gọn thanh bên', expand: 'Mở rộng thanh bên' },
+  en: { navLabel: 'Main navigation', switcher: 'Switch business or branch, currently Salon Tóc Mây, District 3', branch: 'District 3 branch', groups: [['Operations', ['Overview', 'Today', 'Calendar', 'Clients', 'Invoices']], ['Staff', ['Shifts', 'Time off', 'Commission']], ['Manage', ['Reports', 'Audit log', 'Settings']]], langLabel: 'Change language, currently English', themeLabel: 'Switch light or dark theme', role: 'Owner', logout: 'Sign out', crumbLabel: 'Breadcrumb', crumbRoot: 'Operations', crumbPage: 'Calendar', collapse: 'Collapse sidebar', expand: 'Expand sidebar' }
+};
+const ICONS = [
+  ['M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z', 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41', 'M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM16 2v4M8 2v4M3 10h18', 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 3a4 4 0 1 0 0 8a4 4 0 1 0 0-8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75', 'M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1zM8 8h8M8 12h8M8 16h5'],
+  ['M12 2a10 10 0 1 0 0 20a10 10 0 1 0 0-20M12 6v6l4 2', 'M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM3 10h18M10 14l4 4M14 14l-4 4', 'M19 5 5 19M6.5 4a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5M17.5 15a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5'],
+  ['M3 3v18h18M8 17V10M13 17V6M18 17v-4', 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', 'M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6']
+];
+const SUN = 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41';
+const MOON = 'M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z';
+const STAFF = [
+  ['Lan', 'NL', 'Thợ chính', [[0, 45, 'confirmed', 'Chị Hạnh · Nhuộm', '09:00–09:45 · Ghế 2'], [45, 40, 'wait', 'Chờ lên màu', ''], [85, 20, 'confirmed', 'Xả, sấy', '10:25–10:45'], [120, 45, 'checkedIn', 'Chị Thu · Cắt', '11:00–11:45 · Ghế 2']]],
+  ['Hùng', 'TH', 'Thợ', [[30, 45, 'completed', 'Anh Minh · Cắt + gội', '09:30–10:15 · Ghế 1'], [180, 90, 'confirmed', 'Anh Quân · Uốn', '12:00–13:30 · Ghế 1']]],
+  ['Vy', 'LV', 'Kỹ thuật viên spa', [[15, 60, 'checkedIn', 'Chị Lan Anh · Đá nóng', '09:15–10:15 · Giường 1'], [120, 75, 'confirmed', 'Chị Mai · Chăm sóc da', '11:00–12:15 · Giường 1']]],
+  ['Thảo', 'PT', 'Kỹ thuật viên spa', [[90, 60, 'hold', 'Đang giữ chỗ · 08:12', '10:30–11:30 · Phòng 2'], [240, 45, 'noShow', 'Chị Ngân · Gội dưỡng sinh', '13:00–13:45 · Không đến']]]
+];
+const px = (min) => Math.round(min * 64 / 60) + 'px';
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.state || {};
+    const theme = s.theme || this.props.theme || 'light';
+    const lang = s.lang || this.props.lang || 'vi';
+    const collapsed = s.collapsed === undefined ? Boolean(this.props.collapsed) : s.collapsed;
+    const expanded = !collapsed;
+    const c = PALETTE[theme];
+    const t = COPY[lang];
+    const block = (b) => {
+      const kind = b[2];
+      const base = { top: px(b[0]), height: px(b[1]), title: b[3], meta: b[4], border: '0', strike: 'none' };
+      if (kind === 'wait') return Object.assign(base, { bg: 'repeating-linear-gradient(135deg, ' + c.st.confirmed[0] + ' 0 4px, ' + c.raised + ' 4px 10px)', dot: 'transparent' });
+      if (kind === 'hold') return Object.assign(base, { bg: 'transparent', border: '1.5px dashed ' + c.brand, dot: c.brand });
+      return Object.assign(base, { bg: c.st[kind][0], dot: c.st[kind][1] });
+    };
+    return {
+      c: c,
+      t: t,
+      expanded: expanded,
+      expandedStr: expanded ? 'true' : 'false',
+      justify: expanded ? 'flex-start' : 'center',
+      sideW: expanded ? '248px' : '68px',
+      sideLabel: expanded ? t.collapse : t.expand,
+      toolsDir: expanded ? 'row' : 'column',
+      accountBg: expanded ? c.tonal : 'transparent',
+      langCode: lang === 'vi' ? 'VI' : 'EN',
+      themeIcon: theme === 'dark' ? SUN : MOON,
+      groups: t.groups.map((g, gi) => ({
+        label: g[0],
+        items: g[1].map((label, i) => {
+          const cur = gi === 0 && i === 2;
+          return { label: label, d: ICONS[gi][i], showLabel: expanded, aria: expanded ? null : label, current: cur ? 'page' : null,
+            bg: cur ? c.brandSoft : 'transparent', fg: cur ? c.brand : c.ink, weight: cur ? 600 : 500, justify: expanded ? 'flex-start' : 'center' };
+        })
+      })),
+      hours: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00'].map((label, i) => ({ label: label, top: (i * 64 + 2) + 'px' })),
+      staff: STAFF.map((x) => ({ name: x[0], initials: x[1], role: x[2], blocks: x[3].map(block) })),
+      toggleSide: () => this.setState({ collapsed: expanded }),
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      toggleLang: () => this.setState({ lang: lang === 'vi' ? 'en' : 'vi' })
+    };
+  }
+}
+</script>
+</body>
+</html>

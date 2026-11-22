@@ -1356,6 +1356,97 @@ Bước này không thêm màn hình mới. Không chặn trang khi chưa đăng
 - **Quản trị nền tảng:** đăng xuất, đăng nhập tài khoản quản trị, vào thẳng `/mock/admin`; đăng xuất về trang đăng nhập.
 - **Tải lại:** F5 ở bất kỳ bước nào thì vẫn thấy lịch đã đặt, giá đã sửa, vẫn đăng nhập. "Đặt lại dữ liệu mock" thì về dữ liệu gốc.
 
+## Bước 20. Trang tài khoản mới, cửa vào mock, đăng nhập super admin
+
+Sau khi PR #14 merge. Theo góp ý của cô (D-16: chỉ làm cho cơ sở làm đẹp) và buổi review ngày 22/11. Bản vẽ: `design/screens/TaiKhoan*.dc.html` (xem `design/README.md`). Quyết định liên quan: D-16, T-18 (super admin trên tên miền riêng). Làm trên nhánh `feat/mock-auth-pages`, mỗi mục 20a–20g một commit, mở PR mới, không merge.
+
+Trang đăng nhập khách trên trang tiệm (`/mock/[tenant]/login`) **không đổi**.
+
+### 20a. `AuthPage` chia đôi
+
+Sửa `AuthPage` trong `components/sapio/signup-layout.tsx`; mọi trang dùng nó (login, signup, forgot-password, reset-password, invite, select-workspace) đổi theo, không sửa từng trang.
+
+- Từ 900px: hai cột trong khung cách mép 16px, khe 16px.
+  - **Trái** (`AuthAside`, component mới): rộng 46%, tối đa 680px, cao bằng màn hình trừ 32px (`calc(100dvh - 32px)`, tối thiểu 760px), bo `radius-lg` + 4px (24px), nền `brand` (`#1a6650` ở cả hai theme, vì đây là khối trang trí, không phải nền đen), chữ trắng.
+  - **Phải:** form như hiện tại, rộng tối đa 400px (select-workspace 480px, signup 420px), căn giữa theo chiều dọc. Thanh trên cùng căn phải: link ngữ cảnh (như `AuthTop` hiện tại), nút ngôn ngữ (20b), nút sáng/tối.
+- Dưới 900px: ẩn `AuthAside`, giữ một cột như `TaiKhoanDienThoai.dc.html`: dòng trên có chữ "Sapio" bên trái, hai nút bên phải; nút cao 44px.
+- Nút sáng/tối dùng `useTheme()` của Fumadocs như `mock-toolbar.tsx`, bấm là đổi giữa `light` và `dark`; icon mặt trăng khi đang sáng, mặt trời khi đang tối; có `aria-label` và `.sp-tooltip`.
+
+### 20b. `AuthAside`: khối minh họa
+
+- Nội dung chép đúng `TaiKhoanMinhHoa.dc.html`, từ trên xuống:
+  - dòng "Sapio" và nhãn nhỏ;
+  - tiêu đề 38/44px, đậm 700, và một câu mô tả;
+  - thẻ lịch hẹn thu nhỏ (rộng 420px): hai cột "Ghế 2 · Thợ Lan" và "Giường 1 · KTV Vy", có đoạn chờ vạch chéo, khối "Đang giữ chỗ" viền đứt;
+  - thẻ "Lịch mới 09:15" lệch phải, gối 28px lên thẻ lịch;
+  - hình vẽ SVG ở dải dưới: ghế, xe đẩy mỹ phẩm, cây, giường spa, cửa sổ vòm. **Không chồng lên thẻ.** Chép nguyên `path` và màu từ file, `aria-hidden="true"`;
+  - hàng chip tính năng: Lịch hẹn, Liệu trình, Nhân viên, Hoa hồng, Thanh toán.
+- Hai thẻ bên trong dùng màu theme sáng cố định (nền trắng, chữ `ink`), không đổi theo theme, vì chúng nằm trên khối ngọc.
+- Prop `variant`: `login | signup | forgot | workspace | admin`. Bốn bản đầu lấy chữ từ `ASIDE_COPY` trong file. Bản `admin` dùng cho 20f:
+  - nhãn "Quản trị nền tảng";
+  - tiêu đề "Vận hành Sapio";
+  - mô tả "Theo dõi cơ sở, gói và nhật ký trên toàn nền tảng. Chỉ dành cho tài khoản quản trị.";
+  - giữ hình vẽ, bỏ chip.
+- Trang nào dùng bản nào: login → `login`; signup → `signup`; forgot-password và reset-password → `forgot`; invite và select-workspace → `workspace`.
+
+### 20c. Ngôn ngữ của nhóm trang tài khoản
+
+- Chỉ dịch các trang dùng `AuthPage` và `AuthAside`. Khu nội bộ, trang khách và email giữ tiếng Việt.
+- Thêm `mock/auth-copy.ts`: một object `{ vi: {...}, en: {...} }` theo từng trang. Lấy chữ tiếng Anh từ `COPY` trong các file `TaiKhoan*.dc.html`; chữ của trang reset-password và invite tự dịch theo cùng giọng văn.
+- Lỗi và thông báo của BR-76 và BR-77 (số lần còn lại, tạm khóa, đã gửi link) cũng có bản tiếng Anh.
+- Nút ngôn ngữ: icon quả địa cầu + "VI" hoặc "EN". Lựa chọn lưu cùng store mock của Bước 19 (sessionStorage), mặc định `vi`. `lang` của thẻ `<html>` đổi theo.
+
+### 20d. Đăng ký còn 3 bước (D-16)
+
+- Bỏ bước "Chọn ngành": `STEPS` trong `mock/signup.ts` còn `account, verify, business, done`. `SignupSteps` hiện 3 bước: Tài khoản → Xác minh email → Thông tin cơ sở.
+- Bản nháp đăng ký luôn dùng gói mẫu của salon tóc làm dịch vụ mẫu, không hỏi người dùng. Xóa `industry-step.tsx`. Phần dọn `industryTemplate` và các màn "Gói cấu hình ngành" để đợt sau, chưa làm ở đây.
+- Link `?step=industry` cũ chuyển về `?step=business`.
+
+### 20e. Ô mật khẩu
+
+- `PasswordField`: khi ô đang focus mà Caps Lock bật (`e.getModifierState('CapsLock')` ở `keydown`/`keyup`), hiện dòng "Caps Lock đang bật." dưới ô, nền `status-no-show-soft`, chữ `status-no-show`, icon mũi tên lên, `role="status"`, nối vào ô bằng `aria-describedby`. Rời ô thì ẩn.
+- Trang đăng nhập: link "Quên mật khẩu?" chuyển lên cùng hàng với nhãn "Mật khẩu", căn phải, như bản vẽ. Dòng "Bạn là khách đặt lịch?…" nằm dưới nút Đăng nhập, cách một đường kẻ `line`.
+
+### 20f. Cửa vào mock và đăng nhập super admin (T-18)
+
+- `/mock` không còn là danh sách màn hình: chuyển thẳng tới `/mock/login`.
+- Danh sách màn hình (cùng ba cửa và nút "Đặt lại dữ liệu mock" của 19c) chuyển sang `/mock/screens`, bộ lọc vẫn giữ trên URL. Sửa mọi link đang trỏ `/mock` làm danh sách:
+  - trang giới thiệu;
+  - `AccountTools`;
+  - các trang tài liệu trong `content/docs`;
+  - `mock/screens.ts`.
+  `AccountTools` có thêm dòng "Danh sách màn hình" tới `/mock/screens`.
+- Trang mới `/mock/admin/login`:
+  - dùng `AuthPage` với `AuthAside variant="admin"`;
+  - có email, mật khẩu, nút "Đăng nhập";
+  - không có "Giữ đăng nhập", "Quên mật khẩu?" hay "Đăng ký cơ sở". Thay vào đó là dòng nhỏ "Quên mật khẩu thì nhờ quản trị viên khác đặt lại.";
+  - khóa tạm theo BR-76 như trang nhân sự.
+- Phiên super admin lưu tách khỏi phiên nhân sự (`adminSession` riêng trong account store), để mô phỏng cookie riêng của T-18.
+  - `/mock/login` gặp tài khoản `platformAdmin`, hoặc `/mock/admin/login` gặp tài khoản không phải super admin: báo đúng câu sai chung của BR-76, có đếm lần sai.
+  - Bỏ nhánh "đăng nhập nhân sự xong thì sang `/mock/admin`" trong `login-screen.tsx`.
+- Khu `/mock/admin`:
+  - chưa có phiên super admin thì chuyển tới `/mock/admin/login`;
+  - "Đăng xuất" xóa `adminSession` rồi về `/mock/admin/login`;
+  - danh sách tài khoản mẫu trong `AccountTools` của `/mock/admin/login` chỉ hiện tài khoản super admin, của `/mock/login` chỉ hiện tài khoản nhân sự.
+- `content/docs/thiet-ke/man-hinh.md`: thêm MH-63 "Đăng nhập quản trị nền tảng", route `/admin/login` trên `admin.<domain>`, mock `/mock/admin/login`. Thêm vào `mock/screens.ts`.
+
+### 20g. Kiểm và hoàn tất
+
+- Các lệnh kiểm phải xanh: `pnpm check:availability`, `pnpm check:account`, `pnpm check:platform`, `pnpm check:flow`, `pnpm build`, `pnpm typecheck`, `prettier --check`. Thêm ca kiểm vào `check:account`:
+  - đăng nhập sai cửa (super admin ở trang nhân sự và ngược lại) bị từ chối;
+  - đăng nhập sai cửa có đếm vào khóa 15 phút;
+  - `STEPS` không còn `industry`.
+- Mở PR mới, mô tả theo 20a–20g, có mục "Tự quyết". Ghi một mục Tiến độ.
+
+**Xong khi** (người dùng tự kiểm):
+- Mở `/mock` thì vào thẳng trang đăng nhập chia đôi, giống `TaiKhoanDangNhap.dc.html`: hai cột cao bằng nhau, thẻ không che hình vẽ.
+- Bấm nút sáng/tối thì cả trang đổi theme, tải lại vẫn giữ. Bấm VI/EN thì form và khối trái đổi ngôn ngữ, tải lại vẫn giữ.
+- Thu cửa sổ dưới 900px thì khối trái ẩn, form một cột.
+- Gõ mật khẩu khi bật Caps Lock thì thấy cảnh báo.
+- Đăng ký đi đủ 3 bước, không còn "Chọn ngành". Signup, quên mật khẩu, chọn cơ sở, nhận lời mời đều có layout chia đôi với đúng tiêu đề bên trái.
+- Đăng nhập super admin ở `/mock/login` thì bị báo sai. Ở `/mock/admin/login` thì vào được khu quản trị; đăng xuất thì về `/mock/admin/login`. Mở `/mock/admin` khi chưa đăng nhập cũng về trang này.
+- `/mock/screens` vẫn mở được mọi màn.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -1527,4 +1618,19 @@ mục 19a đến 19g, mỗi mục một commit. Không thêm màn hình mới, k
 trang khi chưa đăng nhập. Lưu bằng sessionStorage, đọc sau khi gắn component, bọc try/catch; tiền vẫn là
 bigint. Chỉ chạy các lệnh kiểm trong CLAUDE.md và các lệnh check của mục 19g. Mở PR mới, không merge.
 Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy tắc nghiệp vụ.
+```
+
+Bước 20:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-auth-pages.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, D-16 trong quyet-dinh.md,
+T-16 và T-18 trong quyet-dinh-ky-thuat.md, BR-73, BR-76, BR-77 trong quy-tac.md, design/README.md,
+design/sapio/README.md và các file design/screens/TaiKhoan*.dc.html. Làm Bước 20 trong
+datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md, mục 20a đến 20g, mỗi mục một commit.
+Sửa ở component dùng chung (AuthPage, AuthAside, PasswordField), không sửa từng trang. Chỉ dùng biến
+trong tokens.css và class trong components.css; số đo, chữ và SVG lấy đúng từ các file TaiKhoan*.dc.html.
+Không đổi trang đăng nhập của khách (/mock/[tenant]/login). Chỉ chạy các lệnh kiểm trong CLAUDE.md và
+các lệnh check của mục 20g. Mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy
+tắc nghiệp vụ.
 ```

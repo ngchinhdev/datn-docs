@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Khối minh họa trang tài khoản</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="box-sizing: border-box; width: 100%; height: calc(100vh - 32px); min-height: 760px; padding: 40px; border-radius: 24px; background: #1a6650; color: #ffffff; font-family: 'Be Vietnam Pro', 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; gap: 28px; overflow: hidden; position: relative;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <span style="font-size: 24px; line-height: 28px; font-weight: 700; letter-spacing: -0.02em;">Sapio</span>
+    <span style="font-size: 12px; line-height: 16px; font-weight: 500; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,0.14); color: #e1f0ea;">{{t.kicker}}</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px; max-width: 480px;">
+    <h2 style="margin: 0; font-size: 38px; line-height: 44px; font-weight: 700; letter-spacing: -0.02em;">{{t.title}}</h2>
+    <p style="margin: 0; font-size: 15px; line-height: 22px; color: #d3ebe1;">{{t.lead}}</p>
+  </div>
+
+  <div style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;">
+    <div style="position: relative; z-index: 1; width: 420px; max-width: 100%; box-sizing: border-box; padding: 14px; border-radius: 14px; background: #ffffff; color: #121817; box-shadow: 0 2px 6px rgba(18,24,23,0.10), 0 16px 40px rgba(9,40,31,0.35); display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <span style="font-size: 13px; line-height: 18px; font-weight: 600;">{{t.today}}</span>
+        <span style="font-size: 12px; line-height: 16px; color: #56625f;">{{t.date}}</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 11px; line-height: 16px; font-weight: 500; color: #56625f; padding-bottom: 4px; border-bottom: 1px solid #e0e6e4;">{{t.col1}}</span>
+          <div style="padding: 6px 8px; border-radius: 6px; background: #e6edfb;">
+            <div style="display: flex; align-items: center; gap: 5px; font-size: 12px; line-height: 16px; font-weight: 600;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #1d4ea8; flex: none;"></span>{{t.appt1}}</div>
+            <div style="font-size: 11px; line-height: 15px; color: #56625f; font-variant-numeric: tabular-nums;">09:00–09:45 · {{t.confirmed}}</div>
+          </div>
+          <div style="height: 38px; box-sizing: border-box; padding: 4px 8px; border-radius: 6px; background: repeating-linear-gradient(135deg, #e6edfb 0 4px, #ffffff 4px 10px); font-size: 11px; line-height: 15px; color: #1d4ea8; font-weight: 500;">{{t.wait}}</div>
+          <div style="padding: 5px 8px; border-radius: 6px; background: #e6edfb;">
+            <div style="font-size: 12px; line-height: 16px; font-weight: 600;">{{t.appt1b}}</div>
+            <div style="font-size: 11px; line-height: 15px; color: #56625f; font-variant-numeric: tabular-nums;">10:25–10:45</div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 11px; line-height: 16px; font-weight: 500; color: #56625f; padding-bottom: 4px; border-bottom: 1px solid #e0e6e4;">{{t.col2}}</span>
+          <div style="height: 14px;"></div>
+          <div style="padding: 6px 8px; border-radius: 6px; background: #dcefe7; min-height: 58px; box-sizing: border-box;">
+            <div style="display: flex; align-items: center; gap: 5px; font-size: 12px; line-height: 16px; font-weight: 600;"><span style="width: 6px; height: 6px; border-radius: 999px; background: #1a6650; flex: none;"></span>{{t.appt2}}</div>
+            <div style="font-size: 11px; line-height: 15px; color: #56625f; font-variant-numeric: tabular-nums;">09:15–10:15 · {{t.checkedIn}}</div>
+          </div>
+          <div style="padding: 5px 8px; border-radius: 6px; border: 1.5px dashed #1a6650; font-size: 11px; line-height: 15px; color: #1a6650; font-weight: 500; font-variant-numeric: tabular-nums;">10:30 · {{t.holding}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="position: relative; z-index: 2; align-self: flex-end; margin-top: -28px; width: 260px; box-sizing: border-box; padding: 12px; border-radius: 12px; background: #ffffff; color: #121817; box-shadow: 0 2px 6px rgba(18,24,23,0.10), 0 12px 32px rgba(9,40,31,0.35); display: flex; gap: 10px; align-items: flex-start;">
+      <span style="flex: none; width: 32px; height: 32px; border-radius: 999px; background: #e1f0ea; color: #1a6650; display: flex; align-items: center; justify-content: center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+      </span>
+      <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; line-height: 18px; font-weight: 600;"><span>{{t.newBooking}}</span><span style="font-weight: 500; color: #56625f; font-variant-numeric: tabular-nums;">09:15</span></div>
+        <div style="font-size: 12px; line-height: 16px; color: #56625f;">{{t.newBookingMeta}}</div>
+      </div>
+    </div>
+
+    <svg viewBox="0 0 560 220" preserveAspectRatio="xMidYMax meet" aria-hidden="true" style="flex: 1 1 auto; min-height: 150px; width: 100%; margin-top: 16px;">
+      <path d="M380 212 V86 a70 70 0 0 1 140 0 V212 Z" fill="#1f7359"></path>
+      <path d="M450 18 V212 M380 120 H520" stroke="#2c8a6d" stroke-width="4"></path>
+      <rect x="70" y="92" width="62" height="70" rx="20" fill="#2c8a6d"></rect>
+      <rect x="58" y="152" width="86" height="22" rx="11" fill="#33977a"></rect>
+      <rect x="95" y="174" width="12" height="30" rx="4" fill="#2c8a6d"></rect>
+      <ellipse cx="101" cy="205" rx="40" ry="7" fill="#2c8a6d"></ellipse>
+      <rect x="172" y="140" width="68" height="5" rx="2.5" fill="#2c8a6d"></rect>
+      <rect x="172" y="180" width="68" height="5" rx="2.5" fill="#2c8a6d"></rect>
+      <rect x="176" y="140" width="4" height="66" fill="#2c8a6d"></rect>
+      <rect x="232" y="140" width="4" height="66" fill="#2c8a6d"></rect>
+      <rect x="182" y="114" width="12" height="26" rx="4" fill="#9fdcc6" fill-opacity="0.75"></rect>
+      <rect x="198" y="122" width="11" height="18" rx="4" fill="#e991a6" fill-opacity="0.85"></rect>
+      <rect x="214" y="118" width="14" height="22" rx="5" fill="#e1f0ea" fill-opacity="0.7"></rect>
+      <rect x="186" y="168" width="40" height="12" rx="6" fill="#9fdcc6" fill-opacity="0.5"></rect>
+      <path d="M278 212 h40 l-6 -40 h-28 Z" fill="#33977a"></path>
+      <ellipse cx="286" cy="142" rx="12" ry="32" fill="#3fa587" transform="rotate(-24 286 142)"></ellipse>
+      <ellipse cx="310" cy="136" rx="11" ry="36" fill="#4bb594" transform="rotate(18 310 136)"></ellipse>
+      <ellipse cx="298" cy="128" rx="10" ry="40" fill="#3fa587"></ellipse>
+      <rect x="340" y="158" width="200" height="20" rx="10" fill="#33977a"></rect>
+      <rect x="354" y="178" width="10" height="32" rx="3" fill="#2c8a6d"></rect>
+      <rect x="516" y="178" width="10" height="32" rx="3" fill="#2c8a6d"></rect>
+      <rect x="476" y="141" width="54" height="17" rx="8.5" fill="#e1f0ea" fill-opacity="0.85"></rect>
+      <ellipse cx="380" cy="153" rx="18" ry="5" fill="#9fdcc6" fill-opacity="0.6"></ellipse>
+      <ellipse cx="380" cy="146" rx="13" ry="4.5" fill="#9fdcc6" fill-opacity="0.75"></ellipse>
+      <ellipse cx="380" cy="140" rx="9" ry="3.5" fill="#e1f0ea" fill-opacity="0.9"></ellipse>
+      <path d="M16 212 H544" stroke="#2c8a6d" stroke-width="3" stroke-linecap="round"></path>
+    </svg>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+    <sc-for list="{{chips}}" as="chip" hint-placeholder-count="5">
+      <span style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.24); font-size: 13px; line-height: 18px; font-weight: 500;">
+        <span style="width: 6px; height: 6px; border-radius: 999px; background: #9fdcc6;"></span>{{chip.label}}
+      </span>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"variant":{"editor":"enum","options":["login","signup","forgot","workspace"],"default":"login"},"lang":{"editor":"enum","options":["vi","en"],"default":"vi"},"$preview":{"width":640,"height":868}}'>
+const ASIDE_COPY = {
+  vi: {
+    login: { kicker: 'Dành cho salon tóc và spa', title: 'Lịch hẹn của tiệm, gọn trong một màn hình', lead: 'Xếp thợ, ghế, giường và phòng cùng lúc. Khách tự đặt trên trang của tiệm, bạn chỉ việc đón.' },
+    signup: { kicker: 'Dùng thử 7 ngày', title: 'Mở trang đặt lịch cho tiệm ngay hôm nay', lead: 'Tạo tài khoản, xác minh email, nhập thông tin cơ sở. Hết 7 ngày dùng thử mới cần chọn gói.' },
+    forgot: { kicker: 'Bảo vệ tài khoản', title: 'Lấy lại quyền vào tiệm', lead: 'Link đặt lại gửi về email đăng nhập và chỉ dùng được một lần.' },
+    workspace: { kicker: 'Một tài khoản, nhiều cơ sở', title: 'Hôm nay bạn làm ở tiệm nào?', lead: 'Mỗi cơ sở có lịch, nhân viên và quyền riêng. Mở mỗi cơ sở ở một tab cũng được.' },
+    card: { today: 'Hôm nay', date: 'Thứ Bảy, 21/11', col1: 'Ghế 2 · Thợ Lan', col2: 'Giường 1 · KTV Vy', appt1: 'Chị Hạnh · Nhuộm', confirmed: 'Đã xác nhận', wait: 'Chờ lên màu', appt1b: 'Xả, sấy', appt2: 'Anh Minh · Đá nóng', checkedIn: 'Đã check-in', holding: 'Đang giữ chỗ', newBooking: 'Lịch mới', newBookingMeta: 'Chị Ngọc · Cắt + gội, 14:00 hôm nay' },
+    chips: ['Lịch hẹn', 'Liệu trình', 'Nhân viên', 'Hoa hồng', 'Thanh toán']
+  },
+  en: {
+    login: { kicker: 'For hair salons and spas', title: 'Your salon’s day, on one screen', lead: 'Schedule staff, chairs, beds and rooms together. Clients book on your page, you just welcome them.' },
+    signup: { kicker: '7-day free trial', title: 'Open your booking page today', lead: 'Create an account, verify your email, add your business. Pick a plan only after the 7-day trial.' },
+    forgot: { kicker: 'Account security', title: 'Get back into your salon', lead: 'The reset link goes to your sign-in email and works only once.' },
+    workspace: { kicker: 'One account, many businesses', title: 'Where are you working today?', lead: 'Each business has its own calendar, staff and permissions. Open each one in its own tab if you like.' },
+    card: { today: 'Today', date: 'Sat, 21 Nov', col1: 'Chair 2 · Lan', col2: 'Bed 1 · Vy', appt1: 'Ms. Hanh · Colour', confirmed: 'Confirmed', wait: 'Processing', appt1b: 'Rinse, dry', appt2: 'Mr. Minh · Hot stone', checkedIn: 'Checked in', holding: 'Holding', newBooking: 'New booking', newBookingMeta: 'Ms. Ngoc · Cut + wash, 14:00 today' },
+    chips: ['Appointments', 'Packages', 'Staff', 'Commission', 'Payments']
+  }
+};
+class Component extends DCLogic {
+  renderVals() {
+    const lang = this.props.lang === 'en' ? 'en' : 'vi';
+    const variant = ASIDE_COPY[lang][this.props.variant] ? this.props.variant : 'login';
+    const copy = ASIDE_COPY[lang];
+    return {
+      t: Object.assign({}, copy[variant], copy.card),
+      chips: copy.chips.map((label) => ({ label: label }))
+    };
+  }
+}
+</script>
+</body>
+</html>
