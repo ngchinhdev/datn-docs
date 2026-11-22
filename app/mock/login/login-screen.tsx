@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { useAccountStore } from '@/components/mock/account-store';
 import { AccountTools } from '@/components/mock/account-tools';
+import { useAuthText } from '@/components/mock/auth-text';
 import { Notice, PasswordField } from '@/components/mock/password-field';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
@@ -29,6 +30,7 @@ import { formatTime } from '@/mock/time';
 export function LoginScreen() {
   const router = useRouter();
   const store = useAccountStore();
+  const { t } = useAuthText();
   const { now, accounts, members, records, patch } = store;
   const initialEmail = useSearchParams().get('email') ?? '';
   const [email, setEmail] = useState(initialEmail);
@@ -92,8 +94,8 @@ export function LoginScreen() {
 
   const errorText = failed
     ? remaining
-      ? `Email hoặc mật khẩu chưa đúng. Còn ${remaining} lần thử, sau đó tạm khóa ${LOCK_MINUTES} phút.`
-      : 'Email hoặc mật khẩu chưa đúng.'
+      ? t.login.wrongRemaining(remaining, LOCK_MINUTES)
+      : t.login.wrong
     : null;
 
   return (
@@ -105,24 +107,20 @@ export function LoginScreen() {
             href="/mock/signup"
             className="px-3 py-2.5 text-sm font-semibold no-underline max-[899px]:hidden"
           >
-            Đăng ký cơ sở
+            {t.login.signupTop}
           </Link>
         }
       >
         <div>
-          <h1 className="sp-auth__title">Đăng nhập</h1>
-          <p className="sp-auth__lead">
-            Dành cho chủ cơ sở và nhân viên. Khách đặt lịch đăng nhập trên trang của tiệm bằng mã
-            gửi qua email.
-          </p>
+          <h1 className="sp-auth__title">{t.login.title}</h1>
+          <p className="sp-auth__lead">{t.login.lead}</p>
         </div>
         <form onSubmit={submit} noValidate className="flex flex-col gap-(--space-4)">
           {until && (
             <Notice tone="danger" role="alert" icon={<Lock size={18} aria-hidden="true" />}>
-              <strong>Tạm khóa đăng nhập tới {formatTime(until)}.</strong>
+              <strong>{t.login.lockedTitle(formatTime(until))}</strong>
               <br />
-              Mật khẩu sai {MAX_FAILED} lần liên tiếp. Đã gửi email báo cho {normalizeEmail(email)}.
-              Muốn vào ngay thì đặt lại mật khẩu.
+              {t.login.lockedBody(MAX_FAILED, normalizeEmail(email))}
             </Notice>
           )}
           <Field id="li-mail" label="Email" size="md">
@@ -130,6 +128,7 @@ export function LoginScreen() {
               id="li-mail"
               type="email"
               autoComplete="email"
+              placeholder={t.login.emailPlaceholder}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -139,7 +138,7 @@ export function LoginScreen() {
           </Field>
           <PasswordField
             id="li-pass"
-            label="Mật khẩu"
+            label={t.common.password}
             value={password}
             onChange={setPassword}
             autoComplete="current-password"
@@ -152,33 +151,34 @@ export function LoginScreen() {
               onChange={(e) => setPersistent(e.target.checked)}
             />
             <span>
-              Giữ đăng nhập trên máy này
-              <span className="sp-check__hint">
-                Không chọn thì đăng xuất khi đóng trình duyệt hoặc sau 12 giờ.
-              </span>
+              {t.login.keep}
+              <span className="sp-check__hint">{t.login.keepHint}</span>
             </span>
           </label>
           <Button type="submit" variant="primary" className="h-12!" disabled={Boolean(until)}>
-            {until ? `Đăng nhập lại sau ${formatWait(waitSeconds)}` : 'Đăng nhập'}
+            {until ? t.login.submitLocked(formatWait(waitSeconds)) : t.login.submit}
           </Button>
           {until ? (
             <Link
               href={`/mock/forgot-password?email=${encodeURIComponent(email.trim())}`}
               className="sp-btn sp-btn--secondary h-12! no-underline"
             >
-              Đặt lại mật khẩu
+              {t.login.resetPassword}
             </Link>
           ) : (
             <Link
               href={`/mock/forgot-password?email=${encodeURIComponent(email.trim())}`}
               className="self-center text-sm font-medium"
             >
-              Quên mật khẩu?
+              {t.common.forgot}
             </Link>
           )}
         </form>
+        <p className="m-0 border-t border-(--line) pt-3.5 text-[13px] leading-[18px] text-(--ink-muted)">
+          {t.login.guestNote}
+        </p>
         <p className="m-0 text-center text-sm text-(--ink-muted)">
-          Chưa có cơ sở trên Sapio? <Link href="/mock/signup">Đăng ký, dùng thử 7 ngày</Link>
+          {t.login.noAccount} <Link href="/mock/signup">{t.login.noAccountLink}</Link>
         </p>
       </AuthPage>
       <AccountTools

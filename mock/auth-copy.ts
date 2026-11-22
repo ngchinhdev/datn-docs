@@ -1,134 +1,548 @@
 /*
- * Text of the account pages, Vietnamese and English. The block on the left of those pages is
- * `aside`; the rest is added per page.
+ * Text of the account pages (the pages built on `AuthPage` with the block on the left), in
+ * Vietnamese and English. Pure: pages read it through `useAuthText()`, and the validators in
+ * `mock/signup.ts` take the language as an argument.
  */
 export type AuthLang = 'vi' | 'en';
 
 export type AsideVariant = 'login' | 'signup' | 'forgot' | 'workspace' | 'admin';
 
-interface AsideText {
-  kicker: string;
-  title: string;
-  lead: string;
-}
-
-interface AsideCopy {
-  variants: Record<AsideVariant, AsideText>;
-  card: {
-    today: string;
-    date: string;
-    col1: string;
-    col2: string;
-    appt1: string;
-    confirmed: string;
-    wait: string;
-    appt1b: string;
-    appt2: string;
-    checkedIn: string;
-    holding: string;
-    newBooking: string;
-    newBookingMeta: string;
-  };
-  chips: string[];
-}
-
-export interface AuthCopy {
-  aside: AsideCopy;
-}
-
-export const AUTH_COPY: Record<AuthLang, AuthCopy> = {
-  vi: {
-    aside: {
-      variants: {
-        login: {
-          kicker: 'Dành cho salon tóc và spa',
-          title: 'Lịch hẹn của tiệm, gọn trong một màn hình',
-          lead: 'Xếp thợ, ghế, giường và phòng cùng lúc. Khách tự đặt trên trang của tiệm, bạn chỉ việc đón.',
-        },
-        signup: {
-          kicker: 'Dùng thử 7 ngày',
-          title: 'Mở trang đặt lịch cho tiệm ngay hôm nay',
-          lead: 'Tạo tài khoản, xác minh email, nhập thông tin cơ sở. Hết 7 ngày dùng thử mới cần chọn gói.',
-        },
-        forgot: {
-          kicker: 'Bảo vệ tài khoản',
-          title: 'Lấy lại quyền vào tiệm',
-          lead: 'Link đặt lại gửi về email đăng nhập và chỉ dùng được một lần.',
-        },
-        workspace: {
-          kicker: 'Một tài khoản, nhiều cơ sở',
-          title: 'Hôm nay bạn làm ở tiệm nào?',
-          lead: 'Mỗi cơ sở có lịch, nhân viên và quyền riêng. Mở mỗi cơ sở ở một tab cũng được.',
-        },
-        admin: {
-          kicker: 'Quản trị nền tảng',
-          title: 'Vận hành Sapio',
-          lead: 'Theo dõi cơ sở, gói và nhật ký trên toàn nền tảng. Chỉ dành cho tài khoản quản trị.',
-        },
+const vi = {
+  common: {
+    langLabel: 'Đổi ngôn ngữ, đang dùng tiếng Việt',
+    themeLabel: 'Đổi giao diện sáng hoặc tối',
+    showPassword: 'Hiện mật khẩu',
+    hidePassword: 'Ẩn mật khẩu',
+    capsLock: 'Caps Lock đang bật.',
+    passwordHint: 'Ít nhất 15 ký tự. Một câu dễ nhớ là đủ.',
+    fullName: 'Họ và tên',
+    password: 'Mật khẩu',
+    login: 'Đăng nhập',
+    forgot: 'Quên mật khẩu?',
+    signOut: 'Đăng xuất',
+    back: 'Quay lại',
+  },
+  errors: {
+    passwordEmpty: 'Nhập mật khẩu.',
+    passwordShort: (min: number) => `Mật khẩu cần ít nhất ${min} ký tự.`,
+    passwordLong: (max: number) => `Mật khẩu dài tối đa ${max} ký tự.`,
+    passwordCommon: 'Mật khẩu này quá phổ biến, chọn câu khác.',
+    emailInvalid: 'Email chưa đúng. Ví dụ: an@tiemcuaban.vn.',
+    emailRegistered: 'Email này đã có một cơ sở. Đăng nhập để vào cơ sở của bạn.',
+    nameEmpty: 'Nhập họ và tên.',
+    termsRequired: 'Cần đồng ý điều khoản để tiếp tục.',
+    slugEmpty: 'Nhập địa chỉ trang đặt lịch.',
+    slugChars: 'Chỉ dùng chữ thường không dấu, số và dấu gạch ngang.',
+    slugHyphen: 'Địa chỉ không bắt đầu hoặc kết thúc bằng dấu gạch ngang.',
+    slugLength: (min: number, max: number) => `Địa chỉ dài từ ${min} đến ${max} ký tự.`,
+    slugReserved: 'Tên này dành riêng cho hệ thống, chọn tên khác.',
+    slugTaken: 'Đã có cơ sở dùng địa chỉ này',
+    businessName: 'Nhập tên cơ sở.',
+    branchName: 'Nhập tên chi nhánh.',
+    phone: 'Số điện thoại chưa đúng. Ví dụ: 028 3930 1234.',
+    address: 'Nhập địa chỉ chi nhánh.',
+    hoursNone: 'Chọn ít nhất một ngày mở cửa.',
+    hoursOrder: 'Giờ đóng cửa phải sau giờ mở cửa.',
+  },
+  aside: {
+    variants: {
+      login: {
+        kicker: 'Dành cho salon tóc và spa',
+        title: 'Lịch hẹn của tiệm, gọn trong một màn hình',
+        lead: 'Xếp thợ, ghế, giường và phòng cùng lúc. Khách tự đặt trên trang của tiệm, bạn chỉ việc đón.',
       },
-      card: {
-        today: 'Hôm nay',
-        date: 'Thứ Bảy, 21/11',
-        col1: 'Ghế 2 · Thợ Lan',
-        col2: 'Giường 1 · KTV Vy',
-        appt1: 'Chị Hạnh · Nhuộm',
-        confirmed: 'Đã xác nhận',
-        wait: 'Chờ lên màu',
-        appt1b: 'Xả, sấy',
-        appt2: 'Anh Minh · Đá nóng',
-        checkedIn: 'Đã check-in',
-        holding: 'Đang giữ chỗ',
-        newBooking: 'Lịch mới',
-        newBookingMeta: 'Chị Ngọc · Cắt + gội, 14:00 hôm nay',
+      signup: {
+        kicker: 'Dùng thử 7 ngày',
+        title: 'Mở trang đặt lịch cho tiệm ngay hôm nay',
+        lead: 'Tạo tài khoản, xác minh email, nhập thông tin cơ sở. Hết 7 ngày dùng thử mới cần chọn gói.',
       },
-      chips: ['Lịch hẹn', 'Liệu trình', 'Nhân viên', 'Hoa hồng', 'Thanh toán'],
+      forgot: {
+        kicker: 'Bảo vệ tài khoản',
+        title: 'Lấy lại quyền vào tiệm',
+        lead: 'Link đặt lại gửi về email đăng nhập và chỉ dùng được một lần.',
+      },
+      workspace: {
+        kicker: 'Một tài khoản, nhiều cơ sở',
+        title: 'Hôm nay bạn làm ở tiệm nào?',
+        lead: 'Mỗi cơ sở có lịch, nhân viên và quyền riêng. Mở mỗi cơ sở ở một tab cũng được.',
+      },
+      admin: {
+        kicker: 'Quản trị nền tảng',
+        title: 'Vận hành Sapio',
+        lead: 'Theo dõi cơ sở, gói và nhật ký trên toàn nền tảng. Chỉ dành cho tài khoản quản trị.',
+      },
+    },
+    card: {
+      today: 'Hôm nay',
+      date: 'Thứ Bảy, 21/11',
+      col1: 'Ghế 2 · Thợ Lan',
+      col2: 'Giường 1 · KTV Vy',
+      appt1: 'Chị Hạnh · Nhuộm',
+      confirmed: 'Đã xác nhận',
+      wait: 'Chờ lên màu',
+      appt1b: 'Xả, sấy',
+      appt2: 'Anh Minh · Đá nóng',
+      checkedIn: 'Đã check-in',
+      holding: 'Đang giữ chỗ',
+      newBooking: 'Lịch mới',
+      newBookingMeta: 'Chị Ngọc · Cắt + gội, 14:00 hôm nay',
+    },
+    chips: ['Lịch hẹn', 'Liệu trình', 'Nhân viên', 'Hoa hồng', 'Thanh toán'],
+  },
+  login: {
+    signupTop: 'Đăng ký cơ sở',
+    title: 'Đăng nhập',
+    lead: 'Dành cho chủ cơ sở và nhân viên.',
+    emailPlaceholder: 'Ví dụ: an@tiemcuaban.vn',
+    keep: 'Giữ đăng nhập trên máy này',
+    keepHint: 'Không chọn thì đăng xuất khi đóng trình duyệt hoặc sau 12 giờ.',
+    submit: 'Đăng nhập',
+    submitLocked: (wait: string) => `Đăng nhập lại sau ${wait}`,
+    resetPassword: 'Đặt lại mật khẩu',
+    guestNote: 'Bạn là khách đặt lịch? Đăng nhập trên trang của tiệm bằng mã gửi qua email.',
+    noAccount: 'Chưa có cơ sở trên Sapio?',
+    noAccountLink: 'Đăng ký, dùng thử 7 ngày',
+    wrong: 'Email hoặc mật khẩu chưa đúng.',
+    wrongRemaining: (left: number, minutes: number) =>
+      `Email hoặc mật khẩu chưa đúng. Còn ${left} lần thử, sau đó tạm khóa ${minutes} phút.`,
+    lockedTitle: (time: string) => `Tạm khóa đăng nhập tới ${time}.`,
+    lockedBody: (max: number, email: string) =>
+      `Mật khẩu sai ${max} lần liên tiếp. Đã gửi email báo cho ${email}. Muốn vào ngay thì đặt lại mật khẩu.`,
+  },
+  signup: {
+    steps: ['Tài khoản', 'Xác thực', 'Ngành', 'Cơ sở', 'Xong'],
+    stepsLabel: 'Các bước đăng ký',
+    stepOf: (current: number, total: number, name: string) => `Bước ${current}/${total} · ${name}`,
+    account: {
+      title: 'Tạo tài khoản chủ cơ sở',
+      lead: 'Dùng tài khoản này để quản lý lịch, nhân viên và thu tiền.',
+      namePlaceholder: 'Ví dụ: Nguyễn Văn An',
+      emailHelp: 'Mã xác nhận sẽ gửi tới email này.',
+      emailPlaceholder: 'Ví dụ: an@tiemcuaban.vn',
+      passwordHint: 'Ít nhất 15 ký tự. Một câu dễ nhớ là đủ, ví dụ',
+      passwordExample: 'tiem toc may mo cua 8 gio',
+      termsBefore: 'Tôi đồng ý với',
+      terms: 'Điều khoản sử dụng',
+      termsAnd: 'và',
+      privacy: 'Chính sách quyền riêng tư',
+      termsAfter: 'của Sapio.',
+      submit: 'Tạo tài khoản',
+    },
+    verify: {
+      title: 'Nhập mã trong email',
+      sentTo: 'Đã gửi mã 6 số tới',
+      editEmail: 'Sửa email',
+      help: 'Gõ đủ 6 số là tự xác nhận. Không thấy email? Xem trong thư rác.',
+      submit: 'Xác nhận',
+      resend: 'Gửi lại mã',
+      resendIn: (time: string) => `Gửi lại mã sau ${time}`,
+      wrongCode: (left: number) => `Mã chưa đúng. Còn ${left} lần thử.`,
+      tooMany: 'Bạn đã nhập sai quá số lần cho phép. Gửi mã mới để thử lại.',
+      resent: (email: string) => `Đã gửi mã mới tới ${email}.`,
+      signOutToast: 'Đăng xuất: chưa có trong mock.',
+    },
+    business: {
+      title: 'Thông tin cơ sở',
+      lead: (industry: string) => `${industry} · đổi ngành ở bước trước nếu chọn nhầm.`,
+      saveLater: 'Lưu và làm tiếp sau',
+      saveLaterShort: 'Lưu, làm sau',
+      saved: 'Đã lưu. Đăng nhập lại để làm tiếp (mock chưa có đăng nhập).',
+      create: 'Tạo cơ sở',
+      addressTitle: 'Tên và địa chỉ trang đặt lịch',
+      addressHint:
+        'Khách vào địa chỉ này để đặt lịch. Đổi được sau trong Cài đặt › Thương hiệu, địa chỉ cũ tự chuyển sang địa chỉ mới.',
+      name: 'Tên cơ sở',
+      namePlaceholder: 'Ví dụ: Salon Tóc Mây',
+      slug: 'Địa chỉ trang đặt lịch',
+      slugFree: (host: string) => `${host} còn trống`,
+      slugChecking: 'Đang kiểm tra địa chỉ…',
+      slugRule: 'Chữ thường không dấu, số và dấu gạch ngang; 3 đến 40 ký tự.',
+      branchTitle: 'Chi nhánh đầu tiên',
+      branchHint: 'Thêm chi nhánh khác sau trong Cài đặt.',
+      branch: 'Tên chi nhánh',
+      branchPlaceholder: 'Ví dụ: Quận 3',
+      phone: 'Số điện thoại',
+      phonePlaceholder: 'Ví dụ: 028 3930 1234',
+      address: 'Địa chỉ',
+      addressPlaceholder: 'Số nhà, đường, phường, thành phố',
+      hoursTitle: 'Giờ mở cửa',
+      hoursHint:
+        'Giờ Việt Nam. Nghỉ trưa, nhiều khung một ngày và ngày lễ chỉnh trong Cài đặt › Chi nhánh.',
+      weekdays: ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'],
+      openOn: (day: string) => `Mở cửa ${day}`,
+      opensAt: (day: string) => `${day}, mở cửa lúc`,
+      closesAt: (day: string) => `${day}, đóng cửa lúc`,
+      closed: 'Nghỉ',
+      resourcesTitle: 'Tài nguyên ban đầu',
+      resourcesHint: 'Số lượng ở chi nhánh này. Đặt tên từng cái sau trong Cài đặt › Tài nguyên.',
+    },
+    done: {
+      title: (name: string) => `${name} đã được tạo`,
+      lead: (branch: string, services: number, resources: string) =>
+        `Đã có chi nhánh ${branch}, ${services} dịch vụ mẫu, ${resources}.`,
+      activate: 'Kích hoạt gói ngay',
+      enter: 'Vào trang quản trị',
+      pageTitle: 'Trang đặt lịch',
+      notOpen: 'Chưa nhận lịch',
+      copy: 'Sao chép',
+      copied: (host: string) => `Đã sao chép ${host}.`,
+      preview: 'Xem thử',
+      pageHelp:
+        'Trang đặt lịch nhận khách sau khi bạn kích hoạt gói. Trước đó chỉ bạn xem thử được.',
+      trialTitle: (days: number, date: string) => `Dùng thử ${days} ngày, đến 23:59 ngày ${date}`,
+      trialBody: (days: number) =>
+        `Trong thời gian dùng thử, bạn thêm nhân viên, dịch vụ, tài nguyên, xếp ca và xem thử trang đặt lịch. Đặt lịch online và tạo lịch hẹn mở khi kích hoạt gói. Hết ${days} ngày mà chưa kích hoạt thì tài khoản chỉ còn trang mua gói; dữ liệu vẫn được giữ.`,
+      nextTitle: 'Việc nên làm tiếp',
+      next: (services: number) => [
+        { title: 'Thêm nhân viên và kỹ năng', where: 'Cài đặt › Nhân sự' },
+        { title: `Kiểm tra giá và thời lượng ${services} dịch vụ mẫu`, where: 'Cài đặt › Dịch vụ' },
+        { title: 'Xếp ca tuần đầu', where: 'Xếp ca' },
+        { title: 'Tải logo, chọn màu cho trang đặt lịch', where: 'Cài đặt › Thương hiệu' },
+      ],
     },
   },
-  en: {
-    aside: {
-      variants: {
-        login: {
-          kicker: 'For hair salons and spas',
-          title: 'Your salon’s day, on one screen',
-          lead: 'Schedule staff, chairs, beds and rooms together. Clients book on your page, you just welcome them.',
-        },
-        signup: {
-          kicker: '7-day free trial',
-          title: 'Open your booking page today',
-          lead: 'Create an account, verify your email, add your business. Pick a plan only after the 7-day trial.',
-        },
-        forgot: {
-          kicker: 'Account security',
-          title: 'Get back into your salon',
-          lead: 'The reset link goes to your sign-in email and works only once.',
-        },
-        workspace: {
-          kicker: 'One account, many businesses',
-          title: 'Where are you working today?',
-          lead: 'Each business has its own calendar, staff and permissions. Open each one in its own tab if you like.',
-        },
-        admin: {
-          kicker: 'Platform administration',
-          title: 'Run Sapio',
-          lead: 'Monitor businesses, plans and logs across the platform. For administrator accounts only.',
-        },
-      },
-      card: {
-        today: 'Today',
-        date: 'Sat, 21 Nov',
-        col1: 'Chair 2 · Lan',
-        col2: 'Bed 1 · Vy',
-        appt1: 'Ms. Hanh · Colour',
-        confirmed: 'Confirmed',
-        wait: 'Processing',
-        appt1b: 'Rinse, dry',
-        appt2: 'Mr. Minh · Hot stone',
-        checkedIn: 'Checked in',
-        holding: 'Holding',
-        newBooking: 'New booking',
-        newBookingMeta: 'Ms. Ngoc · Cut + wash, 14:00 today',
-      },
-      chips: ['Appointments', 'Packages', 'Staff', 'Commission', 'Payments'],
-    },
+  forgot: {
+    title: 'Quên mật khẩu',
+    lead: 'Nhập email đăng nhập. Sapio gửi một link để đặt mật khẩu mới.',
+    emailInvalid: 'Email chưa đúng. Ví dụ: an@email.vn.',
+    sentBefore: 'Nếu',
+    sentAfter: 'có tài khoản Sapio, link đặt lại vừa được gửi tới đó. Link dùng được',
+    minutes: (n: number) => `${n} phút`,
+    sentEnd: 'và chỉ một lần. Không thấy thì xem thư mục Spam.',
+    mailbox: 'Mock: mở hộp thư mẫu',
+    resendIn: (wait: string) => `Gửi lại sau ${wait}`,
+    resend: 'Gửi lại link',
+    submit: 'Gửi link đặt lại',
+    back: 'Quay lại đăng nhập',
+  },
+  reset: {
+    title: 'Đặt mật khẩu mới',
+    lead: (email: string) => `Cho tài khoản ${email}.`,
+    label: 'Mật khẩu mới',
+    length: (n: number, min: number, ok: boolean) =>
+      `${n} ký tự${ok ? '' : `, cần ít nhất ${min}`}`,
+    notCommon: 'Không nằm trong danh sách mật khẩu phổ biến hay đã lộ',
+    note: 'Đặt xong, các máy khác đang đăng nhập bằng tài khoản này sẽ bị đăng xuất. Bạn vào thẳng cơ sở dùng gần nhất.',
+    submit: 'Lưu mật khẩu và đăng nhập',
+  },
+  invite: {
+    title: (name: string) => `Bạn được mời vào ${name}`,
+    leadExisting: 'Email này đã có tài khoản Sapio.',
+    leadSignedIn: 'Bạn đang đăng nhập đúng email, nhận là vào được.',
+    leadSignIn: 'Đăng nhập để nhận; cơ sở mới sẽ có trong danh sách cơ sở của bạn.',
+    card: 'Lời mời',
+    role: 'Vai trò',
+    branch: 'Chi nhánh',
+    invitedBy: 'Người mời',
+    expires: 'Hết hạn',
+    emailHelp: 'Lời mời gắn với email này, không đổi được.',
+    createPassword: 'Tạo mật khẩu',
+    submitNew: 'Tạo tài khoản và nhận lời mời',
+    submitAccept: 'Nhận lời mời',
+    submitLogin: 'Đăng nhập và nhận lời mời',
+    refuse: 'Từ chối lời mời',
+    accepted: (name: string) => `Đã nhận lời mời vào ${name}.`,
+    declined: (name: string) => `Đã từ chối lời mời vào ${name}.`,
+    otherTitle: (email: string) => `Lời mời này gửi cho ${email}.`,
+    otherBody: (email: string) =>
+      `Bạn đang đăng nhập bằng ${email}. Đăng xuất rồi mở lại link để nhận.`,
+    otherSubmit: 'Đăng xuất và tiếp tục',
+    locked: 'Tạm khóa đăng nhập 15 phút vì sai mật khẩu nhiều lần. Đặt lại mật khẩu để vào ngay.',
+    wrong: 'Mật khẩu chưa đúng.',
+    wrongRemaining: (left: number) =>
+      `Mật khẩu chưa đúng. Còn ${left} lần thử, sau đó tạm khóa 15 phút.`,
+  },
+  select: {
+    title: 'Chọn cơ sở',
+    lead: (email: string, count: number) =>
+      `Tài khoản ${email} làm ở ${count} cơ sở. Mỗi cơ sở mở ở tab riêng cũng được.`,
+    list: 'Cơ sở của bạn',
+    recent: 'Dùng gần nhất',
+    paused: 'Tạm dừng',
+    notePlan: 'Gói hết hạn, chỉ vào được trang Gói Sapio',
+    noteLocked: 'Bị Sapio khóa',
+    notePaused: 'Gói hết hạn, chờ chủ cơ sở gia hạn',
+    noteSample: 'Cơ sở mẫu, chưa có giao diện',
+    branchPrefix: 'Chi nhánh',
+    invitations: 'Lời mời chờ bạn',
+    inviteMeta: (role: string, day: string) => `Mời làm ${role} · hết hạn ${day}`,
+    decline: 'Từ chối',
+    accept: 'Nhận',
+    own: 'Đăng ký cơ sở của riêng bạn',
   },
 };
+
+export type AuthCopy = typeof vi;
+
+const en: AuthCopy = {
+  common: {
+    langLabel: 'Change language, currently English',
+    themeLabel: 'Switch light or dark theme',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+    capsLock: 'Caps Lock is on.',
+    passwordHint: 'At least 15 characters. An easy sentence is enough.',
+    fullName: 'Full name',
+    password: 'Password',
+    login: 'Sign in',
+    forgot: 'Forgot password?',
+    signOut: 'Sign out',
+    back: 'Back',
+  },
+  errors: {
+    passwordEmpty: 'Enter a password.',
+    passwordShort: (min) => `The password needs at least ${min} characters.`,
+    passwordLong: (max) => `The password can be at most ${max} characters.`,
+    passwordCommon: 'This password is too common, pick another sentence.',
+    emailInvalid: 'That email does not look right. Example: an@yoursalon.com.',
+    emailRegistered: 'This email already has a business. Sign in to open it.',
+    nameEmpty: 'Enter your full name.',
+    termsRequired: 'Agree to the terms to continue.',
+    slugEmpty: 'Enter the address of your booking page.',
+    slugChars: 'Use lowercase letters without accents, digits and hyphens only.',
+    slugHyphen: 'The address cannot start or end with a hyphen.',
+    slugLength: (min, max) => `The address is ${min} to ${max} characters long.`,
+    slugReserved: 'This name is reserved for the system, pick another.',
+    slugTaken: 'Another business already uses this address',
+    businessName: 'Enter the business name.',
+    branchName: 'Enter the branch name.',
+    phone: 'That phone number does not look right. Example: 028 3930 1234.',
+    address: 'Enter the branch address.',
+    hoursNone: 'Pick at least one open day.',
+    hoursOrder: 'Closing time must be after opening time.',
+  },
+  aside: {
+    variants: {
+      login: {
+        kicker: 'For hair salons and spas',
+        title: 'Your salon’s day, on one screen',
+        lead: 'Schedule staff, chairs, beds and rooms together. Clients book on your page, you just welcome them.',
+      },
+      signup: {
+        kicker: '7-day free trial',
+        title: 'Open your booking page today',
+        lead: 'Create an account, verify your email, add your business. Pick a plan only after the 7-day trial.',
+      },
+      forgot: {
+        kicker: 'Account security',
+        title: 'Get back into your salon',
+        lead: 'The reset link goes to your sign-in email and works only once.',
+      },
+      workspace: {
+        kicker: 'One account, many businesses',
+        title: 'Where are you working today?',
+        lead: 'Each business has its own calendar, staff and permissions. Open each one in its own tab if you like.',
+      },
+      admin: {
+        kicker: 'Platform administration',
+        title: 'Run Sapio',
+        lead: 'Monitor businesses, plans and logs across the platform. For administrator accounts only.',
+      },
+    },
+    card: {
+      today: 'Today',
+      date: 'Sat, 21 Nov',
+      col1: 'Chair 2 · Lan',
+      col2: 'Bed 1 · Vy',
+      appt1: 'Ms. Hanh · Colour',
+      confirmed: 'Confirmed',
+      wait: 'Processing',
+      appt1b: 'Rinse, dry',
+      appt2: 'Mr. Minh · Hot stone',
+      checkedIn: 'Checked in',
+      holding: 'Holding',
+      newBooking: 'New booking',
+      newBookingMeta: 'Ms. Ngoc · Cut + wash, 14:00 today',
+    },
+    chips: ['Appointments', 'Packages', 'Staff', 'Commission', 'Payments'],
+  },
+  login: {
+    signupTop: 'Register a business',
+    title: 'Sign in',
+    lead: 'For business owners and staff.',
+    emailPlaceholder: 'e.g. an@yoursalon.com',
+    keep: 'Keep me signed in on this device',
+    keepHint: 'Otherwise you are signed out when the browser closes or after 12 hours.',
+    submit: 'Sign in',
+    submitLocked: (wait) => `Sign in again in ${wait}`,
+    resetPassword: 'Reset password',
+    guestNote: 'Booking as a client? Sign in on the salon’s page with a code sent to your email.',
+    noAccount: 'New to Sapio?',
+    noAccountLink: 'Register, free for 7 days',
+    wrong: 'The email or password is not right.',
+    wrongRemaining: (left, minutes) =>
+      `The email or password is not right. ${left} ${left === 1 ? 'try' : 'tries'} left, then sign-in is locked for ${minutes} minutes.`,
+    lockedTitle: (time) => `Sign-in is locked until ${time}.`,
+    lockedBody: (max, email) =>
+      `${max} wrong passwords in a row. We emailed ${email}. To get in now, reset the password.`,
+  },
+  signup: {
+    steps: ['Account', 'Verify', 'Industry', 'Business', 'Done'],
+    stepsLabel: 'Sign-up steps',
+    stepOf: (current, total, name) => `Step ${current}/${total} · ${name}`,
+    account: {
+      title: 'Create the owner account',
+      lead: 'You use this account to manage the calendar, staff and payments.',
+      namePlaceholder: 'e.g. Nguyen Van An',
+      emailHelp: 'The confirmation code goes to this email.',
+      emailPlaceholder: 'e.g. an@yoursalon.com',
+      passwordHint: 'At least 15 characters. An easy sentence is enough, e.g.',
+      passwordExample: 'my salon opens at 8',
+      termsBefore: 'I agree to the Sapio',
+      terms: 'Terms of Use',
+      termsAnd: 'and',
+      privacy: 'Privacy Policy',
+      termsAfter: '.',
+      submit: 'Create account',
+    },
+    verify: {
+      title: 'Enter the code from your email',
+      sentTo: 'We sent a 6-digit code to',
+      editEmail: 'Edit email',
+      help: 'Type all 6 digits and it confirms by itself. No email? Check your spam folder.',
+      submit: 'Confirm',
+      resend: 'Resend code',
+      resendIn: (time) => `Resend code in ${time}`,
+      wrongCode: (left) => `That code is not right. ${left} ${left === 1 ? 'try' : 'tries'} left.`,
+      tooMany: 'Too many wrong codes. Send a new code to try again.',
+      resent: (email) => `A new code was sent to ${email}.`,
+      signOutToast: 'Sign out: not in the mock.',
+    },
+    business: {
+      title: 'Business details',
+      lead: (industry) => `${industry} · go back a step to change the industry.`,
+      saveLater: 'Save and continue later',
+      saveLaterShort: 'Save, later',
+      saved: 'Saved. Sign in again to continue (the mock has no sign-in here).',
+      create: 'Create business',
+      addressTitle: 'Name and booking page address',
+      addressHint:
+        'Clients use this address to book. You can change it later in Settings › Branding; the old address redirects to the new one.',
+      name: 'Business name',
+      namePlaceholder: 'e.g. Toc May Salon',
+      slug: 'Booking page address',
+      slugFree: (host) => `${host} is available`,
+      slugChecking: 'Checking the address…',
+      slugRule: 'Lowercase letters without accents, digits and hyphens; 3 to 40 characters.',
+      branchTitle: 'First branch',
+      branchHint: 'Add more branches later in Settings.',
+      branch: 'Branch name',
+      branchPlaceholder: 'e.g. District 3',
+      phone: 'Phone number',
+      phonePlaceholder: 'e.g. 028 3930 1234',
+      address: 'Address',
+      addressPlaceholder: 'Street number, street, ward, city',
+      hoursTitle: 'Opening hours',
+      hoursHint:
+        'Vietnam time. Lunch breaks, several periods a day and holidays are set in Settings › Branches.',
+      weekdays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      openOn: (day) => `Open on ${day}`,
+      opensAt: (day) => `${day}, opens at`,
+      closesAt: (day) => `${day}, closes at`,
+      closed: 'Closed',
+      resourcesTitle: 'Starting resources',
+      resourcesHint: 'The count at this branch. Name each one later in Settings › Resources.',
+    },
+    done: {
+      title: (name) => `${name} is ready`,
+      lead: (branch, services, resources) =>
+        `${branch} branch, ${services} sample services and ${resources} are set up.`,
+      activate: 'Activate a plan now',
+      enter: 'Open the admin area',
+      pageTitle: 'Booking page',
+      notOpen: 'Not taking bookings',
+      copy: 'Copy',
+      copied: (host) => `Copied ${host}.`,
+      preview: 'Preview',
+      pageHelp:
+        'The booking page takes clients once you activate a plan. Until then only you can preview it.',
+      trialTitle: (days, date) => `${days}-day trial, until 23:59 on ${date}`,
+      trialBody: (days) =>
+        `During the trial you can add staff, services and resources, set shifts and preview the booking page. Online booking and creating appointments open when you activate a plan. If you have not activated one after ${days} days, the account only shows the plan page; your data stays.`,
+      nextTitle: 'What to do next',
+      next: (services) => [
+        { title: 'Add staff and skills', where: 'Settings › Staff' },
+        {
+          title: `Check the price and duration of ${services} sample services`,
+          where: 'Settings › Services',
+        },
+        { title: 'Plan the first week of shifts', where: 'Shifts' },
+        {
+          title: 'Upload a logo and pick colors for the booking page',
+          where: 'Settings › Branding',
+        },
+      ],
+    },
+  },
+  forgot: {
+    title: 'Forgot password',
+    lead: 'Enter your sign-in email. Sapio sends a link to set a new password.',
+    emailInvalid: 'That email does not look right. Example: an@email.com.',
+    sentBefore: 'If',
+    sentAfter: 'has a Sapio account, a reset link is on its way. The link works for',
+    minutes: (n) => `${n} minutes`,
+    sentEnd: 'and only once. Check your Spam folder if you don’t see it.',
+    mailbox: 'Mock: open the sample mailbox',
+    resendIn: (wait) => `Resend in ${wait}`,
+    resend: 'Resend link',
+    submit: 'Send reset link',
+    back: 'Back to sign in',
+  },
+  reset: {
+    title: 'Set a new password',
+    lead: (email) => `For the account ${email}.`,
+    label: 'New password',
+    length: (n, min, ok) => `${n} characters${ok ? '' : `, at least ${min} needed`}`,
+    notCommon: 'Not on the list of common or leaked passwords',
+    note: 'Once saved, other devices signed in with this account are signed out. You go straight to the business you used last.',
+    submit: 'Save password and sign in',
+  },
+  invite: {
+    title: (name) => `You are invited to ${name}`,
+    leadExisting: 'This email already has a Sapio account.',
+    leadSignedIn: 'You are signed in with the right email, accept to join.',
+    leadSignIn: 'Sign in to accept; the new business will appear in your list.',
+    card: 'Invitation',
+    role: 'Role',
+    branch: 'Branch',
+    invitedBy: 'Invited by',
+    expires: 'Expires',
+    emailHelp: 'The invitation is tied to this email and cannot be changed.',
+    createPassword: 'Create a password',
+    submitNew: 'Create account and accept',
+    submitAccept: 'Accept invitation',
+    submitLogin: 'Sign in and accept',
+    refuse: 'Decline invitation',
+    accepted: (name) => `Joined ${name}.`,
+    declined: (name) => `Declined the invitation to ${name}.`,
+    otherTitle: (email) => `This invitation was sent to ${email}.`,
+    otherBody: (email) =>
+      `You are signed in as ${email}. Sign out, then open the link again to accept.`,
+    otherSubmit: 'Sign out and continue',
+    locked:
+      'Sign-in is locked for 15 minutes after too many wrong passwords. Reset the password to get in now.',
+    wrong: 'The password is not right.',
+    wrongRemaining: (left) =>
+      `The password is not right. ${left} ${left === 1 ? 'try' : 'tries'} left, then sign-in is locked for 15 minutes.`,
+  },
+  select: {
+    title: 'Choose a business',
+    lead: (email, count) =>
+      `${email} works at ${count} ${count === 1 ? 'business' : 'businesses'}. You can open each one in its own tab.`,
+    list: 'Your businesses',
+    recent: 'Last used',
+    paused: 'Paused',
+    notePlan: 'Plan expired, only the Sapio plan page opens',
+    noteLocked: 'Locked by Sapio',
+    notePaused: 'Plan expired, waiting for the owner to renew',
+    noteSample: 'Sample business, no screens yet',
+    branchPrefix: 'Branch',
+    invitations: 'Invitations waiting for you',
+    inviteMeta: (role, day) => `Invited as ${role} · expires ${day}`,
+    decline: 'Decline',
+    accept: 'Accept',
+    own: 'Register your own business',
+  },
+};
+
+export const AUTH_COPY: Record<AuthLang, AuthCopy> = { vi, en };

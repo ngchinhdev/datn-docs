@@ -1,5 +1,6 @@
 import { Bell } from 'lucide-react';
-import { AUTH_COPY, type AsideVariant } from '@/mock/auth-copy';
+import { useAuthText } from '@/components/mock/auth-text';
+import type { AsideVariant } from '@/mock/auth-copy';
 
 export type { AsideVariant };
 
@@ -50,7 +51,7 @@ function Scene() {
  * wrapper takes the light theme, so the tokens inside do not follow the page theme.
  */
 export function AuthAside({ variant }: { variant: AsideVariant }) {
-  const { variants, card, chips } = AUTH_COPY.vi.aside;
+  const { variants, card, chips } = useAuthText().t.aside;
   const text = variants[variant];
   return (
     <div className="hidden max-w-[680px] flex-none basis-[46%] min-[900px]:flex">

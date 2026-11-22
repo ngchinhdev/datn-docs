@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { useAccountStore } from '@/components/mock/account-store';
 import { AccountTools } from '@/components/mock/account-tools';
+import { useAuthText } from '@/components/mock/auth-text';
 import { ErrorPage } from '@/components/mock/error-page';
 import { Notice, PasswordField } from '@/components/mock/password-field';
 import { Button } from '@/components/sapio/button';
@@ -49,6 +50,7 @@ export function ResetScreen() {
   const { now, accounts, members, records, resetTokens, patch } = store;
   const [password, setPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const { lang, t } = useAuthText();
 
   const state = resetState(resetTokens, token, now);
   const account = accounts.find(
@@ -79,7 +81,7 @@ export function ResetScreen() {
   }
 
   const length = [...password].length;
-  const error = passwordError(password);
+  const error = passwordError(password, lang);
   const hasLength = length >= PASSWORD_MIN;
   const notCommon = hasLength && error === null;
 
@@ -118,47 +120,40 @@ export function ResetScreen() {
     <>
       <AuthPage aside="forgot">
         <div>
-          <h1 className="sp-auth__title">Đặt mật khẩu mới</h1>
-          <p className="sp-auth__lead">Cho tài khoản {account.email}.</p>
+          <h1 className="sp-auth__title">{t.reset.title}</h1>
+          <p className="sp-auth__lead">{t.reset.lead(account.email)}</p>
         </div>
         <form onSubmit={submit} noValidate className="flex flex-col gap-(--space-4)">
           <PasswordField
             id="rs-pass"
-            label="Mật khẩu mới"
+            label={t.reset.label}
             value={password}
             onChange={setPassword}
             autoComplete="new-password"
-            help="Ít nhất 15 ký tự. Một câu dễ nhớ là đủ."
+            help={t.common.passwordHint}
             error={submitted && error ? error : null}
           />
           {length > 0 && (
             <ul className="m-0 -mt-1 flex list-none flex-col gap-1 p-0">
               <li>
                 <p className={`sp-fit m-0 ${hasLength ? 'sp-fit--ok' : 'sp-fit--bad'}`}>
-                  <span>
-                    {length} ký tự{hasLength ? '' : `, cần ít nhất ${PASSWORD_MIN}`}
-                  </span>
+                  <span>{t.reset.length(length, PASSWORD_MIN, hasLength)}</span>
                 </p>
               </li>
               {hasLength && (
                 <li>
                   <p className={`sp-fit m-0 ${notCommon ? 'sp-fit--ok' : 'sp-fit--bad'}`}>
-                    <span>
-                      {notCommon
-                        ? 'Không nằm trong danh sách mật khẩu phổ biến hay đã lộ'
-                        : (error ?? '')}
-                    </span>
+                    <span>{notCommon ? t.reset.notCommon : (error ?? '')}</span>
                   </p>
                 </li>
               )}
             </ul>
           )}
           <Notice tone="note" role="note" icon={<Info size={18} aria-hidden="true" />}>
-            Đặt xong, các máy khác đang đăng nhập bằng tài khoản này sẽ bị đăng xuất. Bạn vào thẳng
-            cơ sở dùng gần nhất.
+            {t.reset.note}
           </Notice>
           <Button type="submit" variant="primary" className="h-12!">
-            Lưu mật khẩu và đăng nhập
+            {t.reset.submit}
           </Button>
         </form>
       </AuthPage>

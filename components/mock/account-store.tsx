@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { usePersistedState } from '@/components/mock/use-persisted-state';
 import type { AccountMail } from '@/mock/account-mail';
+import type { AuthLang } from '@/mock/auth-copy';
 import type { LoginRecords, ResetToken } from '@/mock/account';
 import {
   accounts as seedAccounts,
@@ -41,6 +42,8 @@ interface AccountData {
   locks: Record<string, { at: string; reason: string }>;
   /** When the realtime link went down; `null` while it is up. The calendar says so (BR-79). */
   offlineSince: string | null;
+  /** Language of the account pages (`AuthPage`). */
+  lang: AuthLang;
 }
 
 const INITIAL: AccountData = {
@@ -57,6 +60,7 @@ const INITIAL: AccountData = {
   joiners: {},
   locks: SEED_LOCKS,
   offlineSince: null,
+  lang: 'vi',
 };
 
 interface AccountStore extends AccountData {

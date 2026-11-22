@@ -2,6 +2,7 @@
 
 import { Eye, EyeOff } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
+import { useAuthText } from '@/components/mock/auth-text';
 import { Field } from '@/components/sapio/form';
 
 /** A password input with the show/hide button (BR-73 lets people paste and look). */
@@ -23,6 +24,7 @@ export function PasswordField({
   error?: string | null | undefined;
 }) {
   const [shown, setShown] = useState(false);
+  const { t } = useAuthText();
   return (
     <Field id={id} label={label} size="md" help={help} error={error}>
       <input
@@ -37,7 +39,7 @@ export function PasswordField({
       <button
         type="button"
         className="sp-icon-btn me-1"
-        aria-label={shown ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+        aria-label={shown ? t.common.hidePassword : t.common.showPassword}
         aria-pressed={shown}
         onClick={() => setShown((v) => !v)}
       >

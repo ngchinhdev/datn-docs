@@ -1,8 +1,9 @@
 'use client';
 
 import { useTheme } from 'fumadocs-ui/provider/base';
-import { Moon, Sun } from 'lucide-react';
+import { Globe, Moon, Sun } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
+import { useAuthText } from '@/components/mock/auth-text';
 import { AuthAside, type AsideVariant } from '@/components/sapio/auth-aside';
 import { Tip } from '@/components/sapio/tooltip';
 import { cn } from '@/lib/utils';
@@ -28,7 +29,21 @@ export function ThemeButton({ label }: { label: string }) {
   );
 }
 
-export const SIGNUP_STEPS = ['Tài khoản', 'Xác thực', 'Ngành', 'Cơ sở', 'Xong'] as const;
+/** Language switch: a globe and the code of the language in use. */
+export function LangButton() {
+  const { lang, t, setLang } = useAuthText();
+  return (
+    <button
+      type="button"
+      className="inline-flex h-11 items-center gap-1.5 rounded-[10px] border-0 bg-(--fill-tonal) px-3 text-[13px] leading-[18px] font-semibold text-(--ink) min-[900px]:h-10"
+      aria-label={t.common.langLabel}
+      onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
+    >
+      <Globe size={16} aria-hidden="true" />
+      {lang.toUpperCase()}
+    </button>
+  );
+}
 
 /**
  * Page of the public flows. With `aside` it splits in two from 900px: the illustration block on
@@ -59,6 +74,15 @@ export function AuthPage({
   children: ReactNode;
 }) {
   const padBottom = stickyActions && 'max-md:pb-28!';
+  const { lang, t } = useAuthText();
+  // The page names its language for screen readers; the other pages are Vietnamese.
+  useEffect(() => {
+    if (!aside) return;
+    document.documentElement.lang = lang;
+    return () => {
+      document.documentElement.lang = 'vi';
+    };
+  }, [aside, lang]);
 
   if (!aside) {
     return (
@@ -83,7 +107,8 @@ export function AuthPage({
             Sapio
           </span>
           {link}
-          <ThemeButton label="Đổi giao diện sáng hoặc tối" />
+          <LangButton />
+          <ThemeButton label={t.common.themeLabel} />
         </header>
         <div className="flex flex-1 items-center justify-center px-4 py-8 min-[900px]:px-2">
           <main
@@ -110,14 +135,14 @@ export function AuthTop({ children }: { children?: ReactNode }) {
 
 /** Five bars and, on phones, one line of text instead of the labels. */
 export function SignupSteps({ current }: { current: number }) {
-  const name = SIGNUP_STEPS[current - 1];
+  const { t } = useAuthText();
+  const steps = t.signup.steps;
+  const name = steps[current - 1]!;
   return (
     <div className="flex flex-col gap-(--space-2)">
-      <span className="sp-steps__caption">
-        Bước {current}/{SIGNUP_STEPS.length} · {name}
-      </span>
-      <ol className="sp-steps" aria-label="Các bước đăng ký">
-        {SIGNUP_STEPS.map((label, i) => {
+      <span className="sp-steps__caption">{t.signup.stepOf(current, steps.length, name)}</span>
+      <ol className="sp-steps" aria-label={t.signup.stepsLabel}>
+        {steps.map((label, i) => {
           const n = i + 1;
           return (
             <li
