@@ -11,7 +11,7 @@ import { Notice, PasswordField } from '@/components/mock/password-field';
 import { useInvitations } from '@/components/mock/use-invitations';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
-import { AuthPage, AuthTop } from '@/components/sapio/signup-layout';
+import { AuthPage } from '@/components/sapio/signup-layout';
 import { useToast } from '@/components/sapio/toast';
 import {
   attemptLogin,
@@ -214,7 +214,7 @@ function LiveInvite({
 
   if (view.kind === 'other-account') {
     return (
-      <AuthPage maxWidth={480} top={<AuthTop />}>
+      <AuthPage aside="workspace" maxWidth={480}>
         <div>
           <h1 className="sp-auth__title">Bạn được mời vào {workspace.name}</h1>
         </div>
@@ -236,7 +236,7 @@ function LiveInvite({
   }
 
   return (
-    <AuthPage maxWidth={480} top={<AuthTop />}>
+    <AuthPage aside="workspace" maxWidth={480}>
       <div>
         <h1 className="sp-auth__title">Bạn được mời vào {workspace.name}</h1>
         {!isNew && (

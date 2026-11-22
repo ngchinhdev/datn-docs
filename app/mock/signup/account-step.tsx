@@ -60,7 +60,6 @@ export function AccountStep({
       current={1}
       title="Tạo tài khoản chủ cơ sở"
       lead="Dùng tài khoản này để quản lý lịch, nhân viên và thu tiền."
-      maxWidth={560}
       top={
         <Link href="/mock/login" className="sp-btn sp-btn--ghost sp-btn--sm no-underline">
           Đăng nhập

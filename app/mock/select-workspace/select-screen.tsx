@@ -8,7 +8,7 @@ import { useAccountStore } from '@/components/mock/account-store';
 import { AccountTools } from '@/components/mock/account-tools';
 import { useInvitations } from '@/components/mock/use-invitations';
 import { Button } from '@/components/sapio/button';
-import { AuthPage, AuthTop } from '@/components/sapio/signup-layout';
+import { AuthPage } from '@/components/sapio/signup-layout';
 import { useToast } from '@/components/sapio/toast';
 import {
   branchLabel,
@@ -57,14 +57,13 @@ export function SelectScreen() {
   return (
     <>
       <AuthPage
-        maxWidth={560}
-        top={
-          <AuthTop>
-            <span className="flex items-center gap-2 text-sm font-medium">
-              <span className="sp-avatar sp-avatar--sm">{initialsOfName(signedIn.fullName)}</span>
-              {signedIn.fullName}
-            </span>
-          </AuthTop>
+        aside="workspace"
+        maxWidth={480}
+        link={
+          <span className="flex items-center gap-2 px-2 text-sm font-medium">
+            <span className="sp-avatar sp-avatar--sm">{initialsOfName(signedIn.fullName)}</span>
+            {signedIn.fullName}
+          </span>
         }
       >
         <div>

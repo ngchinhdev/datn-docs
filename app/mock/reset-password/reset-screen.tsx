@@ -9,7 +9,7 @@ import { AccountTools } from '@/components/mock/account-tools';
 import { ErrorPage } from '@/components/mock/error-page';
 import { Notice, PasswordField } from '@/components/mock/password-field';
 import { Button } from '@/components/sapio/button';
-import { AuthPage, AuthTop } from '@/components/sapio/signup-layout';
+import { AuthPage } from '@/components/sapio/signup-layout';
 import {
   afterLogin,
   doorsOf,
@@ -116,7 +116,7 @@ export function ResetScreen() {
 
   return (
     <>
-      <AuthPage top={<AuthTop />}>
+      <AuthPage aside="forgot">
         <div>
           <h1 className="sp-auth__title">Đặt mật khẩu mới</h1>
           <p className="sp-auth__lead">Cho tài khoản {account.email}.</p>

@@ -81,7 +81,6 @@ export function VerifyStep({
           <Link href="/mock/signup?step=account">Sửa email</Link>
         </>
       }
-      maxWidth={560}
       top={
         <button
           type="button"

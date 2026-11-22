@@ -9,7 +9,7 @@ import { AccountTools } from '@/components/mock/account-tools';
 import { Notice } from '@/components/mock/password-field';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
-import { AuthPage, AuthTop } from '@/components/sapio/signup-layout';
+import { AuthPage } from '@/components/sapio/signup-layout';
 import {
   isInviteEmail,
   normalizeEmail,
@@ -65,12 +65,11 @@ export function ForgotScreen() {
   return (
     <>
       <AuthPage
-        top={
-          <AuthTop>
-            <Link href="/mock/login" className="text-sm font-semibold no-underline">
-              Đăng nhập
-            </Link>
-          </AuthTop>
+        aside="forgot"
+        link={
+          <Link href="/mock/login" className="px-3 py-2.5 text-sm font-semibold no-underline">
+            Đăng nhập
+          </Link>
         }
       >
         <div>

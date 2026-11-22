@@ -1,19 +1,56 @@
-import type { CSSProperties, ReactNode } from 'react';
+'use client';
+
+import { useTheme } from 'fumadocs-ui/provider/base';
+import { Moon, Sun } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { AuthAside, type AsideVariant } from '@/components/sapio/auth-aside';
+import { Tip } from '@/components/sapio/tooltip';
 import { cn } from '@/lib/utils';
+
+/** Switches between the light and the dark theme; the moon shows in light, the sun in dark. */
+export function ThemeButton({ label }: { label: string }) {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const dark = mounted && resolvedTheme === 'dark';
+  const Icon = dark ? Sun : Moon;
+  return (
+    <Tip label={label} side="bottom-end">
+      <button
+        type="button"
+        className="sp-icon-btn size-11! rounded-[10px]! bg-(--fill-tonal)! min-[900px]:size-10!"
+        aria-label={label}
+        onClick={() => setTheme(dark ? 'light' : 'dark')}
+      >
+        <Icon aria-hidden="true" />
+      </button>
+    </Tip>
+  );
+}
 
 export const SIGNUP_STEPS = ['Tài khoản', 'Xác thực', 'Ngành', 'Cơ sở', 'Xong'] as const;
 
-/** Page of the public flows: Sapio name and one link on top, a column of content below. */
+/**
+ * Page of the public flows. With `aside` it splits in two from 900px: the illustration block on
+ * the left, the form on the right; below that the block is gone and the page is one column.
+ * Without `aside` it is the plain single column.
+ */
 export function AuthPage({
   top,
+  aside,
+  link,
   maxWidth,
   wide = false,
   stickyActions = false,
   children,
 }: {
-  /** Replaces the default top bar. */
-  top: ReactNode;
-  /** Column width in px; the default is 560 (`SignupFlow` README). */
+  /** Replaces the default top bar; only for pages without `aside`. */
+  top?: ReactNode;
+  /** The block on the left and the text it shows. */
+  aside?: AsideVariant;
+  /** Link of the page's context, on the right of the top bar. */
+  link?: ReactNode;
+  /** Column width in px; the default is 560 (`SignupFlow` README), 400 with `aside`. */
   maxWidth?: number;
   /** 1080px column for steps with a side-by-side preview. */
   wide?: boolean;
@@ -21,20 +58,42 @@ export function AuthPage({
   stickyActions?: boolean;
   children: ReactNode;
 }) {
-  const style: CSSProperties = { paddingTop: 0, ...(maxWidth ? { maxWidth } : {}) };
+  const padBottom = stickyActions && 'max-md:pb-28!';
+
+  if (!aside) {
+    return (
+      <div className="sp-auth">
+        {top}
+        <main
+          className={cn('sp-auth__main', wide && 'sp-auth__main--wide', padBottom)}
+          style={{ paddingTop: 0, ...(maxWidth ? { maxWidth } : {}) }}
+        >
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
-    <div className="sp-auth">
-      {top}
-      <main
-        className={cn(
-          'sp-auth__main',
-          wide && 'sp-auth__main--wide',
-          stickyActions && 'max-md:pb-28!',
-        )}
-        style={style}
-      >
-        {children}
-      </main>
+    <div className="sp-auth min-[900px]:flex-row min-[900px]:gap-4 min-[900px]:p-4">
+      <AuthAside variant={aside} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center gap-2 px-4 pt-4 min-[900px]:justify-end min-[900px]:p-0">
+          <span className="sp-brand__name me-auto text-[22px]! leading-7! min-[900px]:hidden">
+            Sapio
+          </span>
+          {link}
+          <ThemeButton label="Đổi giao diện sáng hoặc tối" />
+        </header>
+        <div className="flex flex-1 items-center justify-center px-4 py-8 min-[900px]:px-2">
+          <main
+            className={cn('flex w-full flex-col gap-(--space-6)', padBottom)}
+            style={{ maxWidth: maxWidth ?? 400 }}
+          >
+            {children}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
@@ -110,8 +169,9 @@ export function SignupLayout({
 }) {
   return (
     <AuthPage
-      top={<AuthTop>{top}</AuthTop>}
-      {...(maxWidth ? { maxWidth } : {})}
+      aside="signup"
+      link={top}
+      maxWidth={maxWidth ?? 420}
       {...(wide ? { wide } : {})}
       stickyActions={stickyActions}
     >

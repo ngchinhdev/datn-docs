@@ -9,7 +9,7 @@ import { AccountTools } from '@/components/mock/account-tools';
 import { Notice, PasswordField } from '@/components/mock/password-field';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
-import { AuthPage, AuthTop } from '@/components/sapio/signup-layout';
+import { AuthPage } from '@/components/sapio/signup-layout';
 import {
   afterLogin,
   attemptLogin,
@@ -99,13 +99,14 @@ export function LoginScreen() {
   return (
     <>
       <AuthPage
-        maxWidth={440}
-        top={
-          <AuthTop>
-            <Link href="/mock/signup" className="text-sm font-semibold no-underline">
-              Đăng ký cơ sở
-            </Link>
-          </AuthTop>
+        aside="login"
+        link={
+          <Link
+            href="/mock/signup"
+            className="px-3 py-2.5 text-sm font-semibold no-underline max-[899px]:hidden"
+          >
+            Đăng ký cơ sở
+          </Link>
         }
       >
         <div>
