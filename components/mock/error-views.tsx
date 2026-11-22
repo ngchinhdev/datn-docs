@@ -32,7 +32,7 @@ export function ServerError({
               Thử lại
             </button>
           ) : null}
-          <Link href="/mock" className="sp-btn sp-btn--secondary no-underline">
+          <Link href="/mock/screens" className="sp-btn sp-btn--secondary no-underline">
             Về danh sách màn hình
           </Link>
         </>
@@ -102,7 +102,7 @@ export function NotFoundMock() {
       title="Không tìm thấy trang"
       lead="Link có thể đã cũ hoặc gõ sai."
       actions={
-        <Link href="/mock" className="sp-btn sp-btn--primary no-underline">
+        <Link href="/mock/screens" className="sp-btn sp-btn--primary no-underline">
           Về danh sách màn hình
         </Link>
       }

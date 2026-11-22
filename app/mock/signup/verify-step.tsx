@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useAuthText } from '@/components/mock/auth-text';
 import { Button } from '@/components/sapio/button';
 import { OTP_LENGTH, OtpField } from '@/components/sapio/otp-field';
 import { SignupLayout } from '@/components/sapio/signup-layout';
@@ -33,6 +34,8 @@ export function VerifyStep({
   onNext: () => void;
 }) {
   const toast = useToast();
+  const { t } = useAuthText();
+  const text = t.signup.verify;
   const now = useMockNow();
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -52,11 +55,7 @@ export function VerifyStep({
     }
     const left = attemptsLeft - 1;
     setAttemptsLeft(left);
-    setError(
-      left > 0
-        ? `Mã chưa đúng. Còn ${left} lần thử.`
-        : 'Bạn đã nhập sai quá số lần cho phép. Gửi mã mới để thử lại.',
-    );
+    setError(left > 0 ? text.wrongCode(left) : text.tooMany);
     setCode('');
     document.getElementById(OTP_ID)?.focus();
   }
@@ -67,28 +66,29 @@ export function VerifyStep({
     setAttemptsLeft(CODE_ATTEMPTS);
     setSentAt(now);
     setCooldown(RESEND_SECONDS);
-    toast({ text: `Đã gửi mã mới tới ${draft.email}.` });
+    toast({ text: text.resent(draft.email) });
     document.getElementById(OTP_ID)?.focus();
   }
 
   return (
     <SignupLayout
       current={2}
-      title="Nhập mã trong email"
+      title={text.title}
       lead={
         <>
-          Đã gửi mã 6 số tới <strong className="font-semibold text-(--ink)">{draft.email}</strong>.{' '}
-          <Link href="/mock/signup?step=account">Sửa email</Link>
+          {text.sentTo} <strong className="font-semibold text-(--ink)">{draft.email}</strong>.{' '}
+          <Link href="/mock/signup?step=account" className="sp-link">
+            {text.editEmail}
+          </Link>
         </>
       }
-      maxWidth={560}
       top={
         <button
           type="button"
           className="sp-btn sp-btn--ghost sp-btn--sm"
-          onClick={() => toast({ text: 'Đăng xuất: chưa có trong mock.' })}
+          onClick={() => toast({ text: text.signOutToast })}
         >
-          Đăng xuất
+          {t.common.signOut}
         </button>
       }
     >
@@ -109,7 +109,7 @@ export function VerifyStep({
           }}
           onComplete={verify}
           error={error}
-          help="Gõ đủ 6 số là tự xác nhận. Không thấy email? Xem trong thư rác."
+          help={text.help}
           disabled={locked}
           autoFocus
         />
@@ -119,7 +119,7 @@ export function VerifyStep({
           className="h-12!"
           disabled={locked || code.length !== OTP_LENGTH}
         >
-          Xác nhận
+          {text.submit}
         </Button>
         <Button
           variant="ghost"
@@ -127,7 +127,7 @@ export function VerifyStep({
           disabled={waitLeft > 0 && !locked}
           onClick={resend}
         >
-          {waitLeft > 0 && !locked ? `Gửi lại mã sau ${formatResendIn(waitLeft)}` : 'Gửi lại mã'}
+          {waitLeft > 0 && !locked ? text.resendIn(formatResendIn(waitLeft)) : text.resend}
         </Button>
       </form>
     </SignupLayout>

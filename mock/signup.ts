@@ -1,3 +1,4 @@
+import { AUTH_COPY, type AuthLang } from './auth-copy';
 import { fold } from './customers';
 import { COMMON_PASSWORDS } from './fixtures/common-passwords';
 import { industryTemplates } from './fixtures/templates';
@@ -5,11 +6,12 @@ import type { IndustryTemplate, SampleService, SampleServiceVariant } from './fi
 import { tenantFixtures } from './fixtures';
 import { formatDuration, formatVnd } from './format';
 
-export const STEPS = ['account', 'verify', 'industry', 'business', 'done'] as const;
+export const STEPS = ['account', 'verify', 'business', 'done'] as const;
 export type SignupStep = (typeof STEPS)[number];
 
+/** `?step=industry` is a step that no longer exists; it lands on `business`. */
 export const stepOf = (value: string | null | undefined): SignupStep =>
-  STEPS.find((s) => s === value) ?? 'account';
+  STEPS.find((s) => s === (value === 'industry' ? 'business' : value)) ?? 'account';
 
 // ---------------------------------------------------------------------------------------------
 // Password (BR-73)
@@ -23,12 +25,13 @@ const squash = (text: string) => fold(text).replace(/\s+/g, '');
 const common = new Set(COMMON_PASSWORDS);
 
 /** Error text for the password, or `null` when it is accepted. Length counts characters, not bytes. */
-export function passwordError(password: string): string | null {
+export function passwordError(password: string, lang: AuthLang = 'vi'): string | null {
+  const e = AUTH_COPY[lang].errors;
   const length = [...password].length;
-  if (length === 0) return 'Nhập mật khẩu.';
-  if (length < PASSWORD_MIN) return `Mật khẩu cần ít nhất ${PASSWORD_MIN} ký tự.`;
-  if (length > PASSWORD_MAX) return `Mật khẩu dài tối đa ${PASSWORD_MAX} ký tự.`;
-  if (common.has(squash(password))) return 'Mật khẩu này quá phổ biến, chọn câu khác.';
+  if (length === 0) return e.passwordEmpty;
+  if (length < PASSWORD_MIN) return e.passwordShort(PASSWORD_MIN);
+  if (length > PASSWORD_MAX) return e.passwordLong(PASSWORD_MAX);
+  if (common.has(squash(password))) return e.passwordCommon;
   return null;
 }
 
@@ -40,11 +43,10 @@ export const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valu
 /** One trial per verified email (BR-74); these already own a tenant. */
 const REGISTERED_EMAILS = ['chinh@tocmay.vn'];
 
-export function emailError(email: string): string | null {
-  if (!isEmail(email)) return 'Email chưa đúng. Ví dụ: an@tiemcuaban.vn.';
-  if (REGISTERED_EMAILS.includes(email.trim().toLowerCase())) {
-    return 'Email này đã có một cơ sở. Đăng nhập để vào cơ sở của bạn.';
-  }
+export function emailError(email: string, lang: AuthLang = 'vi'): string | null {
+  const e = AUTH_COPY[lang].errors;
+  if (!isEmail(email)) return e.emailInvalid;
+  if (REGISTERED_EMAILS.includes(email.trim().toLowerCase())) return e.emailRegistered;
   return null;
 }
 
@@ -63,8 +65,6 @@ export const formatResendIn = (seconds: number) =>
 
 // ---------------------------------------------------------------------------------------------
 // Address of the customer page (BR-72)
-
-export const TAKEN_MESSAGE = 'Đã có cơ sở dùng địa chỉ này';
 
 export const SLUG_MIN = 3;
 export const SLUG_MAX = 40;
@@ -97,16 +97,13 @@ export const RESERVED_SLUGS = [
 ];
 
 /** Format and reserved names: checked when the field loses focus. */
-export function slugFormatError(slug: string): string | null {
-  if (!slug) return 'Nhập địa chỉ trang đặt lịch.';
-  if (!/^[a-z0-9-]+$/.test(slug)) return 'Chỉ dùng chữ thường không dấu, số và dấu gạch ngang.';
-  if (slug.startsWith('-') || slug.endsWith('-')) {
-    return 'Địa chỉ không bắt đầu hoặc kết thúc bằng dấu gạch ngang.';
-  }
-  if (slug.length < SLUG_MIN || slug.length > SLUG_MAX) {
-    return `Địa chỉ dài từ ${SLUG_MIN} đến ${SLUG_MAX} ký tự.`;
-  }
-  if (RESERVED_SLUGS.includes(slug)) return 'Tên này dành riêng cho hệ thống, chọn tên khác.';
+export function slugFormatError(slug: string, lang: AuthLang = 'vi'): string | null {
+  const e = AUTH_COPY[lang].errors;
+  if (!slug) return e.slugEmpty;
+  if (!/^[a-z0-9-]+$/.test(slug)) return e.slugChars;
+  if (slug.startsWith('-') || slug.endsWith('-')) return e.slugHyphen;
+  if (slug.length < SLUG_MIN || slug.length > SLUG_MAX) return e.slugLength(SLUG_MIN, SLUG_MAX);
+  if (RESERVED_SLUGS.includes(slug)) return e.slugReserved;
   return null;
 }
 
@@ -126,6 +123,9 @@ export function slugFromName(name: string): string {
 // Industries
 
 export type IndustryId = 'salon' | 'nail' | 'spa' | 'pet';
+
+/** Every new tenant starts from the hair salon template; sign-up does not ask for an industry. */
+export const SIGNUP_INDUSTRY: IndustryId = 'salon';
 
 export interface IndustryOption {
   id: IndustryId;
@@ -225,7 +225,6 @@ export interface SignupDraft {
   passwordOk: boolean;
   terms: boolean;
   verified: boolean;
-  industry: IndustryId;
   businessName: string;
   slug: string;
   /** The owner typed in the address field, so the name no longer rewrites it. */
@@ -245,7 +244,6 @@ export const emptyDraft = (): SignupDraft => ({
   passwordOk: false,
   terms: false,
   verified: false,
-  industry: 'salon',
   businessName: '',
   slug: '',
   slugEdited: false,
@@ -268,10 +266,8 @@ export function canOpen(step: SignupStep, draft: SignupDraft): boolean {
       return true;
     case 'verify':
       return draft.passwordOk;
-    case 'industry':
-      return draft.passwordOk && draft.verified;
     case 'business':
-      return draft.passwordOk && draft.verified && Boolean(industryById(draft.industry)?.template);
+      return draft.passwordOk && draft.verified && Boolean(industryById(SIGNUP_INDUSTRY)?.template);
     case 'done':
       return draft.created;
   }
@@ -296,19 +292,18 @@ export interface BusinessErrors {
   days: Record<number, string>;
 }
 
-export function businessErrors(draft: SignupDraft): BusinessErrors {
+export function businessErrors(draft: SignupDraft, lang: AuthLang = 'vi'): BusinessErrors {
+  const e = AUTH_COPY[lang].errors;
   const errors: BusinessErrors = { days: {} };
-  if (!draft.businessName.trim()) errors.businessName = 'Nhập tên cơ sở.';
-  const slug = slugFormatError(draft.slug) ?? (slugTaken(draft.slug) ? TAKEN_MESSAGE : null);
+  if (!draft.businessName.trim()) errors.businessName = e.businessName;
+  const slug = slugFormatError(draft.slug, lang) ?? (slugTaken(draft.slug) ? e.slugTaken : null);
   if (slug) errors.slug = slug;
-  if (!draft.branchName.trim()) errors.branchName = 'Nhập tên chi nhánh.';
-  if (!isContactPhone(draft.phone)) {
-    errors.phone = 'Số điện thoại chưa đúng. Ví dụ: 028 3930 1234.';
-  }
-  if (!draft.address.trim()) errors.address = 'Nhập địa chỉ chi nhánh.';
-  if (!draft.hours.some((d) => d.open)) errors.hours = 'Chọn ít nhất một ngày mở cửa.';
+  if (!draft.branchName.trim()) errors.branchName = e.branchName;
+  if (!isContactPhone(draft.phone)) errors.phone = e.phone;
+  if (!draft.address.trim()) errors.address = e.address;
+  if (!draft.hours.some((d) => d.open)) errors.hours = e.hoursNone;
   draft.hours.forEach((day, i) => {
-    if (day.open && day.to <= day.from) errors.days[i] = 'Giờ đóng cửa phải sau giờ mở cửa.';
+    if (day.open && day.to <= day.from) errors.days[i] = e.hoursOrder;
   });
   return errors;
 }

@@ -24,7 +24,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 - **Form:** dựng từ *mẫu trang form* (MH-09): các nhóm trường, lưu, hủy thay đổi, lỗi từng trường. Ghi rõ trường là đủ.
 - **Nhẹ:** trang đơn giản theo khung chung, không cần vẽ.
 
-**Trạng thái:** Chưa làm · Đang làm · Đã chốt (cô đồng ý). Trạng thái hiện trên trang `/mock` (lấy từ `mock/screens.ts`).
+**Trạng thái:** Chưa làm · Đang làm · Đã chốt (cô đồng ý). Trạng thái hiện trên trang `/mock/screens` (lấy từ `mock/screens.ts`).
 
 ## Quy ước route
 
@@ -38,7 +38,7 @@ Danh sách này rút từ [phạm vi làm chắc](../du-an/roadmap.md#31-làm-ch
 | Công khai của Sapio | `/`, `/signup`, `/login`... | Người chưa đăng nhập |
 | Trang khách của một cơ sở | `[tenant].<domain>/...` (T-16); mock: `/mock/[tenant]/...` | Khách hàng |
 | Khu nội bộ của một cơ sở | `/app/[tenant]/...` | LT, KTV, QL, CCS |
-| Quản trị nền tảng | `/admin/...` | QTNT |
+| Quản trị nền tảng | `admin.<domain>/...` | QTNT |
 
 - `[tenant]` là slug của cơ sở (`toc-may`, `pawpaw`). Slug nằm trong URL cả ở khu nội bộ, để mở hai cơ sở ở hai tab không lẫn, và link gửi cho đồng nghiệp mở đúng cơ sở. Quyền vẫn xét theo cặp (cơ sở, vai trò) của tài khoản.
 - Slug theo BR-72: chữ thường không dấu, số, gạch ngang, duy nhất, không trùng từ dành riêng (`app`, `admin`, `login`...).
@@ -149,6 +149,7 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | MH-58 | Khách thuê | `/admin/tenants`, `/admin/tenants/[id]` | QTNT | 1 | Vẽ | **Đã chọn.** Danh sách tìm, lọc theo trạng thái, gói, ngành, bị khóa; cột gói, trạng thái (dùng thử, đang dùng, hết hạn) và hạn. Chi tiết chỉ có số tổng, **không** xem dữ liệu khách của cơ sở (BR-89); hộp khóa, mở khóa có lý do (BR-75, BR-90) và gia hạn thủ công (BR-91); nhật ký quản trị của cơ sở |
 | MH-59 | Gói cấu hình ngành | `/admin/templates`, `/admin/templates/[id]` | QTNT | 1 | Vẽ | **Đã chọn. Màn chứng minh BT8.** Bản nháp, xuất bản theo phiên bản (BR-70). Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70) |
 | MH-60 | Tổng quan nền tảng | `/admin` | QTNT | 3 | Vẽ | **Đã chọn.** Ô số (cơ sở, trả phí, dùng thử, hết hạn, bị khóa, thu tháng), cơ sở và lịch hẹn theo ngành, cơ sở mới, sắp hết hạn (BR-89) |
+| MH-63 | Đăng nhập quản trị nền tảng | `/admin/login` trên `admin.<domain>` | QTNT | 2 | Nhẹ | Email + mật khẩu, không có "Giữ đăng nhập", "Quên mật khẩu?" hay "Đăng ký cơ sở"; chỉ tài khoản quản trị vào được, đăng nhập sai cửa báo câu chung của BR-76 và có đếm khóa. Mock: `/mock/admin/login` (T-18) |
 | MH-62 | Gói và giá | `/admin/plans` | QTNT | 2 | Vẽ | **Đã chọn.** Tên, giá tháng, dòng mô tả, số chi nhánh tối đa, tính năng của hai gói; % giảm theo kỳ kèm bảng giá kỳ; đổi giá chỉ áp lần thanh toán sau (BR-83, BR-84) |
 
 ## Tổng hợp
@@ -156,9 +157,9 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | Đợt | Vẽ | DS | Form | Nhẹ | Cộng |
 |---|---|---|---|---|---|
 | 1 | 20 | 7 | 6 | 10 | 43 |
-| 2 | 3 | 2 | 3 | 2 | 10 |
+| 2 | 3 | 2 | 3 | 3 | 11 |
 | 3 | 4 | 1 | 2 | 2 | 9 |
-| **Cộng** | **27** | **10** | **11** | **14** | **62** |
+| **Cộng** | **27** | **10** | **11** | **15** | **63** |
 
 Đợt 1 nhiều nhất vì giai đoạn 2–3 là phần lớn mã nguồn. Trong đợt 1, thứ tự vẽ đề xuất:
 

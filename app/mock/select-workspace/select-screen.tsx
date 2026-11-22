@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
 import { useAccountStore } from '@/components/mock/account-store';
 import { AccountTools } from '@/components/mock/account-tools';
+import { useAuthText } from '@/components/mock/auth-text';
 import { useInvitations } from '@/components/mock/use-invitations';
 import { Button } from '@/components/sapio/button';
-import { AuthPage, AuthTop } from '@/components/sapio/signup-layout';
+import { AuthPage } from '@/components/sapio/signup-layout';
 import { useToast } from '@/components/sapio/toast';
 import {
   branchLabel,
@@ -24,13 +25,6 @@ import { workspaces } from '@/mock/fixtures/accounts';
 import { initialsOfName } from '@/mock/people-format';
 import { localDate } from '@/mock/time';
 
-const NOTE: Record<DoorEntry, string | null> = {
-  open: null,
-  plan: 'Gói hết hạn, chỉ vào được trang Gói Sapio',
-  locked: 'Bị Sapio khóa',
-  paused: 'Gói hết hạn, chờ chủ cơ sở gia hạn',
-};
-
 /** MH-06: the tenants of the signed-in account, and the invitations waiting for it (BR-79). */
 export function SelectScreen() {
   const router = useRouter();
@@ -38,6 +32,13 @@ export function SelectScreen() {
   const { now, members, invitations, signedIn, lastWorkspace, locks, patch, hydrated } =
     useAccountStore();
   const { accept, decline } = useInvitations();
+  const { t } = useAuthText();
+  const NOTE: Record<DoorEntry, string | null> = {
+    open: null,
+    plan: t.select.notePlan,
+    locked: t.select.noteLocked,
+    paused: t.select.notePaused,
+  };
 
   useEffect(() => {
     if (hydrated && !signedIn) router.replace('/mock/login');
@@ -51,30 +52,26 @@ export function SelectScreen() {
   function take(token: string, name: string) {
     const result = accept(token, { fullName: '', password: '' });
     if (!result.ok) return;
-    toast({ text: `Đã nhận lời mời vào ${name}.` });
+    toast({ text: t.invite.accepted(name) });
   }
 
   return (
     <>
       <AuthPage
-        maxWidth={560}
-        top={
-          <AuthTop>
-            <span className="flex items-center gap-2 text-sm font-medium">
-              <span className="sp-avatar sp-avatar--sm">{initialsOfName(signedIn.fullName)}</span>
-              {signedIn.fullName}
-            </span>
-          </AuthTop>
+        aside="workspace"
+        maxWidth={480}
+        link={
+          <span className="flex min-w-0 items-center gap-2 px-2 text-sm font-medium">
+            <span className="sp-avatar sp-avatar--sm">{initialsOfName(signedIn.fullName)}</span>
+            <span className="truncate">{signedIn.fullName}</span>
+          </span>
         }
       >
         <div>
-          <h1 className="sp-auth__title">Chọn cơ sở</h1>
-          <p className="sp-auth__lead">
-            Tài khoản {signedIn.email} làm ở {doors.length} cơ sở. Mỗi cơ sở mở ở tab riêng cũng
-            được.
-          </p>
+          <h1 className="sp-auth__title">{t.select.title}</h1>
+          <p className="sp-auth__lead">{t.select.lead(signedIn.email, doors.length)}</p>
         </div>
-        <ul className="m-0 flex list-none flex-col gap-2 p-0" aria-label="Cơ sở của bạn">
+        <ul className="m-0 flex list-none flex-col gap-2 p-0" aria-label={t.select.list}>
           {doors.map((door) => {
             const workspace = workspaces.find((w) => w.id === door.workspaceId)!;
             const member = members.find(
@@ -82,10 +79,11 @@ export function SelectScreen() {
             )!;
             const entry = doorEntry(door.role, door.status);
             const href = entryHref(workspace, member, entry);
-            const note = NOTE[entry] ?? (workspace.built ? null : 'Cơ sở mẫu, chưa có giao diện');
+            const note = NOTE[entry] ?? (workspace.built ? null : t.select.noteSample);
             const sub = [
               ROLE_LABEL[member.role],
-              member.branchId ? `Chi nhánh ${branchLabel(member.branchId)}` : null,
+              member.branchId ? `${t.select.branchPrefix} ${branchLabel(member.branchId)}` : null,
+              entry === 'paused' ? note : null,
             ]
               .filter(Boolean)
               .join(' · ');
@@ -98,19 +96,18 @@ export function SelectScreen() {
                 >
                   {workspace.monogram}
                 </span>
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="flex items-center text-[15px] leading-[22px] font-semibold">
                     {workspace.name}
                     {workspace.id === last && (
-                      <span className="sp-badge sp-badge--completed ms-2">Dùng gần nhất</span>
+                      <span className="sp-badge sp-badge--completed ms-2">{t.select.recent}</span>
                     )}
                   </span>
                   <span className="block text-[13px] leading-[18px] text-(--ink-muted)">{sub}</span>
                 </span>
                 {entry === 'paused' ? (
                   <span className="ms-auto flex items-center gap-2">
-                    <span className="sp-badge sp-badge--no-show">Tạm dừng</span>
-                    <span className="text-[13px] leading-[18px] text-(--ink-muted)">{note}</span>
+                    <span className="sp-badge sp-badge--no-show">{t.select.paused}</span>
                   </span>
                 ) : (
                   <span className="ms-auto flex items-center gap-2 text-(--ink-muted)">
@@ -121,7 +118,7 @@ export function SelectScreen() {
               </>
             );
             const className =
-              'sp-choice flex flex-row items-center justify-start gap-3.5 px-4 py-3.5 text-left no-underline';
+              'flex items-center gap-3.5 rounded-[14px] bg-(--fill-tonal) px-4 py-3.5 text-left text-(--ink) no-underline hover:bg-(--surface-hover)';
             return (
               <li key={workspace.id}>
                 {href ? (
@@ -148,7 +145,7 @@ export function SelectScreen() {
         {waiting.length > 0 && (
           <section className="sp-auth__card gap-3! p-4!" aria-labelledby="ws-inv">
             <h2 id="ws-inv" className="m-0 text-[15px] leading-[22px] font-semibold">
-              Lời mời chờ bạn
+              {t.select.invitations}
             </h2>
             {waiting.map((invitation) => {
               const workspace = workspaces.find((w) => w.id === invitation.workspaceId)!;
@@ -165,8 +162,10 @@ export function SelectScreen() {
                   <div className="min-w-0">
                     <div className="text-[15px] leading-[22px] font-semibold">{workspace.name}</div>
                     <div className="text-[13px] leading-[18px] text-(--ink-muted)">
-                      Mời làm {ROLE_LABEL[invitation.role]} · hết hạn {date.slice(8, 10)}/
-                      {date.slice(5, 7)}
+                      {t.select.inviteMeta(
+                        ROLE_LABEL[invitation.role],
+                        `${date.slice(8, 10)}/${date.slice(5, 7)}`,
+                      )}
                     </div>
                   </div>
                   <div className="ms-auto flex gap-2">
@@ -175,17 +174,17 @@ export function SelectScreen() {
                       variant="ghost"
                       onClick={() => {
                         decline(invitation.token);
-                        toast({ text: `Đã từ chối lời mời vào ${workspace.name}.` });
+                        toast({ text: t.invite.declined(workspace.name) });
                       }}
                     >
-                      Từ chối
+                      {t.select.decline}
                     </Button>
                     <Button
                       size="sm"
                       variant="secondary"
                       onClick={() => take(invitation.token, workspace.name)}
                     >
-                      Nhận
+                      {t.select.accept}
                     </Button>
                   </div>
                 </div>
@@ -194,9 +193,16 @@ export function SelectScreen() {
           </section>
         )}
         <p className="m-0 text-center text-sm text-(--ink-muted)">
-          <Link href="/mock/signup">Đăng ký cơ sở của riêng bạn</Link> ·{' '}
-          <Link href="/mock/login" onClick={() => patch(() => ({ session: null }))}>
-            Đăng xuất
+          <Link href="/mock/signup" className="sp-link">
+            {t.select.own}
+          </Link>{' '}
+          ·{' '}
+          <Link
+            href="/mock/login"
+            className="sp-link"
+            onClick={() => patch(() => ({ session: null }))}
+          >
+            {t.common.signOut}
           </Link>
         </p>
       </AuthPage>

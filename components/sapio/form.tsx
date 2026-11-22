@@ -51,6 +51,7 @@ export function Field({
   full = false,
   size = 'sm',
   area = false,
+  labelEnd,
   children,
 }: {
   id: string;
@@ -70,10 +71,18 @@ export function Field({
   size?: 'sm' | 'md';
   /** The control is a textarea. */
   area?: boolean;
+  /** A link or button on the right of the label row: "Quên mật khẩu?". */
+  labelEnd?: ReactNode;
   /** The input, select or textarea; give it `id`, and `aria-invalid` when there is an error. */
   children: ReactNode;
 }) {
   const message = error ?? help;
+  const labelEl = (
+    <label className="sp-field__label" htmlFor={id}>
+      {label}
+      {optional && <span className="sp-field__optional"> (không bắt buộc)</span>}
+    </label>
+  );
   return (
     <div
       className={cn(
@@ -84,10 +93,14 @@ export function Field({
         full && 'sp-field--full',
       )}
     >
-      <label className="sp-field__label" htmlFor={id}>
-        {label}
-        {optional && <span className="sp-field__optional"> (không bắt buộc)</span>}
-      </label>
+      {labelEnd ? (
+        <div className="flex items-baseline justify-between gap-2">
+          {labelEl}
+          <span className="text-[13px] leading-[18px] font-medium">{labelEnd}</span>
+        </div>
+      ) : (
+        labelEl
+      )}
       <div className={cn('sp-field__control', area && 'sp-field__control--area')}>
         {children}
         {suffix && (

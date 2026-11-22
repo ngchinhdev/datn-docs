@@ -3,6 +3,7 @@
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
+import { useAuthText } from '@/components/mock/auth-text';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
 import { SignupLayout } from '@/components/sapio/signup-layout';
@@ -33,12 +34,14 @@ export function AccountStep({
   const [touched, setTouched] = useState<Partial<Record<Key, boolean>>>({});
   const [submitted, setSubmitted] = useState(false);
   const [shown, setShown] = useState(false);
+  const { lang, t } = useAuthText();
+  const text = t.signup.account;
 
   const errors: Record<Key, string | null> = {
-    fullName: draft.fullName.trim() ? null : 'Nhập họ và tên.',
-    email: emailError(draft.email),
-    password: passwordError(password),
-    terms: draft.terms ? null : 'Cần đồng ý điều khoản để tiếp tục.',
+    fullName: draft.fullName.trim() ? null : t.errors.nameEmpty,
+    email: emailError(draft.email, lang),
+    password: passwordError(password, lang),
+    terms: draft.terms ? null : t.errors.termsRequired,
   };
   const shownError = (key: Key) => (submitted || touched[key] ? errors[key] : null);
   const touch = (key: Key) => () => setTouched((t) => ({ ...t, [key]: true }));
@@ -58,21 +61,20 @@ export function AccountStep({
   return (
     <SignupLayout
       current={1}
-      title="Tạo tài khoản chủ cơ sở"
-      lead="Dùng tài khoản này để quản lý lịch, nhân viên và thu tiền."
-      maxWidth={560}
+      title={text.title}
+      lead={text.lead}
       top={
-        <Link href="/mock/login" className="sp-btn sp-btn--ghost sp-btn--sm no-underline">
-          Đăng nhập
+        <Link href="/mock/login" className="sp-link px-3 py-2.5 text-sm">
+          {t.common.login}
         </Link>
       }
     >
       <form onSubmit={submit} noValidate className="flex flex-col gap-(--space-4)">
-        <Field id="su-name" label="Họ và tên" size="md" error={shownError('fullName')}>
+        <Field id="su-name" label={t.common.fullName} size="md" error={shownError('fullName')}>
           <input
             id="su-name"
             type="text"
-            placeholder="Ví dụ: Nguyễn Văn An"
+            placeholder={text.namePlaceholder}
             autoComplete="name"
             value={draft.fullName}
             aria-invalid={shownError('fullName') ? true : undefined}
@@ -85,13 +87,13 @@ export function AccountStep({
           id="su-mail"
           label="Email"
           size="md"
-          help="Mã xác nhận sẽ gửi tới email này."
+          help={text.emailHelp}
           error={shownError('email')}
         >
           <input
             id="su-mail"
             type="email"
-            placeholder="Ví dụ: an@tiemcuaban.vn"
+            placeholder={text.emailPlaceholder}
             autoComplete="email"
             value={draft.email}
             aria-invalid={shownError('email') ? true : undefined}
@@ -102,11 +104,11 @@ export function AccountStep({
         </Field>
         <Field
           id="su-pass"
-          label="Mật khẩu"
+          label={t.common.password}
           size="md"
           help={
             <>
-              Ít nhất 15 ký tự. Một câu dễ nhớ là đủ, ví dụ <em>tiem toc may mo cua 8 gio</em>.
+              {text.passwordHint} <em>{text.passwordExample}</em>.
             </>
           }
           error={shownError('password')}
@@ -124,7 +126,7 @@ export function AccountStep({
           <button
             type="button"
             className="sp-icon-btn me-1"
-            aria-label={shown ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+            aria-label={shown ? t.common.hidePassword : t.common.showPassword}
             aria-pressed={shown}
             onClick={() => setShown((v) => !v)}
           >
@@ -142,8 +144,15 @@ export function AccountStep({
               onChange={(e) => update({ terms: e.target.checked })}
             />
             <span>
-              Tôi đồng ý với <a href="#">Điều khoản sử dụng</a> và{' '}
-              <a href="#">Chính sách quyền riêng tư</a> của Sapio.
+              {text.termsBefore}{' '}
+              <a href="#" className="sp-link">
+                {text.terms}
+              </a>{' '}
+              {text.termsAnd}{' '}
+              <a href="#" className="sp-link">
+                {text.privacy}
+              </a>{' '}
+              {text.termsAfter}
             </span>
           </label>
           {shownError('terms') && (
@@ -153,7 +162,7 @@ export function AccountStep({
           )}
         </div>
         <Button type="submit" variant="primary" className="h-12!">
-          Tạo tài khoản
+          {text.submit}
         </Button>
       </form>
     </SignupLayout>

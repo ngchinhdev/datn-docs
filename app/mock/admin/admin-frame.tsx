@@ -3,7 +3,7 @@
 import { Building2, Layers, LayoutDashboard, ScrollText, Tag, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useAccountStore } from '@/components/mock/account-store';
 import { AppShell, type ShellNavItem } from '@/components/sapio/app-shell';
 import { useToast } from '@/components/sapio/toast';
@@ -30,8 +30,14 @@ export function AdminFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const toast = useToast();
   const router = useRouter();
-  const { signedIn, patch } = useAccountStore();
-  const person = signedIn?.fullName ?? 'Quản trị Sapio';
+  const { adminAccount, patch, hydrated } = useAccountStore();
+  const person = adminAccount?.fullName ?? 'Quản trị Sapio';
+  const onLogin = pathname === '/mock/admin/login';
+
+  // No administrator session (T-18): every page of the area but the sign-in page sends you there.
+  useEffect(() => {
+    if (hydrated && !adminAccount && !onLogin) router.replace('/mock/admin/login');
+  }, [hydrated, adminAccount, onLogin, router]);
   const isCurrent = (path: string) =>
     path === '/mock/admin'
       ? pathname === path
@@ -46,6 +52,9 @@ export function AdminFrame({ children }: { children: ReactNode }) {
   }));
   const tabs = items.slice(0, 3);
 
+  if (onLogin) return <>{children}</>;
+  if (!adminAccount) return null;
+
   return (
     <AppShell
       workspace={{ name: 'Sapio', initial: 'S', accentClass: '' }}
@@ -59,8 +68,8 @@ export function AdminFrame({ children }: { children: ReactNode }) {
       account={{ name: person, initials: initialsOfName(person), roleLabel: 'Quản trị nền tảng' }}
       onProfile={() => toast({ text: 'Hồ sơ cá nhân: chưa có trong mock.' })}
       onSignOut={() => {
-        patch(() => ({ session: null }));
-        router.push('/mock/login');
+        patch(() => ({ adminSession: null }));
+        router.push('/mock/admin/login');
       }}
       accountExtra={(kind) => (
         <>
@@ -87,7 +96,7 @@ export function AdminFrame({ children }: { children: ReactNode }) {
             </Link>
           ))}
           <Link
-            href="/mock"
+            href="/mock/screens"
             className="sp-menu__item"
             {...(kind === 'menu' ? { role: 'menuitem' } : {})}
           >

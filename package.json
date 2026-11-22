@@ -19,6 +19,7 @@
     "check:platform": "node scripts/check-platform.ts",
     "check:assistant": "node scripts/check-assistant.ts",
     "check:flow": "node scripts/check-flow.ts",
+    "shot": "node scripts/shot.ts",
     "format": "prettier --write app components lib mock"
   },
   "dependencies": {
@@ -42,6 +43,7 @@
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "playwright": "1.65.1",
     "prettier": "3.9.10",
     "tailwindcss": "4.3.4",
     "typescript": "6.0.3"

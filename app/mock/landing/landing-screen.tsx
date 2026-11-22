@@ -221,7 +221,7 @@ export function LandingScreen() {
           <a href="#">Điều khoản</a>
           <a href="#">Quyền riêng tư</a>
           <Link href="/mock/login">Đăng nhập</Link>
-          <Link href="/mock">Xem mock</Link>
+          <Link href="/mock/screens">Xem mock</Link>
         </span>
       </footer>
     </div>

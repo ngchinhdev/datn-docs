@@ -11,7 +11,7 @@ export function NotBuilt({ screen, path }: { screen: MockScreen | undefined; pat
           ? `${screenStatusLabel.todo}. ${screen.note}`
           : 'Trang này không có trong danh sách màn hình.'}
       </p>
-      <Link href="/mock" className="font-medium">
+      <Link href="/mock/screens" className="font-medium">
         Về danh sách màn hình
       </Link>
     </div>

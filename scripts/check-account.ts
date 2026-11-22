@@ -3,6 +3,7 @@
  * to BR-79) and the members of the sample data.
  * Run: pnpm check:account   (Node 24 runs TypeScript directly)
  */
+import { readFileSync } from 'node:fs';
 import {
   acceptInvitation,
   afterLogin,
@@ -42,6 +43,7 @@ import {
   accounts,
   invitations,
   members,
+  PLATFORM_ADMIN_EMAIL,
   workspaces,
   SAMPLE_PASSWORD,
 } from '../mock/fixtures/accounts.ts';
@@ -789,6 +791,57 @@ report(
       (d) => d.workspaceId === 'pawpaw',
     )?.status === 'active',
   'BR-75: khóa một cơ sở thì chỉ cơ sở đó dừng; cơ sở khác của tài khoản vẫn mở',
+);
+
+// ---- T-18: two doors, one for staff and one for the platform administrators ----
+const adminIn = attemptLogin(
+  accounts,
+  {},
+  PLATFORM_ADMIN_EMAIL,
+  SAMPLE_PASSWORD,
+  MOCK_NOW,
+  'admin',
+);
+report(adminIn.outcome.kind === 'ok', 'T-18: quản trị nền tảng đăng nhập được ở cửa quản trị');
+const adminAtStaff = attemptLogin(accounts, {}, PLATFORM_ADMIN_EMAIL, SAMPLE_PASSWORD, MOCK_NOW);
+report(
+  adminAtStaff.outcome.kind === 'wrong',
+  'T-18: quản trị nền tảng ở cửa nhân sự bị từ chối, dù mật khẩu đúng',
+  show(adminAtStaff.outcome),
+);
+const staffAtAdmin = attemptLogin(accounts, {}, LINH, SAMPLE_PASSWORD, MOCK_NOW, 'admin');
+report(
+  staffAtAdmin.outcome.kind === 'wrong',
+  'T-18: tài khoản nhân sự ở cửa quản trị bị từ chối, dù mật khẩu đúng',
+  show(staffAtAdmin.outcome),
+);
+let wrongDoor: LoginRecords = {};
+let wrongDoorOutcome: LoginOutcome = { kind: 'wrong', remaining: null };
+for (let i = 0; i < 5; i++) {
+  const result = attemptLogin(accounts, wrongDoor, PLATFORM_ADMIN_EMAIL, SAMPLE_PASSWORD, MOCK_NOW);
+  wrongDoor = result.records;
+  wrongDoorOutcome = result.outcome;
+}
+report(
+  wrongDoorOutcome.kind === 'locked' &&
+    wrongDoorOutcome.until === at(15) &&
+    lockedUntil(wrongDoor, PLATFORM_ADMIN_EMAIL, at(14)) !== null,
+  'BR-76: đăng nhập sai cửa được đếm, lần 5 khóa email 15 phút',
+  show(wrongDoorOutcome),
+);
+const adminReset = requestReset(accounts, [], {}, PLATFORM_ADMIN_EMAIL, MOCK_NOW, 'dat-lai-1');
+report(
+  adminReset.issued === null && adminReset.tokens.length === 0,
+  'T-18: quản trị nền tảng không tự đặt lại mật khẩu, không cấp link',
+);
+
+// ---- D-16: sign-up has no industry step ----
+const stepsSource = readFileSync(new URL('../mock/signup.ts', import.meta.url), 'utf8');
+const stepsList = /export const STEPS = \[([^\]]*)\]/.exec(stepsSource)?.[1] ?? '';
+report(
+  stepsList.includes('business') && !stepsList.includes('industry'),
+  'D-16: các bước đăng ký không còn chọn ngành',
+  stepsList,
 );
 
 console.log(failures === 0 ? '\nTất cả đạt.' : `\n${failures} lỗi.`);

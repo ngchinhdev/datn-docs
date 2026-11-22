@@ -3,13 +3,14 @@
 import { Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useAccountStore } from '@/components/mock/account-store';
 import { AccountTools } from '@/components/mock/account-tools';
+import { useAuthText } from '@/components/mock/auth-text';
 import { Notice, PasswordField } from '@/components/mock/password-field';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
-import { AuthPage, AuthTop } from '@/components/sapio/signup-layout';
+import { AuthPage } from '@/components/sapio/signup-layout';
 import {
   afterLogin,
   attemptLogin,
@@ -20,16 +21,23 @@ import {
   lockedUntil,
   MAX_FAILED,
   normalizeEmail,
+  type LoginDoor,
 } from '@/mock/account';
 import { formatWait, lockMail } from '@/mock/account-mail';
 import { workspaces } from '@/mock/fixtures/accounts';
 import { formatTime } from '@/mock/time';
 
-/** MH-03: email and password; five wrong tries in a row lock the email for 15 minutes (BR-76). */
-export function LoginScreen() {
+/**
+ * MH-03: email and password; five wrong tries in a row lock the email for 15 minutes (BR-76).
+ * With `door="admin"` it is MH-63, the page of the platform administrators, which keeps a session
+ * of its own (T-18).
+ */
+export function LoginScreen({ door = 'staff' }: { door?: LoginDoor }) {
+  const isAdmin = door === 'admin';
   const router = useRouter();
   const store = useAccountStore();
-  const { now, accounts, members, records, patch } = store;
+  const { t } = useAuthText();
+  const { now, accounts, members, records, patch, adminAccount, hydrated } = store;
   const initialEmail = useSearchParams().get('email') ?? '';
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
@@ -37,13 +45,18 @@ export function LoginScreen() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [failed, setFailed] = useState(false);
 
+  // An administrator who is already signed in has nothing to do here.
+  useEffect(() => {
+    if (isAdmin && hydrated && adminAccount) router.replace('/mock/admin');
+  }, [isAdmin, hydrated, adminAccount, router]);
+
   const until = email.trim() ? lockedUntil(records, email, now) : null;
   const waitSeconds = until ? Math.ceil((Date.parse(until) - Date.parse(now)) / 1000) : 0;
 
   function submit(e: FormEvent) {
     e.preventDefault();
     if (until) return;
-    const result = attemptLogin(accounts, records, email, password, now);
+    const result = attemptLogin(accounts, records, email, password, now, door);
     patch(() => ({ records: result.records }));
     const { outcome } = result;
     if (outcome.kind === 'wrong') {
@@ -67,11 +80,12 @@ export function LoginScreen() {
     }
 
     const { account } = outcome;
-    patch(() => ({ session: { accountId: account.id, persistent } }));
-    if (account.platformAdmin) {
+    if (isAdmin) {
+      patch(() => ({ adminSession: { accountId: account.id } }));
       router.push('/mock/admin');
       return;
     }
+    patch(() => ({ session: { accountId: account.id, persistent } }));
     const doors = doorsOf(account.id, members, workspaces, lockedStatuses(store.locks));
     const last = store.lastWorkspace[account.id] ?? null;
     const destination = afterLogin(doors, last);
@@ -90,38 +104,36 @@ export function LoginScreen() {
     router.push('/mock/select-workspace');
   }
 
+  const forgotHref = `/mock/forgot-password?email=${encodeURIComponent(email.trim())}`;
   const errorText = failed
     ? remaining
-      ? `Email hoặc mật khẩu chưa đúng. Còn ${remaining} lần thử, sau đó tạm khóa ${LOCK_MINUTES} phút.`
-      : 'Email hoặc mật khẩu chưa đúng.'
+      ? t.login.wrongRemaining(remaining, LOCK_MINUTES)
+      : t.login.wrong
     : null;
+  const lockedBody = isAdmin ? t.adminLogin.lockedBody : t.login.lockedBody;
 
   return (
     <>
       <AuthPage
-        maxWidth={440}
-        top={
-          <AuthTop>
-            <Link href="/mock/signup" className="text-sm font-semibold no-underline">
-              Đăng ký cơ sở
+        aside={isAdmin ? 'admin' : 'login'}
+        link={
+          isAdmin ? undefined : (
+            <Link href="/mock/signup" className="sp-link px-3 py-2.5 text-sm max-[899px]:hidden">
+              {t.login.signupTop}
             </Link>
-          </AuthTop>
+          )
         }
       >
         <div>
-          <h1 className="sp-auth__title">Đăng nhập</h1>
-          <p className="sp-auth__lead">
-            Dành cho chủ cơ sở và nhân viên. Khách đặt lịch đăng nhập trên trang của tiệm bằng mã
-            gửi qua email.
-          </p>
+          <h1 className="sp-auth__title">{isAdmin ? t.adminLogin.title : t.login.title}</h1>
+          <p className="sp-auth__lead">{isAdmin ? t.adminLogin.lead : t.login.lead}</p>
         </div>
         <form onSubmit={submit} noValidate className="flex flex-col gap-(--space-4)">
           {until && (
             <Notice tone="danger" role="alert" icon={<Lock size={18} aria-hidden="true" />}>
-              <strong>Tạm khóa đăng nhập tới {formatTime(until)}.</strong>
+              <strong>{t.login.lockedTitle(formatTime(until))}</strong>
               <br />
-              Mật khẩu sai {MAX_FAILED} lần liên tiếp. Đã gửi email báo cho {normalizeEmail(email)}.
-              Muốn vào ngay thì đặt lại mật khẩu.
+              {lockedBody(MAX_FAILED, normalizeEmail(email))}
             </Notice>
           )}
           <Field id="li-mail" label="Email" size="md">
@@ -129,6 +141,7 @@ export function LoginScreen() {
               id="li-mail"
               type="email"
               autoComplete="email"
+              placeholder={t.login.emailPlaceholder}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -138,49 +151,61 @@ export function LoginScreen() {
           </Field>
           <PasswordField
             id="li-pass"
-            label="Mật khẩu"
+            label={t.common.password}
             value={password}
             onChange={setPassword}
             autoComplete="current-password"
             error={errorText}
+            labelEnd={
+              isAdmin ? undefined : (
+                <Link href={forgotHref} className="sp-link">
+                  {t.common.forgot}
+                </Link>
+              )
+            }
           />
-          <label className="sp-check">
-            <input
-              type="checkbox"
-              checked={persistent}
-              onChange={(e) => setPersistent(e.target.checked)}
-            />
-            <span>
-              Giữ đăng nhập trên máy này
-              <span className="sp-check__hint">
-                Không chọn thì đăng xuất khi đóng trình duyệt hoặc sau 12 giờ.
+          {!isAdmin && (
+            <label className="sp-check">
+              <input
+                type="checkbox"
+                checked={persistent}
+                onChange={(e) => setPersistent(e.target.checked)}
+              />
+              <span>
+                {t.login.keep}
+                <span className="sp-check__hint">{t.login.keepHint}</span>
               </span>
-            </span>
-          </label>
+            </label>
+          )}
           <Button type="submit" variant="primary" className="h-12!" disabled={Boolean(until)}>
-            {until ? `Đăng nhập lại sau ${formatWait(waitSeconds)}` : 'Đăng nhập'}
+            {until ? t.login.submitLocked(formatWait(waitSeconds)) : t.login.submit}
           </Button>
-          {until ? (
-            <Link
-              href={`/mock/forgot-password?email=${encodeURIComponent(email.trim())}`}
-              className="sp-btn sp-btn--secondary h-12! no-underline"
-            >
-              Đặt lại mật khẩu
-            </Link>
-          ) : (
-            <Link
-              href={`/mock/forgot-password?email=${encodeURIComponent(email.trim())}`}
-              className="self-center text-sm font-medium"
-            >
-              Quên mật khẩu?
+          {until && !isAdmin && (
+            <Link href={forgotHref} className="sp-btn sp-btn--secondary h-12! no-underline">
+              {t.login.resetPassword}
             </Link>
           )}
         </form>
-        <p className="m-0 text-center text-sm text-(--ink-muted)">
-          Chưa có cơ sở trên Sapio? <Link href="/mock/signup">Đăng ký, dùng thử 7 ngày</Link>
-        </p>
+        {isAdmin ? (
+          <p className="m-0 border-t border-(--line) pt-3.5 text-[13px] leading-[18px] text-(--ink-muted)">
+            {t.adminLogin.note}
+          </p>
+        ) : (
+          <>
+            <p className="m-0 border-t border-(--line) pt-3.5 text-[13px] leading-[18px] text-(--ink-muted)">
+              {t.login.guestNote}
+            </p>
+            <p className="m-0 text-center text-sm text-(--ink-muted)">
+              {t.login.noAccount}{' '}
+              <Link href="/mock/signup" className="sp-link">
+                {t.login.noAccountLink}
+              </Link>
+            </p>
+          </>
+        )}
       </AuthPage>
       <AccountTools
+        door={door}
         onPickAccount={(account) => {
           setEmail(account.email);
           setPassword(account.password);

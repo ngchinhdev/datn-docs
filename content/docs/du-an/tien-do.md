@@ -7,6 +7,25 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 22/11/2026 (tối): trang tài khoản mới (Bước 20)
+
+- **Đã làm** (nhánh `feat/mock-auth-pages`):
+  - 20a–20b: `AuthPage` chia đôi từ 900px, khối `AuthAside` năm bản (login, signup, forgot, workspace, admin), nút sáng/tối.
+  - 20c: nút VI/EN lưu trong store mock; chữ các trang tài khoản ở `mock/auth-copy.ts`; hàm kiểm tra mật khẩu, email, địa chỉ nhận ngôn ngữ.
+  - 20d: đăng ký còn 3 bước, bỏ `industry-step.tsx`; `?step=industry` chuyển về `business`.
+  - 20e: cảnh báo Caps Lock ở `PasswordField`; "Quên mật khẩu?" lên hàng nhãn.
+  - 20f: `/mock` chuyển tới `/mock/login`, danh sách màn hình ở `/mock/screens`; `/mock/admin/login` (MH-63) với `adminSession` riêng.
+  - Sửa sau review: khối trái 50% có thẻ "Tóm tắt hôm nay", quy tắc link `.sp-auth a`, lề 16px, `AccountTools` thu thành nút tròn góc phải dưới.
+  - 20h: `pnpm shot` (Playwright, Chromium); chụp 5 route × sáng/điện thoại/tối, so với `TaiKhoan*.dc.html`, sửa tiêu đề 26/32, khoảng cách 18px, link `.sp-link`, dòng cơ sở tạm dừng, tên người dùng bị xuống dòng trên điện thoại.
+  - 20g: thêm ca kiểm vào `check:account` (sai cửa bị từ chối và có đếm khóa, admin không cấp link đặt lại, `STEPS` không còn `industry`); `check:availability`, `check:account`, `check:platform`, `check:flow`, `typecheck`, `build`, `prettier --check` đều xanh.
+- **Tự quyết:**
+  - `AuthPage` chỉ chia đôi khi có `aside`; hộp thư mẫu, trang lỗi, hết hạn, cơ sở bị khóa giữ một cột.
+  - Khối trái bọc `data-theme="light"` để token luôn ra màu sáng.
+  - Quên mật khẩu với email quản trị coi như email không tồn tại (T-18).
+  - Lời dẫn bước "Thông tin cơ sở" không còn nhắc ngành.
+  - Chữ lấy từ fixtures (tên loại tài nguyên, dịch vụ mẫu) vẫn tiếng Việt khi chọn EN.
+- **Tiếp theo:** người dùng kiểm "Xong khi" của Bước 20 ở 1280, 1440, 1920px và review PR; Bước 21 (khung quản trị); đợt dọn D-16.
+
 ### 22/11/2026: review giao diện sau D-16, trang tài khoản và khung quản trị
 
 - **Đã làm** (phiên claude.ai):

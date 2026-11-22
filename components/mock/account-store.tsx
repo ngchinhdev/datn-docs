@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { usePersistedState } from '@/components/mock/use-persisted-state';
 import type { AccountMail } from '@/mock/account-mail';
+import type { AuthLang } from '@/mock/auth-copy';
 import type { LoginRecords, ResetToken } from '@/mock/account';
 import {
   accounts as seedAccounts,
@@ -25,6 +26,8 @@ interface AccountData {
   invitations: Invitation[];
   /** Who is signed in; `null` is nobody. */
   session: { accountId: string; persistent: boolean } | null;
+  /** The platform administrator who is signed in: a session of its own, apart from `session` (T-18). */
+  adminSession: { accountId: string } | null;
   /** Minutes the mock clock has run on from `MOCK_NOW`. */
   offsetMinutes: number;
   records: LoginRecords;
@@ -41,6 +44,8 @@ interface AccountData {
   locks: Record<string, { at: string; reason: string }>;
   /** When the realtime link went down; `null` while it is up. The calendar says so (BR-79). */
   offlineSince: string | null;
+  /** Language of the account pages (`AuthPage`). */
+  lang: AuthLang;
 }
 
 const INITIAL: AccountData = {
@@ -48,6 +53,7 @@ const INITIAL: AccountData = {
   members: seedMembers,
   invitations: seedInvitations,
   session: null,
+  adminSession: null,
   offsetMinutes: 0,
   records: {},
   resetTokens: [],
@@ -57,6 +63,7 @@ const INITIAL: AccountData = {
   joiners: {},
   locks: SEED_LOCKS,
   offlineSince: null,
+  lang: 'vi',
 };
 
 interface AccountStore extends AccountData {
@@ -67,6 +74,8 @@ interface AccountStore extends AccountData {
   advance: (minutes: number) => void;
   /** The signed-in account, or `undefined`. */
   signedIn: Account | undefined;
+  /** The signed-in platform administrator, or `undefined`. */
+  adminAccount: Account | undefined;
   /** The saved data has been read; until then the sample data stands in (see `usePersistedState`). */
   hydrated: boolean;
 }
@@ -94,6 +103,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       patch,
       advance,
       signedIn: data.accounts.find((a) => a.id === data.session?.accountId),
+      adminAccount: data.accounts.find((a) => a.id === data.adminSession?.accountId),
       hydrated,
     }),
     [data, patch, advance, hydrated],

@@ -6,10 +6,11 @@ import { useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { useAccountStore } from '@/components/mock/account-store';
 import { AccountTools } from '@/components/mock/account-tools';
+import { useAuthText } from '@/components/mock/auth-text';
 import { Notice } from '@/components/mock/password-field';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
-import { AuthPage, AuthTop } from '@/components/sapio/signup-layout';
+import { AuthPage } from '@/components/sapio/signup-layout';
 import {
   isInviteEmail,
   normalizeEmail,
@@ -25,6 +26,7 @@ import { formatWait, resetMail } from '@/mock/account-mail';
  */
 export function ForgotScreen() {
   const { now, accounts, resetTokens, resetSentAt, patch } = useAccountStore();
+  const { t } = useAuthText();
   const initialEmail = useSearchParams().get('email') ?? '';
   const [email, setEmail] = useState(initialEmail);
   const [sentTo, setSentTo] = useState<string | null>(null);
@@ -35,7 +37,7 @@ export function ForgotScreen() {
   function submit(e: FormEvent) {
     e.preventDefault();
     if (!isInviteEmail(email)) {
-      setError('Email chưa đúng. Ví dụ: an@email.vn.');
+      setError(t.forgot.emailInvalid);
       return;
     }
     setError(null);
@@ -65,19 +67,16 @@ export function ForgotScreen() {
   return (
     <>
       <AuthPage
-        top={
-          <AuthTop>
-            <Link href="/mock/login" className="text-sm font-semibold no-underline">
-              Đăng nhập
-            </Link>
-          </AuthTop>
+        aside="forgot"
+        link={
+          <Link href="/mock/login" className="sp-link px-3 py-2.5 text-sm">
+            {t.common.login}
+          </Link>
         }
       >
         <div>
-          <h1 className="sp-auth__title">Quên mật khẩu</h1>
-          <p className="sp-auth__lead">
-            Nhập email đăng nhập. Sapio gửi một link để đặt mật khẩu mới.
-          </p>
+          <h1 className="sp-auth__title">{t.forgot.title}</h1>
+          <p className="sp-auth__lead">{t.forgot.lead}</p>
         </div>
         <form onSubmit={submit} noValidate className="flex flex-col gap-(--space-4)">
           <Field id="fg-mail" label="Email" size="md" error={error}>
@@ -93,26 +92,25 @@ export function ForgotScreen() {
           </Field>
           {sentTo && (
             <Notice tone="info" role="status" icon={<Mail size={18} aria-hidden="true" />}>
-              Nếu <strong>{sentTo}</strong> có tài khoản Sapio, link đặt lại vừa được gửi tới đó.
-              Link dùng được <strong>{RESET_MINUTES} phút</strong> và chỉ một lần. Không thấy thì
-              xem thư mục Spam.{' '}
-              <Link href="/mock/mailbox" className="font-medium">
-                Mock: mở hộp thư mẫu
+              {t.forgot.sentBefore} <strong>{sentTo}</strong> {t.forgot.sentAfter}{' '}
+              <strong>{t.forgot.minutes(RESET_MINUTES)}</strong> {t.forgot.sentEnd}{' '}
+              <Link href="/mock/mailbox" className="sp-link">
+                {t.forgot.mailbox}
               </Link>
             </Notice>
           )}
           {sentTo ? (
             <Button type="submit" variant="secondary" className="h-12!" disabled={wait > 0}>
-              {wait > 0 ? `Gửi lại sau ${formatWait(wait)}` : 'Gửi lại link'}
+              {wait > 0 ? t.forgot.resendIn(formatWait(wait)) : t.forgot.resend}
             </Button>
           ) : (
             <Button type="submit" variant="primary" className="h-12!">
-              Gửi link đặt lại
+              {t.forgot.submit}
             </Button>
           )}
         </form>
-        <Link href="/mock/login" className="self-center text-sm font-medium">
-          Quay lại đăng nhập
+        <Link href="/mock/login" className="sp-link self-center text-sm">
+          {t.forgot.back}
         </Link>
       </AuthPage>
       <AccountTools />
