@@ -1447,6 +1447,14 @@ Sửa `AuthPage` trong `components/sapio/signup-layout.tsx`; mọi trang dùng n
 - Đăng nhập super admin ở `/mock/login` thì bị báo sai. Ở `/mock/admin/login` thì vào được khu quản trị; đăng xuất thì về `/mock/admin/login`. Mở `/mock/admin` khi chưa đăng nhập cũng về trang này.
 - `/mock/screens` vẫn mở được mọi màn.
 
+### 20h. Chụp màn hình để tự so (dùng cho mọi bước giao diện từ nay)
+
+- Thêm `playwright` vào devDependencies (ghim bản), chạy một lần `pnpm exec playwright install chromium`.
+- `scripts/shot.ts`, lệnh `pnpm shot <route>... [--phone] [--dark]`: mở `http://localhost:3100<route>` bằng Chromium (cần `pnpm dev` đang chạy), viewport 1440×900 (`--phone`: 390×844), `deviceScaleFactor: 1`, đặt theme qua `localStorage` theme của Fumadocs trước khi tải, chờ font tải xong, chụp cả trang vào `.shots/<route>[-phone][-dark].png`. Thêm `.shots/` vào `.gitignore`.
+- Chạy cho bước này: `/mock/login`, `/mock/signup`, `/mock/forgot-password`, `/mock/select-workspace` (script điền form đăng nhập của Linh trước khi chụp; tùy chọn `--login <email>`), `/mock/admin/login`, mỗi route thêm một ảnh `--phone` và một ảnh `--dark`. So với `design/screens/TaiKhoan*.dc.html` theo `CLAUDE.md`, sửa chỗ lệch.
+
+**Xong khi:** mô tả PR có danh sách route đã chụp và các chỗ đã sửa sau khi so.
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
