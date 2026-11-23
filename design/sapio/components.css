@@ -437,8 +437,14 @@ dialog.sp-dialog::backdrop,
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-x: hidden;
   overflow-y: auto;
+  transition: width 200ms ease;
 }
+/* Texts that the rail hides fade in after the sidebar has started to widen. */
+.sp-nav__label, .sp-nav__group, .sp-nav__badge, .sp-switcher__text, .sp-switcher__chevron, .sp-brand__text, .sp-account__text, .sp-shell__lang-code { animation: sp-shell-fade 160ms ease 80ms both; }
+@keyframes sp-shell-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sp-shell-slide { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
 /* The page sits in a card. Below 768px there is no card: the page scrolls as a whole. */
 .sp-shell__card { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
 .sp-shell__bar { display: none; }
@@ -467,19 +473,20 @@ dialog.sp-dialog::backdrop,
 /* Rail: icons only. Automatic at 768-1199px, or chosen with the collapse button (.sp-shell--collapsed). */
 .sp-shell--collapsed .sp-shell__side { width: 68px; }
 .sp-shell--collapsed :is(.sp-nav__label, .sp-nav__group, .sp-switcher__text, .sp-switcher__chevron, .sp-nav__badge, .sp-brand__text, .sp-shell__lang-code, .sp-account__text) { display: none; }
-.sp-shell--collapsed :is(.sp-nav__item, .sp-switcher) { justify-content: center; padding: 0; }
-.sp-shell--collapsed .sp-brand { justify-content: center; padding: 0; }
-.sp-shell--collapsed .sp-shell__tools { flex-direction: column; padding: 0; }
-.sp-shell--collapsed .sp-account { justify-content: center; padding: 0; background: transparent; }
+/* Icons keep their left offset (centered in the 48px of the rail), so they stay put while the width changes. */
+.sp-shell--collapsed .sp-nav__item { padding: 0 15px; }
+.sp-shell--collapsed .sp-brand { padding: 0 var(--space-2); }
+.sp-shell--collapsed .sp-shell__tools { flex-direction: column; align-items: flex-start; padding: 0 6px; }
+.sp-shell--collapsed .sp-account { background: transparent; }
 @media (min-width: 768px) and (max-width: 1199px) {
   .sp-shell:not(.sp-shell--expanded) .sp-shell__side { width: 68px; }
   .sp-shell:not(.sp-shell--expanded) :is(.sp-nav__label, .sp-nav__group, .sp-switcher__text, .sp-switcher__chevron, .sp-nav__badge, .sp-brand__text, .sp-shell__lang-code, .sp-account__text) { display: none; }
-  .sp-shell:not(.sp-shell--expanded) :is(.sp-nav__item, .sp-switcher) { justify-content: center; padding: 0; }
-  .sp-shell:not(.sp-shell--expanded) .sp-brand { justify-content: center; padding: 0; }
-  .sp-shell:not(.sp-shell--expanded) .sp-shell__tools { flex-direction: column; padding: 0; }
-  .sp-shell:not(.sp-shell--expanded) .sp-account { justify-content: center; padding: 0; background: transparent; }
+  .sp-shell:not(.sp-shell--expanded) .sp-nav__item { padding: 0 15px; }
+  .sp-shell:not(.sp-shell--expanded) .sp-brand { padding: 0 var(--space-2); }
+  .sp-shell:not(.sp-shell--expanded) .sp-shell__tools { flex-direction: column; align-items: flex-start; padding: 0 6px; }
+  .sp-shell:not(.sp-shell--expanded) .sp-account { background: transparent; }
   /* Expanded on a tablet: the full sidebar slides over the content. */
-  .sp-shell--expanded .sp-shell__side { position: fixed; inset: 0 auto 0 0; z-index: 50; background: var(--surface); box-shadow: var(--shadow-popover); }
+  .sp-shell--expanded .sp-shell__side { position: fixed; inset: 0 auto 0 0; z-index: 50; background: var(--surface); box-shadow: var(--shadow-popover); animation: sp-shell-slide 200ms ease; }
   /* The open sidebar leaves the flow, so the card keeps the place of the rail. */
   .sp-shell--expanded .sp-shell__card { margin-left: 68px; }
 }
@@ -1089,6 +1096,8 @@ a.sp-checklist__item:hover { background: var(--fill-tonal); }
 @media (prefers-reduced-motion: reduce) {
   .sp-btn, .sp-appt, .sp-date, .sp-slot, .sp-variant, .sp-field__control, .sp-segmented__item, .sp-nav__item, .sp-switch input, .sp-switch input::after, .sp-choice { transition: none; }
   .sp-otp__slot[data-active]:empty::after { animation: none; }
+  .sp-shell .sp-shell__side { transition: none; animation: none; }
+  :is(.sp-nav__label, .sp-nav__group, .sp-nav__badge, .sp-switcher__text, .sp-switcher__chevron, .sp-brand__text, .sp-account__text, .sp-shell__lang-code) { animation: none; }
   .sp-btn:active:not([disabled]) { transform: none; }
 }
 
