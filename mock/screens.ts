@@ -243,9 +243,13 @@ const built: Record<string, ScreenLink[]> = {
     { label: 'Nhật ký nền tảng', href: () => '/mock/admin/audit-log', platform: true },
   ],
   'MH-59': [
-    { label: 'Gói cấu hình ngành', href: () => '/mock/admin/templates', platform: true },
     {
-      label: 'Spa thú cưng (bản nháp)',
+      label: 'Gói cấu hình ngành (sẽ bỏ, D-16)',
+      href: () => '/mock/admin/templates',
+      platform: true,
+    },
+    {
+      label: 'Spa thú cưng, bản nháp (sẽ bỏ, D-16)',
       href: () => '/mock/admin/templates/pet_spa',
       platform: true,
     },
@@ -856,7 +860,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/admin/templates', '/admin/templates/[id]'],
-    note: 'Màn chứng minh BT8. Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70)',
+    note: 'Sẽ bỏ (D-16), menu đã không còn mục này. Màn chứng minh BT8. Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70)',
   },
   {
     code: 'MH-60',

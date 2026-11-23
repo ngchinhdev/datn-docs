@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Layers, LayoutDashboard, ScrollText, Tag, type LucideIcon } from 'lucide-react';
+import { Building2, LayoutDashboard, ScrollText, Tag, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
@@ -21,7 +21,6 @@ interface AdminEntry {
 const ENTRIES: AdminEntry[] = [
   { id: 'overview', label: 'Tổng quan', path: '/mock/admin', icon: LayoutDashboard },
   { id: 'tenants', label: 'Khách thuê', path: '/mock/admin/tenants', icon: Building2 },
-  { id: 'templates', label: 'Gói cấu hình ngành', path: '/mock/admin/templates', icon: Layers },
   { id: 'plans', label: 'Gói và giá', path: '/mock/admin/plans', icon: Tag },
   { id: 'audit-log', label: 'Nhật ký', path: '/mock/admin/audit-log', icon: ScrollText },
 ];
@@ -78,7 +77,7 @@ export function AdminFrame({ children }: { children: ReactNode }) {
             Xem mock với vai trò
           </div>
           <Link
-            href="/mock/admin/templates"
+            href="/mock/admin"
             className="sp-menu__item"
             {...(kind === 'menu'
               ? { role: 'menuitemradio', 'aria-checked': true }
