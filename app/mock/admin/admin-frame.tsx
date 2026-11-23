@@ -48,6 +48,7 @@ export function AdminFrame({ children }: { children: ReactNode }) {
     label: entry.label,
     href: entry.path,
     icon: entry.icon,
+    group: 'Vận hành',
     current: isCurrent(entry.path),
   }));
   const tabs = items.slice(0, 3);

@@ -5,6 +5,8 @@ import {
   Check,
   ChevronsUpDown,
   Ellipsis,
+  Globe,
+  LogOut,
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
@@ -24,6 +26,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useAuthText } from '@/components/mock/auth-text';
 import { cn } from '@/lib/utils';
 import { LockIcon } from './lock-icon';
 import { Sheet } from './sheet';
@@ -284,11 +287,30 @@ function ThemeButton({ rail }: { rail: boolean }) {
     <Tip label={label} side={rail ? 'right' : 'top-end'}>
       <button
         type="button"
-        className="sp-icon-btn"
+        className="sp-icon-btn sp-icon-btn--tonal"
         aria-label={label}
         onClick={() => setTheme(dark ? 'light' : 'dark')}
       >
         {dark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
+      </button>
+    </Tip>
+  );
+}
+
+/** Language switch: a globe and the code of the language in use; icon only on the rail. */
+function LangButton({ rail }: { rail: boolean }) {
+  const { lang, setLang } = useAuthText();
+  const label = `Đổi ngôn ngữ, đang dùng ${lang === 'vi' ? 'tiếng Việt' : 'English'}`;
+  return (
+    <Tip label={label} side={rail ? 'right' : 'top-end'}>
+      <button
+        type="button"
+        className="sp-icon-btn sp-icon-btn--tonal"
+        aria-label={label}
+        onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
+      >
+        <Globe aria-hidden="true" />
+        <span className="sp-shell__lang-code">{lang.toUpperCase()}</span>
       </button>
     </Tip>
   );
@@ -317,9 +339,7 @@ function Account({
           {account.initials}
         </span>
         <span className="sp-account__text">
-          <span className="sp-switcher__name" style={{ fontSize: 13, lineHeight: '18px' }}>
-            {account.name}
-          </span>{' '}
+          <span className="sp-switcher__name">{account.name}</span>{' '}
           <span className="sp-switcher__sub">{account.roleLabel}</span>
         </span>
         {rail && (
@@ -329,7 +349,18 @@ function Account({
         )}
         <span className="sr-only">, menu tài khoản</span>
       </button>
-      <ThemeButton rail={rail} />
+      {!rail && (
+        <Tip label="Đăng xuất" side="top-end">
+          <button
+            type="button"
+            className="sp-icon-btn sp-account__out"
+            aria-label="Đăng xuất"
+            onClick={onSignOut}
+          >
+            <LogOut aria-hidden="true" />
+          </button>
+        </Tip>
+      )}
       {menu.open &&
         createPortal(
           <div
@@ -375,61 +406,71 @@ function Account({
   );
 }
 
+/** An item without a group belongs to the section above it; the first section may have no heading. */
+function sectionsOf(items: ShellNavItem[]) {
+  const sections: { group: string | undefined; items: ShellNavItem[] }[] = [];
+  for (const item of items) {
+    const last = sections.at(-1);
+    if (last && (!item.group || item.group === last.group)) last.items.push(item);
+    else sections.push({ group: item.group, items: [item] });
+  }
+  return sections;
+}
+
 function NavItems({ items, rail }: { items: ShellNavItem[]; rail: boolean }) {
-  let lastGroup: string | undefined;
   return (
     <div className="sp-nav">
-      {items.map((item) => {
-        const heading = item.group && item.group !== lastGroup ? item.group : null;
-        lastGroup = item.group ?? lastGroup;
-        const Icon = item.icon;
-        return (
-          <div key={item.id} className="contents">
-            {heading && <div className="sp-nav__group">{heading}</div>}
-            <Tip label={item.label} side="right" enabled={rail}>
-              <Link
-                href={item.href}
-                className="sp-nav__item relative w-full"
-                aria-current={item.current ? 'page' : undefined}
-                aria-label={
-                  rail
-                    ? [
-                        item.label,
-                        item.badge ? `${item.badge} việc chờ` : null,
-                        item.locked ? 'cần nâng gói' : null,
-                      ]
-                        .filter(Boolean)
-                        .join(', ')
-                    : undefined
-                }
-              >
-                <Icon aria-hidden="true" />
-                <span className="sp-nav__label">{item.label}</span>
-                {item.locked && !rail && (
-                  <>
-                    <span className="sp-sr-only"> (cần nâng gói)</span>
-                    <LockIcon />
-                  </>
-                )}
-                {item.badge ? (
-                  <>
-                    <span className="sp-nav__badge">
-                      {item.badge}
-                      <span className="sr-only"> việc chờ</span>
-                    </span>
-                    {rail && (
-                      <span
-                        aria-hidden="true"
-                        className="absolute top-1.5 right-2 size-2 rounded-full bg-(--brand)"
-                      />
-                    )}
-                  </>
-                ) : null}
-              </Link>
-            </Tip>
-          </div>
-        );
-      })}
+      {sectionsOf(items).map((section, i) => (
+        <div key={section.group ?? `section-${i}`} className="sp-nav__section">
+          {section.group && <div className="sp-nav__group">{section.group}</div>}
+          {section.items.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Tip key={item.id} label={item.label} side="right" enabled={rail}>
+                <Link
+                  href={item.href}
+                  className="sp-nav__item relative w-full"
+                  aria-current={item.current ? 'page' : undefined}
+                  aria-label={
+                    rail
+                      ? [
+                          item.label,
+                          item.badge ? `${item.badge} việc chờ` : null,
+                          item.locked ? 'cần nâng gói' : null,
+                        ]
+                          .filter(Boolean)
+                          .join(', ')
+                      : undefined
+                  }
+                >
+                  <Icon aria-hidden="true" />
+                  <span className="sp-nav__label">{item.label}</span>
+                  {item.locked && !rail && (
+                    <>
+                      <span className="sp-sr-only"> (cần nâng gói)</span>
+                      <LockIcon />
+                    </>
+                  )}
+                  {item.badge ? (
+                    <>
+                      <span className="sp-nav__badge">
+                        {item.badge}
+                        <span className="sr-only"> việc chờ</span>
+                      </span>
+                      {rail && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute top-1.5 right-2 size-2 rounded-full bg-(--brand)"
+                        />
+                      )}
+                    </>
+                  ) : null}
+                </Link>
+              </Tip>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
@@ -491,7 +532,13 @@ export function AppShell(props: ShellProps) {
     >
       <nav ref={sideRef} className="sp-shell__side" id="app-sidebar" aria-label="Điều hướng chính">
         <div className="sp-brand">
-          <span className="sp-brand__name">Sapio</span>
+          <span className="sp-brand__mark" aria-hidden="true">
+            S
+          </span>
+          <span className="sp-brand__text">
+            <span className="sp-brand__name">Sapio</span>
+            {props.platform && <span className="sp-brand__sub">{props.platform.name}</span>}
+          </span>
           <Tip label={toggleLabel} side={rail ? 'right' : 'bottom-end'}>
             <button
               ref={toggleRef}
@@ -506,17 +553,23 @@ export function AppShell(props: ShellProps) {
             </button>
           </Tip>
         </div>
-        <Switcher
-          workspace={workspace}
-          branchName={branchName}
-          branches={props.branches}
-          otherWorkspaces={props.otherWorkspaces}
-          newWorkspaceHref={props.newWorkspaceHref}
-          platform={props.platform}
-          rail={rail}
-          compact={false}
-        />
+        {!props.platform && (
+          <Switcher
+            workspace={workspace}
+            branchName={branchName}
+            branches={props.branches}
+            otherWorkspaces={props.otherWorkspaces}
+            newWorkspaceHref={props.newWorkspaceHref}
+            platform={props.platform}
+            rail={rail}
+            compact={false}
+          />
+        )}
         <NavItems items={items} rail={rail} />
+        <div className="sp-shell__tools">
+          <LangButton rail={rail} />
+          <ThemeButton rail={rail} />
+        </div>
         <Account
           account={account}
           accountExtra={props.accountExtra}
