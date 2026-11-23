@@ -503,14 +503,6 @@ export function AppShell(props: ShellProps) {
   // Icons only: the saved choice on wide screens, or the default on tablets until opened.
   const rail = wide ? collapsed : !overlay;
 
-  // The frame names its language for screen readers; the other pages are Vietnamese.
-  useEffect(() => {
-    document.documentElement.lang = lang;
-    return () => {
-      document.documentElement.lang = 'vi';
-    };
-  }, [lang]);
-
   // A tablet's open sidebar closes on Escape or a click outside it.
   useEffect(() => {
     if (wide || !overlay) return;
@@ -564,7 +556,13 @@ export function AppShell(props: ShellProps) {
         !wide && overlay && 'sp-shell--expanded',
       )}
     >
-      <nav ref={sideRef} className="sp-shell__side" id="app-sidebar" aria-label={t.navLabel}>
+      <nav
+        ref={sideRef}
+        lang={lang}
+        className="sp-shell__side"
+        id="app-sidebar"
+        aria-label={t.navLabel}
+      >
         <div className="sp-brand">
           <span className="sp-brand__mark" aria-hidden="true">
             S
@@ -618,7 +616,7 @@ export function AppShell(props: ShellProps) {
           <div ref={setPhoneSlot} className="flex flex-none items-center gap-(--space-2)" />
         </header>
         {/* Tablet and up: the card has a bar with the sidebar toggle and the breadcrumb. */}
-        <div className="sp-shell__bar">
+        <div lang={lang} className="sp-shell__bar">
           <Tip label={toggleLabel} side="bottom">
             <button
               ref={toggleRef}
@@ -648,6 +646,7 @@ export function AppShell(props: ShellProps) {
       </div>
 
       <nav
+        lang={lang}
         className="sp-tabbar"
         aria-label={t.navLabel}
         data-phone-nav
@@ -683,7 +682,7 @@ export function AppShell(props: ShellProps) {
       </nav>
 
       <Sheet open={more} title={moreLabel} onClose={() => setMore(false)}>
-        <div className="flex flex-col gap-(--space-5)">
+        <div lang={lang} className="flex flex-col gap-(--space-5)">
           <div className="flex gap-(--space-2)">
             <LangButton rail={false} touch />
             <ThemeButton rail={false} touch />
