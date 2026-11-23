@@ -10,8 +10,6 @@ import { ChipMenu, FilterChip, SearchField } from '@/components/sapio/filters';
 import { PageHeader } from '@/components/sapio/page-header';
 import { TableFoot } from '@/components/sapio/pagination';
 import {
-  INDUSTRY_IDS,
-  INDUSTRY_LABEL,
   STATE_BADGE,
   filterTenants,
   paginate,
@@ -19,7 +17,6 @@ import {
   type PlatformState,
   type TenantView,
 } from '@/mock/platform';
-import type { IndustryId } from '@/mock/fixtures/platform';
 import { PLAN_CODES, type PlanCode } from '@/mock/subscription';
 import { formatFullDate } from '@/mock/time';
 
@@ -55,7 +52,6 @@ export function TenantListScreen() {
     STATES.map((s) => s.value),
   );
   const plan = pick<PlanCode>(params.get('plan') ?? '', PLAN_CODES);
-  const industry = pick<IndustryId>(params.get('industry') ?? '', INDUSTRY_IDS);
   const lockedOnly = params.get('locked') === '1';
   const size = SIZES.find((s) => String(s) === params.get('size')) ?? SIZES[0];
 
@@ -72,8 +68,8 @@ export function TenantListScreen() {
   };
 
   const rows = useMemo(
-    () => filterTenants(views, { q, state, plan, industry, lockedOnly }),
-    [views, q, state, plan, industry, lockedOnly],
+    () => filterTenants(views, { q, state, plan, industry: '', lockedOnly }),
+    [views, q, state, plan, lockedOnly],
   );
   const page = paginate(rows, Number(params.get('page')) || 1, size);
 
@@ -92,7 +88,7 @@ export function TenantListScreen() {
     {
       key: 'name',
       label: 'Cơ sở',
-      width: '24%',
+      width: '28%',
       cell: (v) => (
         <div className="sp-table__primary">
           <span>
@@ -103,21 +99,15 @@ export function TenantListScreen() {
       ),
     },
     {
-      key: 'industry',
-      label: 'Ngành',
-      width: '12%',
-      cell: (v) => INDUSTRY_LABEL[v.tenant.industry],
-    },
-    {
       key: 'plan',
       label: 'Gói',
-      width: '12%',
+      width: '14%',
       cell: (v) => catalog.plans[v.subscription.planCode].name,
     },
     {
       key: 'state',
       label: 'Trạng thái',
-      width: '17%',
+      width: '18%',
       cell: (v) => (
         <>
           <span className={`sp-badge ${STATE_BADGE[v.state]}`}>{stateLabel(v)}</span>
@@ -133,10 +123,10 @@ export function TenantListScreen() {
     {
       key: 'ends',
       label: 'Hạn',
-      width: '10%',
+      width: '12%',
       cell: (v) => <span className="sp-num">{endText(v)}</span>,
     },
-    { key: 'owner', label: 'Chủ cơ sở', width: '15%', cell: (v) => v.tenant.ownerEmail },
+    { key: 'owner', label: 'Chủ cơ sở', width: '18%', cell: (v) => v.tenant.ownerEmail },
     {
       key: 'created',
       label: 'Tạo ngày',
@@ -147,7 +137,7 @@ export function TenantListScreen() {
 
   const summary =
     page.total === 0 ? '0 cơ sở' : `Hiển thị ${page.from}–${page.to} trong ${page.total} cơ sở`;
-  const reset = () => change({ q: '', state: '', plan: '', industry: '', locked: '' });
+  const reset = () => change({ q: '', state: '', plan: '', locked: '' });
 
   return (
     <div className="sp-shell__content sp-shell__content--wide">
@@ -176,13 +166,6 @@ export function TenantListScreen() {
           options={PLAN_CODES.map((code) => ({ value: code, label: catalog.plans[code].name }))}
           onChange={(v) => change({ plan: v })}
         />
-        <ChipMenu
-          label="Ngành"
-          value={industry}
-          allLabel="Tất cả"
-          options={INDUSTRY_IDS.map((id) => ({ value: id, label: INDUSTRY_LABEL[id] }))}
-          onChange={(v) => change({ industry: v })}
-        />
         <FilterChip pressed={lockedOnly} onToggle={() => change({ locked: lockedOnly ? '' : '1' })}>
           Bị khóa
         </FilterChip>
@@ -206,7 +189,6 @@ export function TenantListScreen() {
               <span className="sp-cards__body">
                 <span className="sp-cards__title">{v.tenant.name}</span>
                 <span className="sp-cards__meta">
-                  {INDUSTRY_LABEL[v.tenant.industry]} ·{' '}
                   {catalog.plans[v.subscription.planCode].name} · {stateLabel(v)}
                   {v.lock && ' · Bị khóa'}
                 </span>

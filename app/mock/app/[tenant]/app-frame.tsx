@@ -222,7 +222,7 @@ export function AppFrame({ tenantSlug, children }: { tenantSlug: string; childre
             </Link>
           ))}
           <Link
-            href="/mock/admin/templates"
+            href="/mock/admin"
             className={cn('sp-menu__item', kind === 'list' && 'min-h-11')}
             {...(kind === 'menu' ? { role: 'menuitem' } : {})}
           >

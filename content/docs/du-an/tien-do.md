@@ -7,6 +7,25 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 23/11/2026 (chiều): khung quản trị mới (Bước 21)
+
+- **Đã làm** (nhánh `feat/mock-shell-card`):
+  - 21a: thanh bên 248px nằm trên nền `surface`, logo ô "S", hàng công cụ VI/EN và sáng/tối, thẻ tài khoản có nút đăng xuất riêng; menu chia thành `.sp-nav__section`. Các mục đầu menu và menu super admin thuộc nhóm "Vận hành".
+  - 21b: nội dung trong card `.sp-shell__card` có đầu card (nút thu gọn, breadcrumb) và vùng cuộn riêng. `PageHeader` đưa `crumbs` lên đầu card từ 768px (`shell-crumbs.tsx`).
+  - 21c: tiêu đề cột bảng 600 12/16; chân bảng đặt ô số dòng trước phân trang.
+  - 21d: nút VI/EN chỉ dịch phần khung, chữ ở `mock/shell-copy.ts`; trên điện thoại hai nút nằm đầu bảng "Thêm".
+  - 21e: README Sapio đã có từ buổi lập kế hoạch; sửa thêm `design/sapio/components/AppShell/README.md`.
+  - 21f: super admin bỏ mục "Gói cấu hình ngành", cột và bộ lọc "Ngành"; `mock/screens.ts` ghi "sẽ bỏ (D-16)".
+  - 21g: `pnpm shot` thêm `--collapsed` và đăng nhập `/mock/admin/login` cho route `/mock/admin*`; `check:availability`, `check:account`, `check:platform`, `check:flow`, `typecheck`, `prettier --check`, `build` đều xanh.
+  - Thêm: thanh bên chuyển động khi thu gọn và mở rộng (độ rộng 200ms, chữ hiện dần).
+- **Tự quyết:**
+  - `.sp-brand__name` 16/20 chỉ áp trong `.sp-brand`, để chữ Sapio ở `AuthTop` không đổi.
+  - Tiêu đề cột bảng theo kế hoạch (600), bản vẽ để 500.
+  - Trang Lịch giữ `sp-shell__content--wide`: trang cuộn trong card, đệm 28/32.
+  - Liên kết "Quản trị nền tảng" trong menu tài khoản trỏ về `/mock/admin`, vì mục menu "Gói cấu hình ngành" đã bỏ.
+- **Chưa kiểm:** chuyển động thanh bên, nút VI/EN, bề rộng 768–1199px.
+- **Tiếp theo:** người dùng kiểm "Xong khi" của Bước 21 và review PR; đợt dọn D-16.
+
 ### 23/11/2026: mật khẩu mẫu ngắn, kế hoạch khung quản trị (Bước 21)
 
 - **Đã làm:** review lại PR #15 (Bước 20), người dùng đã merge. Mọi tài khoản mẫu dùng chung mật khẩu `123456` (ngắn hơn BR-73 cho phép, vì chỉ đăng ký và đặt lại mật khẩu mới kiểm độ dài); trang đăng nhập nhân sự và super admin có ô chọn tài khoản mẫu để điền sẵn. Viết Bước 21 trong [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md): khung quản trị mới theo `design/screens/Khung*.dc.html`, có bảng phần tử → class → số đo → token; sửa README Sapio (tiêu đề cột bảng in hoa là ngoại lệ, khung `AppShell` mới, thứ tự chân bảng).

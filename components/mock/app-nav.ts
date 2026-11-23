@@ -31,22 +31,48 @@ export interface NavEntry {
   feature?: FeatureCode;
 }
 
-const overview: NavEntry = { id: 'overview', label: 'Tổng quan', path: '', icon: LayoutDashboard };
-const today: NavEntry = { id: 'today', label: 'Hôm nay', path: 'today', icon: ListChecks };
-const calendar: NavEntry = { id: 'calendar', label: 'Lịch', path: 'calendar', icon: CalendarDays };
+const overview: NavEntry = {
+  id: 'overview',
+  label: 'Tổng quan',
+  path: '',
+  icon: LayoutDashboard,
+  group: 'Vận hành',
+};
+const today: NavEntry = {
+  id: 'today',
+  label: 'Hôm nay',
+  path: 'today',
+  icon: ListChecks,
+  group: 'Vận hành',
+};
+const calendar: NavEntry = {
+  id: 'calendar',
+  label: 'Lịch',
+  path: 'calendar',
+  icon: CalendarDays,
+  group: 'Vận hành',
+};
 const customers: NavEntry = {
   id: 'customers',
   label: 'Khách hàng',
   tabLabel: 'Khách',
   path: 'customers',
   icon: Users,
+  group: 'Vận hành',
 };
-const invoices: NavEntry = { id: 'invoices', label: 'Hóa đơn', path: 'invoices', icon: Receipt };
+const invoices: NavEntry = {
+  id: 'invoices',
+  label: 'Hóa đơn',
+  path: 'invoices',
+  icon: Receipt,
+  group: 'Vận hành',
+};
 const refunds: NavEntry = {
   id: 'refunds',
   label: 'Hoàn tiền',
   path: 'refunds',
   icon: Undo2,
+  group: 'Vận hành',
 };
 const shifts: NavEntry = {
   id: 'shifts',
