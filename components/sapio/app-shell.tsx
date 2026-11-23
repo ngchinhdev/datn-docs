@@ -25,8 +25,9 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { useAuthText } from '@/components/mock/auth-text';
+import { useShellText } from '@/components/mock/shell-text';
 import { cn } from '@/lib/utils';
+import { itemText, termText } from '@/mock/shell-copy';
 import { LockIcon } from './lock-icon';
 import { Sheet } from './sheet';
 import { Breadcrumb, ShellCrumbsSetter, type Crumb } from './shell-crumbs';
@@ -161,7 +162,9 @@ function Switcher({
   'workspace' | 'branchName' | 'branches' | 'otherWorkspaces' | 'newWorkspaceHref' | 'platform'
 > & { rail: boolean; compact: boolean }) {
   const menu = useMenu();
+  const { t } = useShellText();
   if (platform) {
+    const platformName = termText(t, platform.name);
     return (
       <div
         className="sp-switcher"
@@ -175,12 +178,12 @@ function Switcher({
           {platform.initial}
         </span>
         <span className="sp-switcher__text">
-          <span className="sp-switcher__name">{platform.name}</span>{' '}
+          <span className="sp-switcher__name">{platformName}</span>{' '}
           <span className="sp-switcher__sub">{platform.sub}</span>
         </span>
         {rail && (
           <span className="sp-sr-only">
-            {platform.name} {platform.sub}
+            {platformName} {platform.sub}
           </span>
         )}
       </div>
@@ -199,7 +202,7 @@ function Switcher({
         onKeyDown={menu.onTriggerKeyDown}
       >
         <Mark workspace={workspace} />
-        <span className="sp-sr-only">Đổi cơ sở hoặc chi nhánh:</span>
+        <span className="sp-sr-only">{t.switcherLabel}:</span>
         <span className="sp-switcher__text">
           <span className="sp-switcher__name">{workspace.name}</span>{' '}
           <span className="sp-switcher__sub">{branchName}</span>
@@ -219,10 +222,10 @@ function Switcher({
             className="sp-menu fixed z-60 w-70"
             style={menu.fixedStyle('below', rail)}
             role="menu"
-            aria-label="Đổi cơ sở hoặc chi nhánh"
+            aria-label={t.switcherLabel}
             onKeyDown={menu.onKeyDown}
           >
-            <div className="sp-menu__label">Chi nhánh của {workspace.name}</div>
+            <div className="sp-menu__label">{t.branchesOf(workspace.name)}</div>
             {branches.map((b) => (
               <Link
                 key={b.id}
@@ -242,7 +245,7 @@ function Switcher({
             {otherWorkspaces.length > 0 && (
               <>
                 <div className="sp-menu__sep" />
-                <div className="sp-menu__label">Cơ sở khác của bạn</div>
+                <div className="sp-menu__label">{t.otherWorkspaces}</div>
                 {otherWorkspaces.map((w) => (
                   <Link
                     key={w.name}
@@ -268,7 +271,7 @@ function Switcher({
               onClick={() => menu.close(false)}
             >
               <Plus size={16} aria-hidden="true" />
-              Đăng ký cơ sở mới
+              {t.newWorkspace}
             </Link>
           </div>,
           document.body,
@@ -277,17 +280,18 @@ function Switcher({
   );
 }
 
-function ThemeButton({ rail }: { rail: boolean }) {
+function ThemeButton({ rail, touch = false }: { rail: boolean; touch?: boolean }) {
   const { resolvedTheme, setTheme } = useTheme();
+  const { t } = useShellText();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const dark = mounted && resolvedTheme === 'dark';
-  const label = dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối';
+  const label = dark ? t.themeToLight : t.themeToDark;
   return (
     <Tip label={label} side={rail ? 'right' : 'top-end'}>
       <button
         type="button"
-        className="sp-icon-btn sp-icon-btn--tonal"
+        className={cn('sp-icon-btn sp-icon-btn--tonal', touch && 'h-11! min-w-11!')}
         aria-label={label}
         onClick={() => setTheme(dark ? 'light' : 'dark')}
       >
@@ -298,14 +302,14 @@ function ThemeButton({ rail }: { rail: boolean }) {
 }
 
 /** Language switch: a globe and the code of the language in use; icon only on the rail. */
-function LangButton({ rail }: { rail: boolean }) {
-  const { lang, setLang } = useAuthText();
-  const label = `Đổi ngôn ngữ, đang dùng ${lang === 'vi' ? 'tiếng Việt' : 'English'}`;
+function LangButton({ rail, touch = false }: { rail: boolean; touch?: boolean }) {
+  const { lang, t, setLang } = useShellText();
+  const label = t.langLabel(lang);
   return (
     <Tip label={label} side={rail ? 'right' : 'top-end'}>
       <button
         type="button"
-        className="sp-icon-btn sp-icon-btn--tonal"
+        className={cn('sp-icon-btn sp-icon-btn--tonal', touch && 'h-11! min-w-11!')}
         aria-label={label}
         onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
       >
@@ -324,6 +328,8 @@ function Account({
   rail,
 }: Pick<ShellProps, 'account' | 'accountExtra' | 'onProfile' | 'onSignOut'> & { rail: boolean }) {
   const menu = useMenu();
+  const { t } = useShellText();
+  const roleLabel = termText(t, account.roleLabel);
   return (
     <div className="sp-account relative">
       <button
@@ -340,21 +346,21 @@ function Account({
         </span>
         <span className="sp-account__text">
           <span className="sp-switcher__name">{account.name}</span>{' '}
-          <span className="sp-switcher__sub">{account.roleLabel}</span>
+          <span className="sp-switcher__sub">{roleLabel}</span>
         </span>
         {rail && (
           <span className="sr-only">
-            {account.name} {account.roleLabel}
+            {account.name} {roleLabel}
           </span>
         )}
-        <span className="sr-only">, menu tài khoản</span>
+        <span className="sr-only">{t.accountMenuSuffix}</span>
       </button>
       {!rail && (
-        <Tip label="Đăng xuất" side="top-end">
+        <Tip label={t.signOut} side="top-end">
           <button
             type="button"
             className="sp-icon-btn sp-account__out"
-            aria-label="Đăng xuất"
+            aria-label={t.signOut}
             onClick={onSignOut}
           >
             <LogOut aria-hidden="true" />
@@ -368,7 +374,7 @@ function Account({
             className="sp-menu fixed z-60 w-65"
             style={menu.fixedStyle('above', rail)}
             role="menu"
-            aria-label="Tài khoản"
+            aria-label={t.accountMenu}
             onKeyDown={menu.onKeyDown}
           >
             <button
@@ -380,7 +386,7 @@ function Account({
                 onProfile();
               }}
             >
-              Hồ sơ
+              {t.profile}
             </button>
             <button
               type="button"
@@ -391,7 +397,7 @@ function Account({
                 onSignOut();
               }}
             >
-              Đăng xuất
+              {t.signOut}
             </button>
             {accountExtra && (
               <>
@@ -418,15 +424,17 @@ function sectionsOf(items: ShellNavItem[]) {
 }
 
 function NavItems({ items, rail }: { items: ShellNavItem[]; rail: boolean }) {
+  const { t } = useShellText();
   return (
     <div className="sp-nav">
       {sectionsOf(items).map((section, i) => (
         <div key={section.group ?? `section-${i}`} className="sp-nav__section">
-          {section.group && <div className="sp-nav__group">{section.group}</div>}
+          {section.group && <div className="sp-nav__group">{termText(t, section.group)}</div>}
           {section.items.map((item) => {
             const Icon = item.icon;
+            const label = itemText(t, item.id, item.label);
             return (
-              <Tip key={item.id} label={item.label} side="right" enabled={rail}>
+              <Tip key={item.id} label={label} side="right" enabled={rail}>
                 <Link
                   href={item.href}
                   className="sp-nav__item relative w-full"
@@ -434,9 +442,9 @@ function NavItems({ items, rail }: { items: ShellNavItem[]; rail: boolean }) {
                   aria-label={
                     rail
                       ? [
-                          item.label,
-                          item.badge ? `${item.badge} việc chờ` : null,
-                          item.locked ? 'cần nâng gói' : null,
+                          label,
+                          item.badge ? t.pending(item.badge) : null,
+                          item.locked ? t.needsUpgrade : null,
                         ]
                           .filter(Boolean)
                           .join(', ')
@@ -444,10 +452,10 @@ function NavItems({ items, rail }: { items: ShellNavItem[]; rail: boolean }) {
                   }
                 >
                   <Icon aria-hidden="true" />
-                  <span className="sp-nav__label">{item.label}</span>
+                  <span className="sp-nav__label">{label}</span>
                   {item.locked && !rail && (
                     <>
-                      <span className="sp-sr-only"> (cần nâng gói)</span>
+                      <span className="sp-sr-only"> ({t.needsUpgrade})</span>
                       <LockIcon />
                     </>
                   )}
@@ -455,7 +463,7 @@ function NavItems({ items, rail }: { items: ShellNavItem[]; rail: boolean }) {
                     <>
                       <span className="sp-nav__badge">
                         {item.badge}
-                        <span className="sr-only"> việc chờ</span>
+                        <span className="sr-only"> {t.pendingWord}</span>
                       </span>
                       {rail && (
                         <span
@@ -482,6 +490,7 @@ function NavItems({ items, rail }: { items: ShellNavItem[]; rail: boolean }) {
  */
 export function AppShell(props: ShellProps) {
   const { workspace, branchName, items, tabs, account, children } = props;
+  const { lang, t } = useShellText();
   const wide = useWide();
   const saved = useSidebarSetting();
   const collapsed = saved === 'collapsed';
@@ -493,6 +502,14 @@ export function AppShell(props: ShellProps) {
   const toggleRef = useRef<HTMLButtonElement>(null);
   // Icons only: the saved choice on wide screens, or the default on tablets until opened.
   const rail = wide ? collapsed : !overlay;
+
+  // The frame names its language for screen readers; the other pages are Vietnamese.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    return () => {
+      document.documentElement.lang = 'vi';
+    };
+  }, [lang]);
 
   // A tablet's open sidebar closes on Escape or a click outside it.
   useEffect(() => {
@@ -517,14 +534,14 @@ export function AppShell(props: ShellProps) {
     };
   }, [wide, overlay]);
 
-  const toggleLabel = rail ? 'Mở rộng thanh bên' : 'Thu gọn thanh bên';
+  const toggleLabel = rail ? t.expandSide : t.collapseSide;
   const onToggle = () => {
     if (wide) writeSidebar(collapsed ? 'expanded' : 'collapsed');
     else setOverlay((v) => !v);
   };
-  const tabIds = new Set(tabs.map((t) => t.id));
+  const tabIds = new Set(tabs.map((tab) => tab.id));
   const rest = items.filter((i) => !tabIds.has(i.id));
-  const moreLabel = props.moreLabel ?? 'Thêm';
+  const moreLabel = termText(t, props.moreLabel ?? 'Thêm');
   const MoreIcon = props.moreLabel ? UserRound : Ellipsis;
   const moreCurrent = rest.some((i) => i.current);
 
@@ -534,8 +551,9 @@ export function AppShell(props: ShellProps) {
   const anchor = currentItem ?? items.find((i) => i.label === firstCrumb);
   const group = anchor ? sectionsOf(items).find((s) => s.items.includes(anchor))?.group : undefined;
   const crumbs: Crumb[] = [
-    ...(group ? [{ label: group }] : []),
-    ...(pageCrumbs ?? (currentItem ? [{ label: currentItem.label }] : [])),
+    ...(group ? [{ label: termText(t, group) }] : []),
+    ...(pageCrumbs ??
+      (currentItem ? [{ label: itemText(t, currentItem.id, currentItem.label) }] : [])),
   ];
 
   return (
@@ -546,14 +564,16 @@ export function AppShell(props: ShellProps) {
         !wide && overlay && 'sp-shell--expanded',
       )}
     >
-      <nav ref={sideRef} className="sp-shell__side" id="app-sidebar" aria-label="Điều hướng chính">
+      <nav ref={sideRef} className="sp-shell__side" id="app-sidebar" aria-label={t.navLabel}>
         <div className="sp-brand">
           <span className="sp-brand__mark" aria-hidden="true">
             S
           </span>
           <span className="sp-brand__text">
             <span className="sp-brand__name">Sapio</span>
-            {props.platform && <span className="sp-brand__sub">{props.platform.name}</span>}
+            {props.platform && (
+              <span className="sp-brand__sub">{termText(t, props.platform.name)}</span>
+            )}
           </span>
         </div>
         {!props.platform && (
@@ -614,7 +634,7 @@ export function AppShell(props: ShellProps) {
           </Tip>
           <span className="sp-shell__bar-sep" aria-hidden="true" />
           {crumbs.length > 0 && (
-            <nav aria-label="Vị trí">
+            <nav aria-label={t.crumbLabel}>
               <Breadcrumb crumbs={crumbs} />
             </nav>
           )}
@@ -629,12 +649,14 @@ export function AppShell(props: ShellProps) {
 
       <nav
         className="sp-tabbar"
-        aria-label="Điều hướng chính"
+        aria-label={t.navLabel}
         data-phone-nav
         style={{ ['--tabs' as string]: tabs.length + 1 }}
       >
         {tabs.map((tab) => {
           const Icon = tab.icon;
+          // A tab may carry a shorter label than its menu item.
+          const short = tab.label !== items.find((i) => i.id === tab.id)?.label;
           return (
             <Link
               key={tab.id}
@@ -643,7 +665,7 @@ export function AppShell(props: ShellProps) {
               aria-current={tab.current ? 'page' : undefined}
             >
               <Icon aria-hidden="true" />
-              {tab.label}
+              {itemText(t, tab.id, tab.label, short)}
             </Link>
           );
         })}
@@ -662,8 +684,12 @@ export function AppShell(props: ShellProps) {
 
       <Sheet open={more} title={moreLabel} onClose={() => setMore(false)}>
         <div className="flex flex-col gap-(--space-5)">
+          <div className="flex gap-(--space-2)">
+            <LangButton rail={false} touch />
+            <ThemeButton rail={false} touch />
+          </div>
           {rest.length > 0 && (
-            <nav aria-label="Các mục khác" className="flex flex-col">
+            <nav aria-label={t.otherItems} className="flex flex-col">
               {rest.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -676,8 +702,8 @@ export function AppShell(props: ShellProps) {
                   >
                     <Icon size={18} aria-hidden="true" />
                     <span className="sp-menu__text">
-                      {item.label}
-                      {item.locked && <span className="sp-sr-only"> (cần nâng gói)</span>}
+                      {itemText(t, item.id, item.label)}
+                      {item.locked && <span className="sp-sr-only"> ({t.needsUpgrade})</span>}
                     </span>
                     {item.locked && <LockIcon />}
                     {item.badge ? <span className="sp-nav__badge">{item.badge}</span> : null}
@@ -689,7 +715,7 @@ export function AppShell(props: ShellProps) {
           )}
           <div className="flex flex-col">
             <div className="sp-menu__label">
-              {account.name} · {account.roleLabel}
+              {account.name} · {termText(t, account.roleLabel)}
             </div>
             <button
               type="button"
@@ -699,10 +725,9 @@ export function AppShell(props: ShellProps) {
                 props.onProfile();
               }}
             >
-              Hồ sơ
+              {t.profile}
             </button>
             {props.accountExtra?.('list')}
-            <ThemeRow />
             <button
               type="button"
               className="sp-menu__item min-h-11"
@@ -711,27 +736,11 @@ export function AppShell(props: ShellProps) {
                 props.onSignOut();
               }}
             >
-              Đăng xuất
+              {t.signOut}
             </button>
           </div>
         </div>
       </Sheet>
     </div>
-  );
-}
-
-function ThemeRow() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  const dark = mounted && resolvedTheme === 'dark';
-  return (
-    <button
-      type="button"
-      className="sp-menu__item min-h-11"
-      onClick={() => setTheme(dark ? 'light' : 'dark')}
-    >
-      {dark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
-    </button>
   );
 }
