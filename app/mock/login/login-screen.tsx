@@ -21,6 +21,7 @@ import {
   lockedUntil,
   MAX_FAILED,
   normalizeEmail,
+  sampleAccountLine,
   type LoginDoor,
 } from '@/mock/account';
 import { formatWait, lockMail } from '@/mock/account-mail';
@@ -111,6 +112,15 @@ export function LoginScreen({ door = 'staff' }: { door?: LoginDoor }) {
       : t.login.wrong
     : null;
   const lockedBody = isAdmin ? t.adminLogin.lockedBody : t.login.lockedBody;
+  // Mock only: the sample accounts of this door, so nobody has to type an email.
+  const samples = accounts.filter((a) => Boolean(a.platformAdmin) === isAdmin);
+  const pickSample = (id: string) => {
+    const account = samples.find((a) => a.id === id);
+    if (!account) return;
+    setEmail(account.email);
+    setPassword(account.password);
+    setFailed(false);
+  };
 
   return (
     <>
@@ -136,6 +146,20 @@ export function LoginScreen({ door = 'staff' }: { door?: LoginDoor }) {
               {lockedBody(MAX_FAILED, normalizeEmail(email))}
             </Notice>
           )}
+          <Field id="li-sample" label="Tài khoản mẫu (chỉ có ở mock)" size="md">
+            <select
+              id="li-sample"
+              value={samples.find((a) => a.email === normalizeEmail(email))?.id ?? ''}
+              onChange={(e) => pickSample(e.target.value)}
+            >
+              <option value="">Chọn để điền sẵn email và mật khẩu</option>
+              {samples.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {sampleAccountLine(a, members, workspaces)} · {a.email}
+                </option>
+              ))}
+            </select>
+          </Field>
           <Field id="li-mail" label="Email" size="md">
             <input
               id="li-mail"

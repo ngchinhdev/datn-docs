@@ -5,8 +5,11 @@
  */
 import type { StaffRoleId } from './types.ts';
 
-/** Every sample account signs in with this sentence (23 characters, BR-73). */
-export const SAMPLE_PASSWORD = 'ca phe sua da buoi sang';
+/**
+ * Every sample account, of every role, signs in with this one short password so the mock is quick
+ * to try. It is shorter than BR-73 allows on purpose: only sign-up and reset check the length.
+ */
+export const SAMPLE_PASSWORD = '123456';
 
 /** The account of the platform administration: it belongs to no tenant. */
 export const PLATFORM_ADMIN_EMAIL = 'quantri@sapio.vn';

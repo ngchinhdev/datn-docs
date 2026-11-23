@@ -620,8 +620,8 @@ const onePerTenant = members.every(
 report(onePerTenant, 'BR-78: mỗi tài khoản một vai trò ở mỗi cơ sở');
 report(
   new Set(accounts.map((a) => a.email)).size === accounts.length &&
-    accounts.every((a) => a.email === a.email.toLowerCase() && [...a.password].length >= 15),
-  'BR-73, BR-76: email duy nhất, chữ thường; mật khẩu mẫu từ 15 ký tự',
+    accounts.every((a) => a.email === a.email.toLowerCase() && a.password === SAMPLE_PASSWORD),
+  'BR-76: email duy nhất, chữ thường; mọi tài khoản mẫu dùng chung một mật khẩu',
 );
 for (const f of tenantFixtures) {
   const ws = workspaces.find((w) => w.slug === f.tenant.slug)!;
