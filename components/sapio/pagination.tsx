@@ -102,7 +102,7 @@ export function PageSizeSelect({
   );
 }
 
-/** Footer of a table card: what is shown on the left, pages and size on the right. */
+/** Footer of a table card: what is shown on the left; on the right the page size, then the pages. */
 export function TableFoot({
   summary,
   page,
@@ -124,8 +124,8 @@ export function TableFoot({
     <div className="sp-table-foot">
       <span className="sp-num">{summary}</span>
       <div className="sp-table-foot__right">
-        <Pagination page={page} pages={pages} hrefFor={hrefFor} />
         <PageSizeSelect value={size} options={sizes} onChange={onSize} />
+        <Pagination page={page} pages={pages} hrefFor={hrefFor} />
       </div>
     </div>
   );
