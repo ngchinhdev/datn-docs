@@ -1455,6 +1455,118 @@ Sửa `AuthPage` trong `components/sapio/signup-layout.tsx`; mọi trang dùng n
 
 **Xong khi:** mô tả PR có danh sách route đã chụp và các chỗ đã sửa sau khi so.
 
+## Bước 21. Khung quản trị mới: thanh bên trên nền, nội dung trong card
+
+Sau khi PR #15 merge. Theo buổi review ngày 22/11. Bản vẽ: `design/screens/KhungNoiBo.dc.html` (khu nội bộ, trang Lịch), `KhungSuperAdmin.dc.html` (super admin, trang Khách thuê), `KhungSuperAdminThuGon.dc.html` (thu gọn). Làm trên nhánh `feat/mock-shell-card`, mỗi mục 21a–21g một commit, mở PR mới, không merge.
+
+Chỉ đổi **khung** (`AppShell`, `.sp-shell*`) và chân bảng. Nội dung từng trang giữ nguyên, trừ 21f. Khu nội bộ (`app-frame.tsx`) và super admin (`admin-frame.tsx`) cùng dùng `AppShell`, nên sửa một chỗ là cả hai đổi theo. Khung `.sp-admin` của kỹ thuật viên trên điện thoại không đổi.
+
+Bản vẽ dùng style viết tay. Khi code, **chỉ dùng biến trong `tokens.css` và class trong `components.css`**; bảng dưới đây là bản dịch từ bản vẽ sang class. Class mới hoặc sửa thì sửa ở cả `design/sapio/components.css` và `app/sapio/components.css`.
+
+### 21a. Thanh bên nằm trên nền trang
+
+| Phần tử | Class | Kích thước, chữ | Màu (token) |
+|---|---|---|---|
+| Thanh bên | `.sp-shell__side` (sửa) | rộng 248px; padding 14px 10px 12px; khe dọc 12px; dính, cao 100vh, cuộn được | nền trong suốt (thấy `surface` của `.sp-shell`); **bỏ** `box-shadow` viền phải |
+| Logo | `.sp-brand` (sửa), `.sp-brand__mark` (mới), `.sp-brand__name` | ô chữ "S" 32×32, bo 10px, chữ 700 16px; tên "Sapio" 700 16/20, letter-spacing -0.01em; padding ngang 6px | ô: nền `brand`, chữ `on-primary` |
+| Dòng phụ dưới logo (chỉ super admin) | `.sp-brand__sub` (mới) | 12/16 | `ink-muted` |
+| Bộ chọn cơ sở (khu nội bộ) | `.sp-switcher` (sửa) | padding 8px, bo `radius-md` (12px), khe 10px; ô chữ cái 32×32 bo 9px; tên 600 13/18, chi nhánh 12/16 | nền `fill-tonal`, không viền, không bóng |
+| Nhãn nhóm menu | `.sp-nav__group` (sửa) | 500 12/16, padding 4px 10px, **không in hoa, không letter-spacing** | `ink-muted` |
+| Mục menu | `.sp-nav__item` (sửa) | cao 36px, padding 0 10px, khe 10px, bo 10px, chữ 500 14/20, icon 18px | chữ `ink`; rê chuột `surface-hover`; đang mở: nền `brand-soft`, chữ `brand`, 600 |
+| Hàng công cụ | `.sp-shell__tools` (mới) | flex hàng ngang, khe 6px, padding 0 4px; nằm ngay trên thẻ tài khoản | |
+| Nút ngôn ngữ | `.sp-icon-btn .sp-icon-btn--tonal` (mới) | cao 36px, padding 0 10px, bo 10px; icon quả địa cầu 16px + "VI"/"EN" 600 12/16 | nền `fill-tonal`, chữ `ink` |
+| Nút sáng/tối | `.sp-icon-btn .sp-icon-btn--tonal` | 36×36, bo 10px, icon 16px (mặt trăng khi đang sáng, mặt trời khi đang tối) | như trên |
+| Thẻ tài khoản | `.sp-account` (sửa) | padding 8px, bo 12px, khe 10px; **bỏ** đường kẻ trên | nền `fill-tonal` |
+| Avatar | `.sp-avatar .sp-avatar--sm` | 32×32 tròn, chữ 600 12px | nền `brand-soft`, chữ `brand` |
+| Tên / vai trò | `.sp-account__text` | tên 600 13/18, cắt bằng dấu ba chấm; vai trò 12/16 | tên `ink`, vai trò `ink-muted` |
+| Nút đăng xuất | `.sp-icon-btn` | 32×32, bo 8px, icon 16px | `ink-muted` |
+
+- Nút thu gọn **chuyển từ dòng logo sang đầu card** (21b).
+- Bấm vào avatar hoặc tên vẫn mở menu tài khoản hiện có (Hồ sơ, mục thêm của mock). Nút đăng xuất tách ra thành icon riêng ở cuối thẻ, có `aria-label` và `.sp-tooltip`.
+- Super admin không có bộ chọn cơ sở: dưới logo là dòng phụ "Quản trị nền tảng". Menu của super admin nằm trong một nhóm "Vận hành".
+- Nút sáng/tối dùng `useTheme()` của Fumadocs như `ThemeButton` của Bước 20. Nút ngôn ngữ dùng chung `lang` trong account store với nhóm trang tài khoản (21d). Nếu `ThemeButton` và `LangButton` trong `signup-layout.tsx` dùng lại được thì chuyển ra file chung, đừng viết lại.
+
+### 21b. Nội dung trong card
+
+| Phần tử | Class | Kích thước, chữ | Màu (token) |
+|---|---|---|---|
+| Card | `.sp-shell__card` (mới, thay vai trò của `.sp-shell__main` từ 768px) | lề 8px trên, phải, dưới, 0 bên trái; cao `calc(100dvh - 16px)`, dính ở top 8px; bo 16px; flex cột; `overflow: hidden` | nền `surface-raised`, viền 1px `line`, bóng `shadow-card` |
+| Đầu card | `.sp-shell__bar` (mới) | cao 52px, padding 0 12px, khe 10px, đường kẻ dưới 1px | kẻ `line` |
+| Nút thu gọn | `.sp-icon-btn` | 36×36, icon `PanelLeft` 18px | `ink-muted` |
+| Vạch ngăn | `.sp-shell__bar-sep` (mới) | 1×18px | nền `line` |
+| Breadcrumb | `.sp-breadcrumb` (đã có, bỏ `margin`) | 500 13/18, dấu "/" cách 6px | link `ink-muted`, trang hiện tại 600 `ink` |
+| Vùng cuộn | `.sp-shell__scroll` (mới) | flex 1, `min-height: 0`, `overflow: auto` | |
+| Nội dung trang | `.sp-shell__content` (sửa) | padding 28px 32px, khe 20px; vẫn tối đa 1200px, căn giữa | |
+| Nội dung kín card (Lịch) | `.sp-shell__content--fill` (sửa) | padding 20px 24px, khe 16px; cao bằng vùng cuộn | |
+
+- Trang cuộn **bên trong card**; thanh bên và đầu card đứng yên. Tiêu đề cột dính (`.sp-table th`) phải dính theo vùng cuộn của card.
+- Trang Lịch cũng nằm trong card: lưới lịch cuộn trong card, không tràn ra ngoài.
+- `Banner` (dùng thử, sắp hết hạn) nằm trong card, ngay dưới đầu card.
+- **Breadcrumb ở đầu card:**
+  - Mặc định gồm nhóm menu của mục đang mở rồi tới tên mục, ví dụ "Vận hành / Lịch". Mục không có nhóm thì chỉ có tên mục.
+  - Trang có `crumbs` trong `PageHeader` (trang chi tiết như khách thuê, dịch vụ): đầu card hiện nhóm menu rồi tới các `crumbs` đó. Ví dụ "Vận hành / Khách thuê / Salon Tóc Mây", có link về danh sách.
+  - Từ 768px, `PageHeader` không vẽ breadcrumb của nó nữa, để không hiện hai lần. Đưa `crumbs` lên khung bằng context, giống cách `PhoneHeaderAction` đưa nút lên header điện thoại.
+- **Thu gọn (từ 1200px):** bấm nút ở đầu card thì thanh bên còn 68px. Lựa chọn lưu như hiện tại (`localStorage`). Theo `KhungSuperAdminThuGon.dc.html`:
+  - chỉ còn ô "S", ô chữ cái của cơ sở, icon menu (có tooltip tên mục ở bên phải);
+  - hai nút công cụ xếp dọc, nút ngôn ngữ chỉ còn icon;
+  - thẻ tài khoản chỉ còn avatar, nền trong suốt. Bấm avatar mở menu tài khoản, trong menu có thêm dòng "Đăng xuất".
+- **Tablet (768–1199px):** vẫn tự thu thành dải icon. Nút ở đầu card mở thanh bên đầy đủ đè lên card như hiện tại; Esc hoặc bấm ra ngoài thì đóng.
+- **Điện thoại (dưới 768px):** không có card. Giữ header điện thoại và thanh điều hướng dưới như hiện tại, nền nội dung `surface`. Nút ngôn ngữ và sáng/tối nằm trong bảng "Thêm", trên các mục còn lại.
+
+### 21c. Bảng: tiêu đề cột to hơn, ô số dòng nằm trước phân trang
+
+- Tiêu đề cột (`.sp-table th`): chữ từ 600 11/16 lên **600 12/16**, vẫn in hoa, letter-spacing 0.04em, màu `ink-muted`; padding giữ 10px 16px. Dữ liệu trong bảng vẫn 14/20. `.sp-menu__label` giữ 11/16.
+
+- `TableFoot` trong `components/sapio/pagination.tsx`: bên phải đổi thành `PageSizeSelect` rồi tới `Pagination`. Ô chọn nằm **bên trái** phân trang, như `KhungSuperAdmin.dc.html`.
+- Dòng tóm tắt "Hiện 1–6 trong 6 cơ sở" giữ bên trái.
+
+### 21d. Ngôn ngữ của khung
+
+- Nút VI/EN của khung **chỉ dịch phần khung**:
+  - nhãn nhóm và mục menu, nhãn thanh điều hướng dưới, mục "Thêm";
+  - breadcrumb mặc định (nhóm và tên mục);
+  - bộ chọn cơ sở (dòng "Đổi cơ sở hoặc chi nhánh", nhãn trong menu);
+  - thẻ tài khoản (vai trò, Hồ sơ, Đăng xuất);
+  - `aria-label` và tooltip của các nút.
+- Nội dung trang, `crumbs` do trang đưa lên, và tên riêng (tên cơ sở, chi nhánh, người) giữ tiếng Việt.
+- Thêm `mock/shell-copy.ts`: object `{ vi: {...}, en: {...} }`. Nhãn menu tra theo `id` của mục trong `components/mock/app-nav.ts` và `admin-frame.tsx`, nhóm tra theo khóa nhóm. Chữ tiếng Anh lấy từ `COPY` trong các file `Khung*.dc.html`; mục chưa có trong bản vẽ thì tự dịch theo cùng giọng văn.
+- `lang` dùng chung với nhóm trang tài khoản (account store, sessionStorage). `lang` của thẻ `<html>` đổi theo.
+
+### 21e. README của Sapio
+
+Sửa `design/sapio/README.md`:
+- Mục "Giọng văn": thêm ngoại lệ cho quy tắc không viết hoa toàn bộ. **Tiêu đề cột bảng** (`.sp-table th`) và nhãn nhóm trong menu bật lên (`.sp-menu__label`) in hoa, letter-spacing 0.04em; tiêu đề cột 600 12/16 (21c), nhãn menu 600 11/16. Nhãn nhóm của thanh bên thì không in hoa.
+- Mục "Khu quản trị": sửa dòng `AppShell` theo khung mới. Gồm thanh bên 248px trên nền `surface`, nội dung trong card `surface-raised` bo 16px cách mép 8px, đầu card có nút thu gọn và breadcrumb; dải icon 68px; điện thoại bỏ card, giữ thanh điều hướng dưới.
+- Ghi thứ tự chân bảng: tóm tắt bên trái; bên phải ô số dòng rồi tới phân trang.
+
+### 21f. Super admin bỏ phần ngành (D-16)
+
+- `admin-frame.tsx`: bỏ mục "Gói cấu hình ngành" khỏi menu.
+- Danh sách khách thuê (`/mock/admin/tenants`): bỏ cột và bộ lọc "Ngành" (nếu có).
+- Route `/mock/admin/templates*` chưa xóa; đợt dọn D-16 sau sẽ xóa cùng `industryTemplate`. Trong `mock/screens.ts`, các màn đó ghi chú "sẽ bỏ (D-16)".
+
+### 21g. Kiểm và hoàn tất
+
+- Các lệnh kiểm phải xanh: `pnpm check:availability`, `pnpm check:account`, `pnpm check:platform`, `pnpm check:flow`, `pnpm build`, `pnpm typecheck`, `prettier --check`.
+- Tự so với bản vẽ (theo `CLAUDE.md`). Chạy `pnpm shot` cho:
+  - `/mock/app/toc-may/calendar` với `--login chinh@tocmay.vn`, kèm một ảnh `--dark` và một ảnh `--phone`;
+  - `/mock/admin/tenants`, kèm `--dark`;
+  - một trang danh sách có phân trang ở khu nội bộ, ví dụ khách hàng.
+  
+  Ảnh thu gọn: đặt `localStorage` của thanh bên thành `collapsed` trước khi chụp (thêm tùy chọn `--collapsed` cho `scripts/shot.ts`). So với `Khung*.dc.html`, sửa chỗ lệch.
+  - `--login` hiện chỉ điền form của trang nhân sự. Thêm cho nó cách đăng nhập super admin qua `/mock/admin/login` khi route bắt đầu bằng `/mock/admin`.
+- Mở PR mới, mô tả theo 21a–21g, có mục "Tự quyết" và danh sách ảnh đã so. Ghi một mục Tiến độ.
+
+**Xong khi** (người dùng tự kiểm):
+- Ở 1440px, khu nội bộ và super admin đều có thanh bên trên nền trang, nội dung trong card nổi, giống `KhungNoiBo.dc.html` và `KhungSuperAdmin.dc.html`. Cuộn trang thì chỉ vùng trong card cuộn.
+- Bấm nút ở đầu card thì thanh bên thu còn dải icon, giống `KhungSuperAdminThuGon.dc.html`. Tải lại vẫn giữ.
+- Breadcrumb ở đầu card đúng theo trang; trang chi tiết có link về danh sách, và không hiện breadcrumb hai lần.
+- Bấm VI/EN thì menu, breadcrumb, thẻ tài khoản đổi ngôn ngữ, nội dung trang giữ nguyên. Bấm sáng/tối thì cả trang đổi theme.
+- Trang Lịch nằm gọn trong card, lưới cuộn trong card.
+- Tiêu đề cột bảng to hơn trước (12px), vẫn in hoa. Chân bảng: ô "20 / trang" nằm bên trái phân trang.
+- Super admin không còn mục "Gói cấu hình ngành".
+- Thu dưới 768px: không có card, còn thanh điều hướng dưới; VI/EN và sáng/tối nằm trong "Thêm".
+
 ## Câu lệnh gợi ý cho Claude Code
 
 Bước 1–6:
@@ -1641,4 +1753,19 @@ trong tokens.css và class trong components.css; số đo, chữ và SVG lấy �
 Không đổi trang đăng nhập của khách (/mock/[tenant]/login). Chỉ chạy các lệnh kiểm trong CLAUDE.md và
 các lệnh check của mục 20g. Mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu thuẫn với quy
 tắc nghiệp vụ.
+```
+
+Bước 21:
+
+```
+git checkout main && git pull && git checkout -b feat/mock-shell-card.
+Đọc CLAUDE.md, mục mới nhất của datn-docs/content/docs/du-an/tien-do.md, design/README.md,
+design/sapio/README.md (mục "Khu quản trị"), components/sapio/app-shell.tsx và các file
+design/screens/Khung*.dc.html. Làm Bước 21 trong datn-docs/content/docs/ky-thuat/ke-hoach-ui-mock.md,
+mục 21a đến 21g, mỗi mục một commit. Sửa ở AppShell, TableFoot và components.css (cả hai bản), không sửa từng
+trang; nội dung các trang giữ nguyên trừ 21f. Chỉ dùng biến trong tokens.css và class trong
+components.css, theo đúng bảng phần tử → class → số đo → token trong 21a và 21b. Trước khi báo xong,
+chụp bằng pnpm shot và so với các file Khung*.dc.html theo CLAUDE.md. Chỉ chạy các lệnh kiểm trong
+CLAUDE.md và các lệnh check của mục 21g. Mở PR mới, không merge. Dừng lại hỏi mình nếu thiết kế mâu
+thuẫn với quy tắc nghiệp vụ.
 ```

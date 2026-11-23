@@ -7,7 +7,7 @@ Sapio có hai mật độ, dùng chung một bộ token:
 
 ## Giọng văn
 
-- Viết tiếng Việt có dấu, câu ngắn, chủ động. Viết hoa chữ đầu câu, không VIẾT HOA TOÀN BỘ nhãn.
+- Viết tiếng Việt có dấu, câu ngắn, chủ động. Viết hoa chữ đầu câu, không VIẾT HOA TOÀN BỘ nhãn. Ngoại lệ: tiêu đề cột bảng (`.sp-table th`, 600 12/16) và nhãn nhóm trong menu bật lên (`.sp-menu__label`, 600 11/16) in hoa, letter-spacing 0.04em. Nhãn nhóm của thanh bên (`.sp-nav__group`) không in hoa.
 - Với khách: xưng "bạn", nói điều sắp xảy ra. Ví dụ: "Đặt lịch", "Giữ chỗ cho bạn trong 10 phút", "Hết giờ trống ngày này. Xem ngày khác?".
 - Trong quản trị: bỏ chủ ngữ, động từ đứng đầu. Ví dụ: "Check-in", "Đổi giờ", "Thu tiền", "Đánh dấu không đến".
 - Lỗi nói rõ sai gì và sửa thế nào, không xin lỗi chung chung: "Số điện thoại chưa đúng. Ví dụ: 0912 345 678."
@@ -70,11 +70,16 @@ Lịch là màn hình đặc trưng của Sapio; giữ đúng các quy tắc sau
 
 ## Khu quản trị
 
-- Mọi trang trong `/app/[tenant]` nằm trong `AppShell`: thanh bên 240px (1200px trở lên), dải icon 68px (768–1199px), thanh điều hướng dưới (dưới 768px). Mục đang mở nền `brand-soft`, chữ `brand`. Thanh bên chỉ hiện mục vai trò đó có quyền.
+- Mọi trang trong `/app/[tenant]` và khu super admin nằm trong `AppShell` (bản vẽ `design/screens/Khung*.dc.html`):
+  - thanh bên 248px nằm thẳng trên nền `surface`, không viền, không bóng: logo, bộ chọn cơ sở (nền `fill-tonal`), các nhóm menu; dưới cùng là hàng nút VI/EN và sáng/tối, rồi thẻ tài khoản (nền `fill-tonal`: avatar, tên, vai trò, nút đăng xuất);
+  - nội dung nằm trong card `.sp-shell__card`: nền `surface-raised`, viền `line`, bóng `shadow-card`, bo 16px, cách mép 8px. Đầu card có nút thu gọn thanh bên và breadcrumb; trang cuộn bên trong card, trang Lịch cũng vậy;
+  - thu gọn thành dải icon 68px (tự động ở 768–1199px, hoặc chọn bằng nút ở đầu card từ 1200px);
+  - dưới 768px: không có card, thanh điều hướng dưới như cũ.
+- Mục đang mở nền `brand-soft`, chữ `brand`. Thanh bên chỉ hiện mục vai trò đó có quyền.
 - Hai mẫu trang dùng cho phần lớn màn cấu hình: **danh sách** (`DataTable`: tiêu đề, tìm kiếm, bộ lọc nhanh, bảng, phân trang; điện thoại đổi thành thẻ) và **form** (`FormSection`: nhóm trường có giải thích, thanh "Còn thay đổi chưa lưu"). Màn mới dựng từ hai mẫu này trước; chỉ vẽ riêng khi có tương tác đặc thù.
 - Ô nhập trong quản trị cao 40px, chữ 14px (`.sp-field--sm`); trang khách giữ 48px, 16px.
 - Bộ lọc đang bật, công tắc đang bật: `brand-soft` + `brand`. Hộp kiểm đã chọn: nền `primary`. Không có nền đen cho bất kỳ trạng thái nào.
-- Bảng: cột số căn phải; một nút ghost mỗi hàng; thao tác khác nằm trong trang chi tiết.
+- Bảng: cột số căn phải; một nút ghost mỗi hàng; thao tác khác nằm trong trang chi tiết. Chân bảng: dòng tóm tắt bên trái; bên phải là ô số dòng (`PageSizeSelect`) rồi tới phân trang.
 - **Không cuộn ngang trên điện thoại** (dưới 768px), trừ lưới lịch. Hàng nút, bộ lọc, menu con quá dài thì gom vào bảng trượt lên (`.sp-sheet`), xuống dòng, hoặc thành trang danh sách riêng.
 - Trạng thái tài khoản (dùng thử, sắp hết hạn) hiện bằng `Banner` trên cùng vùng nội dung. Tính năng ngoài gói hiện ổ khóa `.sp-lock` và trang giải thích kèm nút nâng cấp (`Plan`), không ẩn hẳn.
 - **Trang chi tiết** (dịch vụ, gói cấu hình ngành) theo `DetailPage`: form bên trái, cột xem trước dính bên phải. Các đoạn của dịch vụ vẽ bằng `SegmentTimeline`.

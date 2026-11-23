@@ -7,6 +7,11 @@ description: Nhật ký tiến độ theo tuần. Mỗi phiên làm việc kết
 
 ## Tuần 2 (09/11 – 15/11/2026)
 
+### 23/11/2026: mật khẩu mẫu ngắn, kế hoạch khung quản trị (Bước 21)
+
+- **Đã làm:** review lại PR #15 (Bước 20), người dùng đã merge. Mọi tài khoản mẫu dùng chung mật khẩu `123456` (ngắn hơn BR-73 cho phép, vì chỉ đăng ký và đặt lại mật khẩu mới kiểm độ dài); trang đăng nhập nhân sự và super admin có ô chọn tài khoản mẫu để điền sẵn. Viết Bước 21 trong [Kế hoạch code giao diện mock](../ky-thuat/ke-hoach-ui-mock.md): khung quản trị mới theo `design/screens/Khung*.dc.html`, có bảng phần tử → class → số đo → token; sửa README Sapio (tiêu đề cột bảng in hoa là ngoại lệ, khung `AppShell` mới, thứ tự chân bảng).
+- **Tiếp theo:** Claude Code làm Bước 21 trên nhánh `feat/mock-shell-card`; sau đó đợt dọn D-16 (bỏ Pawpaw, `industryTemplate`, "Gói cấu hình ngành"; thêm tenant spa mẫu; sửa `CLAUDE.md` còn ghi spa thú cưng và quy tắc 5).
+
 ### 22/11/2026 (tối): trang tài khoản mới (Bước 20)
 
 - **Đã làm** (nhánh `feat/mock-auth-pages`):
