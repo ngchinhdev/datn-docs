@@ -1,13 +1,15 @@
-import Link from 'next/link';
+'use client';
+
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { Breadcrumb, useShellCrumbs, type Crumb } from './shell-crumbs';
 
-export interface Crumb {
-  label: string;
-  href?: string;
-}
+export type { Crumb };
 
-/** Title row of a page in the admin area: optional breadcrumb, title, one line below it, actions. */
+/**
+ * Title row of a page in the admin area: optional breadcrumb, title, one line below it, actions.
+ * From 768px the crumbs go to the card bar of `AppShell`; below that they stay above the title.
+ */
 export function PageHeader({
   title,
   sub,
@@ -26,26 +28,16 @@ export function PageHeader({
   /** The page already has a way back on phones (a "‹ Dịch vụ" button), so the crumbs go. */
   hideCrumbsOnPhone?: boolean;
 }) {
+  const inShell = useShellCrumbs(crumbs);
   return (
     <div className="sp-page-head">
       <div className="min-w-0">
         {crumbs && (
-          <nav aria-label="Vị trí" className={cn(hideCrumbsOnPhone && 'max-md:hidden')}>
-            <ol className="sp-breadcrumb">
-              {crumbs.map((crumb, i) => {
-                const last = i === crumbs.length - 1;
-                return (
-                  <li key={crumb.label} className="contents">
-                    {i > 0 && <span aria-hidden="true">/</span>}
-                    {last || !crumb.href ? (
-                      <span aria-current={last ? 'page' : undefined}>{crumb.label}</span>
-                    ) : (
-                      <Link href={crumb.href}>{crumb.label}</Link>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
+          <nav
+            aria-label="Vị trí"
+            className={cn(hideCrumbsOnPhone && 'max-md:hidden', inShell && 'md:hidden')}
+          >
+            <Breadcrumb crumbs={crumbs} />
           </nav>
         )}
         <h1 className="sp-page-head__title">{title}</h1>

@@ -8,8 +8,7 @@ import {
   Globe,
   LogOut,
   Moon,
-  PanelLeftClose,
-  PanelLeftOpen,
+  PanelLeft,
   Plus,
   Sun,
   UserRound,
@@ -30,6 +29,7 @@ import { useAuthText } from '@/components/mock/auth-text';
 import { cn } from '@/lib/utils';
 import { LockIcon } from './lock-icon';
 import { Sheet } from './sheet';
+import { Breadcrumb, ShellCrumbsSetter, type Crumb } from './shell-crumbs';
 import { Tip } from './tooltip';
 import { useMediaQuery } from './use-media-query';
 import { useMenu } from './use-menu';
@@ -476,8 +476,9 @@ function NavItems({ items, rail }: { items: ShellNavItem[]; rail: boolean }) {
 }
 
 /**
- * Frame of every page in `/app/[tenant]`: sidebar (240px, 68px rail, or off with a tab bar below
- * 768px) around the page. Pages bring their own `.sp-shell__content`.
+ * Frame of every page in `/app/[tenant]`: a sidebar on the page background (248px, 68px rail, or
+ * off with a tab bar below 768px) and the page in a card with its own bar. Pages bring their own
+ * `.sp-shell__content`.
  */
 export function AppShell(props: ShellProps) {
   const { workspace, branchName, items, tabs, account, children } = props;
@@ -487,6 +488,7 @@ export function AppShell(props: ShellProps) {
   const [overlay, setOverlay] = useState(false);
   const [more, setMore] = useState(false);
   const [phoneSlot, setPhoneSlot] = useState<HTMLElement | null>(null);
+  const [pageCrumbs, setPageCrumbs] = useState<Crumb[] | null>(null);
   const sideRef = useRef<HTMLElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   // Icons only: the saved choice on wide screens, or the default on tablets until opened.
@@ -500,8 +502,12 @@ export function AppShell(props: ShellProps) {
       setOverlay(false);
       toggleRef.current?.focus();
     };
+    // The toggle is outside the sidebar; its own click flips the state.
     const onPointerDown = (e: PointerEvent) => {
-      if (!sideRef.current?.contains(e.target as Node)) setOverlay(false);
+      const target = e.target as Node;
+      if (!sideRef.current?.contains(target) && !toggleRef.current?.contains(target)) {
+        setOverlay(false);
+      }
     };
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('pointerdown', onPointerDown);
@@ -522,6 +528,16 @@ export function AppShell(props: ShellProps) {
   const MoreIcon = props.moreLabel ? UserRound : Ellipsis;
   const moreCurrent = rest.some((i) => i.current);
 
+  // Bar of the card: the menu group, then the crumbs of the page, or the name of the open item.
+  const currentItem = items.find((i) => i.current);
+  const firstCrumb = pageCrumbs?.[0]?.label;
+  const anchor = currentItem ?? items.find((i) => i.label === firstCrumb);
+  const group = anchor ? sectionsOf(items).find((s) => s.items.includes(anchor))?.group : undefined;
+  const crumbs: Crumb[] = [
+    ...(group ? [{ label: group }] : []),
+    ...(pageCrumbs ?? (currentItem ? [{ label: currentItem.label }] : [])),
+  ];
+
   return (
     <div
       className={cn(
@@ -539,19 +555,6 @@ export function AppShell(props: ShellProps) {
             <span className="sp-brand__name">Sapio</span>
             {props.platform && <span className="sp-brand__sub">{props.platform.name}</span>}
           </span>
-          <Tip label={toggleLabel} side={rail ? 'right' : 'bottom-end'}>
-            <button
-              ref={toggleRef}
-              type="button"
-              className="sp-icon-btn"
-              aria-label={toggleLabel}
-              aria-expanded={!rail}
-              aria-controls="app-sidebar"
-              onClick={onToggle}
-            >
-              {rail ? <PanelLeftOpen aria-hidden="true" /> : <PanelLeftClose aria-hidden="true" />}
-            </button>
-          </Tip>
         </div>
         {!props.platform && (
           <Switcher
@@ -579,7 +582,7 @@ export function AppShell(props: ShellProps) {
         />
       </nav>
 
-      <div className="sp-shell__main">
+      <div className="sp-shell__card">
         {/* Phone: no sidebar, so the workspace switcher moves to a header. */}
         <header className="flex items-center justify-between gap-(--space-2) bg-(--surface-raised) px-(--space-3) py-(--space-2) shadow-[0_1px_0_var(--line)] md:hidden">
           <Switcher
@@ -594,10 +597,34 @@ export function AppShell(props: ShellProps) {
           />
           <div ref={setPhoneSlot} className="flex flex-none items-center gap-(--space-2)" />
         </header>
-        <PhoneSlot.Provider value={phoneSlot}>
-          {props.banner}
-          {children}
-        </PhoneSlot.Provider>
+        {/* Tablet and up: the card has a bar with the sidebar toggle and the breadcrumb. */}
+        <div className="sp-shell__bar">
+          <Tip label={toggleLabel} side="bottom">
+            <button
+              ref={toggleRef}
+              type="button"
+              className="sp-icon-btn"
+              aria-label={toggleLabel}
+              aria-expanded={!rail}
+              aria-controls="app-sidebar"
+              onClick={onToggle}
+            >
+              <PanelLeft aria-hidden="true" />
+            </button>
+          </Tip>
+          <span className="sp-shell__bar-sep" aria-hidden="true" />
+          {crumbs.length > 0 && (
+            <nav aria-label="Vị trí">
+              <Breadcrumb crumbs={crumbs} />
+            </nav>
+          )}
+        </div>
+        {props.banner}
+        <div className="sp-shell__scroll">
+          <ShellCrumbsSetter.Provider value={setPageCrumbs}>
+            <PhoneSlot.Provider value={phoneSlot}>{children}</PhoneSlot.Provider>
+          </ShellCrumbsSetter.Provider>
+        </div>
       </div>
 
       <nav

@@ -439,31 +439,49 @@ dialog.sp-dialog::backdrop,
   height: 100vh;
   overflow-y: auto;
 }
-.sp-shell__main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
-.sp-shell__content { width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5); }
+/* The page sits in a card. Below 768px there is no card: the page scrolls as a whole. */
+.sp-shell__card { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.sp-shell__bar { display: none; }
+.sp-shell__bar-sep { flex: none; width: 1px; height: 18px; background: var(--line); }
+.sp-shell__content { width: 100%; max-width: 1200px; box-sizing: border-box; margin: 0 auto; padding: 28px 32px; display: flex; flex-direction: column; gap: var(--space-5); }
 .sp-shell__content--wide { max-width: none; }
-/* Page whose list fills the rest of the screen: header and toolbar stay, the table scrolls inside its card. */
-/* From 768px only: on phones the list scrolls with the page (cards, tab bar at the bottom). */
 @media (min-width: 768px) {
-  .sp-shell__content--fill { height: 100%; max-height: 100vh; min-height: 0; }
-  .sp-shell__main:has(> .sp-shell__content--fill) { height: 100vh; }
+  .sp-shell__card {
+    box-sizing: border-box;
+    margin: var(--space-2) var(--space-2) var(--space-2) 0;
+    height: calc(100dvh - 16px);
+    position: sticky;
+    top: var(--space-2);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface-raised);
+    box-shadow: var(--shadow-card);
+  }
+  .sp-shell__bar { flex: none; display: flex; align-items: center; gap: 10px; box-sizing: border-box; height: 52px; padding: 0 var(--space-3); border-bottom: 1px solid var(--line); }
+  /* Only this area scrolls; the sidebar and the bar stay. */
+  .sp-shell__scroll { flex: 1 1 auto; min-height: 0; overflow: auto; }
+  /* Page whose list fills the rest of the card: header and toolbar stay, the table scrolls inside its own card. */
+  .sp-shell__content--fill { height: 100%; min-height: 0; padding: 20px var(--space-6); gap: var(--space-4); }
 }
 /* Rail: icons only. Automatic at 768-1199px, or chosen with the collapse button (.sp-shell--collapsed). */
 .sp-shell--collapsed .sp-shell__side { width: 68px; }
 .sp-shell--collapsed :is(.sp-nav__label, .sp-nav__group, .sp-switcher__text, .sp-switcher__chevron, .sp-nav__badge, .sp-brand__text, .sp-shell__lang-code, .sp-account__text) { display: none; }
 .sp-shell--collapsed :is(.sp-nav__item, .sp-switcher) { justify-content: center; padding: 0; }
-.sp-shell--collapsed .sp-brand { flex-direction: column; justify-content: center; gap: var(--space-2); padding: 0; }
+.sp-shell--collapsed .sp-brand { justify-content: center; padding: 0; }
 .sp-shell--collapsed .sp-shell__tools { flex-direction: column; padding: 0; }
 .sp-shell--collapsed .sp-account { justify-content: center; padding: 0; background: transparent; }
 @media (min-width: 768px) and (max-width: 1199px) {
   .sp-shell:not(.sp-shell--expanded) .sp-shell__side { width: 68px; }
   .sp-shell:not(.sp-shell--expanded) :is(.sp-nav__label, .sp-nav__group, .sp-switcher__text, .sp-switcher__chevron, .sp-nav__badge, .sp-brand__text, .sp-shell__lang-code, .sp-account__text) { display: none; }
   .sp-shell:not(.sp-shell--expanded) :is(.sp-nav__item, .sp-switcher) { justify-content: center; padding: 0; }
-  .sp-shell:not(.sp-shell--expanded) .sp-brand { flex-direction: column; justify-content: center; gap: var(--space-2); padding: 0; }
+  .sp-shell:not(.sp-shell--expanded) .sp-brand { justify-content: center; padding: 0; }
   .sp-shell:not(.sp-shell--expanded) .sp-shell__tools { flex-direction: column; padding: 0; }
   .sp-shell:not(.sp-shell--expanded) .sp-account { justify-content: center; padding: 0; background: transparent; }
   /* Expanded on a tablet: the full sidebar slides over the content. */
   .sp-shell--expanded .sp-shell__side { position: fixed; inset: 0 auto 0 0; z-index: 50; background: var(--surface); box-shadow: var(--shadow-popover); }
+  /* The open sidebar leaves the flow, so the card keeps the place of the rail. */
+  .sp-shell--expanded .sp-shell__card { margin-left: 68px; }
 }
 @media (max-width: 767px) {
   .sp-shell .sp-shell__side { display: none; }
@@ -734,9 +752,11 @@ dialog.sp-dialog::backdrop,
 .sp-page-head__title { margin: 0; font: 600 24px/32px var(--font-sans); letter-spacing: -0.02em; }
 .sp-page-head__sub { margin: 2px 0 0; font: 400 14px/20px var(--font-sans); color: var(--ink-muted); }
 .sp-page-head__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.sp-breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 var(--space-1); padding: 0; list-style: none; font: 500 13px/18px var(--font-sans); color: var(--ink-muted); }
+.sp-breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; padding: 0; list-style: none; font: 500 13px/18px var(--font-sans); color: var(--ink-muted); }
 .sp-breadcrumb a { color: var(--ink-muted); text-decoration: none; }
 .sp-breadcrumb a:hover { color: var(--ink); }
+.sp-breadcrumb [aria-current="page"] { font-weight: 600; color: var(--ink); }
+.sp-page-head .sp-breadcrumb { margin-bottom: var(--space-1); }
 
 /* ---------- Toolbar: search + filters above a list ---------- */
 .sp-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
