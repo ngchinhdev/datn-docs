@@ -47,7 +47,7 @@ Email luôn được **chuẩn hóa** trước khi so và lưu: bỏ khoảng tr
 | BR-76.3 | Từ lần sai thứ 3, câu báo kèm số lần còn lại trước khi bị khóa: còn 2, còn 1 |
 | BR-76.4 | Lần sai thứ **5** khóa email đó **15 phút**, tính từ lần sai này |
 | BR-76.5 | Trong lúc khóa, mọi lần đăng nhập email đó đều bị từ chối, kể cả khi đúng mật khẩu. Các lần này không đếm và không kéo dài thời gian khóa |
-| BR-76.6 | Khi bắt đầu khóa, gửi một email báo cho chủ tài khoản, kèm giờ hết khóa và nút đặt lại mật khẩu. Email không có tài khoản thì không gửi gì, nhưng màn hình vẫn báo y hệt |
+| BR-76.6 | Khi bắt đầu khóa, gửi một email báo cho chủ tài khoản, kèm giờ hết khóa và nút đặt lại mật khẩu. Tài khoản quản trị nền tảng không có nút, vì không tự đặt lại được (T-18): email nói thử lại khi hết khóa, hoặc nhờ quản trị viên khác đặt lại mật khẩu. Email không có tài khoản thì không gửi gì, nhưng màn hình vẫn báo y hệt |
 | BR-76.7 | Hết khóa thì bộ đếm về 0. Đăng nhập đúng cũng đưa bộ đếm về 0 |
 | BR-76.8 | Đặt lại mật khẩu xong (BR-77.5) thì mở khóa ngay |
 

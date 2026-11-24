@@ -69,7 +69,7 @@ Trả về 200:
 
 ## 4. Danh sách cơ sở
 
-`GET /v1/auth/workspaces`. Dùng cho Chọn cơ sở (MH-06). Đọc qua hàm `memberships_of(user_id)` (`SECURITY DEFINER`, ERD).
+`GET /v1/auth/workspaces`. Dùng cho Chọn cơ sở (MH-06). Đọc `memberships` trong `withUser(userId, ...)` rồi nối với `tenants` ([ERD](../architecture/erd.md), T-07).
 
 ```json
 [
