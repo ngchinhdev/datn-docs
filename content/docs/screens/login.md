@@ -42,14 +42,14 @@ Bố cục `AuthPage`: khối giới thiệu bên trái, form bên phải. Màn 
 | `?next=` | Chỉ nhận đường dẫn tương đối bắt đầu bằng `/app/`. Giá trị khác thì bỏ qua, để không bị lợi dụng chuyển hướng sang trang lạ |
 | Sửa mục 6 | Ẩn mục 9 |
 | Nhấn mục 11 hoặc Enter | Kiểm trên máy trước. Mục 6 trống hoặc sai dạng thì báo dưới mục 6 "Email chưa đúng. Ví dụ: an@tiemcuaban.vn." Mục 7 trống thì báo ở mục 9 "Nhập mật khẩu." Có lỗi thì không gọi API. Hết lỗi thì gọi API #1 với `{ email: mục 6, password: mục 7, remember: mục 10 }`; trong lúc chờ, mục 11 hiện vòng xoay và không bấm được |
-| API trả 200 | Chuyển tới `?next=` nếu hợp lệ. Nếu không: `destination.kind = workspace` thì tới `destination.path`, `select-workspace` thì tới `/select-workspace` |
+| API trả 200 | Chuyển tới `?next=` nếu hợp lệ. Nếu không: tới `redirectTo` |
 | API trả 401 `INVALID_CREDENTIALS` | Xóa mục 7 rồi đặt con trỏ vào đó. Mục 9: "Email hoặc mật khẩu chưa đúng.", có `remainingAttempts` thì thêm "Còn {n} lần thử, sau đó tạm khóa 15 phút." |
 | API trả 423 `LOGIN_LOCKED` | Xóa mục 7, ẩn mục 9. Mục 5: "Tạm khóa đăng nhập tới {HH:mm}." và "Mật khẩu sai 5 lần liên tiếp. Đã gửi email báo cho {mục 6}. Muốn vào ngay thì đặt lại mật khẩu." Mục 11 không bấm được, chữ đổi thành "Đăng nhập lại sau {m:ss}" và đếm ngược tới `lockedUntil`. Hiện mục 12. Giờ hiển thị theo `Asia/Ho_Chi_Minh` |
 | Hết giờ đếm ngược | Ẩn mục 5 và mục 12, mục 11 bấm lại được |
 | Sửa mục 6 trong lúc khóa | Ẩn mục 5 và mục 12, mục 11 bấm lại được. Khóa gắn với email, nên email khác vẫn thử được |
-| API trả 400 `VALIDATION_FAILED` | Báo dưới mục 6 như khi kiểm trên máy |
+| API trả 400 `VALIDATION_FAILED` | Mỗi phần tử của `errors` báo bằng `message` dưới ô có tên `field` (`email` là mục 6, `password` là mục 9) |
 | API trả 429 `RATE_LIMITED` | Mục 9: "Thử quá nhiều lần. Thử lại sau {Retry-After} giây." |
-| Lỗi mạng hoặc 5xx | Mục 9: "Chưa đăng nhập được, thử lại sau." Có `instance` thì thêm "Mã lỗi: {instance}" (BR-79) |
+| Lỗi mạng hoặc 5xx | Mục 9: "Chưa đăng nhập được, thử lại sau." Lỗi 5xx có `requestId`, thêm "Mã lỗi: {requestId}" (BR-79) |
 
 ## MH-63: đăng nhập quản trị nền tảng
 

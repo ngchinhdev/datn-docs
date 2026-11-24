@@ -32,33 +32,60 @@ Trình duyệt chỉ gọi `/api/*` **cùng origin** với trang. Next.js chuy�
 
 ## Lỗi
 
-Mọi lỗi theo Problem Details (RFC 9457), `Content-Type: application/problem+json`:
+Mọi lỗi theo Problem Details (RFC 9457), `Content-Type: application/problem+json`. Thân lỗi không có `type`, `title` và `instance`:
 
 ```json
 {
-  "type": "about:blank",
-  "title": "Unauthorized",
-  "status": 401,
-  "code": "INVALID_CREDENTIALS",
-  "detail": "Email hoặc mật khẩu chưa đúng.",
-  "instance": "/v1/auth/login",
-  "remainingAttempts": 2
+  "status": 400,
+  "code": "VALIDATION_FAILED",
+  "detail": "Thông tin chưa hợp lệ.",
+  "errors": [{ "field": "password", "code": "REQUIRED", "message": "Nhập mật khẩu." }],
+  "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
 }
 ```
 
-- `code` là mã lỗi nghiệp vụ, viết `UPPER_SNAKE_CASE`, **không đổi** sau khi đã dùng. Giao diện chọn câu hiển thị theo `code`, không theo `detail`.
-- Trường thêm (như `remainingAttempts`, `lockedUntil`) ghi trong trang của từng endpoint.
-- Lỗi dùng chung:
+| Trường | Có khi | Nghĩa |
+|---|---|---|
+| `status` | Luôn | Mã HTTP, từ 400 đến 599 |
+| `code` | Luôn, kể cả lỗi 500 | Mã lỗi nghiệp vụ, viết `UPPER_SNAKE_CASE`, **không đổi** sau khi đã dùng. Giao diện chọn cách xử lý theo `code` |
+| `detail` | Luôn | Một câu tiếng Việt cố định theo `code`, giao diện hiện thẳng được. Không chứa giá trị thay đổi: giá trị đó nằm ở trường thêm |
+| `errors` | Chỉ với 400 `VALIDATION_FAILED` | Mỗi lỗi một trường, xem dưới |
+| `requestId` | Luôn | UUIDv7 của request, bằng header `X-Request-Id`. Giao diện hiện nó làm mã tra cứu khi gặp lỗi máy chủ (BR-79) |
+| Trường thêm | Tùy `code` | Như `remainingAttempts`, `lockedUntil`; ghi trong trang của từng endpoint |
+
+Mỗi phần tử của `errors`:
+
+| Trường | Nghĩa |
+|---|---|
+| `field` | Tên trường, nối bằng dấu chấm: `email`, `items.0.serviceId`. Lỗi của cả body có `field` là `body` |
+| `code` | Mã theo trường, bảng dưới |
+| `message` | Câu tiếng Việt cho trường đó, giao diện hiện dưới ô nhập |
+
+Mã theo trường:
+
+| `code` | Khi |
+|---|---|
+| `REQUIRED` | Thiếu trường, giá trị `null`, hoặc chuỗi rỗng ở trường bắt buộc có giá trị |
+| `INVALID_EMAIL` | Sai định dạng email |
+| `TOO_SHORT` | Ngắn hơn mức tối thiểu (trừ trường hợp `REQUIRED`) |
+| `TOO_LONG` | Dài hơn mức tối đa |
+| `INVALID_VALUE` | Mọi lỗi còn lại: sai kiểu, sai dạng, ngoài danh sách cho phép |
+
+Câu `detail` của từng `code` và câu `message` của từng mã theo trường (kể cả câu riêng của trường `email`, `password`) nằm ở `packages/shared/src/errors.ts`. API và web dùng chung file đó.
+
+Header `X-Request-Id` có ở mọi phản hồi, kể cả 2xx. Máy chủ tự sinh cho mỗi request và bỏ qua giá trị client gửi. Log lỗi 5xx ghi kèm `requestId`.
+
+Lỗi dùng chung:
 
 | Status | `code` | Khi nào |
 |---|---|---|
-| 400 | `VALIDATION_FAILED` | Body hoặc tham số sai schema. `errors` là danh sách `{ path, message }` |
+| 400 | `VALIDATION_FAILED` | Body hoặc tham số sai schema, hoặc body không đọc được |
 | 401 | `UNAUTHENTICATED` | Không có phiên, hoặc phiên đã hết hạn hay bị thu hồi |
 | 403 | `FORBIDDEN` | Có phiên nhưng không có quyền |
 | 403 | `ORIGIN_NOT_ALLOWED` | Header `Origin` không thuộc danh sách tin cậy |
 | 404 | `NOT_FOUND` | Không có tài nguyên, hoặc không thuộc cơ sở của phiên |
 | 429 | `RATE_LIMITED` | Gọi quá nhiều lần. Có header `Retry-After` (giây) |
-| 500 | (không có) | Lỗi máy chủ. Giao diện hiện `instance` làm mã tra cứu (BR-79) |
+| 500 | `INTERNAL_ERROR` | Lỗi máy chủ. Thân lỗi không chứa chi tiết nào của lỗi |
 
 ## Thời gian, tiền, ID
 
