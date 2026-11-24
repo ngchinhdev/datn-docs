@@ -1,7 +1,4 @@
 {
   "title": "Màn hình",
-  "pages": [
-    "index",
-    "login"
-  ]
+  "pages": ["index", "login", "select-workspace"]
 }
