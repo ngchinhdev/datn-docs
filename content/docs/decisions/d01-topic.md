@@ -1,5 +1,5 @@
 ---
-title: D-01. Đề tài: nền tảng đặt lịch đa tài nguyên cho cơ sở dịch vụ theo lịch hẹn
+title: "D-01. Đề tài: nền tảng đặt lịch đa tài nguyên cho cơ sở dịch vụ theo lịch hẹn"
 ---
 
 > **Thay thế một phần bởi [D-16](./d16-beauty-only-scope.md)** (15/11/2026): chỉ làm cho cơ sở làm đẹp, bỏ đa ngành và spa thú cưng.

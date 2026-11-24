@@ -1,5 +1,5 @@
 ---
-title: D-07. Tổ chức repo: 2 repo
+title: "D-07. Tổ chức repo: 2 repo"
 ---
 
 - `datn-saas`: monorepo code (apps/web Next.js, apps/api NestJS, packages dùng chung).

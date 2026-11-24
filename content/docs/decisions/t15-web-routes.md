@@ -1,5 +1,5 @@
 ---
-title: T-15. Route của web: tiếng Anh, slug cơ sở trong URL
+title: "T-15. Route của web: tiếng Anh, slug cơ sở trong URL"
 ---
 
 Chốt ngày 07/11/2026 cùng [Danh sách màn hình](../screens/index.md). Phần trang khách được thay bằng [T-16](./t16-tenant-subdomains.md) (tên miền con).

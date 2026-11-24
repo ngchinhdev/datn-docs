@@ -1,5 +1,5 @@
 ---
-title: T-05. `packages/scheduling-core`: thuật toán thuần
+title: "T-05. `packages/scheduling-core`: thuật toán thuần"
 ---
 
 - Không phụ thuộc Nest, DB, ngày giờ hệ thống. Đầu vào là dữ liệu thuần (khung giờ mở cửa, ca làm, đoạn chiếm dụng đã có, yêu cầu dịch vụ), đầu ra là danh sách giờ trống và phương án gán tài nguyên.

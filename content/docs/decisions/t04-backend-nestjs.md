@@ -1,5 +1,5 @@
 ---
-title: T-04. Backend: NestJS 12, ESM, Express
+title: "T-04. Backend: NestJS 12, ESM, Express"
 ---
 
 - NestJS 12 (27/08/2026, bản 12.3.x): gói lõi là ESM; `nest new` hỏi chọn CJS hay ESM → **chọn ESM**. Dự án ESM mặc định dùng **Vitest** và **oxlint**.

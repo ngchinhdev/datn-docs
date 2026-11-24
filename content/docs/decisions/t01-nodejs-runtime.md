@@ -1,5 +1,5 @@
 ---
-title: T-01. Runtime: Node.js 24 LTS
+title: "T-01. Runtime: Node.js 24 LTS"
 ---
 
 - Node 24 là Maintenance LTS, còn bản vá bảo mật đến 30/04/2028, sau ngày bảo vệ. **Node 22 hết bảo mật 30/04/2027, trước ngày bảo vệ** → không dùng.

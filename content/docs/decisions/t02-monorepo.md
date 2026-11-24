@@ -1,5 +1,5 @@
 ---
-title: T-02. Monorepo: pnpm workspaces + catalog, Turborepo
+title: "T-02. Monorepo: pnpm workspaces + catalog, Turborepo"
 ---
 
 - `pnpm-workspace.yaml` khai báo `apps/*`, `packages/*`; dùng **catalog** để mọi package dùng chung một phiên bản TypeScript, Zod, Vitest.

@@ -1,5 +1,5 @@
 ---
-title: T-03. Frontend: Next.js 16.4 + React 19.3
+title: "T-03. Frontend: Next.js 16.4 + React 19.3"
 ---
 
 - Next.js 16.4 (06/10/2026) ra mắt kèm React 19.3; `create-next-app` mặc định **bật Cache Components**, đây là mô hình sẽ thành mặc định ở Next 17 → dùng ngay từ đầu.

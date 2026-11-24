@@ -1,5 +1,5 @@
 ---
-title: T-07. Cô lập dữ liệu: RLS hai lớp
+title: "T-07. Cô lập dữ liệu: RLS hai lớp"
 ---
 
 - App kết nối DB bằng role `app_user` **không phải chủ bảng, không có `BYPASSRLS`**; migration chạy bằng role chủ sở hữu. Bật `ENABLE` và `FORCE ROW LEVEL SECURITY` trên mọi bảng có `tenant_id`.

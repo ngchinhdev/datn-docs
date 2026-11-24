@@ -1,5 +1,5 @@
 ---
-title: T-17. Gói Sapio: gói và tính năng là dữ liệu, kiểm qua một hàm
+title: "T-17. Gói Sapio: gói và tính năng là dữ liệu, kiểm qua một hàm"
 ---
 
 Chốt ngày 08/11/2026 cùng [D-15](./d15-trial-and-two-plans.md).

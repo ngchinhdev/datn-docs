@@ -1,5 +1,5 @@
 ---
-title: T-08. Xác thực: tự xây bằng phiên trong cookie
+title: "T-08. Xác thực: tự xây bằng phiên trong cookie"
 ---
 
 - **Nhân viên:** email + mật khẩu (băm bằng argon2id, gói `@node-rs/argon2` có sẵn bản build cho Windows). Đăng nhập tạo **session token ngẫu nhiên**, lưu bản băm trong bảng `sessions`, gửi về bằng cookie `httpOnly`, `Secure`, `SameSite=Lax`. Thu hồi phiên được ngay (đăng xuất, đổi mật khẩu).

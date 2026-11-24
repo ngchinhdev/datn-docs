@@ -1,5 +1,5 @@
 ---
-title: D-03. Định vị so với đối thủ: không tuyên bố phát minh
+title: "D-03. Định vị so với đối thủ: không tuyên bố phát minh"
 ---
 
 > **Cập nhật theo [D-16](./d16-beauty-only-scope.md):** đóng góp (4) "thêm ngành chỉ bằng cấu hình" đã bỏ.

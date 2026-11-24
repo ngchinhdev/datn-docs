@@ -1,5 +1,5 @@
 ---
-title: D-16. Thu hẹp phạm vi: chỉ cơ sở làm đẹp, bỏ đa ngành và spa thú cưng
+title: "D-16. Thu hẹp phạm vi: chỉ cơ sở làm đẹp, bỏ đa ngành và spa thú cưng"
 ---
 
 Chốt ngày 15/11/2026 theo góp ý đề cương của cô.

@@ -1,5 +1,5 @@
 ---
-title: T-06. Cơ sở dữ liệu: PostgreSQL 18 + Drizzle ORM v1 (RC)
+title: "T-06. Cơ sở dữ liệu: PostgreSQL 18 + Drizzle ORM v1 (RC)"
 ---
 
 - PostgreSQL 18, image chính thức trong Docker Compose và Testcontainers. Bật extension `btree_gist` (cần cho exclusion constraint có `tenant_id WITH =`). Khóa chính dùng `default uuidv7()`, hàm có sẵn từ PostgreSQL 18.
