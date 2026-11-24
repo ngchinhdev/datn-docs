@@ -1,6 +1,6 @@
 /*
  * Checks the arithmetic of money (mock/money.ts) against the worked examples of
- * content/docs/nghiep-vu/quy-tac.md (BR-22, BR-25, BR-26, BR-27, BR-28, BR-40, BR-42), a sweep of
+ * content/docs/features/business-rules.md (BR-22, BR-25, BR-26, BR-27, BR-28, BR-40, BR-42), a sweep of
  * random amounts for the invariants, and the sample money data.
  * Run: pnpm check:money   (Node 24 runs TypeScript directly)
  */

@@ -1,6 +1,6 @@
 /*
  * Checks the free-slot finder against the ten worked examples of
- * content/docs/ky-thuat/thuat-toan-gio-trong.md (section 4), against a minute-by-minute brute
+ * content/docs/architecture/availability-algorithm.md (section 4), against a minute-by-minute brute
  * force (section 5), and the sample appointments against double booking (BR-01).
  * Run: pnpm check:availability   (Node 24 runs TypeScript directly)
  */

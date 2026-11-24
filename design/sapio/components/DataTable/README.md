@@ -1,6 +1,6 @@
 # DataTable
 
-Mẫu trang danh sách cho mọi màn mức **DS** trong [Danh sách màn hình](https://datn-docs.vercel.app/docs/thiet-ke/man-hinh): `.sp-page-head` → `.sp-toolbar` → `.sp-table-card` > (`.sp-table-wrap` > `table.sp-table`) + `.sp-table-foot`.
+Mẫu trang danh sách cho mọi màn mức **DS** trong [Danh sách màn hình](https://datn-docs.vercel.app/docs/screens): `.sp-page-head` → `.sp-toolbar` → `.sp-table-card` > (`.sp-table-wrap` > `table.sp-table`) + `.sp-table-foot`.
 
 - **Cuộn trong khung (từ 768px):** trang dùng `.sp-shell__content--fill`, thẻ bảng chiếm phần màn hình còn lại; chỉ thân bảng cuộn (`.sp-table-wrap`, `tabindex="0"`, `role="region"` có nhãn để cuộn được bằng bàn phím). Dòng tiêu đề cột dính trên, chân bảng dính dưới. Mỗi dòng cao 56px. Dưới 768px danh sách thẻ cuộn theo trang như bình thường.
 

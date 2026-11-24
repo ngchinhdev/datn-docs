@@ -4,9 +4,9 @@ File này là **trí nhớ dự án** cho Claude Code. Đọc nó đầu mỗi p
 
 ## Bối cảnh
 
-- **Đề tài:** Xây dựng nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho các cơ sở dịch vụ theo lịch hẹn.
+- **Đề tài:** Xây dựng nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho cơ sở làm đẹp.
 - **Sinh viên:** Nguyễn Ngọc Chính (26410176), UIT, làm một mình. **GVHD:** ThS. Nguyễn Thị Thùy Trâm.
-- **Ngành chính:** salon tóc, nail, spa. **Ngành thứ hai** (chứng minh tính tổng quát, chỉ bằng cấu hình): spa thú cưng.
+- **Phạm vi:** chỉ cơ sở làm đẹp (salon tóc, nail, spa), D-16. Không có spa thú cưng, gói cấu hình ngành hay đối tượng được phục vụ; mỗi mục lịch hẹn là một dịch vụ cho một người.
 - **Mốc:** bắt đầu 02/11/2026; đóng băng tính năng 16/05/2027; bảo vệ cuối 06/2027.
 - **Giao tiếp:** người dùng viết tiếng Việt; trả lời và viết tài liệu bằng tiếng Việt. Code, tên biến, commit message bằng tiếng Anh.
 
@@ -21,26 +21,31 @@ datn/
 
 Mở VS Code và Claude Code tại `datn/` để thấy cả hai repo.
 
-## Tài liệu (nguồn sự thật)
+## Tài liệu
+
+Repo có hai vùng:
+
+- **`content/docs/`: tài liệu chính thức**, phục vụ ở `/docs`, giữ lại khi xong dự án. Viết như mô tả sản phẩm đang có. Không ghi bước, PR, ai bảo gì, lịch sử thay đổi.
+- **`sessions/`: vùng làm việc** (tiến độ, kế hoạch, prompt, review), xóa khi xong dự án. Trang chính thức không link tới đây.
 
 | Cần gì | Đọc file |
 |---|---|
-| Phạm vi, giai đoạn, thực nghiệm E1–E9, bài toán khó BT1–BT8 | `content/docs/du-an/roadmap.md` |
-| Đề cương đã gửi cô (không tự ý mở rộng phạm vi so với đây) | `content/docs/du-an/de-cuong.md` |
-| Vì sao chọn A mà không chọn B (D-xx) | `content/docs/du-an/quyet-dinh.md` |
-| Đã làm đến đâu | `content/docs/du-an/tien-do.md` |
-| Quy tắc nghiệp vụ (BR-xx) | `content/docs/nghiep-vu/quy-tac.md` |
-| Tên gọi khái niệm trong code | `content/docs/nghiep-vu/thuat-ngu.md` |
-| Phiên bản, kiến trúc, pattern (T-xx) | `content/docs/ky-thuat/quyet-dinh-ky-thuat.md` |
-| Cách viết test | `content/docs/ky-thuat/chien-luoc-kiem-thu.md` |
-| Dựng base source từng bước | `content/docs/ky-thuat/ke-hoach-dung-base.md` |
-| Code giao diện mock từng bước | `content/docs/ky-thuat/ke-hoach-ui-mock.md` |
-| Toàn bộ màn hình (MH-xx), route, đợt làm mock | `content/docs/thiet-ke/man-hinh.md` |
+| Phạm vi, vai trò, bài toán khó BT1–BT7, thực nghiệm E1–E8 | `content/docs/overview/scope.md` |
+| Đề cương đã gửi cô (không tự ý mở rộng phạm vi so với đây) | `content/docs/overview/proposal.md` |
+| Tên gọi khái niệm trong code | `content/docs/overview/glossary.md` |
+| Một tính năng: quy tắc BR-xx.y, luồng, tiêu chí chấp nhận AC-xx | `content/docs/features/<tính-năng>.md` (đã có: `auth.md`) |
+| Quy tắc BR-xx chưa tách theo tính năng | `content/docs/features/business-rules.md` |
+| Danh sách màn hình MH-xx; đặc tả một màn | `content/docs/screens/index.md`; `content/docs/screens/<màn>.md` |
+| Quy ước API, quyền và lỗi nghiệp vụ từng nhóm | `content/docs/api/index.md`, `content/docs/api/<nhóm>.md` |
+| Kiến trúc, ERD, thuật toán giờ trống, cách viết test | `content/docs/architecture/` |
+| Vì sao chọn A mà không chọn B (D-xx, T-xx) | `content/docs/decisions/index.md`, mỗi quyết định một file |
+| Đã làm đến đâu | `sessions/progress/` (file tháng mới nhất) |
+| Kế hoạch và prompt từng bước | `sessions/plans/` (`auth.md`, `ui-mock.md`, `base-setup.md`, `roadmap.md`) |
 | Thiết kế: màu, chữ, component, màn hình đã chốt | `design/README.md`, `design/sapio/README.md` |
 
-`content/docs/nghiep-vu/phan-tich-goc.md` là bản phân tích ban đầu, **rộng hơn phạm vi đồ án**: chỉ tham khảo, không làm theo.
+`sessions/archive/initial-analysis.md` là bản phân tích ban đầu, **rộng hơn phạm vi đồ án**: chỉ tham khảo, không làm theo.
 
-Link giữa các trang tài liệu ghi đường dẫn tới file, có đuôi `.md` (`../du-an/roadmap.md#muc`), vì Fumadocs chỉ đổi link dạng này sang URL của trang.
+Link giữa các trang trong `content/docs` ghi đường dẫn tới file, có đuôi `.md` (`../features/auth.md#muc`), vì Fumadocs chỉ đổi link dạng này sang URL của trang. Tên thư mục và tên file bằng tiếng Anh, nội dung bằng tiếng Việt.
 
 ## Tóm tắt kỹ thuật (chi tiết ở T-xx)
 
@@ -61,20 +66,20 @@ Link giữa các trang tài liệu ghi đường dẫn tới file, có đuôi `.
 2. **Thời gian:** lưu `timestamptz` UTC; hiển thị theo múi giờ chi nhánh (`Asia/Ho_Chi_Minh`). Nghiệp vụ không gọi `Date.now()`, dùng `Clock`.
 3. **ID:** UUIDv7.
 4. **Đa khách thuê:** mọi bảng nghiệp vụ có `tenant_id` + RLS (ENABLE và FORCE). Truy vấn nghiệp vụ đi qua `withTenant()`. Không có đường tắt bỏ qua RLS trong code ứng dụng.
-5. **Lõi không biết ngành:** `scheduling-core` và các module lõi không chứa từ khóa ngành (tóc, nail, chó, mèo...). Khác biệt ngành nằm trong `industryTemplate` (dữ liệu). Có script kiểm tra trong lint.
+5. (Đã bỏ theo D-16: không còn quy tắc "lõi không biết ngành".)
 6. **Sổ cái:** `ledgerEntry` chỉ thêm, không sửa, không xóa; điều chỉnh bằng bút toán đảo.
 7. **Lớp:** controller → application service → domain (hàm thuần) + repository (Drizzle). Domain không import Nest hay Drizzle.
 8. **Schema:** định nghĩa một lần trong `packages/shared`, FE và BE cùng dùng.
-9. **Test:** tên test bắt đầu bằng mã BR khi kiểm quy tắc nghiệp vụ (`it('BR-23: ...')`). Không mock database trong integration/e2e.
+9. **Test:** tên test bắt đầu bằng mã BR khi kiểm quy tắc nghiệp vụ (`it('BR-23: ...')`, `it('BR-76.4: ...')`). Không mock database trong integration/e2e.
 10. **Đổi quyết định:** không âm thầm đổi thư viện hay kiến trúc. Đề xuất, chờ người dùng đồng ý, rồi ghi vào trang quyết định (D-xx hoặc T-xx).
 
 ## Cách làm việc mỗi phiên
 
-1. Đọc `tien-do.md` (mục mới nhất) để biết đang ở đâu.
-2. Làm việc theo roadmap. Thay đổi nghiệp vụ thì cập nhật `quy-tac.md` trước khi viết code.
-3. Một tính năng xong khi đạt "Định nghĩa hoàn thành" trong `chien-luoc-kiem-thu.md`.
+1. Đọc mục mới nhất trong `sessions/progress/` để biết đang ở đâu, rồi kế hoạch của bước trong `sessions/plans/`.
+2. Thay đổi nghiệp vụ thì cập nhật trang tính năng (`content/docs/features/`) trước khi viết code. Endpoint mới hay đổi thì cập nhật trang API tương ứng.
+3. Một tính năng xong khi đạt "Định nghĩa hoàn thành" trong `content/docs/architecture/testing.md` và mọi dòng AC-xx của trang tính năng có test.
 4. Commit nhỏ, theo Conventional Commits (`feat(scheduling): ...`, `test(billing): ...`, `docs: ...`).
-5. **Kết thúc phiên:** thêm một mục vào `tien-do.md` (đã làm, vướng, tiếp theo) và commit repo docs.
+5. **Kết thúc phiên:** thêm một mục vào `sessions/progress/<năm-tháng>.md` (đã làm, vướng, tiếp theo) và commit repo docs.
 
 ## Lệnh thường dùng
 
@@ -91,7 +96,7 @@ Lệnh của `datn-saas` xem `datn-saas/CLAUDE.md`.
 ## Mock giao diện
 
 - Nằm ở `app/mock/*` trong repo này, dùng dữ liệu giả trong `mock/fixtures/` (TypeScript), không gọi API thật.
-- Có bộ chọn tenant (Salon Tóc Mây, Spa thú cưng Pawpaw) và bộ chọn vai trò.
+- Có bộ chọn tenant (Salon Tóc Mây; Pawpaw sẽ được thay bằng Spa Lá Sen, xem `sessions/plans/d16-cleanup.md`) và bộ chọn vai trò.
 - Dùng cùng Tailwind 4 + shadcn/ui với `apps/web` để chuyển component sang dễ.
 - Giao diện theo hệ thống thiết kế **Sapio** (`design/sapio/`): chỉ dùng biến trong `tokens.css` và class trong `components.css`, không tự đặt màu; không nền đen ở đâu. Màn hình tham chiếu ở `design/screens/`.
 - Chia việc: phiên claude.ai lo phân tích, thiết kế, review; Claude Code trên máy lo code theo kế hoạch, làm trên nhánh riêng và mở pull request để review, không tự merge.

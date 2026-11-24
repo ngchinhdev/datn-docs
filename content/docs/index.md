@@ -1,26 +1,26 @@
 ---
 title: Tổng quan
-description: Tài liệu đồ án tốt nghiệp - nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho các cơ sở dịch vụ theo lịch hẹn.
+description: Tài liệu đồ án tốt nghiệp - nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho cơ sở làm đẹp.
 ---
 
-**Đề tài:** Xây dựng nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho các cơ sở dịch vụ theo lịch hẹn.
+**Đề tài:** Xây dựng nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho cơ sở làm đẹp.
 
 **Sinh viên:** Nguyễn Ngọc Chính (26410176), Trường Đại học Công nghệ Thông tin, ĐHQG-HCM. **Giảng viên hướng dẫn:** ThS. Nguyễn Thị Thùy Trâm.
 
 ## Đề tài giải quyết gì
 
-Salon, nail, spa (và các cơ sở dịch vụ theo lịch hẹn nói chung) phải xếp lịch trên **nhiều loại tài nguyên cùng lúc**: nhân viên, ghế, phòng, máy. Một dịch vụ có thể chiếm các tài nguyên khác nhau ở các đoạn thời gian khác nhau, ví dụ nhuộm tóc có đoạn chờ thuốc lên màu mà thợ được rảnh nhưng ghế vẫn bận. Nền tảng tính đúng giờ trống, chống đặt trùng khi nhiều người đặt cùng lúc, và nối liền lịch hẹn với thanh toán, ví, gói liệu trình, hoa hồng nhân viên, báo cáo. Lõi không gắn với ngành nào: spa thú cưng được hỗ trợ chỉ bằng cấu hình.
+Salon tóc, tiệm nail, spa phải xếp lịch trên **nhiều loại tài nguyên cùng lúc**: nhân viên, ghế, giường, phòng, máy. Một dịch vụ có thể chiếm các tài nguyên khác nhau ở các đoạn thời gian khác nhau, ví dụ nhuộm tóc có đoạn chờ thuốc lên màu mà thợ được rảnh nhưng ghế vẫn bận. Nền tảng tính đúng giờ trống, chống đặt trùng khi nhiều người đặt cùng lúc, và nối liền lịch hẹn với thanh toán, ví, gói liệu trình, hoa hồng nhân viên, báo cáo.
 
 ## Đọc từ đâu
 
 | Mục | Nội dung |
 |---|---|
-| [Đề cương](./du-an/de-cuong.md) | Bản đã gửi giảng viên |
-| [Roadmap](./du-an/roadmap.md) | Phạm vi, 8 bài toán khó, 9 thực nghiệm, kế hoạch 34 tuần |
-| [Quyết định dự án](./du-an/quyet-dinh.md) | Lý do các lựa chọn về đề tài, phạm vi, cách làm |
-| [Tiến độ](./du-an/tien-do.md) | Nhật ký theo tuần |
-| [Quy tắc nghiệp vụ](./nghiep-vu/quy-tac.md) | Các quy tắc BR-xx, mỗi quy tắc có test |
-| [Thuật ngữ](./nghiep-vu/thuat-ngu.md) | Tên gọi thống nhất giữa tài liệu và code |
-| [Quyết định kỹ thuật](./ky-thuat/quyet-dinh-ky-thuat.md) | Phiên bản, kiến trúc, pattern |
-| [Chiến lược kiểm thử](./ky-thuat/chien-luoc-kiem-thu.md) | Các tầng test, quy ước |
-| [Kế hoạch dựng base source](./ky-thuat/ke-hoach-dung-base.md) | Các bước dựng code và app tài liệu |
+| [Phạm vi](./overview/scope.md) | Bài toán, phạm vi, vai trò, 7 bài toán khó, thực nghiệm E1–E8 |
+| [Đề cương](./overview/proposal.md) | Bản đã gửi giảng viên |
+| [Thuật ngữ](./overview/glossary.md) | Tên gọi thống nhất giữa tài liệu và code |
+| [Tính năng](./features/auth.md) | Mỗi tính năng: phạm vi, quy tắc, luồng, tiêu chí chấp nhận |
+| [Quy tắc nghiệp vụ](./features/business-rules.md) | Danh mục BR-xx chưa tách theo tính năng |
+| [Màn hình](./screens/index.md) | Danh sách MH-xx và đặc tả từng màn |
+| [API](./api/index.md) | Quy ước, quyền, lỗi nghiệp vụ của từng nhóm API |
+| [Kiến trúc](./architecture/overview.md) | Thành phần, ERD, thuật toán giờ trống, kiểm thử |
+| [Quyết định](./decisions/index.md) | D-xx (sản phẩm), T-xx (kỹ thuật) |
