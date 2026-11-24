@@ -16,6 +16,8 @@ description: Các bảng của Sapio theo phân hệ, khóa, ràng buộc, RLS, 
 - **Xóa:** cấu hình (dịch vụ, tài nguyên, nhân viên) không xóa cứng khi đã có lịch tham chiếu, mà đặt `archived_at`. Lịch hẹn, tiền, sổ cái, nhật ký không bao giờ xóa.
 - **Cột chung:** `created_at timestamptz not null default now()`. Bảng sửa được có thêm `updated_at`. Không liệt kê lại hai cột này trong các bảng dưới đây.
 - **JSONB** chỉ dùng cho cấu hình có hình dạng thay đổi theo cơ sở: quy tắc hoàn cọc, chia hoa hồng. Hình dạng được kiểm bằng schema Zod trong `packages/shared` (quy tắc 8).
+- **Tên:** bảng và cột viết `snake_case` (`password_resets.expires_at`); code TypeScript dùng camelCase, Drizzle đổi qua lại bằng `casing: 'snake_case'`.
+- **Email và slug** lưu kiểu `text`, đã chuẩn hóa ở tầng ứng dụng (email: bỏ khoảng trắng hai đầu, chữ thường; slug theo BR-72). DB so khớp nguyên văn.
 
 Ký hiệu trong bảng: **PK** khóa chính, **FK** khóa ngoại, **U** duy nhất, **?** cho phép rỗng.
 
@@ -25,14 +27,14 @@ Các bảng này **không có RLS theo tenant**: chúng là dữ liệu của n�
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `users` | `email citext`, `password_hash`, `name`, `email_verified_at?`, `is_platform_admin bool`, `last_tenant_id?` FK `tenants` | U `email`. Tài khoản nhân sự, dùng chung cho mọi cơ sở (một người làm ở hai cơ sở có một tài khoản). `last_tenant_id` là cơ sở dùng gần nhất (BR-79) |
+| `users` | `email text`, `password_hash`, `name`, `email_verified_at?`, `is_platform_admin bool`, `last_tenant_id?` FK `tenants` | U `email`. Tài khoản nhân sự, dùng chung cho mọi cơ sở (một người làm ở hai cơ sở có một tài khoản). `last_tenant_id` là cơ sở dùng gần nhất (BR-79) |
 | `sessions` | `user_id` FK, `door` (`staff`, `platform`), `token_hash`, `remember bool`, `created_at`, `last_used_at`, `expires_at`, `revoked_at?`, `ip`, `user_agent` | U `token_hash` (SHA-256 của token). Phiên nhân sự và quản trị nền tảng (T-08, BR-76.9 đến 76.12) |
-| `login_throttles` | `email citext` PK, `failed_count int`, `locked_until?`, `updated_at` | Bộ đếm sai theo email, có cả email không có tài khoản (BR-76.2 đến 76.8). Tăng bằng một câu `INSERT ... ON CONFLICT DO UPDATE` để hai request cùng lúc không đếm thiếu |
+| `login_throttles` | `email text` PK, `failed_count int`, `locked_until?`, `updated_at` | Bộ đếm sai theo email, có cả email không có tài khoản (BR-76.2 đến 76.8). Tăng bằng một câu `INSERT ... ON CONFLICT DO UPDATE` để hai request cùng lúc không đếm thiếu |
 | `password_resets` | `user_id` FK, `token_hash`, `created_at`, `expires_at`, `used_at?`, `replaced_at?` | U `token_hash`. Link đặt lại mật khẩu (BR-77) |
 | `email_verifications` | `email`, `code_hash`, `purpose` (`signup`), `expires_at`, `attempts`, `consumed_at?` | Mã 6 số khi đăng ký (BR-74) |
-| `tenants` | `slug citext`, `name`, `monogram`, `locked_at?`, `lock_reason?`, `created_by` FK `users` | U `slug` (BR-72). Khóa vi phạm là `locked_at` (BR-75) |
+| `tenants` | `slug text`, `name`, `monogram`, `locked_at?`, `lock_reason?`, `created_by` FK `users` | U `slug` (BR-72). Khóa vi phạm là `locked_at` (BR-75) |
 | `tenant_slug_history` | `tenant_id`, `slug`, `changed_at` | U `slug`. Link cũ tự chuyển sang slug mới (BR-72) |
-| `trial_claims` | `email citext` PK, `tenant_id`, `claimed_at` | Một email đã xác thực chỉ dùng thử một lần (BR-74) |
+| `trial_claims` | `email text` PK, `tenant_id`, `claimed_at` | Một email đã xác thực chỉ dùng thử một lần (BR-74) |
 | `plans` | `code`, `name`, `monthly_price_vnd`, `features text[]`, `limits jsonb` | Như [T-17](../decisions/t17-plan-entitlements.md) |
 | `subscriptions` | `tenant_id` U, `plan_code`, `status`, `trial_ends_at?`, `current_period_end?`, `pending_plan_code?` | Như T-17 |
 | `platform_payments` | `tenant_id`, `provider_ref` U, `kind` (`buy`, `renew`, `upgrade`), `plan_code`, `months`, `amount_vnd`, `paid_at` | Chỉ thêm (BR-88) |
@@ -115,7 +117,7 @@ erDiagram
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `customers` | `tenant_id`, `name`, `call_name?`, `phone_e164?`, `email citext?`, `email_verified_at?`, `data_consent_at?`, `marketing_consent_at?`, `requires_deposit bool` | U `(tenant_id, phone_e164)` và U `(tenant_id, email)`, cả hai bỏ qua giá trị rỗng. Cùng số ở hai cơ sở là hai dòng (BR-60). Số điện thoại chuẩn hóa trước khi lưu (BR-61). Đồng ý dữ liệu và quảng cáo tách riêng (BR-64). `requires_deposit` tính lại mỗi lần đánh dấu không đến (BR-10) |
+| `customers` | `tenant_id`, `name`, `call_name?`, `phone_e164?`, `email text?`, `email_verified_at?`, `data_consent_at?`, `marketing_consent_at?`, `requires_deposit bool` | U `(tenant_id, phone_e164)` và U `(tenant_id, email)`, cả hai bỏ qua giá trị rỗng. Cùng số ở hai cơ sở là hai dòng (BR-60). Số điện thoại chuẩn hóa trước khi lưu (BR-61). Đồng ý dữ liệu và quảng cáo tách riêng (BR-64). `requires_deposit` tính lại mỗi lần đánh dấu không đến (BR-10) |
 | `customer_notes` | `tenant_id`, `customer_id` FK, `body`, `author_id` | Chỉ trả về ở API nội bộ, không có đường nào ra trang khách (BR-62) |
 | `customer_sessions` | `tenant_id`, `customer_id` FK, `token_hash`, `expires_at`, `revoked_at?` | Phiên khách gắn với một cơ sở (T-08, BR-17) |
 | `otp_requests` | `tenant_id`, `email`, `code_hash`, `expires_at`, `attempts`, `consumed_at?`, `appointment_id?` | BR-16. Sai quá N lần thì phải gửi mã mới |

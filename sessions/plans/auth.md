@@ -26,7 +26,8 @@ Kế hoạch này chỉ chia việc. Trang nào ở trên nói khác kế hoạc
 ### A1a. Bảng và migration
 
 - Thêm các bảng `users`, `sessions`, `login_throttles`, `tenants` (chỉ `id`, `slug`, `name`, `locked_at?`, `lock_reason?`, `created_at`), `memberships` (chưa có `branch_id`, `staff_resource_id`), theo ERD mục 2. Ghép thêm `password_resets` nếu dễ, vì A3 sẽ dùng.
-- Dùng extension `citext`. ID là UUIDv7.
+- Email và slug kiểu `text`, không dùng `citext`; code chuẩn hóa trước khi lưu và so (`normalizeEmail`). ID là UUIDv7.
+- Bật `casing: 'snake_case'` cho Drizzle (cả `drizzle({ client, casing })` và `drizzle.config.ts`): tên trong TS là camelCase, cột trong DB là snake_case.
 - `memberships` bật RLS theo T-07, có hàm `memberships_of(user_id)` kiểu `SECURITY DEFINER`, chỉ trả `slug`, `name`, `role`, `locked_at`.
 - Viết migration mới, không sửa `20261103150501_init`.
 
