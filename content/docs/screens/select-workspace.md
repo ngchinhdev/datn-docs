@@ -31,6 +31,7 @@ Bố cục `AuthPage` như [Đăng nhập](./login.md): khối giới thiệu b�
 | 10 | Lỗi | Chữ báo lỗi, `role="alert"` | Ẩn | Dưới danh sách |
 | 11 | Đăng ký cơ sở của riêng bạn | Link | | Tới `/signup` |
 | 12 | Đăng xuất | Nút chữ, cạnh mục 11 | | |
+| 13 | Ngôn ngữ, giao diện | Hai nút ở thanh trên | | Như mục 15 và 16 của [Đăng nhập](./login.md) |
 
 ## Xử lý
 
