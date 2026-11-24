@@ -1,5 +1,5 @@
 /*
- * Free-slot finder after content/docs/ky-thuat/thuat-toan-gio-trong.md, sections 2 to 3.
+ * Free-slot finder after content/docs/architecture/availability-algorithm.md, sections 2 to 3.
  * `findSlots` is pure and works in whole minutes since the Unix epoch (UTC); `freeSlots` builds its
  * input from a tenant fixture. The real one lives in datn-saas/packages/scheduling-core.
  * Imports only types and pure modules, so Node can run it (scripts/check-availability.ts).

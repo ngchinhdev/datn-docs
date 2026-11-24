@@ -7,11 +7,14 @@ Code nằm ở repo riêng: [datn-saas](https://github.com/ngchinhdev/datn-saas)
 ## Nội dung
 
 ```
-content/docs/
-├── index.md
-├── du-an/        # đề cương, roadmap, quyết định, tiến độ
-├── nghiep-vu/    # quy tắc nghiệp vụ (BR), thuật ngữ, phân tích gốc
-└── ky-thuat/     # quyết định kỹ thuật (T), chiến lược kiểm thử, kế hoạch dựng base
+content/docs/     # TÀI LIỆU CHÍNH THỨC, phục vụ ở /docs, giữ lại khi xong dự án
+├── overview/     # phạm vi, đề cương, thuật ngữ
+├── features/     # mỗi tính năng: quy tắc, luồng, tiêu chí chấp nhận; danh mục BR-xx
+├── screens/      # danh sách MH-xx, đặc tả từng màn
+├── api/          # quy ước API, quyền và lỗi nghiệp vụ từng nhóm
+├── architecture/ # tổng quan, ERD, thuật toán giờ trống, kiểm thử
+└── decisions/    # D-xx, T-xx, mỗi quyết định một file
+sessions/         # VÙNG LÀM VIỆC: tiến độ, kế hoạch, prompt, review; xóa khi xong dự án
 assets/           # file gốc (đề cương .docx)
 app/              # Next.js: /docs (Fumadocs) và /mock
 mock/             # dữ liệu giả (fixtures) và danh sách màn hình mock
@@ -48,7 +51,8 @@ App xem tài liệu (Next.js + Fumadocs) phục vụ `/docs`, mock giao diện �
 Claude Code không nhớ nội dung chat cũ. Thứ được giữ lại là **các file trong repo này**:
 
 - `CLAUDE.md`: bối cảnh và quy tắc, nạp tự động mỗi phiên.
-- `content/docs/du-an/tien-do.md`: cuối mỗi phiên, Claude ghi lại đã làm gì, vướng gì, việc tiếp theo.
-- `content/docs/du-an/quyet-dinh.md` và `ky-thuat/quyet-dinh-ky-thuat.md`: lý do của mọi lựa chọn.
+- `sessions/progress/<năm-tháng>.md`: cuối mỗi phiên, Claude ghi lại đã làm gì, vướng gì, việc tiếp theo.
+- `content/docs/decisions/`: lý do của mọi lựa chọn.
+- `sessions/plans/`: kế hoạch từng bước và prompt cho Claude Code.
 
 Câu mở đầu gợi ý cho mỗi phiên: *"Đọc tiến độ mới nhất rồi làm tiếp."*

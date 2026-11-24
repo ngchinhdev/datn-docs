@@ -270,7 +270,7 @@ const built: Record<string, ScreenLink[]> = {
 
 type Row = Omit<MockScreen, 'level' | 'zone'> & { level: string; zone: string };
 
-/** Mirror of the table in content/docs/thiet-ke/man-hinh.md; status is set by `built`. */
+/** Mirror of the table in content/docs/screens/index.md; status is set by `built`. */
 const rows: Row[] = [
   {
     code: 'MH-01',

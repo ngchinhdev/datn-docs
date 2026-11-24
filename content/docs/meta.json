@@ -1,4 +1,18 @@
 {
-  "title": "Tài liệu đồ án",
-  "pages": ["index", "---Dự án---", "...du-an", "---Nghiệp vụ---", "...nghiep-vu", "---Thiết kế---", "...thiet-ke", "---Kỹ thuật---", "...ky-thuat"]
+  "title": "Tài liệu Sapio",
+  "pages": [
+    "index",
+    "---Tổng quan---",
+    "...overview",
+    "---Tính năng---",
+    "...features",
+    "---Màn hình---",
+    "...screens",
+    "---API---",
+    "...api",
+    "---Kiến trúc---",
+    "...architecture",
+    "---Quyết định---",
+    "...decisions"
+  ]
 }

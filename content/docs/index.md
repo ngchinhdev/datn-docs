@@ -15,12 +15,12 @@ Salon, nail, spa (và các cơ sở dịch vụ theo lịch hẹn nói chung) ph
 
 | Mục | Nội dung |
 |---|---|
-| [Đề cương](./du-an/de-cuong.md) | Bản đã gửi giảng viên |
-| [Roadmap](./du-an/roadmap.md) | Phạm vi, 8 bài toán khó, 9 thực nghiệm, kế hoạch 34 tuần |
-| [Quyết định dự án](./du-an/quyet-dinh.md) | Lý do các lựa chọn về đề tài, phạm vi, cách làm |
-| [Tiến độ](./du-an/tien-do.md) | Nhật ký theo tuần |
-| [Quy tắc nghiệp vụ](./nghiep-vu/quy-tac.md) | Các quy tắc BR-xx, mỗi quy tắc có test |
-| [Thuật ngữ](./nghiep-vu/thuat-ngu.md) | Tên gọi thống nhất giữa tài liệu và code |
-| [Quyết định kỹ thuật](./ky-thuat/quyet-dinh-ky-thuat.md) | Phiên bản, kiến trúc, pattern |
-| [Chiến lược kiểm thử](./ky-thuat/chien-luoc-kiem-thu.md) | Các tầng test, quy ước |
-| [Kế hoạch dựng base source](./ky-thuat/ke-hoach-dung-base.md) | Các bước dựng code và app tài liệu |
+| [Phạm vi](./overview/scope.md) | Bài toán, phạm vi, vai trò, 8 bài toán khó, thực nghiệm E1–E9 |
+| [Đề cương](./overview/proposal.md) | Bản đã gửi giảng viên |
+| [Thuật ngữ](./overview/glossary.md) | Tên gọi thống nhất giữa tài liệu và code |
+| [Tính năng](./features/auth.md) | Mỗi tính năng: phạm vi, quy tắc, luồng, tiêu chí chấp nhận |
+| [Quy tắc nghiệp vụ](./features/business-rules.md) | Danh mục BR-xx chưa tách theo tính năng |
+| [Màn hình](./screens/index.md) | Danh sách MH-xx và đặc tả từng màn |
+| [API](./api/index.md) | Quy ước, quyền, lỗi nghiệp vụ của từng nhóm API |
+| [Kiến trúc](./architecture/overview.md) | Thành phần, ERD, thuật toán giờ trống, kiểm thử |
+| [Quyết định](./decisions/index.md) | D-xx (sản phẩm), T-xx (kỹ thuật) |

@@ -1,7 +1,7 @@
 /*
  * Checks the commission rules and periods (mock/commission.ts, BR-40 to BR-42) and the numbers of
  * the reports (mock/reports.ts, BR-45 to BR-47) against the worked examples of
- * content/docs/nghiep-vu/quy-tac.md and the sample data.
+ * content/docs/features/business-rules.md and the sample data.
  * Run: pnpm check:reports   (Node 24 runs TypeScript directly)
  */
 import {

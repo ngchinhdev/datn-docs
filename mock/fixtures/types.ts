@@ -1,4 +1,4 @@
-// Mock data shapes. Names follow the glossary (content/docs/nghiep-vu/thuat-ngu.md).
+// Mock data shapes. Names follow the glossary (content/docs/overview/glossary.md).
 
 export type Weekday = 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday
 

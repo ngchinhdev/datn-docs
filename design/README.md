@@ -1,6 +1,6 @@
 # Thiết kế Sapio (bản sao để code)
 
-Thư mục này là **bản sao** của hai trang thiết kế trên Claude Design, để Claude Code đọc được mà không cần mở claude.ai. Khi thiết kế đổi, cập nhật lại bản sao này (nhờ phiên claude.ai làm) và ghi vào `content/docs/du-an/tien-do.md`.
+Thư mục này là **bản sao** của hai trang thiết kế trên Claude Design, để Claude Code đọc được mà không cần mở claude.ai. Khi thiết kế đổi, cập nhật lại bản sao này (nhờ phiên claude.ai làm) và ghi vào `sessions/progress/2026-11.md`.
 
 | Bản gốc trên claude.ai | Bản sao ở đây |
 |---|---|
@@ -133,4 +133,4 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `KhungSuperAdmin.dc.html` | MH-58 Khách thuê trong khung mới, tiêu đề cột in hoa, ô số dòng trước phân trang | **Đã chọn** | `/mock/admin/tenants` (Bước 21) |
 | `KhungSuperAdminThuGon.dc.html` | Khung mới, thanh bên thu gọn 68px | **Đã chọn** | như trên, thu gọn |
 
-Lý do các lựa chọn: `content/docs/du-an/quyet-dinh.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70, BR-73, BR-75, BR-76 đến BR-79, BR-83, BR-84, BR-89 đến BR-92 trong `content/docs/nghiep-vu/quy-tac.md`.
+Lý do các lựa chọn: `content/docs/decisions/index.md` mục D-11, D-12. Quy tắc nghiệp vụ liên quan: BR-03, BR-05, BR-07, BR-08, BR-02, BR-13 đến BR-38, BR-40 đến BR-47, BR-63 đến BR-67, BR-50 đến BR-59, BR-70, BR-73, BR-75, BR-76 đến BR-79, BR-83, BR-84, BR-89 đến BR-92 trong `content/docs/features/business-rules.md`.
