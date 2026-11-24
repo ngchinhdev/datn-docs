@@ -48,11 +48,11 @@ Trả về 200:
 ```json
 {
   "user": { "id": "0193…", "email": "an@tiemcuaban.vn", "name": "Nguyễn Văn An" },
-  "destination": { "kind": "workspace", "slug": "toc-may", "path": "/app/toc-may/calendar" }
+  "redirectTo": "/app/toc-may/calendar"
 }
 ```
 
-`destination.kind` là `workspace` (có `slug`, `path`) hoặc `select-workspace` (không có trường thêm).
+`redirectTo` là đường dẫn giao diện chuyển tới: trang đầu của cơ sở (`/app/{slug}/calendar`, hoặc `/app/{slug}/my/schedule` với kỹ thuật viên), hoặc `/select-workspace` khi cần chọn cơ sở.
 
 | Status | `code` | Trường thêm | Câu hiển thị (MH-03) |
 |---|---|---|---|
@@ -90,7 +90,7 @@ Khi chưa có bảng gói thì mọi cơ sở là `active`.
 
 ## 5. Vào một cơ sở
 
-`POST /v1/auth/workspaces/{slug}/enter`. Ghi `users.last_tenant_id` rồi trả về `{ path }`. Tài khoản không có membership ở cơ sở này thì trả **404** `NOT_FOUND`, không phải 403, để không lộ slug có tồn tại.
+`POST /v1/auth/workspaces/{slug}/enter`. Ghi `users.last_tenant_id` rồi trả về `{ redirectTo }`, là trang đầu của cơ sở đó theo vai trò. Tài khoản không có membership ở cơ sở này thì trả **404** `NOT_FOUND`, không phải 403, để không lộ slug có tồn tại.
 
 ## 6. Quên mật khẩu
 
@@ -119,7 +119,7 @@ Khi gửi: đánh dấu `replaced_at` cho các link cũ còn hiệu lực, tạo
    - thu hồi mọi phiên của tài khoản;
    - xóa `login_throttles` của email;
    - tạo phiên mới với `remember = false` (BR-77.5).
-4. Trả về giống đăng nhập: `{ user, destination }`. `destination` ưu tiên cơ sở dùng gần nhất.
+4. Trả về giống đăng nhập: `{ user, redirectTo }`. `redirectTo` ưu tiên cơ sở dùng gần nhất.
 
 ## 9 đến 11. Quản trị nền tảng
 
@@ -129,4 +129,49 @@ Giống đăng nhập, phiên và đăng xuất của nhân sự, chỉ khác nh
 - Không có trường `remember`. Phiên hết sau 2 giờ không thao tác: mỗi request đều cập nhật hạn, cũng chỉ ghi DB khi đã cũ hơn 5 phút (BR-76.11).
 - Chỉ tài khoản `is_platform_admin` vào được. Tài khoản khác đăng nhập ở đây bị tính là sai (BR-76.1).
 - Dùng chung bộ đếm sai với cửa nhân sự (BR-76.2).
-- Trả về `{ user }`, không có `destination`.
+- Trả về `{ user }`, không có `redirectTo`: đăng nhập xong luôn về `/` của `admin.sapio.vn`.
+
+## Thử trong Scalar
+
+Scalar (`http://localhost:4000/docs`) có sẵn các ca thử có tên cho mỗi endpoint: chọn trong danh sách ví dụ của request, hoặc của phản hồi từng status. Mọi tài khoản mẫu có mật khẩu `123456`. Dữ liệu mẫu tạo bằng `pnpm --filter @datn/api db:seed`; thêm `-- --reset` để xóa dữ liệu mẫu (kể cả phiên và bộ đếm sai) rồi tạo lại. Danh sách ca nằm ở `apps/api/src/openapi/examples/auth.ts`, và một test chạy từng ca trên dữ liệu mẫu để kiểm kết quả ghi dưới đây.
+
+Ca nào làm đổi dữ liệu thì chạy lại cho kết quả khác: "Sai lần thứ 3" tăng bộ đếm của `sapkhoa@tocmay.vn`, nên lần chạy sau đã là lần thứ 4. `--reset` đưa bộ đếm về như ban đầu.
+
+### Đăng nhập nhân sự (#1, `POST /v1/auth/login`)
+
+| Ca | Email | Kết quả |
+|---|---|---|
+| Chủ một cơ sở | `chinh@tocmay.vn` | 200, `redirectTo` là `/app/toc-may/calendar` |
+| Kỹ thuật viên | `mai@tocmay.vn` | 200, `redirectTo` là `/app/toc-may/my/schedule` |
+| Nhiều cơ sở | `linh.pham@email.vn` | 200, `redirectTo` là `/select-workspace` |
+| Chưa thuộc cơ sở nào | `moi@email.vn` | 200, `redirectTo` là `/select-workspace` |
+| Cơ sở bị khóa | `chu@toccu.vn` (chủ `toc-cu`, cơ sở đã bị khóa) | 200, `redirectTo` là `/select-workspace` |
+| Sai mật khẩu | `chinh@tocmay.vn` với `sai-mat-khau` | 401 `INVALID_CREDENTIALS` |
+| Sai lần thứ 3 | `sapkhoa@tocmay.vn` (đã sai 2 lần) với `sai-mat-khau` | 401 `INVALID_CREDENTIALS`, `remainingAttempts` là 2 |
+| Đang bị khóa | `dakhoa@tocmay.vn` (khóa tới một năm sau, để còn khóa khi thử) | 423 `LOGIN_LOCKED`, có `lockedUntil` |
+| Email không tồn tại | `khongco@email.vn` với `sai-mat-khau` | 401 `INVALID_CREDENTIALS`, thân giống ca "Sai mật khẩu" (trừ `requestId`) |
+| Quản trị vào nhầm cửa | `quantri@sapio.vn` | 401 `INVALID_CREDENTIALS` |
+| Email sai dạng | `abc` | 400 `VALIDATION_FAILED`, `errors[0]` là `email` `INVALID_EMAIL` |
+| Mật khẩu trống | `chinh@tocmay.vn` với mật khẩu `""` | 400 `VALIDATION_FAILED`, `errors[0]` là `password` `REQUIRED` |
+
+### Đăng nhập quản trị nền tảng (#9, `POST /v1/platform/auth/login`)
+
+| Ca | Email | Kết quả |
+|---|---|---|
+| Quản trị đăng nhập đúng | `quantri@sapio.vn` | 200, `{ user }` |
+| Sai mật khẩu | `quantri@sapio.vn` với `sai-mat-khau` | 401 `INVALID_CREDENTIALS` |
+| Nhân sự vào nhầm cửa | `chinh@tocmay.vn` | 401 `INVALID_CREDENTIALS` |
+
+### Vào một cơ sở (#5, `POST /v1/auth/workspaces/{slug}/enter`)
+
+Cần đăng nhập trước bằng tài khoản ghi ở cột "Đăng nhập là" (Scalar giữ cookie phiên).
+
+| Ca | Đăng nhập là | `slug` | Kết quả |
+|---|---|---|---|
+| Cơ sở của mình | `chinh@tocmay.vn` | `toc-may` | 200, `redirectTo` là `/app/toc-may/calendar` |
+| Cơ sở của người khác | `chinh@tocmay.vn` | `nail-ha-vy` | 404 `NOT_FOUND` |
+| Cơ sở bị khóa | `chu@toccu.vn` | `toc-cu` | 200, `redirectTo` là `/app/toc-cu/calendar` (khung ứng dụng hiện trang báo khóa) |
+
+### Phiên (#3, #11)
+
+Chỉ có ví dụ phản hồi: 200 khi đang đăng nhập, 401 `UNAUTHENTICATED` khi phiên hết hạn hoặc đã đăng xuất.

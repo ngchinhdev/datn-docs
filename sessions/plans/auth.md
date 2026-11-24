@@ -39,7 +39,7 @@ Kế hoạch này chỉ chia việc. Trang nào ở trên nói khác kế hoạc
   - không bao giờ khóa trước lần sai thứ 5;
   - trong lúc khóa thì trạng thái không đổi.
 - `sessionExpiry(door, remember, createdAt, lastUsedAt)` theo BR-76.9 đến 76.11.
-- `destinationAfterLogin(workspaces, lastTenantId, { afterReset })` theo bảng "Vào cơ sở" của trang tính năng.
+- `redirectAfterLogin(workspaces, lastTenantId, { afterReset })` theo bảng "Vào cơ sở" của trang tính năng.
 - Thời gian luôn lấy từ `Clock`, không dùng `Date.now()`.
 
 ### A1c. Hạ tầng
@@ -98,7 +98,7 @@ Kế hoạch này chỉ chia việc. Trang nào ở trên nói khác kế hoạc
 
 - [ ] `pnpm lint && pnpm typecheck && pnpm test && pnpm test:integration` đều qua.
 - [ ] `http://localhost:4000/docs` mở Scalar, thấy đủ 8 endpoint của A1.
-- [ ] Dùng Scalar đăng nhập `chinh@tocmay.vn` / `123456`, nhận `destination.path = /app/toc-may/calendar`.
+- [ ] Dùng Scalar đăng nhập `chinh@tocmay.vn` / `123456`, nhận `redirectTo = /app/toc-may/calendar`.
 - [ ] Sai 5 lần với `mai@tocmay.vn`: lần 5 trả 423, Mailpit (`:8025`) có thư "Đăng nhập Sapio bị tạm khóa".
 - [ ] `quantri@sapio.vn` đăng nhập ở `/v1/auth/login` thì trả 401. Ở `/v1/platform/auth/login` thì trả 200.
 - [ ] `apps/api/openapi.json` đã được tạo.
