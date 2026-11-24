@@ -4,9 +4,9 @@ File này là **trí nhớ dự án** cho Claude Code. Đọc nó đầu mỗi p
 
 ## Bối cảnh
 
-- **Đề tài:** Xây dựng nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho các cơ sở dịch vụ theo lịch hẹn.
+- **Đề tài:** Xây dựng nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho cơ sở làm đẹp.
 - **Sinh viên:** Nguyễn Ngọc Chính (26410176), UIT, làm một mình. **GVHD:** ThS. Nguyễn Thị Thùy Trâm.
-- **Ngành chính:** salon tóc, nail, spa. **Ngành thứ hai** (chứng minh tính tổng quát, chỉ bằng cấu hình): spa thú cưng.
+- **Phạm vi:** chỉ cơ sở làm đẹp (salon tóc, nail, spa), D-16. Không có spa thú cưng, gói cấu hình ngành hay đối tượng được phục vụ; mỗi mục lịch hẹn là một dịch vụ cho một người.
 - **Mốc:** bắt đầu 02/11/2026; đóng băng tính năng 16/05/2027; bảo vệ cuối 06/2027.
 - **Giao tiếp:** người dùng viết tiếng Việt; trả lời và viết tài liệu bằng tiếng Việt. Code, tên biến, commit message bằng tiếng Anh.
 
@@ -30,7 +30,7 @@ Repo có hai vùng:
 
 | Cần gì | Đọc file |
 |---|---|
-| Phạm vi, vai trò, bài toán khó BT1–BT8, thực nghiệm E1–E9 | `content/docs/overview/scope.md` |
+| Phạm vi, vai trò, bài toán khó BT1–BT7, thực nghiệm E1–E8 | `content/docs/overview/scope.md` |
 | Đề cương đã gửi cô (không tự ý mở rộng phạm vi so với đây) | `content/docs/overview/proposal.md` |
 | Tên gọi khái niệm trong code | `content/docs/overview/glossary.md` |
 | Một tính năng: quy tắc BR-xx.y, luồng, tiêu chí chấp nhận AC-xx | `content/docs/features/<tính-năng>.md` (đã có: `auth.md`) |
@@ -66,7 +66,7 @@ Link giữa các trang trong `content/docs` ghi đường dẫn tới file, có 
 2. **Thời gian:** lưu `timestamptz` UTC; hiển thị theo múi giờ chi nhánh (`Asia/Ho_Chi_Minh`). Nghiệp vụ không gọi `Date.now()`, dùng `Clock`.
 3. **ID:** UUIDv7.
 4. **Đa khách thuê:** mọi bảng nghiệp vụ có `tenant_id` + RLS (ENABLE và FORCE). Truy vấn nghiệp vụ đi qua `withTenant()`. Không có đường tắt bỏ qua RLS trong code ứng dụng.
-5. **Lõi không biết ngành:** `scheduling-core` và các module lõi không chứa từ khóa ngành (tóc, nail, chó, mèo...). Khác biệt ngành nằm trong `industryTemplate` (dữ liệu). Có script kiểm tra trong lint.
+5. (Đã bỏ theo D-16: không còn quy tắc "lõi không biết ngành".)
 6. **Sổ cái:** `ledgerEntry` chỉ thêm, không sửa, không xóa; điều chỉnh bằng bút toán đảo.
 7. **Lớp:** controller → application service → domain (hàm thuần) + repository (Drizzle). Domain không import Nest hay Drizzle.
 8. **Schema:** định nghĩa một lần trong `packages/shared`, FE và BE cùng dùng.
@@ -96,7 +96,7 @@ Lệnh của `datn-saas` xem `datn-saas/CLAUDE.md`.
 ## Mock giao diện
 
 - Nằm ở `app/mock/*` trong repo này, dùng dữ liệu giả trong `mock/fixtures/` (TypeScript), không gọi API thật.
-- Có bộ chọn tenant (Salon Tóc Mây, Spa thú cưng Pawpaw) và bộ chọn vai trò.
+- Có bộ chọn tenant (Salon Tóc Mây; Pawpaw sẽ được thay bằng Spa Lá Sen, xem `sessions/plans/d16-cleanup.md`) và bộ chọn vai trò.
 - Dùng cùng Tailwind 4 + shadcn/ui với `apps/web` để chuyển component sang dễ.
 - Giao diện theo hệ thống thiết kế **Sapio** (`design/sapio/`): chỉ dùng biến trong `tokens.css` và class trong `components.css`, không tự đặt màu; không nền đen ở đâu. Màn hình tham chiếu ở `design/screens/`.
 - Chia việc: phiên claude.ai lo phân tích, thiết kế, review; Claude Code trên máy lo code theo kế hoạch, làm trên nhánh riêng và mở pull request để review, không tự merge.

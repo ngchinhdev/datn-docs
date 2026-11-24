@@ -10,4 +10,4 @@ Chốt ngày 15/11/2026 theo góp ý đề cương của cô.
   - Bỏ mục tiêu "tổng quát theo ngành bằng cấu hình", bỏ spa thú cưng, bỏ "đối tượng được phục vụ" (thú cưng của khách) và bước chọn ngành khi đăng ký.
   - Giữ nguyên trọng tâm: đặt lịch đa tài nguyên, chống trùng lịch, SaaS nhiều cơ sở cô lập dữ liệu, thanh toán, ví, gói liệu trình, hoa hồng, chatbot.
 - **Không chọn phòng khám:** dính hồ sơ bệnh án, dữ liệu y tế; ít loại tài nguyên hơn spa nên yếu phần "đa tài nguyên".
-- **Việc kéo theo (chưa làm):** sửa roadmap, `CLAUDE.md`, các BR/T-xx nhắc đến `industryTemplate` và spa thú cưng; mock bỏ tenant Pawpaw, có thể thay bằng một tiệm spa mẫu. Ghi chú "lõi không biết ngành" (quy tắc 5) không còn bắt buộc.
+- **Việc kéo theo:** tài liệu đã sửa ngày 24/11/2026; code mock làm theo kế hoạch D-16. Danh sách ban đầu: sửa roadmap, `CLAUDE.md`, các BR/T-xx nhắc đến `industryTemplate` và spa thú cưng; mock bỏ tenant Pawpaw, có thể thay bằng một tiệm spa mẫu. Ghi chú "lõi không biết ngành" (quy tắc 5) không còn bắt buộc.

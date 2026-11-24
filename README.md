@@ -1,6 +1,6 @@
 # datn-docs
 
-Tài liệu và mock giao diện cho đồ án tốt nghiệp **"Xây dựng nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho các cơ sở dịch vụ theo lịch hẹn"**. Sinh viên: Nguyễn Ngọc Chính, UIT. GVHD: ThS. Nguyễn Thị Thùy Trâm.
+Tài liệu và mock giao diện cho đồ án tốt nghiệp **"Xây dựng nền tảng SaaS đặt lịch đa tài nguyên và quản lý vận hành cho cơ sở làm đẹp"**. Sinh viên: Nguyễn Ngọc Chính, UIT. GVHD: ThS. Nguyễn Thị Thùy Trâm.
 
 Code nằm ở repo riêng: [datn-saas](https://github.com/ngchinhdev/datn-saas).
 

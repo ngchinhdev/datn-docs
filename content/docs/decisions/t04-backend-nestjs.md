@@ -11,11 +11,11 @@ title: T-04. Backend: NestJS 12, ESM, Express
 
   | Module | Trách nhiệm |
   |---|---|
-  | `tenancy` | Khách thuê, chi nhánh, gói cấu hình ngành, ngữ cảnh tenant cho mỗi request |
+  | `tenancy` | Khách thuê, chi nhánh, ngữ cảnh tenant cho mỗi request |
   | `identity` | Tài khoản, phiên đăng nhập, membership, vai trò, OTP khách |
   | `catalog` | Dịch vụ, biến thể, đoạn chiếm dụng, giá, loại tài nguyên, tài nguyên |
   | `staffing` | Nhân viên, kỹ năng, ca làm, nghỉ phép |
-  | `customers` | Khách hàng, đối tượng được phục vụ, ghi chú |
+  | `customers` | Khách hàng, ghi chú |
   | `scheduling` | Gọi `scheduling-core` để tính giờ trống; giữ chỗ; lịch hẹn; đổi, hủy, không đến |
   | `billing` | Hóa đơn, thanh toán, `PaymentProvider`, webhook, hoàn tiền |
   | `ledger` | Sổ cái: ví, gói liệu trình, doanh thu thực hiện |

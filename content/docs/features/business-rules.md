@@ -7,7 +7,7 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 
 - Mỗi quy tắc có mã cố định. Không đánh lại mã khi xóa; quy tắc bỏ đi ghi "(đã bỏ, lý do...)".
 - Test của một quy tắc đặt tên bắt đầu bằng mã, ví dụ `it('BR-05: đoạn chờ giải phóng nhân viên nhưng vẫn giữ ghế', ...)`.
-- Các chữ cái X, Y, N, M, K trong quy tắc là tham số **cấu hình theo cơ sở**, có giá trị mặc định trong gói cấu hình ngành.
+- Các chữ cái X, Y, N, M, K trong quy tắc là tham số **cấu hình theo cơ sở**, có giá trị mặc định khi tạo cơ sở.
 - Quy tắc lấy từ Phân tích nghiệp vụ gốc, đã lọc theo phạm vi đồ án ([D-04](../decisions/d04-scope-for-one-person.md)).
 
 ## Đặt lịch
@@ -18,7 +18,7 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 | BR-02 | Giờ trống chỉ nằm trong giờ mở cửa của chi nhánh; ngày đặc biệt ưu tiên hơn giờ thường lệ. Một ngày có nhiều khung, không chồng nhau. Đổi giờ mở cửa hay thêm ngày đóng cửa mà có lịch nằm ngoài giờ mới thì lưu xong các lịch đó vào "Cần xếp lại" (BR-35), giữ giá. Chi nhánh có giá riêng cho từng biến thể; để trống là giá chung, giá theo cấp (BR-56) tính trên giá của chi nhánh |
 | BR-03 | Nhân viên chỉ được xếp cho dịch vụ thuộc kỹ năng của mình |
 | BR-04 | Thời gian chuẩn bị và dọn dẹp chiếm dụng tài nguyên như thời gian làm |
-| BR-05 | Đoạn "chờ" giải phóng nhân viên nhưng vẫn chiếm phòng/ghế/lồng sấy theo cấu hình dịch vụ |
+| BR-05 | Đoạn "chờ" giải phóng nhân viên nhưng vẫn chiếm phòng/ghế/giường theo cấu hình dịch vụ |
 | BR-06 | Không cho đặt sớm hơn X giờ và xa hơn Y ngày so với hiện tại (cấu hình) |
 | BR-07 | Giữ chỗ tồn tại tối đa 10 phút; hết hạn thì tự trả lại |
 | BR-08 | Khách tự đổi/hủy phải trước tối thiểu X giờ; tự đổi tối đa N lần mỗi lịch. Khách chỉ đổi giờ hoặc hủy **cả lịch**; bỏ một dịch vụ trong chuỗi hay một người trong nhóm thì qua tiệm. Quá hạn tự đổi thì trang hiện số điện thoại cơ sở. "Chọn lại giờ" khi trả lời đề nghị đổi người (BR-32, BR-33) không tính vào N lần |
@@ -26,13 +26,13 @@ description: Bảng quy tắc nghiệp vụ BR-xx của phạm vi đồ án. Tà
 | BR-10 | Không đến K lần trong 6 tháng thì lần sau bắt buộc đặt cọc |
 | BR-11 | Duyệt nghỉ phép phải xử lý xong mọi lịch bị ảnh hưởng; khách chọn đích danh phải được hỏi ý trước khi đổi người. Cách xử lý từng lịch: BR-34. Đơn đang chờ duyệt đã chặn đặt lịch mới với người đó trong khoảng xin nghỉ (trang khách và lễ tân); đơn bị từ chối thì mở lại |
 | BR-12 | Lịch đã đặt giữ giá tại thời điểm đặt dù sau đó giá dịch vụ thay đổi (thời lượng cũng vậy, xem BR-59) |
-| BR-13 | Biến thể dịch vụ (giá, thời lượng) được chọn theo thuộc tính của đối tượng được phục vụ |
+| BR-13 | Dịch vụ có một hoặc nhiều biến thể (giá, thời lượng khác nhau, ví dụ tóc ngắn/dài, liệu trình 60/90 phút). Khách tự chọn biến thể khi đặt; dịch vụ chỉ có một biến thể thì không hỏi |
 | BR-14 | Khi khách chọn nhân viên: "Bất kỳ ai" đứng đầu và được chọn sẵn (hệ thống xếp người theo BR-57); chỉ liệt kê nhân viên nhận đặt online và có kỹ năng làm dịch vụ đã chọn (BR-03); người kín lịch trong ngày đang xem vẫn hiện nhưng làm mờ, ghi "Hết giờ ngày này"; chọn một người thì giờ trống lọc theo lịch người đó |
 | BR-15 | Trang khách chỉ hiện hồ sơ công khai của nhân viên: tên hiển thị, ảnh (không có thì chữ cái đầu), chức danh, thế mạnh, giờ trống sớm nhất. Họ tên đầy đủ, mã nhân viên, số điện thoại chỉ hiện trong khu quản trị |
 | BR-16 | Khách xác nhận lịch bằng mã 6 số gửi qua **email**. Số điện thoại vẫn bắt buộc, làm thông tin liên hệ cho cơ sở, không dùng để xác thực. Mã hết hạn sau X phút; nhập sai N lần thì phải gửi mã mới (cấu hình). Đăng nhập trang khách cũng bằng mã email; phiên riêng cho từng cơ sở; email chưa có lịch vẫn đăng nhập được |
-| BR-17 | Đối tượng được phục vụ đã lưu (ví dụ thú cưng) chỉ hiện khi khách đã có phiên, tức đã xác thực OTP tại cơ sở đó trước đây. Chưa có phiên thì khách khai đối tượng mới ngay trong luồng đặt lịch. Không xóa được đối tượng còn lịch sắp tới; sửa thuộc tính không đổi giá và thời lượng của lịch đã đặt (BR-12) |
-| BR-18 | **Chuỗi dịch vụ:** một lịch online có tối đa 4 dịch vụ cho cùng một đối tượng, làm lần lượt theo thứ tự khách xếp. Dịch vụ sau bắt đầu ngay khi phần khách thấy của dịch vụ trước kết thúc (BR-51); nếu cùng một người làm và dịch vụ sau có đoạn Chuẩn bị thì khách chờ thêm đúng đoạn đó. Khách chọn một người cho cả chuỗi hoặc chọn riêng từng dịch vụ; "Bất kỳ ai" xếp từng dịch vụ theo BR-57, cùng cấp thì ưu tiên người làm dịch vụ trước. Giá, cọc là tổng của từng mục (BR-56) |
-| BR-19 | **Đặt nhóm:** một lịch online cho tối đa 4 đối tượng (người đi cùng hoặc nhiều thú cưng), mỗi đối tượng một dịch vụ, cùng giờ bắt đầu; mỗi loại tài nguyên phải là tài nguyên khác nhau (khác người làm, khác ghế). Không có giờ chung thì gợi ý giờ lệch nhau, các mục bắt đầu cách nhau không quá 60 phút, xếp theo giờ xong sớm nhất. Người đi cùng chỉ cần tên; một người đặt, một mã OTP, một email xác nhận cho cả nhóm |
+| BR-17 | Phiên khách gắn với một cơ sở: mã email xác thực ở cơ sở này không dùng được ở cơ sở khác. Thông tin đã lưu (tên, lịch sử, lịch sắp tới) chỉ hiện khi khách đã có phiên |
+| BR-18 | **Chuỗi dịch vụ:** một lịch online có tối đa 4 dịch vụ cho cùng một người, làm lần lượt theo thứ tự khách xếp. Dịch vụ sau bắt đầu ngay khi phần khách thấy của dịch vụ trước kết thúc (BR-51); nếu cùng một người làm và dịch vụ sau có đoạn Chuẩn bị thì khách chờ thêm đúng đoạn đó. Khách chọn một người cho cả chuỗi hoặc chọn riêng từng dịch vụ; "Bất kỳ ai" xếp từng dịch vụ theo BR-57, cùng cấp thì ưu tiên người làm dịch vụ trước. Giá, cọc là tổng của từng mục (BR-56) |
+| BR-19 | **Đặt nhóm:** một lịch online cho tối đa 4 người (người đặt và người đi cùng), mỗi người một dịch vụ, cùng giờ bắt đầu; mỗi loại tài nguyên phải là tài nguyên khác nhau (khác người làm, khác ghế). Không có giờ chung thì gợi ý giờ lệch nhau, các mục bắt đầu cách nhau không quá 60 phút, xếp theo giờ xong sớm nhất. Người đi cùng chỉ cần tên; một người đặt, một mã OTP, một email xác nhận cho cả nhóm |
 
 ## Vận hành lịch: lễ tân, ca, nghỉ phép
 
@@ -59,7 +59,7 @@ Chi tiết và ví dụ tính tay ở [Thuật toán tính giờ trống](../arc
 | BR-52 | Dọn dẹp khai theo **từng loại tài nguyên** của biến thể ("dọn ghế 10 phút sau khi dùng"); bắt đầu ngay khi đoạn cuối dùng loại đó kết thúc, không chờ cả dịch vụ xong |
 | BR-53 | Một mục lịch hẹn dùng **cùng một tài nguyên** cho mỗi loại từ đầu đến cuối (cùng thợ, cùng ghế) |
 | BR-54 | Phần khách thấy nằm trong giờ mở cửa (BR-02). Tài nguyên không phải nhân viên chỉ dùng trong giờ mở cửa, nên dọn dẹp cũng phải xong trước giờ đóng. Nhân viên dùng được trong ca, nên chuẩn bị được phép trước giờ mở cửa |
-| BR-55 | Mỗi dịch vụ chọn biến thể theo một trong hai cách: **khách tự chọn**, hoặc **tự động theo thuộc tính** của đối tượng được phục vụ (BR-13). Với cách thứ hai, mọi đối tượng hợp lệ theo schema của ngành khớp đúng một biến thể; thiếu hoặc trùng điều kiện thì không lưu được |
+| BR-55 | Mỗi dịch vụ có ít nhất một biến thể; tên biến thể không trùng nhau trong một dịch vụ. Biến thể do khách tự chọn (BR-13) |
 | BR-56 | Biến thể có thể đặt **giá theo cấp nhân viên**. Khách chọn đích danh trả giá cấp của người đó; "Bất kỳ ai" trả giá cấp thấp nhất trong số người làm được dịch vụ, hệ thống xếp ai cũng giữ giá đó |
 | BR-57 | Phân công "Bất kỳ ai": nhân viên cấp thấp nhất trước, hòa thì người ít phút bận nhất trong ngày, hòa nữa theo thứ tự danh sách. Tài nguyên khác chọn theo thứ tự (Ghế 1 trước Ghế 2) |
 | BR-58 | Trang khách chỉ hiện giờ trên lưới g phút theo đồng hồ địa phương (mặc định 15, cấu hình theo chi nhánh). Lễ tân xếp được giờ lệch lưới nếu mọi ràng buộc vẫn đúng |
@@ -100,7 +100,7 @@ Số liệu tính theo ngày giờ của chi nhánh, lọc theo chi nhánh và k
 | BR-46 | **Tiền thu vào** = mọi khoản tiền về qua tiền mặt, chuyển khoản, thẻ, cổng (gồm cọc, bán gói, nạp ví), trừ tiền đã hoàn ra. Trả bằng ví hay buổi gói không phải tiền vào. **Tiền trả trước còn giữ** (cuối khoảng) = doanh thu các buổi gói chưa dùng + tiền thật trong ví; tiền tặng không tính |
 | BR-47 | **Lấp đầy** = phút nhân viên bận cho khách (đoạn Chuẩn bị và Làm của lịch không bị hủy, BR-05) ÷ phút trong ca sau nghỉ phép đã duyệt; đoạn Chờ không tính. **Không đến** = số lịch "không đến" ÷ số lịch đã tới giờ, không tính lịch đã hủy; kèm giá trị lịch mất và tiền cọc giữ lại |
 
-## Dữ liệu, bảo mật, cấu hình ngành
+## Dữ liệu, bảo mật, cơ sở
 
 | Mã | Quy tắc |
 |---|---|
@@ -112,8 +112,8 @@ Số liệu tính theo ngày giờ của chi nhánh, lọc theo chi nhánh và k
 | BR-65 | Màu nhấn của cơ sở phải đạt tương phản 4,5 : 1 với chữ trắng, không đạt thì không lưu được. Đổi đường dẫn trang đặt lịch thì đường dẫn cũ chuyển hướng 90 ngày |
 | BR-66 | Email mã xác nhận, đã đặt lịch, đổi giờ, hủy, hoàn cọc, hỏi ý đổi người là bắt buộc; cơ sở chỉ tắt được email nhắc trước 24 giờ và 2 giờ. Email gửi qua outbox, lỗi thì thử lại 3 lần |
 | BR-67 | Chatbot có giới hạn lượt theo khách mỗi ngày và cả cơ sở mỗi tháng; hết lượt thì mời khách gọi tiệm hoặc đặt trên trang. Chatbot chỉ nói giá, giờ lấy từ hệ thống |
-| BR-70 | Gói cấu hình ngành chỉ được nạp khi tạo tenant; sau đó mọi chỉnh sửa thuộc về tenant, không ảnh hưởng gói gốc. Gói có bản nháp và các bản đã xuất bản; cơ sở mới nhận bản đang xuất bản lúc tạo, sửa hay xuất bản bản mới không đổi cơ sở đã tạo |
-| BR-71 | Thuộc tính của đối tượng được phục vụ phải hợp lệ theo schema của ngành trước khi lưu |
+| BR-70 | (đã bỏ, D-16: không còn gói cấu hình ngành; cơ sở mới chỉ nhận loại tài nguyên và chính sách mặc định) |
+| BR-71 | (đã bỏ, D-16: không còn đối tượng được phục vụ) |
 | BR-72 | Slug của cơ sở (cũng là tên miền con, T-16): chữ thường không dấu, số, gạch ngang, 3–40 ký tự, không bắt đầu hoặc kết thúc bằng gạch ngang, duy nhất trên nền tảng, không trùng từ dành riêng (`www`, `app`, `admin`, `api`, `mail`, `status`, `blog`, `cdn`, `signup`, `login`, `logout`, `invite`, `verify-email`, `forgot-password`, `reset-password`, `select-workspace`, `docs`, `mock`, `help`, `about`, `terms`, `privacy`, `static`, `assets`). Đổi slug thì link cũ tự chuyển sang slug mới |
 | BR-73 | Mật khẩu nhân sự: 15–128 ký tự, không ép loại ký tự, chặn mật khẩu phổ biến. Chi tiết BR-73.1 đến 73.5 ở [Xác thực nhân sự](./auth.md#br-73-mật-khẩu) |
 | BR-74 | Mỗi email đã xác thực chỉ tạo được một cơ sở dùng thử. Đăng ký và gửi mã xác thực bị giới hạn số lần theo email và theo IP |
@@ -143,7 +143,7 @@ Quyết định ở [D-15](../decisions/d15-trial-and-two-plans.md). Thanh toán
 | BR-89 | Quản trị nền tảng chỉ thấy **số tổng** của một cơ sở: số chi nhánh, thành viên, lịch hẹn, khách đã lưu, thanh toán gói, lần đăng nhập gần nhất của chủ cơ sở. Không mở được lịch, khách, hóa đơn của cơ sở và không có đường tắt qua RLS; muốn xem thì chủ cơ sở mời vào như thành viên (BR-78). Trạng thái gói chỉ có Dùng thử, Đang dùng, Hết hạn; bị khóa (BR-75) là cờ riêng, cơ sở bị khóa vẫn giữ gói và hạn |
 | BR-90 | Khóa cơ sở (BR-75) phải có lý do ít nhất 20 ký tự; chủ cơ sở thấy lý do trên trang khóa (BR-79) và nhận email kèm lý do. Trong lúc khóa, gói vẫn chạy, không cộng bù ngày; khóa nhầm thì mở khóa rồi gia hạn thủ công (BR-91). Mở khóa cũng phải có lý do (chỉ quản trị thấy) và email báo chủ cơ sở |
 | BR-91 | Gia hạn thủ công: thêm 7, 14, 30 ngày hoặc số ngày khác, tối đa **90 ngày** mỗi lần, giữ gói hiện tại. Gói đã hết hạn thì tính từ hôm nay (hôm nay là ngày thứ nhất); còn hạn thì nối vào ngày cuối cũ; đang dùng thử thì kéo dài dùng thử. Lý do bắt buộc, chỉ quản trị thấy. Không tạo khoản thu trong sổ của nền tảng (BR-88) |
-| BR-92 | Trợ lý đặt lịch trên trang khách (BT7). **Hiện** khi cơ sở bật chatbot và gói có tính năng chatbot (dùng thử có); không hiện khi trang tạm dừng (BR-79, BR-82); ẩn ở các bước Thông tin liên hệ, Xác nhận, Trả cọc của luồng đặt lịch. **Số liệu:** giá, thời lượng, cọc, giờ trống chỉ hiện trong thẻ lấy từ hệ thống, có dòng nguồn; câu chữ của trợ lý không tự viết số; giá tùy đối tượng thì hỏi lại thuộc tính (BR-13); giờ trống theo BR-06, BR-14. **Phạm vi:** một dịch vụ cho một người hoặc một đối tượng; nhiều dịch vụ, đặt nhóm, đổi giờ, hủy lịch thì đưa link sang trang đặt lịch hoặc Lịch của tôi. **Giữ chỗ:** chọn giờ trong thẻ thì giữ chỗ 10 phút (BR-07) rồi sang bước Thông tin liên hệ của luồng đặt lịch, đã điền dịch vụ, giờ, thợ; lịch chỉ tạo khi nhập đúng mã email (BR-16), trợ lý không tự đặt lịch. Mỗi khung chat giữ tối đa một chỗ, giữ giờ khác thì trả giờ cũ; hết 10 phút thì báo và đưa giờ còn trống. **Gặp lễ tân:** câu ngoài phạm vi, khách bấm "Gặp lễ tân", hoặc không hiểu hai lần liền thì hiện số điện thoại và giờ mở cửa của chi nhánh (ngoài giờ thì nói giờ mở lại); không có chat trực tiếp với lễ tân. **Lượt (BR-67):** một lượt là một câu khách gửi, kể cả bấm gợi ý; bấm nút trong thẻ không tính. Đếm theo khách khi có phiên, chưa có thì theo trình duyệt; lượt ngày tính lại lúc 00:00 giờ chi nhánh. Hết lượt khách hoặc lượt tháng của cơ sở thì khóa ô nhập, hiện "Đặt trên trang" và "Gọi", không gọi AI. **Lưu:** cuộc trò chuyện còn khi đóng mở khung và tải lại trang trong ngày; lưu 30 ngày để đếm lượt và làm bộ đánh giá BT7; chủ cơ sở chưa có màn đọc lại |
+| BR-92 | Trợ lý đặt lịch trên trang khách (BT7). **Hiện** khi cơ sở bật chatbot và gói có tính năng chatbot (dùng thử có); không hiện khi trang tạm dừng (BR-79, BR-82); ẩn ở các bước Thông tin liên hệ, Xác nhận, Trả cọc của luồng đặt lịch. **Số liệu:** giá, thời lượng, cọc, giờ trống chỉ hiện trong thẻ lấy từ hệ thống, có dòng nguồn; câu chữ của trợ lý không tự viết số; dịch vụ có nhiều biến thể thì hỏi khách chọn (BR-13); giờ trống theo BR-06, BR-14. **Phạm vi:** một dịch vụ cho một người; nhiều dịch vụ, đặt nhóm, đổi giờ, hủy lịch thì đưa link sang trang đặt lịch hoặc Lịch của tôi. **Giữ chỗ:** chọn giờ trong thẻ thì giữ chỗ 10 phút (BR-07) rồi sang bước Thông tin liên hệ của luồng đặt lịch, đã điền dịch vụ, giờ, thợ; lịch chỉ tạo khi nhập đúng mã email (BR-16), trợ lý không tự đặt lịch. Mỗi khung chat giữ tối đa một chỗ, giữ giờ khác thì trả giờ cũ; hết 10 phút thì báo và đưa giờ còn trống. **Gặp lễ tân:** câu ngoài phạm vi, khách bấm "Gặp lễ tân", hoặc không hiểu hai lần liền thì hiện số điện thoại và giờ mở cửa của chi nhánh (ngoài giờ thì nói giờ mở lại); không có chat trực tiếp với lễ tân. **Lượt (BR-67):** một lượt là một câu khách gửi, kể cả bấm gợi ý; bấm nút trong thẻ không tính. Đếm theo khách khi có phiên, chưa có thì theo trình duyệt; lượt ngày tính lại lúc 00:00 giờ chi nhánh. Hết lượt khách hoặc lượt tháng của cơ sở thì khóa ô nhập, hiện "Đặt trên trang" và "Gọi", không gọi AI. **Lưu:** cuộc trò chuyện còn khi đóng mở khung và tải lại trang trong ngày; lưu 30 ngày để đếm lượt và làm bộ đánh giá BT7; chủ cơ sở chưa có màn đọc lại |
 
 ## Tình huống đặc biệt phải có test
 
@@ -168,17 +168,17 @@ Quyết định ở [D-15](../decisions/d15-trial-and-two-plans.md). Thanh toán
 | Chị Hà trả 200.000 ₫ bằng ví khi ví có 150.000 ₫ tiền thật và 100.000 ₫ tiền tặng | Trừ 150.000 ₫ tiền thật rồi 50.000 ₫ tiền tặng; còn 50.000 ₫ tiền tặng, không rút được | BR-25 |
 | Hoàn khoản trả bằng ví 200.000 ₫ | Trả lại vào ví 150.000 ₫ tiền thật, 50.000 ₫ tiền tặng | BR-28 |
 | Lễ tân bấm Thu hai lần liền | Chỉ một khoản được ghi | BR-21 |
-| Một khách đặt cho hai thú cưng cùng lúc | Đặt nhóm, mỗi bé là một đối tượng được phục vụ | BR-13, BR-19 |
-| Hai bé cùng giờ mà chỉ còn một lồng sấy rảnh | Không hiện giờ đó cho "cùng giờ"; gợi ý giờ lệch nhau không quá 60 phút | BR-19 |
+| Một khách đặt cho mình và một người bạn cùng lúc | Đặt nhóm, mỗi người một mục; người đi cùng chỉ cần tên | BR-19 |
+| Hai người cùng giờ mà chỉ còn một phòng xông rảnh | Không hiện giờ đó cho "cùng giờ"; gợi ý giờ lệch nhau không quá 60 phút | BR-19 |
 | Khách chọn Lan cho cả Cắt rồi Nhuộm | Nhuộm bắt đầu sau khi cắt xong thêm 15 phút pha thuốc; khách thấy khoảng chờ này | BR-18 |
 | Khách bấm "Chọn lại giờ" trong email hỏi ý, lịch đã đổi 2 lần | Vẫn chọn lại được, không tính vào số lần đổi | BR-08, BR-33 |
 | Thợ có lịch cắt nằm trọn trong đoạn chờ lên màu của khách nhuộm | Cả hai lịch hợp lệ; lịch cắt phải ở ghế khác (VD3 của BT1) | BR-05, BR-53 |
 | Lịch nhuộm cuối buổi sáng mà 10 phút dọn ghế lấn qua giờ đóng cửa | Không hiện giờ đó (VD5) | BR-52, BR-54 |
-| Chỉ có một bồn tắm, bé trước đang sấy | Bé sau vào bồn ngay khi rửa bồn xong, không chờ bé trước sấy xong (VD8) | BR-52 |
+| Chỉ có một bồn ngâm, khách trước đang xông hơi | Khách sau vào bồn ngay khi rửa bồn xong, không chờ khách trước xông xong (VD8) | BR-52 |
 | Khách để "Bất kỳ ai" nhưng chỉ thợ cấp cao còn rảnh | Xếp thợ cấp cao, khách vẫn trả giá cấp thấp nhất (VD10) | BR-56, BR-57 |
 | Giữ chỗ đã hết hạn nhưng job dọn chưa chạy | Giờ đó vẫn hiện là trống (VD9) | BR-07 |
 | Sửa thời lượng nhuộm khi đã có 6 lịch đặt trước | 6 lịch giữ thời lượng và giá cũ | BR-59 |
-| Hai biến thể Tắm sấy cùng khớp chó 10 kg | Không cho lưu, báo biến thể nào trùng | BR-55 |
+| Hai biến thể của Nhuộm cùng tên "Tóc dài" | Không cho lưu, báo tên trùng | BR-55 |
 | Lễ tân đặt lịch cho khách đang đứng ở quầy, giờ bắt đầu là 5 phút nữa | Được, không vướng "đặt trước ít nhất 2 giờ" | BR-30 |
 | Lễ tân bấm ô ở cột Lan để tạo lịch, không tick "đích danh" | Lịch là "Bất kỳ ai"; sau này Lan nghỉ thì đổi người không cần hỏi | BR-31, BR-34 |
 | Kéo lịch khách chọn Mai sang cột Lan | Hỏi lại, gửi email báo khách; giá không đổi | BR-32, BR-12 |
@@ -193,4 +193,4 @@ Quyết định ở [D-15](../decisions/d15-trial-and-two-plans.md). Thanh toán
 
 Ghi các điểm chưa rõ ở đây; chốt xong thì chuyển thành BR.
 
-- Gộp đối tượng trùng sau OTP; email và số điện thoại trỏ tới hai khách khác nhau; bỏ kỹ năng khi còn lịch sắp tới; dịch vụ cần hai nhân viên. Đề xuất ở [ERD](../architecture/erd.md#13-câu-hỏi-còn-mở).
+- Email và số điện thoại trỏ tới hai khách khác nhau; bỏ kỹ năng khi còn lịch sắp tới; dịch vụ cần hai nhân viên. Đề xuất ở [ERD](../architecture/erd.md#13-câu-hỏi-còn-mở).

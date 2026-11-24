@@ -1,19 +1,19 @@
 ---
 title: Thuật toán tính giờ trống (BT1)
-description: Bài toán, mô hình dữ liệu, mã giả, 10 ví dụ tính tay cho salon và spa thú cưng, thuật toán vét cạn đối chứng cho E1.
+description: Bài toán, mô hình dữ liệu, mã giả, 10 ví dụ tính tay cho salon tóc và spa, thuật toán vét cạn đối chứng cho E1.
 ---
 
 > **Đã chốt 08/11/2026** cùng màn MH-45. Quy tắc tương ứng: BR-50 đến BR-59. Trang này là đầu vào cho `packages/scheduling-core` ở giai đoạn 3.
 
 ## 1. Bài toán
 
-Cho một chi nhánh, một ngày và **một mục đặt lịch** (một biến thể dịch vụ cho một đối tượng, có thể kèm nhân viên khách chọn). Tìm mọi **giờ bắt đầu** mà khách được phép chọn. Mỗi giờ phải kèm một **phương án gán**: tài nguyên cụ thể nào làm từng phần.
+Cho một chi nhánh, một ngày và **một mục đặt lịch** (một biến thể dịch vụ cho một khách, có thể kèm nhân viên khách chọn). Tìm mọi **giờ bắt đầu** mà khách được phép chọn. Mỗi giờ phải kèm một **phương án gán**: tài nguyên cụ thể nào làm từng phần.
 
 Giờ bắt đầu hợp lệ khi đồng thời thỏa:
 
 - Phần khách thấy nằm trong giờ mở cửa của chi nhánh. Ngày đặc biệt thay giờ thường lệ (BR-02).
 - Mỗi loại tài nguyên mà dịch vụ cần có ít nhất một tài nguyên rảnh trong **mọi** khoảng nó bị chiếm, kể cả lúc chuẩn bị và dọn dẹp (BR-04).
-- Đoạn chờ không chiếm nhân viên, nhưng vẫn chiếm ghế, phòng, lồng sấy (BR-05). Không có hai đoạn `hold`/`active` chồng nhau trên cùng một tài nguyên (BR-01).
+- Đoạn chờ không chiếm nhân viên, nhưng vẫn chiếm ghế, giường, phòng (BR-05). Không có hai đoạn `hold`/`active` chồng nhau trên cùng một tài nguyên (BR-01).
 - Nhân viên có kỹ năng làm dịch vụ (BR-03). Đặt online thì nhân viên phải bật "nhận đặt online". Khách chọn đích danh thì chỉ xét người đó (BR-14).
 - Giờ bắt đầu không sớm hơn `now + X` giờ và không xa hơn `now + Y` ngày (BR-06).
 - Giữ chỗ đã hết hạn (`expiresAt ≤ now`) coi như không có, kể cả khi job dọn chưa chạy (BR-07).
@@ -60,22 +60,22 @@ Từ đó tính được:
 - `O_Ghế = [15,90) ∪ [105,130)`
 - `O_Gội = [90,105)`
 
-**Ví dụ: Tắm sấy chó từ 10 kg của Pawpaw**
+**Ví dụ: Ngâm bùn, xông hơi của Spa Lá Sen**
 
 | Đoạn | Loại | Phút từ gốc | Chiếm |
 |---|---|---|---|
-| Tắm | work | 0–30 | Nhân viên, Bồn tắm |
-| Sấy lồng | wait | 30–75 | Lồng sấy |
-| Chải, xịt thơm | work | 75–90 | Nhân viên |
-| Rửa bồn | (dọn Bồn 10′) | 30–40 | Bồn tắm |
-| Dọn lồng | (dọn Lồng 5′) | 75–80 | Lồng sấy |
+| Ngâm bùn | work | 0–30 | Nhân viên, Bồn ngâm |
+| Xông hơi | wait | 30–75 | Phòng xông |
+| Thoa dưỡng thể | work | 75–90 | Nhân viên |
+| Rửa bồn | (dọn Bồn 10′) | 30–40 | Bồn ngâm |
+| Dọn phòng xông | (dọn Phòng xông 5′) | 75–80 | Phòng xông |
 
 - `prepLen = 0`, phần khách thấy `[0, 90)`.
 - `O_NV = [0,30) ∪ [75,90)`
 - `O_Bồn = [0,40)`
-- `O_Lồng = [30,80)`
+- `O_Xông = [30,80)`
 
-Biến thể nào được dùng thì đã chọn xong trước khi gọi thuật toán: khách tự chọn, hoặc chọn theo thông tin của bé (BR-13).
+Biến thể nào được dùng thì đã chọn xong trước khi gọi thuật toán: khách tự chọn (BR-13).
 
 ### 2.3. Tài nguyên: thời gian rảnh
 
@@ -229,38 +229,38 @@ Giường gội 1 đã có lịch Gội sấy 10:00–10:30 (Hùng làm).
 - **Kết quả buổi sáng:** 08:15, 08:30, 09:15, 09:30, 09:45, 10:00.
 - So với VD5, mất 08:45 và 09:00: lúc khách cần gội (10:00–10:15, 10:15–10:30), giường đang bận. Thợ và ghế đều rảnh nhưng vẫn không đặt được.
 
-### Bối cảnh B: Spa thú cưng Pawpaw, Thứ Bảy 07/11/2026
+### Bối cảnh B: Spa Lá Sen, Thứ Bảy 07/11/2026
 
-- Giờ mở cửa 08:00–18:00. Khoa và Vy làm ca 08:00–18:00, đều có kỹ năng Tắm sấy.
-- Tài nguyên: Bồn 1, Bồn 2, Lồng 1, Lồng 2.
-- Dịch vụ: Tắm sấy chó từ 10 kg như mục 2.2. Bé Lucky 12 kg, nên hệ thống chọn đúng biến thể này (BR-13).
+- Giờ mở cửa 08:00–18:00. Thảo và Ngân làm ca 08:00–18:00, đều có kỹ năng Ngâm bùn, xông hơi.
+- Tài nguyên: Bồn 1, Bồn 2, Phòng xông 1, Phòng xông 2.
+- Dịch vụ: Ngâm bùn, xông hơi như mục 2.2.
 
-### VD7. Lồng sấy là nút thắt
+### VD7. Phòng xông là nút thắt
 
-Lồng 1 bận 09:30–10:30, Lồng 2 bận 10:00–11:00 (hai bé khác đang sấy). Nhân viên và bồn rảnh.
+Phòng xông 1 bận 09:30–10:30, Phòng xông 2 bận 10:00–11:00 (hai khách khác đang xông). Nhân viên và bồn rảnh.
 
-- **Lồng** `[30,80)`:
-  - Lồng 1: `[07:30, 08:10] ∪ [10:00, 16:40]`.
-  - Lồng 2: `[07:30, 08:40] ∪ [10:30, 16:40]`.
+- **Phòng xông** `[30,80)`:
+  - Phòng xông 1: `[07:30, 08:10] ∪ [10:00, 16:40]`.
+  - Phòng xông 2: `[07:30, 08:40] ∪ [10:30, 16:40]`.
   - Hợp lại: `[07:30, 08:40] ∪ [10:00, 16:40]`.
 - **Nhân viên:** `[08:00, 16:30]`. **Bồn:** `[08:00, 17:20]`. **Giờ mở cửa** cho `[0,90)`: `[08:00, 16:30]`.
 - **Kết quả:** 08:00, 08:15, 08:30, rồi 10:00…16:30.
-- 08:45…09:45 bị loại dù nhân viên và bồn rảnh. Ví dụ giờ 08:45 cần lồng 09:15–10:05: Lồng 1 bận từ 09:30, Lồng 2 bận từ 10:00.
+- 08:45…09:45 bị loại dù nhân viên và bồn rảnh. Ví dụ giờ 08:45 cần phòng xông 09:15–10:05: phòng 1 bận từ 09:30, phòng 2 bận từ 10:00.
 
-### VD8. Rửa bồn song song với lúc sấy
+### VD8. Rửa bồn song song với lúc xông
 
-Chỉ có Bồn 1, hai lồng rảnh. Bé A tắm lúc 09:00 ở Bồn 1 với Khoa:
+Chỉ có Bồn 1, hai phòng xông rảnh. Khách A ngâm bùn lúc 09:00 ở Bồn 1 với Thảo:
 
-- Bồn 1 bận `[09:00, 09:40)`: tắm, rồi rửa bồn.
-- Lồng 1 bận `[09:30, 10:20)`.
-- Khoa bận `[09:00, 09:30) ∪ [10:15, 10:30)`.
+- Bồn 1 bận `[09:00, 09:40)`: ngâm, rồi rửa bồn.
+- Phòng xông 1 bận `[09:30, 10:20)`.
+- Thảo bận `[09:00, 09:30) ∪ [10:15, 10:30)`.
 
-Tính cho bé B:
+Tính cho khách B:
 
 - **Bồn** `[0,40)`: `[08:00, 08:20] ∪ [09:40, 17:20]`.
-- **Lồng 2:** `[07:30, 16:40]`. **Vy:** `[08:00, 16:30]`.
+- **Phòng xông 2:** `[07:30, 16:40]`. **Ngân:** `[08:00, 16:30]`.
 - **Kết quả:** 08:00, 08:15, rồi 09:45…16:30.
-- Bé B vào bồn lúc 09:45 trong khi bé A còn đang sấy. Nếu dọn dẹp là đoạn cuối của cả dịch vụ, Bồn 1 sẽ bận tới 10:40 và bé B phải đợi tới 10:45. Đây là lý do tách dọn dẹp theo từng loại tài nguyên (BR-52).
+- Khách B vào bồn lúc 09:45 trong khi khách A còn đang xông. Nếu dọn dẹp là đoạn cuối của cả dịch vụ, Bồn 1 sẽ bận tới 10:40 và khách B phải đợi tới 10:45. Đây là lý do tách dọn dẹp theo từng loại tài nguyên (BR-52).
 
 ### VD9. Đặt trước tối thiểu và giữ chỗ hết hạn (bối cảnh A)
 
@@ -315,7 +315,7 @@ bruteSlots(req, now):
   - dịch vụ có 1–5 đoạn, có chờ, chuẩn bị, dọn;
   - 1–4 tài nguyên mỗi loại.
 
-  Dịch vụ mẫu của cả hai ngành luôn được đưa vào.
+  Dịch vụ mẫu của Salon Tóc Mây và Spa Lá Sen luôn được đưa vào.
 - **Thuộc tính phụ:**
   - Thêm một lịch bận thì tập giờ chỉ nhỏ đi, không lớn thêm.
   - Bỏ một giữ chỗ hết hạn khỏi đầu vào thì kết quả không đổi.
@@ -330,7 +330,7 @@ Khi một lịch có nhiều mục, các loại tài nguyên không còn độc 
   - Mục sau bắt đầu khi phần khách thấy của mục trước kết thúc.
   - Duyệt quay lui theo mục. Mỗi lần chọn tài nguyên cho một mục thì trừ phần chiếm dụng đó khỏi `free` rồi mới tính mục sau.
   - Đoạn chuẩn bị của mục sau có thể chồng lên cuối mục trước nếu khác người làm.
-- **Đặt nhóm** (hai bé cùng giờ):
+- **Đặt nhóm** (hai người cùng giờ):
   - Các mục cùng giờ bắt đầu, mỗi loại cần các tài nguyên **khác nhau**.
   - Đây là bài toán ghép cặp nhỏ (mỗi lịch không quá 4 mục). Quay lui là đủ.
 

@@ -9,17 +9,17 @@ description: Các bảng của Sapio theo phân hệ, khóa, ràng buộc, RLS, 
 
 - **Khóa chính:** `id uuid default uuidv7()` (PostgreSQL 18).
 - **Đa khách thuê:** mọi bảng nghiệp vụ có `tenant_id uuid not null`, kể cả bảng con (đoạn của dịch vụ, dòng hóa đơn), để RLS chặn ở từng bảng (quy tắc 4, T-07).
-- **Khóa ngoại kèm tenant:** mỗi bảng nghiệp vụ có `unique (tenant_id, id)`. Khóa ngoại tham chiếu cặp `(tenant_id, x_id)` chứ không chỉ `x_id`. Vì vậy một dòng của Tóc Mây không thể trỏ sang dịch vụ của Pawpaw, kể cả khi code có lỗi.
+- **Khóa ngoại kèm tenant:** mỗi bảng nghiệp vụ có `unique (tenant_id, id)`. Khóa ngoại tham chiếu cặp `(tenant_id, x_id)` chứ không chỉ `x_id`. Vì vậy một dòng của Tóc Mây không thể trỏ sang dịch vụ của Spa Lá Sen, kể cả khi code có lỗi.
 - **Thời điểm:** `timestamptz`. Ngày địa phương (`date`) và giờ địa phương (`time`) chỉ dùng cho thứ gắn với lịch của chi nhánh: giờ mở cửa, ngày đặc biệt.
 - **Tiền:** `bigint`, đơn vị đồng (quy tắc 1). Cột tiền tên kết thúc bằng `_vnd`.
 - **Trạng thái:** `text` kèm `check (status in (...))`, dễ thêm giá trị hơn kiểu `enum` của Postgres. Dữ liệu trạng thái mô tả ở [mục 11](#11-vòng-đời-trạng-thái).
 - **Xóa:** cấu hình (dịch vụ, tài nguyên, nhân viên) không xóa cứng khi đã có lịch tham chiếu, mà đặt `archived_at`. Lịch hẹn, tiền, sổ cái, nhật ký không bao giờ xóa.
 - **Cột chung:** `created_at timestamptz not null default now()`. Bảng sửa được có thêm `updated_at`. Không liệt kê lại hai cột này trong các bảng dưới đây.
-- **JSONB** chỉ dùng cho thứ có hình dạng do ngành quyết định: thuộc tính đối tượng, điều kiện biến thể, nội dung gói cấu hình ngành. Hình dạng được kiểm bằng schema Zod trong `packages/shared` (quy tắc 8, BR-71).
+- **JSONB** chỉ dùng cho cấu hình có hình dạng thay đổi theo cơ sở: quy tắc hoàn cọc, chia hoa hồng. Hình dạng được kiểm bằng schema Zod trong `packages/shared` (quy tắc 8).
 
 Ký hiệu trong bảng: **PK** khóa chính, **FK** khóa ngoại, **U** duy nhất, **?** cho phép rỗng.
 
-## 2. Nền tảng: tài khoản, khách thuê, gói ngành
+## 2. Nền tảng: tài khoản, khách thuê
 
 Các bảng này **không có RLS theo tenant**: chúng là dữ liệu của nền tảng hoặc phải đọc được trước khi biết tenant (đăng nhập, chọn cơ sở).
 
@@ -30,9 +30,7 @@ Các bảng này **không có RLS theo tenant**: chúng là dữ liệu của n�
 | `login_throttles` | `email citext` PK, `failed_count int`, `locked_until?`, `updated_at` | Bộ đếm sai theo email, có cả email không có tài khoản (BR-76.2 đến 76.8). Tăng bằng một câu `INSERT ... ON CONFLICT DO UPDATE` để hai request cùng lúc không đếm thiếu |
 | `password_resets` | `user_id` FK, `token_hash`, `created_at`, `expires_at`, `used_at?`, `replaced_at?` | U `token_hash`. Link đặt lại mật khẩu (BR-77) |
 | `email_verifications` | `email`, `code_hash`, `purpose` (`signup`), `expires_at`, `attempts`, `consumed_at?` | Mã 6 số khi đăng ký (BR-74) |
-| `industry_templates` | `code` (`hair_salon`, `pet_spa`), `name`, `status` (`open`, `soon`, `hidden`), `card_description` | U `code` |
-| `industry_template_versions` | `template_id` FK, `version int`, `content jsonb`, `published_at?`, `published_by?` | U `(template_id, version)`. `published_at` rỗng là bản nháp; mỗi gói tối đa một bản nháp (unique một phần). `content` gồm từ ngữ, schema đối tượng, loại tài nguyên, dịch vụ mẫu có đoạn, chính sách mặc định (BR-70, MH-59) |
-| `tenants` | `slug citext`, `name`, `monogram`, `template_version_id` FK, `locked_at?`, `lock_reason?`, `created_by` FK `users` | U `slug` (BR-72). `template_version_id` ghi cơ sở được tạo từ bản nào; sau đó không đọc gói nữa (BR-70). Khóa vi phạm là `locked_at` (BR-75) |
+| `tenants` | `slug citext`, `name`, `monogram`, `locked_at?`, `lock_reason?`, `created_by` FK `users` | U `slug` (BR-72). Khóa vi phạm là `locked_at` (BR-75) |
 | `tenant_slug_history` | `tenant_id`, `slug`, `changed_at` | U `slug`. Link cũ tự chuyển sang slug mới (BR-72) |
 | `trial_claims` | `email citext` PK, `tenant_id`, `claimed_at` | Một email đã xác thực chỉ dùng thử một lần (BR-74) |
 | `plans` | `code`, `name`, `monthly_price_vnd`, `features text[]`, `limits jsonb` | Như [T-17](../decisions/t17-plan-entitlements.md) |
@@ -50,8 +48,6 @@ Các bảng này **không có RLS theo tenant**: chúng là dữ liệu của n�
 erDiagram
   users ||--o{ memberships : "làm ở"
   tenants ||--o{ memberships : "có"
-  industry_templates ||--o{ industry_template_versions : "có bản"
-  industry_template_versions ||--o{ tenants : "tạo từ"
   tenants ||--|| subscriptions : "gói Sapio"
   plans ||--o{ subscriptions : ""
   tenants ||--o{ platform_payments : ""
@@ -61,8 +57,8 @@ erDiagram
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `tenant_profiles` | `tenant_id` PK, `vocabulary jsonb`, `subject_schema jsonb`, `brand_color`, `logo_url?` | Chép từ gói ngành lúc tạo (BR-70). Sửa ở đây không đụng gói gốc |
-| `booking_policies` | `tenant_id` PK, `min_lead_minutes`, `max_days_ahead`, `change_cutoff_minutes`, `max_reschedules`, `no_show_after_minutes`, `deposit_after_no_shows`, `hold_minutes` (10), `otp_ttl_minutes`, `otp_max_attempts`, `refund_rules jsonb` | Các tham số X, Y, N, M, K của BR-06 đến BR-10, BR-16, BR-23. Mặc định lấy từ gói ngành |
+| `tenant_profiles` | `tenant_id` PK, `brand_color`, `logo_url?` | Thương hiệu của cơ sở |
+| `booking_policies` | `tenant_id` PK, `min_lead_minutes`, `max_days_ahead`, `change_cutoff_minutes`, `max_reschedules`, `no_show_after_minutes`, `deposit_after_no_shows`, `hold_minutes` (10), `otp_ttl_minutes`, `otp_max_attempts`, `refund_rules jsonb` | Các tham số X, Y, N, M, K của BR-06 đến BR-10, BR-16, BR-23. Giá trị mặc định đặt lúc tạo cơ sở |
 | `branches` | `tenant_id`, `name`, `address`, `phone`, `timezone` (`Asia/Ho_Chi_Minh`), `slot_step_minutes` (15), `archived_at?` | BR-58. Gói Cơ bản chỉ 1 chi nhánh đang dùng (BR-83) |
 | `opening_hours` | `tenant_id`, `branch_id` FK, `weekday smallint`, `opens time`, `closes time` | Nhiều dòng mỗi ngày là nhiều khung (sáng, chiều). `check (opens < closes)` |
 | `special_days` | `tenant_id`, `branch_id` FK, `date`, `note` | U `(branch_id, date)`. Ngày đặc biệt thay giờ thường lệ (BR-02) |
@@ -76,8 +72,8 @@ Nhân viên là một **tài nguyên** có loại `is_staff` (thuật ngữ). M�
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `resource_types` | `tenant_id`, `name`, `is_staff bool`, `sort` | Từ gói ngành: Thợ, Ghế cắt, Giường gội; Nhân viên chăm sóc, Bồn tắm, Lồng sấy, Bàn cắt tỉa |
-| `resources` | `tenant_id`, `branch_id` FK, `resource_type_id` FK, `name`, `sort`, `archived_at?` | Ghế 1, Lồng sấy 2, Mai |
+| `resource_types` | `tenant_id`, `name`, `is_staff bool`, `sort` | Cơ sở mới có sẵn: Nhân viên, Ghế, Giường, Phòng; chủ cơ sở sửa, thêm, xóa được. Ví dụ Tóc Mây: Thợ, Ghế cắt, Giường gội; Lá Sen: Kỹ thuật viên, Giường, Bồn ngâm, Phòng xông |
+| `resources` | `tenant_id`, `branch_id` FK, `resource_type_id` FK, `name`, `sort`, `archived_at?` | Ghế 1, Phòng xông 2, Mai |
 | `resource_pauses` | `tenant_id`, `resource_id` FK, `starts_at`, `ends_at`, `reason` | Tạm ngưng bảo trì (MH-46). Trừ khỏi thời gian khả dụng |
 | `staff_levels` | `tenant_id`, `level smallint`, `name` | U `(tenant_id, level)`. Thợ, Thợ chính, Thợ cả (BR-56) |
 | `staff_profiles` | `tenant_id`, `resource_id` PK FK, `display_name`, `title`, `specialty?`, `avatar_url?`, `bookable_online bool`, `full_name`, `employee_code`, `phone`, `level smallint` | Hai lớp công khai, nội bộ (BR-15). FK `(tenant_id, level)` sang `staff_levels`. Tài nguyên phải có loại `is_staff` (trigger kiểm) |
@@ -92,8 +88,8 @@ Nhân viên là một **tài nguyên** có loại `is_staff` (thuật ngữ). M�
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
 | `service_groups` | `tenant_id`, `name`, `sort` | Cắt, Nhuộm và uốn |
-| `services` | `tenant_id`, `group_id?` FK, `name`, `description?`, `deposit_vnd?`, `variant_selection` (`customer`, `subject`), `bookable_online bool`, `commission_split jsonb?`, `sort`, `archived_at?` | BR-55. `commission_split` khi dịch vụ cần hai loại nhân viên (BR-43, [mục 13](#13-câu-hỏi-còn-mở)) |
-| `service_variants` | `tenant_id`, `service_id` FK, `name`, `short_name`, `price_vnd`, `match jsonb`, `sort`, `archived_at?` | `price_vnd` là giá gốc. `match` là điều kiện theo thuộc tính đối tượng, rỗng khi khách tự chọn (BR-13). Kiểm phủ đủ, không trùng ở tầng ứng dụng (BR-55) |
+| `services` | `tenant_id`, `group_id?` FK, `name`, `description?`, `deposit_vnd?`, `bookable_online bool`, `commission_split jsonb?`, `sort`, `archived_at?` | BR-55. `commission_split` khi dịch vụ cần hai loại nhân viên (BR-43, [mục 13](#13-câu-hỏi-còn-mở)) |
+| `service_variants` | `tenant_id`, `service_id` FK, `name`, `short_name`, `price_vnd`, `sort`, `archived_at?` | `price_vnd` là giá gốc. Khách tự chọn biến thể (BR-13). U `(service_id, name)` trên các dòng chưa lưu trữ (BR-55) |
 | `service_segments` | `tenant_id`, `variant_id` FK, `position smallint`, `kind` (`prep`, `work`, `wait`), `minutes`, `label?` | U `(variant_id, position)`. `check (minutes > 0)`. Chuẩn bị chỉ đứng đầu (BR-50), kiểm bằng trigger |
 | `segment_resource_types` | `tenant_id`, `segment_id` FK, `resource_type_id` FK | PK cặp hai cột. Đoạn `wait` không có loại `is_staff` (BR-50, trigger) |
 | `variant_cleanups` | `tenant_id`, `variant_id` FK, `resource_type_id` FK, `minutes` | PK `(variant_id, resource_type_id)`. Dọn dẹp sau khi dùng (BR-52) |
@@ -115,24 +111,23 @@ erDiagram
   services ||--o{ staff_skills : ""
 ```
 
-## 6. Khách hàng và đối tượng được phục vụ
+## 6. Khách hàng
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
 | `customers` | `tenant_id`, `name`, `call_name?`, `phone_e164?`, `email citext?`, `email_verified_at?`, `data_consent_at?`, `marketing_consent_at?`, `requires_deposit bool` | U `(tenant_id, phone_e164)` và U `(tenant_id, email)`, cả hai bỏ qua giá trị rỗng. Cùng số ở hai cơ sở là hai dòng (BR-60). Số điện thoại chuẩn hóa trước khi lưu (BR-61). Đồng ý dữ liệu và quảng cáo tách riêng (BR-64). `requires_deposit` tính lại mỗi lần đánh dấu không đến (BR-10) |
 | `customer_notes` | `tenant_id`, `customer_id` FK, `body`, `author_id` | Chỉ trả về ở API nội bộ, không có đường nào ra trang khách (BR-62) |
-| `served_subjects` | `tenant_id`, `customer_id` FK, `is_self bool`, `name`, `attributes jsonb`, `archived_at?` | Mỗi khách tối đa một dòng `is_self` (unique một phần). `attributes` hợp lệ theo `tenant_profiles.subject_schema` (BR-71). Lõi chỉ biết "chính khách" hay "đối tượng khác", không biết "thú cưng" (quy tắc 5) |
 | `customer_sessions` | `tenant_id`, `customer_id` FK, `token_hash`, `expires_at`, `revoked_at?` | Phiên khách gắn với một cơ sở (T-08, BR-17) |
 | `otp_requests` | `tenant_id`, `email`, `code_hash`, `expires_at`, `attempts`, `consumed_at?`, `appointment_id?` | BR-16. Sai quá N lần thì phải gửi mã mới |
 
 ## 7. Đặt lịch
 
-Ba tầng: **lịch hẹn** (một lần khách đến), **mục** (một dịch vụ cho một đối tượng), **đặt chỗ tài nguyên** (một đoạn trên một tài nguyên cụ thể).
+Ba tầng: **lịch hẹn** (một lần khách đến), **mục** (một dịch vụ cho một người), **đặt chỗ tài nguyên** (một đoạn trên một tài nguyên cụ thể).
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
 | `appointments` | `tenant_id`, `branch_id` FK, `customer_id?` FK, `status`, `channel` (`online`, `walk_in`, `phone`, `chatbot`), `starts_at`, `ends_at`, `hold_expires_at?`, `deposit_vnd?`, `reschedule_count`, `checked_in_at?`, `completed_at?`, `cancelled_at?`, `cancel_reason?`, `cancelled_by` (`customer`, `tenant`)?, `note?` | `starts_at`, `ends_at` là phần khách thấy (BR-51). `customer_id` rỗng khi đang giữ chỗ mà khách chưa nhập liên hệ |
-| `appointment_items` | `tenant_id`, `appointment_id` FK, `position`, `variant_id` FK, `served_subject_id?` FK, `staff_resource_id` FK, `staff_choice` (`any`, `chosen`), `price_vnd`, `starts_at`, `ends_at` | `price_vnd` chốt lúc đặt (BR-12, BR-56). `staff_choice` để biết khách chọn đích danh hay không (BR-11, câu hỏi mở cũ về đổi người) |
+| `appointment_items` | `tenant_id`, `appointment_id` FK, `position`, `variant_id` FK, `guest_name?`, `staff_resource_id` FK, `staff_choice` (`any`, `chosen`), `price_vnd`, `starts_at`, `ends_at` | `guest_name` rỗng là người đặt; có tên là người đi cùng khi đặt nhóm (BR-19). `price_vnd` chốt lúc đặt (BR-12, BR-56). `staff_choice` để biết khách chọn đích danh hay không (BR-11, câu hỏi mở cũ về đổi người) |
 | `resource_bookings` | `tenant_id`, `item_id` FK, `resource_id` FK, `kind` (`prep`, `work`, `wait`, `cleanup`), `starts_at`, `ends_at`, `status` (`hold`, `active`, `released`), `expires_at?` | Exclusion constraint chống trùng ([mục 10](#10-ràng-buộc-quan-trọng)). Thời gian thật của từng đoạn được lưu ở đây, nên sửa dịch vụ sau đó không làm đổi lịch đã đặt (BR-59) |
 
 **Giữ chỗ không có bảng riêng.** Roadmap mục 8.1 có `holds`. Mô hình này thay nó bằng lịch hẹn trạng thái `held` cộng các `resource_bookings` trạng thái `hold` có `expires_at`, đúng như BT2 mô tả. Một bảng ít hơn, và lúc xác nhận chỉ đổi trạng thái, không chép dữ liệu.
@@ -141,11 +136,9 @@ Vì sao `kind` có `cleanup` dù dịch vụ không có loại đoạn này: d�
 
 ```mermaid
 erDiagram
-  customers ||--o{ served_subjects : "có"
   customers ||--o{ appointments : "đặt"
   appointments ||--|{ appointment_items : "gồm"
   appointment_items }o--|| service_variants : "dịch vụ"
-  appointment_items }o--o| served_subjects : "cho"
   appointment_items ||--|{ resource_bookings : "chiếm"
   resource_bookings }o--|| resources : "trên"
 ```
@@ -238,7 +231,7 @@ alter table appointment_items add constraint appointment_items_appointment_fk
 - `customers (tenant_id, phone_e164)`, `(tenant_id, lower(name) text_pattern_ops)`: tìm khách.
 - `outbox_events (available_at) where processed_at is null`.
 
-**RLS:** mọi bảng ở mục 3 đến 9 bật `ENABLE` và `FORCE ROW LEVEL SECURITY`, policy theo `app.tenant_id` (T-07). Cùng áp cho `memberships`, `invitations`. Bảng mục 2 (trừ hai bảng đó) không có RLS; `app_user` chỉ có quyền đọc trên `plans`, `industry_templates`, `industry_template_versions`, còn ghi thì chỉ qua API quản trị nền tảng.
+**RLS:** mọi bảng ở mục 3 đến 9 bật `ENABLE` và `FORCE ROW LEVEL SECURITY`, policy theo `app.tenant_id` (T-07). Cùng áp cho `memberships`, `invitations`. Bảng mục 2 (trừ hai bảng đó) không có RLS; `app_user` chỉ có quyền đọc trên `plans`, còn ghi thì chỉ qua API quản trị nền tảng.
 
 ## 11. Vòng đời trạng thái
 
@@ -282,7 +275,7 @@ Tiêu chí của giai đoạn 1: mọi BR có chỗ đứng trong ERD.
 | BR-06 đến BR-10 | `booking_policies`; `appointments.status`, `reschedule_count`; `customers.requires_deposit` |
 | BR-11 | `leave_requests`; `appointment_items.staff_choice` |
 | BR-12, BR-59 | `appointment_items.price_vnd`; thời gian nằm ở `resource_bookings` |
-| BR-13, BR-55 | `services.variant_selection`, `service_variants.match`, `served_subjects.attributes` |
+| BR-13, BR-55 | `service_variants` |
 | BR-14, BR-15 | `staff_profiles` (`bookable_online`, hai lớp hồ sơ) |
 | BR-16, BR-17 | `otp_requests`, `customer_sessions` |
 | BR-20, BR-21, BR-25 | `ledger_*`; unique `idempotency_key`; hai tài khoản ví |
@@ -296,7 +289,6 @@ Tiêu chí của giai đoạn 1: mọi BR có chỗ đứng trong ERD.
 | BR-62 | `customer_notes` |
 | BR-63, BR-75 | `audit_logs`; `tenants.locked_at` |
 | BR-64 | `customers.data_consent_at`, `marketing_consent_at` |
-| BR-70, BR-71 | `industry_template_versions`, `tenants.template_version_id`, `tenant_profiles` |
 | BR-72 | unique `tenants.slug`, `tenant_slug_history` |
 | BR-73 | `users.password_hash` (kiểm lúc đặt) |
 | BR-76 | `login_throttles`, `sessions` |
@@ -304,14 +296,11 @@ Tiêu chí của giai đoạn 1: mọi BR có chỗ đứng trong ERD.
 | BR-74 | `trial_claims` |
 | BR-80 đến BR-88 | `plans`, `subscriptions`, `platform_payments` (T-17) |
 
-Không bảng nào dành riêng cho một ngành. Hai gói Salon tóc và Spa thú cưng chỉ khác nhau ở `industry_template_versions.content` (tiêu chí của BT8).
-
 ## 13. Câu hỏi còn mở
 
 Mỗi câu có đề xuất. Khi chốt thì chuyển thành BR.
 
-1. **Gộp đối tượng sau OTP.** Khách chưa có phiên khai bé "Mochi" mới (BR-17). Xác thực OTP xong thì hóa ra khách đã có "Mochi" từ trước.
-   - *Đề xuất:* không tự gộp. Đối tượng mới gắn vào khách đã nhận diện. Hồ sơ khách (MH-33) gợi ý "Có thể trùng: Mochi (Chó, 6 kg)", lễ tân bấm gộp: lịch của bản trùng chuyển sang bản giữ lại.
+1. (đã bỏ, D-16: không còn đối tượng được phục vụ.)
 2. **Nhận diện khách khi số điện thoại và email lệch nhau.** Email đã xác thực trỏ tới khách A, số điện thoại trùng khách B.
    - *Đề xuất:* email đã xác thực thắng, vì đó là thứ vừa được chứng minh. Số điện thoại mới được lưu cho khách A nếu A chưa có số. Nếu A đã có số khác thì ghi chú cho lễ tân, không tự đổi.
 3. **Bỏ kỹ năng khi nhân viên còn lịch sắp tới cho dịch vụ đó.**

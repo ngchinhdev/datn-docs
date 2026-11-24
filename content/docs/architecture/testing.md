@@ -1,9 +1,9 @@
 ---
 title: Chiến lược kiểm thử
-description: Các tầng kiểm thử, công cụ, quy ước và cách các bài kiểm thử phục vụ thực nghiệm E1–E9 trong báo cáo.
+description: Các tầng kiểm thử, công cụ, quy ước và cách các bài kiểm thử phục vụ thực nghiệm E1–E8 trong báo cáo.
 ---
 
-Kiểm thử là **sản phẩm chính** của đồ án, không phải phần phụ: tám bài toán khó được chứng minh bằng số liệu từ các bài kiểm thử dưới đây (xem Roadmap mục 11, thực nghiệm E1–E9).
+Kiểm thử là **sản phẩm chính** của đồ án, không phải phần phụ: bảy bài toán khó được chứng minh bằng số liệu từ các bài kiểm thử dưới đây (xem Roadmap mục 11, thực nghiệm E1–E9).
 
 ## Các tầng
 
@@ -14,11 +14,10 @@ Kiểm thử là **sản phẩm chính** của đồ án, không phải phần p
 | 3 | Integration (DB thật) | Vitest + Testcontainers (PostgreSQL 18, Redis) | Migration chạy sạch; exclusion constraint; RLS khi kết nối bằng `app_user` (E5); 100 request giữ chỗ đồng thời (E2); repository; trigger chặn sửa sổ cái | CI |
 | 4 | API e2e | Vitest + Supertest + Testcontainers | Luồng đầy đủ qua HTTP: đăng ký cơ sở → cấu hình → đặt lịch → webhook → hoàn thành → hóa đơn, hoa hồng; webhook gửi lặp (E3); ma trận quyền vai trò × endpoint | CI |
 | 5 | Component FE | Vitest + Testing Library + MSW | Luồng đặt lịch ở client, form dùng schema chung, lịch lễ tân (kéo thả, hiển thị đoạn chờ), trạng thái lỗi | CI |
-| 6 | E2E giao diện | Playwright + `@axe-core/playwright` | 5 luồng chính trên toàn hệ thống (Docker Compose + seed), chạy cho cả tenant salon và spa thú cưng; kiểm tra khả năng truy cập | CI (nhánh chính, PR) |
+| 6 | E2E giao diện | Playwright + `@axe-core/playwright` | 5 luồng chính trên toàn hệ thống (Docker Compose + seed), chạy cho cả tenant salon tóc và spa; kiểm tra khả năng truy cập | CI (nhánh chính, PR) |
 | 7 | Tải | k6 | API tìm giờ trống và đặt lịch: p95, thông lượng, điểm suy giảm (E6) | Thủ công, trước khi viết chương 5 |
 | 8 | Đánh giá chatbot | Script Vitest riêng + bộ 50–100 câu hỏi | Giá, giờ trống trong câu trả lời khớp API; chuyển lễ tân đúng lúc; 0 lịch tạo khi chưa OTP (E7) | Thủ công (tốn phí API) |
 | 9 | Độ dễ dùng | Thang SUS | 5–8 người làm 5 nhiệm vụ (E8) | Giai đoạn 7 |
-| 10 | Tổng quát theo ngành | Bộ test lõi chạy lại với tenant spa thú cưng | Số test qua, số dòng code lõi phải sửa = 0 (E9) | CI |
 
 ## Quy ước
 
@@ -40,4 +39,4 @@ Kiểm thử là **sản phẩm chính** của đồ án, không phải phần p
 
 ## Lưu kết quả thực nghiệm
 
-Kết quả các thực nghiệm E1–E9 lưu thành file JSON hoặc CSV trong `datn-saas/experiments/results/` (có ngày và commit), để vẽ bảng, biểu đồ cho chương 5. Không ghi số liệu bằng tay.
+Kết quả các thực nghiệm E1–E8 lưu thành file JSON hoặc CSV trong `datn-saas/experiments/results/` (có ngày và commit), để vẽ bảng, biểu đồ cho chương 5. Không ghi số liệu bằng tay.

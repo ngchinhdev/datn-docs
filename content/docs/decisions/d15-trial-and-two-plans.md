@@ -2,6 +2,8 @@
 title: D-15. Dùng thử 7 ngày và hai gói Sapio, thay cho duyệt tay
 ---
 
+> **Cập nhật theo [D-16](./d16-beauty-only-scope.md):** gói cấu hình ngành đã bỏ; câu so sánh với nó chỉ còn ý nghĩa lịch sử.
+
 Chốt ngày 08/11/2026 khi thiết kế MH-02 Đăng ký cơ sở.
 
 - **Bối cảnh:** bản đầu cho tự đăng ký rồi chờ quản trị nền tảng duyệt mới mở trang đặt lịch. Không có bước chặn thì dễ có tiệm ảo, trang giả mạo để lừa khách đặt cọc. Thực tế các nền tảng chặn bằng **thanh toán** chứ không bằng duyệt tay: Mangomint cho tự thiết lập miễn phí, tính tiền khi bắt đầu nhận khách.

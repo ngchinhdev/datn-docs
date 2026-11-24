@@ -10,7 +10,7 @@ Mỗi quyết định một trang: bối cảnh, lựa chọn, lý do, hệ qu�
 | Mã | Quyết định |
 |---|---|
 | [D-01](./d01-topic.md) | Đề tài: nền tảng đặt lịch đa tài nguyên cho cơ sở dịch vụ theo lịch hẹn |
-| [D-02](./d02-target-industries.md) | Ngành chính salon, tóc, nail, spa; ngành chứng minh là spa thú cưng; bỏ nha khoa |
+| [D-02](./d02-target-industries.md) | ~~Ngành chính salon, tóc, nail, spa; ngành chứng minh là spa thú cưng~~ (thay bởi D-16) |
 | [D-03](./d03-positioning.md) | Định vị so với đối thủ: không tuyên bố phát minh |
 | [D-04](./d04-scope-for-one-person.md) | Cắt phạm vi cho một người làm |
 | [D-05](./d05-chatbot-on-web-last.md) | Giữ chatbot, nhưng trên web và làm sau cùng |

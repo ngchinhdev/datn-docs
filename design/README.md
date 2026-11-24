@@ -27,7 +27,7 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `Main.dc.html` | Khách · bước chọn ngày giờ, điện thoại | **Đã chọn** (phương án A) | `/mock/[tenant]/book` bước "Ngày giờ" |
 | `KhachChonTho.dc.html` | Khách · bảng chọn thợ trượt lên | **Đã chọn** | `/mock/[tenant]/book`, mở từ dòng "Thợ" |
 | `KhachDesktop.dc.html` | Khách · chọn ngày giờ, máy tính | **Đã chọn** | `/mock/[tenant]/book` ở màn hình ≥ 900px |
-| `KhachMotTrang.dc.html` | Khách · một trang (Pawpaw) | Lấy một phần: bước chọn thú cưng, giá theo cân nặng | `/mock/pawpaw/book` bước "Cho bé nào?" |
+| `KhachMotTrang.dc.html` | Khách · một trang (Pawpaw) | **Bỏ** (D-16) | `/mock/pawpaw/book` bước "Cho bé nào?" |
 | `KhachLichThang.dc.html` | Khách · lịch tháng | Không chọn | không làm |
 | `LeTanChiTiet.dc.html` | Lễ tân · lịch theo nhân viên + bảng chi tiết, máy tính | **Đã chọn** | `/mock/app/[tenant]/calendar` |
 | `LeTanTaiNguyen.dc.html` | Lễ tân · lịch theo tài nguyên | **Đã chọn** | `/mock/app/[tenant]/calendar?view=resources` |
@@ -41,21 +41,21 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `QuanTriDienThoaiLoc.dc.html` | MH-08 bảng Bộ lọc trên điện thoại | **Đã chọn** | như trên, bộ lọc mở |
 | `DangKyTaiKhoan.dc.html` | MH-02 bước 1, tài khoản (điện thoại) | **Đã chọn** | `/mock/signup?step=account` (Bước 9) |
 | `DangKyXacThuc.dc.html` | MH-02 bước 2, mã 6 số qua email | **Đã chọn** | `/mock/signup?step=verify` |
-| `DangKyNganh.dc.html` | MH-02 bước 3, chọn ngành, xem trước gói ngành | **Đã chọn** | `/mock/signup?step=industry` |
-| `DangKyNganhDienThoai.dc.html` | MH-02 bước 3 trên điện thoại (Spa thú cưng) | **Đã chọn** | như trên, dưới 768px |
+| `DangKyNganh.dc.html` | MH-02 bước 3, chọn ngành, xem trước gói ngành | **Bỏ** (D-16) | `/mock/signup?step=industry` |
+| `DangKyNganhDienThoai.dc.html` | MH-02 bước 3 trên điện thoại (Spa thú cưng) | **Bỏ** (D-16) | như trên, dưới 768px |
 | `DangKyCoSo.dc.html` | MH-02 bước 4, thông tin cơ sở, địa chỉ `toc-may.sapio.vn` | **Đã chọn** | `/mock/signup?step=business` |
 | `DangKyXong.dc.html` | MH-02 bước 5, đã tạo, dùng thử 7 ngày | **Đã chọn** | `/mock/signup?step=done` |
 | `GoiDungThu.dc.html` | Lịch khi đang dùng thử: dải báo, việc cần chuẩn bị | **Đã chọn** | `/mock/app/toc-may/calendar?plan=trial` |
 | `GoiSapio.dc.html` | MH-61 Cài đặt › Gói Sapio, hai gói | **Đã chọn** | `/mock/app/toc-may/settings/plan` |
 | `GoiHetHan.dc.html` | MH-61 khi hết hạn: chỉ còn trang gia hạn | **Đã chọn** | `/mock/app/toc-may/...?plan=expired` |
-| `GoiKhoaTinhNang.dc.html` | Gói Cơ bản: tính năng bị khóa, nâng gói giữa kỳ | **Đã chọn** | `/mock/app/pawpaw/settings/chatbot` |
+| `GoiKhoaTinhNang.dc.html` | Gói Cơ bản: tính năng bị khóa, nâng gói giữa kỳ | **Đã chọn** | `/mock/app/<cơ sở gói Cơ bản>/settings/chatbot` |
 | `DichVuChiTiet.dc.html` | MH-45 Chi tiết dịch vụ (Tóc Mây, Nhuộm tóc): biến thể khách tự chọn, trục đoạn, giá theo cấp, ai làm được, xem trước | **Đã chọn** | `/mock/app/toc-may/settings/services/may-dye` (Bước 10) |
-| `DichVuThuCung.dc.html` | MH-45 (Pawpaw, Tắm sấy): biến thể theo loài và cân nặng, sửa điều kiện, rửa bồn song song | **Đã chọn** | `/mock/app/pawpaw/settings/services/paw-bath` |
+| `DichVuThuCung.dc.html` | MH-45 (Pawpaw, Tắm sấy): biến thể theo loài và cân nặng, sửa điều kiện, rửa bồn song song | **Bỏ** (D-16) | `/mock/app/pawpaw/settings/services/paw-bath` |
 | `DichVuDienThoai.dc.html` | MH-45 trên điện thoại: trục thu nhỏ, sửa đoạn trong bảng trượt | **Đã chọn** | như trên, dưới 768px |
-| `GoiNganhDanhSach.dc.html` | MH-59 danh sách gói cấu hình ngành, khung quản trị nền tảng | **Đã chọn** | `/mock/admin/templates` |
-| `GoiNganhChiTiet.dc.html` | MH-59 Spa thú cưng: từ ngữ, thông tin của bé, tài nguyên, dịch vụ mẫu, chính sách, phiên bản | **Đã chọn** | `/mock/admin/templates/pet_spa` |
+| `GoiNganhDanhSach.dc.html` | MH-59 danh sách gói cấu hình ngành, khung quản trị nền tảng | **Bỏ** (D-16) | `/mock/admin/templates` |
+| `GoiNganhChiTiet.dc.html` | MH-59 Spa thú cưng: từ ngữ, thông tin của bé, tài nguyên, dịch vụ mẫu, chính sách, phiên bản | **Bỏ** (D-16) | `/mock/admin/templates/pet_spa` |
 | `LichTaoMoi.dc.html` | MH-26 Tạo lịch từ ô trống (Tóc Mây): tìm khách, giờ và thợ điền sẵn, kiểm ngay | **Đã chọn** | `/mock/app/toc-may/calendar` (Bước 11) |
-| `LichTaoPawpaw.dc.html` | MH-26 (Pawpaw): chọn bé, biến thể theo cân nặng, giờ không đặt được kèm 3 giờ gần nhất | **Đã chọn** | `/mock/app/pawpaw/calendar` |
+| `LichTaoPawpaw.dc.html` | MH-26 (Pawpaw): chọn bé, biến thể theo cân nặng, giờ không đặt được kèm 3 giờ gần nhất | **Bỏ** (D-16) | `/mock/app/pawpaw/calendar` |
 | `LichKeoTha.dc.html` | MH-27 Đang kéo: vùng thả được, không thả được, nhãn giờ mới | **Đã chọn** | `/mock/app/toc-may/calendar` |
 | `LichDoiNguoi.dc.html` | MH-27 Thả lịch khách chọn đích danh sang người khác: hỏi lại | **Đã chọn** | như trên |
 | `LichChiTietDienThoai.dc.html` | MH-28 Chi tiết lịch hẹn trên điện thoại | **Đã chọn** | `/mock/app/toc-may/appointments/[id]` |
@@ -67,12 +67,12 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `KhachTrangCoSo.dc.html` | MH-11 Trang cơ sở, điện thoại: dịch vụ và giá, thợ với giờ trống sớm nhất, giờ mở cửa, chính sách | **Đã chọn** | `/mock/[tenant]` (Bước 12) |
 | `KhachTrangCoSoDesktop.dc.html` | MH-11 trên máy tính, cột phải cố định có nút Đặt lịch | **Đã chọn** | như trên, từ 900px |
 | `KhachNhieuDichVu.dc.html` | MH-13 Nhiều dịch vụ: giỏ có thứ tự, giờ trống cho cả chuỗi, chọn thợ từng dịch vụ | **Đã chọn** | `/mock/toc-may/book` |
-| `KhachDatNhom.dc.html` | MH-14 Đặt nhóm: nhiều bé (Pawpaw), giờ cùng lúc hoặc lệch nhau; bạn và người đi cùng (Tóc Mây) | **Đã chọn** | `/mock/[tenant]/book` |
+| `KhachDatNhom.dc.html` | MH-14 Đặt nhóm: bạn và người đi cùng (Tóc Mây), giờ cùng lúc hoặc lệch nhau. Phần nhiều bé (Pawpaw) bỏ theo D-16 | **Đã chọn** | `/mock/[tenant]/book` |
 | `KhachTraCoc.dc.html` | MH-15 Trả cọc: QR, đếm ngược giữ chỗ; đã nhận cọc; tiền về sau khi mất chỗ | **Đã chọn** | `/mock/[tenant]/book/pay` |
 | `KhachDangNhap.dc.html` | MH-16 Đăng nhập khách: email, mã 6 số, email chưa có lịch | **Đã chọn** | `/mock/[tenant]/login` |
 | `KhachLichCuaToi.dc.html` | MH-17 Lịch hẹn của khách: sắp tới, đã qua, đặt lại | **Đã chọn** | `/mock/[tenant]/me` |
 | `KhachChiTietLich.dc.html` | MH-18 Chi tiết lịch hẹn: trả lời đề nghị đổi thợ, hủy xem trước tiền hoàn, quá hạn tự đổi | **Đã chọn** | `/mock/[tenant]/me/appointments/[id]` |
-| `KhachBeCuaToi.dc.html` | MH-19 Bé của tôi: danh sách, sửa theo schema ngành | **Đã chọn** | `/mock/pawpaw/me/subjects` |
+| `KhachBeCuaToi.dc.html` | MH-19 Bé của tôi: danh sách, sửa theo schema ngành | **Bỏ** (D-16) | `/mock/pawpaw/me/subjects` |
 | `KhachGoiVaVi.dc.html` | MH-20 Gói và ví | **Đã chọn** | `/mock/[tenant]/me/wallet` |
 | `KhachThongTin.dc.html` | MH-21 Thông tin cá nhân, tin khuyến mãi | **Đã chọn** | `/mock/[tenant]/me/profile` |
 | `KhachEmail.dc.html` | MH-23 Email: mã xác nhận, đã đặt lịch, hỏi ý đổi thợ | **Đã chọn** | `/mock/[tenant]/emails` (chỉ có trong mock) |
@@ -113,7 +113,7 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `MatKetNoi.dc.html` | MH-10 Mất kết nối realtime trên lịch lễ tân | **Đã chọn** | `/mock/app/[tenant]/calendar` (công cụ mock) |
 | `CoSoBiKhoa.dc.html` | MH-10 Cơ sở bị khóa, khu nội bộ | **Đã chọn** | công cụ mock "Khóa cơ sở" |
 | `CoSoBiKhoaKhach.dc.html` | MH-10 Trang khách tạm dừng (điện thoại) | **Đã chọn** | `/mock/[tenant]` khi cơ sở bị khóa hoặc hết gói |
-| `QtTongQuan.dc.html` | MH-60 Tổng quan nền tảng: ô số, cơ sở theo ngành, cơ sở mới, sắp hết hạn | **Đã chọn** | `/mock/admin` (Bước 17) |
+| `QtTongQuan.dc.html` | MH-60 Tổng quan nền tảng: ô số, cơ sở mới, sắp hết hạn (bỏ khối "cơ sở theo ngành", D-16) | **Đã chọn** | `/mock/admin` (Bước 17) |
 | `QtKhachThue.dc.html` | MH-58 Danh sách khách thuê: tìm, lọc, gói, trạng thái, hạn | **Đã chọn** | `/mock/admin/tenants` |
 | `QtKhachThueChiTiet.dc.html` | MH-58 Chi tiết cơ sở (Tóc Mây): số tổng, gói và thanh toán, nhật ký quản trị | **Đã chọn** | `/mock/admin/tenants/[id]` |
 | `QtKhoaCoSo.dc.html` | MH-58 Hộp khóa cơ sở có lý do | **Đã chọn** | nút "Khóa cơ sở" ở chi tiết |
@@ -121,7 +121,7 @@ File `.dc.html` là định dạng của canvas (thẻ `<x-dc>`, `{{...}}`, `<sc
 | `QtGoiVaGia.dc.html` | MH-62 Gói và giá: hai gói, giá theo kỳ, thay đổi chưa lưu | **Đã chọn** | `/mock/admin/plans` |
 | `ChatHoi.dc.html` | MH-22 Trợ lý: nút trên trang cơ sở, lời chào, hỏi giá, hỏi giờ, lọc theo thợ | **Đã chọn** | `/mock/[tenant]` (Bước 18) |
 | `ChatGiuCho.dc.html` | MH-22 Giữ chỗ 10 phút, sang bước Thông tin liên hệ, đã đặt, hết giữ chỗ | **Đã chọn** | `/mock/[tenant]`, `/mock/[tenant]/book?step=info` |
-| `ChatGioiHan.dc.html` | MH-22 Gặp lễ tân, hết lượt trong ngày, spa thú cưng hỏi theo bé | **Đã chọn** | `/mock/[tenant]` |
+| `ChatGioiHan.dc.html` | MH-22 Gặp lễ tân, hết lượt trong ngày (bỏ phần spa thú cưng, D-16) | **Đã chọn** | `/mock/[tenant]` |
 | `ChatMayTinh.dc.html` | MH-22 Máy tính: khung chat ở góc phải dưới | **Đã chọn** | `/mock/[tenant]` |
 | `TaiKhoanDangNhap.dc.html` | MH-03 Đăng nhập, layout chia đôi, nút VI/EN và sáng/tối (sau D-16) | **Đã chọn**, thay `DangNhap.dc.html` | `/mock/login` (Bước 20) |
 | `TaiKhoanDangKy.dc.html` | MH-02 Đăng ký bước 1, còn 3 bước (bỏ Chọn ngành) | **Đã chọn**, thay `DangKyTaiKhoan.dc.html` | `/mock/signup` |

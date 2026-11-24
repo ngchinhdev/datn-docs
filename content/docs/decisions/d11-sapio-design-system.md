@@ -9,7 +9,7 @@ title: D-11. Tên sản phẩm Sapio và hệ thống thiết kế
   - Font Be Vietnam Pro.
   - Màu thương hiệu ngọc bích (`brand`); nút chính khu quản trị cũng màu ngọc (`primary`), đổi từ màu mực ngày 07/11 vì màu đen quá lạnh cho ngành dịch vụ và làm khu quản trị mất màu riêng.
   - 4 màu trạng thái lịch hẹn kèm bản nền nhạt.
-  - Màu riêng từng cơ sở (`tenant-may`, `tenant-pawpaw`), gán qua `--accent`.
+  - Màu riêng từng cơ sở (`tenant-may`, `tenant-la-sen`), gán qua `--accent`.
   - Token lịch: 16px mỗi 15 phút.
   - 8 component: Button, StatusBadge, AppointmentBlock, ResourceCalendar, ServiceCard, SlotPicker, HoldBanner, PhoneField.
 - **Chi tiết nhận diện:** đoạn chờ vẽ vạch chéo; lịch hẹn khác đặt vào khe chờ của nhân viên thì vẽ thụt vào.

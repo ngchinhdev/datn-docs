@@ -2,6 +2,8 @@
 title: D-12. Hướng giao diện hai màn hình đầu
 ---
 
+> **Cập nhật theo [D-16](./d16-beauty-only-scope.md):** bỏ bước chọn đối tượng được phục vụ; biến thể do khách tự chọn (BR-13).
+
 Vẽ trên canvas Claude Design "Sapio · Màn hình đầu tiên" (07/11/2026), dùng Sapio Design System.
 
 - **Trang khách: ưu tiên điện thoại, chọn phương án A "Từng bước".**

@@ -13,7 +13,7 @@ Danh sách này rút từ [phạm vi làm chắc](../overview/scope.md#31-làm-c
 
 | Đợt | Mục tiêu | Phục vụ code ở |
 |---|---|---|
-| 1 | Tài khoản, khung ứng dụng, cấu hình cơ sở, đặt lịch, ca và nghỉ phép, gói cấu hình ngành | Giai đoạn 2–3 (nền tảng, lõi đặt lịch) |
+| 1 | Tài khoản, khung ứng dụng, cấu hình cơ sở, đặt lịch, ca và nghỉ phép | Giai đoạn 2–3 (nền tảng, lõi đặt lịch) |
 | 2 | Tiền: thu tiền, cọc, gói, ví, hóa đơn, hoàn tiền, gói Sapio | Giai đoạn 4 |
 | 3 | Hoa hồng, báo cáo, thông báo, chatbot, tổng quan | Giai đoạn 5–6 |
 
@@ -40,7 +40,7 @@ Danh sách này rút từ [phạm vi làm chắc](../overview/scope.md#31-làm-c
 | Khu nội bộ của một cơ sở | `/app/[tenant]/...` | LT, KTV, QL, CCS |
 | Quản trị nền tảng | `admin.<domain>/...` | QTNT |
 
-- `[tenant]` là slug của cơ sở (`toc-may`, `pawpaw`). Slug nằm trong URL cả ở khu nội bộ, để mở hai cơ sở ở hai tab không lẫn, và link gửi cho đồng nghiệp mở đúng cơ sở. Quyền vẫn xét theo cặp (cơ sở, vai trò) của tài khoản.
+- `[tenant]` là slug của cơ sở (`toc-may`, `la-sen`). Slug nằm trong URL cả ở khu nội bộ, để mở hai cơ sở ở hai tab không lẫn, và link gửi cho đồng nghiệp mở đúng cơ sở. Quyền vẫn xét theo cặp (cơ sở, vai trò) của tài khoản.
 - Slug theo BR-72: chữ thường không dấu, số, gạch ngang, duy nhất, không trùng từ dành riêng (`app`, `admin`, `login`...).
 - Trạng thái xem đặt trong query để chia sẻ link và tải lại không mất: `?date=2026-11-07`, `?view=resources`, `?branch=q3`, `?step=time`.
 - **Mock** dùng đúng route thật, thêm tiền tố `/mock`: `/mock/toc-may/book`, `/mock/app/toc-may/calendar`. Đổi cơ sở là đổi slug trong URL. Các URL mock cũ (`/mock/dat-lich`, `/mock/le-tan`, `/mock/hom-nay`) chuyển hướng 308 sang route mới; cơ sở lấy từ `?tenant=`.
@@ -49,8 +49,8 @@ Danh sách này rút từ [phạm vi làm chắc](../overview/scope.md#31-làm-c
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-01 | Trang giới thiệu Sapio | `/` | Ai cũng xem | 1 | Vẽ | **Đã chọn.** Một trang: lời giới thiệu kèm ảnh lịch nhiều cột, tính năng chính, chọn ngành có sẵn dịch vụ mẫu, bảng giá hai gói lấy từ dữ liệu (BR-83), nút "Đăng ký cơ sở" và "Đăng nhập" |
-| MH-02 | Đăng ký cơ sở | `/signup?step=account\|verify\|industry\|business\|done` | CCS | 1 | Vẽ | **Đã chọn.** Tài khoản (mật khẩu BR-73) → mã 6 số qua email → **chọn ngành** có xem trước gói → tên, địa chỉ `toc-may.sapio.vn`, chi nhánh đầu, giờ mở cửa, số tài nguyên → đã tạo, **dùng thử 7 ngày**. BR-70, BR-72, BR-74, BR-80 |
+| MH-01 | Trang giới thiệu Sapio | `/` | Ai cũng xem | 1 | Vẽ | **Đã chọn.** Một trang: lời giới thiệu kèm ảnh lịch nhiều cột, tính năng chính, bảng giá hai gói lấy từ dữ liệu (BR-83), nút "Đăng ký cơ sở" và "Đăng nhập" |
+| MH-02 | Đăng ký cơ sở | `/signup?step=account\|verify\|business\|done` | CCS | 1 | Vẽ | **Đã chọn.** Tài khoản (mật khẩu BR-73) → mã 6 số qua email → tên, địa chỉ `toc-may.sapio.vn`, chi nhánh đầu, giờ mở cửa, số tài nguyên → đã tạo, **dùng thử 7 ngày**. BR-72, BR-74, BR-80 |
 | MH-03 | Đăng nhập | `/login` | Nhân sự | 1 | Vẽ | **Đã chọn.** Email + mật khẩu, "Giữ đăng nhập trên máy này"; sai thì báo chung, từ lần 3 báo số lần còn lại, sai 5 lần tạm khóa 15 phút (BR-76) |
 | MH-04 | Quên và đặt lại mật khẩu | `/forgot-password`, `/reset-password` | Nhân sự | 1 | Vẽ | **Đã chọn.** Luôn báo cùng một câu; link 30 phút, dùng một lần, gửi lại sau 60 giây; đặt xong đăng xuất máy khác, vào cơ sở dùng gần nhất (BR-73, BR-77) |
 | MH-05 | Nhận lời mời | `/invite/[token]` | LT, KTV, QL | 1 | Vẽ | **Đã chọn.** Thẻ lời mời (vai trò, chi nhánh, người mời, hết hạn). Email chưa có tài khoản: điền tên, tạo mật khẩu; đã có: đăng nhập đúng email đó. Từ chối được; hết hạn, thu hồi, đã dùng có trang riêng (BR-78) |
@@ -74,12 +74,12 @@ Route trong bảng là đường dẫn trên tên miền con của cơ sở (ví
 | MH-11 | Trang cơ sở | `/` | KH | 1 | Vẽ | **Đã chọn.** Tên, ảnh, địa chỉ chi nhánh, giờ mở cửa, nhóm dịch vụ và giá, nhân viên (hồ sơ công khai, BR-15), chính sách hủy; nút "Đặt lịch" |
 | MH-12 | Luồng đặt lịch | `/book?step=...` | KH | 1 | Vẽ | **Đang làm** (D-12, D-13, D-14). BR-03, BR-06, BR-07, BR-13, BR-14, BR-16, BR-17 |
 | MH-13 | Đặt nhiều dịch vụ | trong MH-12 | KH | 1 | Vẽ | **Đã chọn.** BR-18. Thêm dịch vụ vào giỏ, thứ tự làm, cùng hay khác thợ; giờ trống tính cho cả chuỗi (BT1) |
-| MH-14 | Đặt nhóm | trong MH-12 | KH | 1 | Vẽ | **Đã chọn.** BR-19. Nhiều người hoặc nhiều bé cùng giờ, mỗi đối tượng một dịch vụ; không đủ chỗ thì gợi ý giờ lệch nhau |
+| MH-14 | Đặt nhóm | trong MH-12 | KH | 1 | Vẽ | **Đã chọn.** BR-19. Nhiều người cùng giờ, mỗi người một dịch vụ, người đi cùng chỉ cần tên; không đủ chỗ thì gợi ý giờ lệch nhau |
 | MH-15 | Trả tiền cọc | `/book/pay` | KH | 2 | Vẽ | **Đã chọn.** BR-29. QR của provider giả lập (D-09), đếm ngược giữ chỗ, kết quả thanh toán; trả xong mà giữ chỗ đã hết hạn (BR-07, BR-21) |
 | MH-16 | Đăng nhập khách | `/login` | KH | 1 | Nhẹ | **Đã chọn.** Email → mã 6 số (BR-16); phiên gắn với cơ sở |
 | MH-17 | Lịch của tôi | `/me` | KH | 1 | Nhẹ | **Đã chọn.** Sắp tới, đã qua; đặt lại lịch cũ |
 | MH-18 | Chi tiết lịch hẹn của khách | `/me/appointments/[id]` | KH | 1 | Vẽ | **Đã chọn.** Đổi giờ (BR-08: trước X giờ, tối đa N lần), hủy kèm mức hoàn cọc (BR-23); hết hạn tự đổi thì hiện số điện thoại cơ sở |
-| MH-19 | Đối tượng được phục vụ | `/me/subjects` | KH | 1 | Form | **Đã chọn.** Thuộc tính theo schema của ngành (BR-71). Ngành không có đối tượng khác thì không hiện mục này |
+| MH-19 | (đã bỏ, D-16) | | | | | Không còn đối tượng được phục vụ |
 | MH-20 | Gói và ví | `/me/wallet` | KH | 2 | Nhẹ | **Đã chọn.** Số buổi còn và hạn của gói; số dư tiền thật, tiền tặng; lịch sử |
 | MH-21 | Thông tin cá nhân | `/me/profile` | KH | 1 | Form | **Đã chọn.** Họ tên, số điện thoại, email; đồng ý nhận quảng cáo (BR-64) |
 | MH-22 | Khung chat đặt lịch | nổi trên MH-11, MH-12 | KH | 3 | Vẽ | **Đã chọn.** BT7, BR-92: hỏi giá, giờ; giữ chỗ rồi chuyển sang bước Thông tin liên hệ (OTP); "Gặp lễ tân"; hết lượt (BR-67); điện thoại toàn màn hình, máy tính khung góc phải |
@@ -98,7 +98,7 @@ Route trong bảng là đường dẫn trên tên miền con của cơ sở (ví
 | MH-30 | Bán gói, nạp ví | `/app/[tenant]/sales/new?type=package\|wallet` | LT | 2 | Form | **Đã chọn.** Chọn khách, gói hoặc số tiền nạp, tiền tặng kèm; qua MH-29 để thu |
 | MH-31 | Hóa đơn | `/app/[tenant]/invoices`, `/invoices/[id]` | LT, CCS | 2 | DS | **Đã chọn.** Cột: số, giờ, khách, tổng, phương thức, trạng thái; chi tiết có in và "Yêu cầu hoàn tiền" |
 | MH-32 | Khách hàng | `/app/[tenant]/customers` | LT, CCS | 1 | DS | Tìm theo tên, số điện thoại chuẩn hóa; cột: lần đến gần nhất, số lần, số lần không đến |
-| MH-33 | Hồ sơ khách | `/app/[tenant]/customers/[id]` | LT, CCS | 1 (tiền ở 2) | Vẽ | **Đã chọn.** Lịch sử, ghi chú nội bộ (BR-62), đối tượng được phục vụ, gói, ví, bắt buộc cọc (BR-10) |
+| MH-33 | Hồ sơ khách | `/app/[tenant]/customers/[id]` | LT, CCS | 1 (tiền ở 2) | Vẽ | **Đã chọn.** Lịch sử, ghi chú nội bộ (BR-62), gói, ví, bắt buộc cọc (BR-10) |
 | MH-34 | Hoàn tiền | `/app/[tenant]/refunds` | LT tạo, QL/CCS duyệt | 2 | DS | **Đã chọn.** Lý do bắt buộc, chờ duyệt (BR-28); duyệt thì thu hồi hoa hồng và hoàn buổi gói |
 
 ## E. Kỹ thuật viên (ưu tiên điện thoại)
@@ -127,8 +127,8 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | MH-42 | Chi nhánh | `/app/[tenant]/settings/branches` | CCS | 1 | DS | **Đã chọn.** Mẫu danh sách. |
 | MH-43 | Chi tiết chi nhánh | `/app/[tenant]/settings/branches/[id]` | CCS | 1 | Vẽ | **Đã chọn.** Giờ mở cửa nhiều khung mỗi ngày, ngày đặc biệt (BR-02), giá riêng của chi nhánh |
 | MH-44 | Dịch vụ | `/app/[tenant]/settings/services` | CCS | 1 | DS | Nhóm dịch vụ, kéo đổi thứ tự, bật/tắt đặt online |
-| MH-45 | Chi tiết dịch vụ | `/app/[tenant]/settings/services/[id]` | CCS | 1 | Vẽ | **Đã chọn. Màn đặc trưng thứ hai.** Biến thể khách tự chọn hoặc theo thuộc tính đối tượng, kiểm điều kiện phủ đủ, không trùng (BR-13, BR-55); trục thời gian theo từng loại tài nguyên, đoạn Chuẩn bị, Làm, Chờ, dọn dẹp theo loại tài nguyên (BR-50 đến BR-52); giá theo cấp nhân viên (BR-56); ai làm được (BR-03); cột phải xem trước trên lịch lễ tân và thẻ khách thấy; lịch đã đặt giữ thời gian, giá cũ (BR-59) |
-| MH-46 | Tài nguyên | `/app/[tenant]/settings/resources` | CCS | 1 | DS | **Đã chọn.** Nhóm theo loại (từ gói ngành), chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng |
+| MH-45 | Chi tiết dịch vụ | `/app/[tenant]/settings/services/[id]` | CCS | 1 | Vẽ | **Đã chọn. Màn đặc trưng thứ hai.** Biến thể khách tự chọn, tên không trùng (BR-13, BR-55); trục thời gian theo từng loại tài nguyên, đoạn Chuẩn bị, Làm, Chờ, dọn dẹp theo loại tài nguyên (BR-50 đến BR-52); giá theo cấp nhân viên (BR-56); ai làm được (BR-03); cột phải xem trước trên lịch lễ tân và thẻ khách thấy; lịch đã đặt giữ thời gian, giá cũ (BR-59) |
+| MH-46 | Tài nguyên | `/app/[tenant]/settings/resources` | CCS | 1 | DS | **Đã chọn.** Nhóm theo loại tài nguyên, chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng |
 | MH-47 | Nhân sự | `/app/[tenant]/settings/staff` | CCS | 1 | DS | Mọi thành viên kèm cột "Nhận khách trên lịch", lời mời đang chờ (gửi lại, thu hồi, mời lại), hộp "Mời nhân viên"; quản lý chỉ mời Lễ tân và Kỹ thuật viên (BR-78). **Đã chọn** |
 | MH-48 | Hồ sơ nhân viên | `/app/[tenant]/settings/staff/[id]` | CCS | 1 | Form | Hai lớp hồ sơ (BR-15), kỹ năng, cấp, chi nhánh, vai trò |
 | MH-49 | Chính sách | `/app/[tenant]/settings/policies` | CCS | 1 (cọc ở 2) | Form | **Đã chọn.** Tham số X, Y, N, M, K của BR-06 đến BR-10; mức hoàn cọc (BR-23); mỗi trường có câu giải thích bằng ví dụ |
@@ -146,9 +146,9 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-58 | Khách thuê | `/admin/tenants`, `/admin/tenants/[id]` | QTNT | 1 | Vẽ | **Đã chọn.** Danh sách tìm, lọc theo trạng thái, gói, ngành, bị khóa; cột gói, trạng thái (dùng thử, đang dùng, hết hạn) và hạn. Chi tiết chỉ có số tổng, **không** xem dữ liệu khách của cơ sở (BR-89); hộp khóa, mở khóa có lý do (BR-75, BR-90) và gia hạn thủ công (BR-91); nhật ký quản trị của cơ sở |
-| MH-59 | Gói cấu hình ngành | `/admin/templates`, `/admin/templates/[id]` | QTNT | 1 | Vẽ | **Đã chọn. Màn chứng minh BT8.** Bản nháp, xuất bản theo phiên bản (BR-70). Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70) |
-| MH-60 | Tổng quan nền tảng | `/admin` | QTNT | 3 | Vẽ | **Đã chọn.** Ô số (cơ sở, trả phí, dùng thử, hết hạn, bị khóa, thu tháng), cơ sở và lịch hẹn theo ngành, cơ sở mới, sắp hết hạn (BR-89) |
+| MH-58 | Khách thuê | `/admin/tenants`, `/admin/tenants/[id]` | QTNT | 1 | Vẽ | **Đã chọn.** Danh sách tìm, lọc theo trạng thái, gói, bị khóa; cột gói, trạng thái (dùng thử, đang dùng, hết hạn) và hạn. Chi tiết chỉ có số tổng, **không** xem dữ liệu khách của cơ sở (BR-89); hộp khóa, mở khóa có lý do (BR-75, BR-90) và gia hạn thủ công (BR-91); nhật ký quản trị của cơ sở |
+| MH-59 | (đã bỏ, D-16) | | | | | Không còn gói cấu hình ngành |
+| MH-60 | Tổng quan nền tảng | `/admin` | QTNT | 3 | Vẽ | **Đã chọn.** Ô số (cơ sở, trả phí, dùng thử, hết hạn, bị khóa, thu tháng), cơ sở mới, sắp hết hạn (BR-89) |
 | MH-63 | Đăng nhập quản trị nền tảng | `/admin/login` trên `admin.<domain>` | QTNT | 2 | Nhẹ | Email + mật khẩu, không có "Giữ đăng nhập", "Quên mật khẩu?" hay "Đăng ký cơ sở"; chỉ tài khoản quản trị vào được, đăng nhập sai cửa báo câu chung của BR-76 và có đếm khóa. Mock: `/mock/admin/login` (T-18) |
 | MH-62 | Gói và giá | `/admin/plans` | QTNT | 2 | Vẽ | **Đã chọn.** Tên, giá tháng, dòng mô tả, số chi nhánh tối đa, tính năng của hai gói; % giảm theo kỳ kèm bảng giá kỳ; đổi giá chỉ áp lần thanh toán sau (BR-83, BR-84) |
 
@@ -164,7 +164,7 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 Đợt 1 nhiều nhất vì giai đoạn 2–3 là phần lớn mã nguồn. Trong đợt 1, thứ tự vẽ đề xuất:
 
 1. **Khung và mẫu:** MH-07, MH-08, MH-09.
-2. **Đăng ký có chọn ngành:** MH-02.
+2. **Đăng ký:** MH-02.
 3. **Cấu hình dịch vụ:** MH-45, cùng MH-59 vì dùng chung phần soạn đoạn chiếm dụng.
 4. **Nghiệp vụ lịch:** MH-26, MH-27, MH-38, MH-40.
 5. **Phía khách:** MH-11, MH-13, MH-14, MH-18.
