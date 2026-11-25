@@ -76,7 +76,7 @@ Ba dòng của mục 6:
 
 | Khi | Xử lý |
 |---|---|
-| Mở trang | Máy chủ gọi API #7 với `token` trong địa chỉ. 200 thì hiện form, mục 3 lấy `email` của phản hồi. 410, hoặc địa chỉ không có `token`, thì hiện trang "Link không còn dùng được". Trang đặt `referrer` là `no-referrer` để token không lọt ra ngoài qua header `Referer`. Đang có phiên vẫn vào được trang |
+| Mở trang | Trình duyệt gọi API #7 qua `/api` với `token` trong địa chỉ; trong lúc chờ hiện khung trống. 200 thì hiện form, mục 3 lấy `email` của phản hồi. 410, 400, hoặc địa chỉ không có `token`, thì hiện trang "Link không còn dùng được". 429, lỗi mạng hoặc 5xx thì hiện "Chưa kiểm được link". Tiêu đề tab luôn là "Đặt mật khẩu mới". Trang đặt `referrer` là `no-referrer` để token không lọt ra ngoài qua header `Referer`. Đang có phiên vẫn vào được trang |
 | Gõ vào mục 4 | Hiện mục 6, ẩn mục 5 |
 | Nhấn mục 8 hoặc Enter | Kiểm trên máy theo BR-73.1 trước. Mục 4 ngắn hơn 15 ký tự, kể cả trống, thì báo ở mục 5 "Mật khẩu cần ít nhất 15 ký tự."; dài hơn 128 thì "Mật khẩu quá dài."; không gọi API. Hết lỗi thì gọi API #8 với `{ token, password: mục 4 }`; trong lúc chờ, nút hiện vòng xoay và không bấm được |
 | API trả 200 | Chuyển tới `redirectTo`. Phiên mới (không giữ đăng nhập) thay phiên cũ của trình duyệt này, mọi phiên khác của tài khoản bị thu hồi (BR-77.5) |
@@ -85,6 +85,17 @@ Ba dòng của mục 6:
 | API trả 429 `RATE_LIMITED` | Mục 5: "Thử quá nhiều lần. Thử lại sau {Retry-After} giây." |
 | Lỗi mạng hoặc 5xx | Mục 5: "Chưa đặt được mật khẩu, thử lại sau." Lỗi 5xx có `requestId` thì thêm "Mã lỗi: {requestId}" (BR-79) |
 | Bấm mục 9 | Như [Đăng nhập](./login.md) |
+
+### Chưa kiểm được link
+
+Hiện thay form khi API #7 trả 429, lỗi mạng hoặc 5xx. Không có khối giới thiệu, cột rộng tối đa 480px.
+
+| # | Mục | Loại | Ghi chú |
+|---|---|---|---|
+| 1 | Tiêu đề | Chữ | "Đặt mật khẩu mới", `h1` |
+| 2 | Lỗi | `Notice` loại danger, `role="alert"` | 429: "Thử quá nhiều lần. Thử lại sau {Retry-After} giây." Lỗi mạng hoặc 5xx: "Chưa kiểm tra được link, thử lại sau." Lỗi 5xx có `requestId` thì thêm "Mã lỗi: {requestId}" (BR-79) |
+| 3 | Thử lại | Nút phụ | Gọi lại API #7. Trong lúc chờ hiện vòng xoay và không bấm được |
+| 4 | Ngôn ngữ, giao diện | Hai nút ở thanh trên | Như mục 15 và 16 của [Đăng nhập](./login.md) |
 
 ## Link không còn dùng được
 
