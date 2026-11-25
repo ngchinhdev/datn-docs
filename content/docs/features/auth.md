@@ -154,7 +154,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 
 ## Liên quan
 
-- Màn hình: [Đăng nhập](../screens/login.md), [Danh sách màn hình](../screens/index.md) (MH-03, MH-04, MH-06, MH-63)
+- Màn hình: [Đăng nhập](../screens/login.md), [Quên và đặt lại mật khẩu](../screens/password-reset.md), [Chọn cơ sở](../screens/select-workspace.md), [Danh sách màn hình](../screens/index.md) (MH-03, MH-04, MH-06, MH-63)
 - API: [Xác thực](../api/auth.md)
 - Bảng: `users`, `sessions`, `login_throttles`, `password_resets`, `memberships` trong [ERD](../architecture/erd.md)
 - Quyết định: [T-08](../decisions/t08-staff-session-cookie.md), [T-16](../decisions/t16-tenant-subdomains.md), [T-18](../decisions/t18-admin-subdomain.md)
