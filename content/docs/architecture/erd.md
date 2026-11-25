@@ -43,7 +43,7 @@ Các bảng này **không có RLS theo tenant**: chúng là dữ liệu của n�
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `memberships` | `tenant_id`, `user_id` FK, `role` (`owner`, `manager`, `receptionist`, `technician`), `branch_id?`, `staff_resource_id?`, `disabled_at?` | U `(tenant_id, user_id)`. Có RLS. Màn "Chọn cơ sở" (MH-06) đọc qua hàm `memberships_of(user_id)` kiểu `SECURITY DEFINER`, chỉ trả slug, tên, vai trò |
+| `memberships` | `tenant_id`, `user_id` FK, `role` (`owner`, `manager`, `receptionist`, `technician`), `branch_id?`, `staff_resource_id?`, `disabled_at?` | U `(tenant_id, user_id)`. Có RLS theo `app.tenant_id`, thêm policy `SELECT` cho dòng có `user_id = app.user_id`: màn "Chọn cơ sở" (MH-06) đọc trong `withUser(userId, ...)` (T-07). `tenants` là bảng nền tảng, không có RLS |
 | `invitations` | `tenant_id`, `email`, `role`, `token_hash`, `expires_at`, `accepted_at?` | MH-05 |
 
 ```mermaid

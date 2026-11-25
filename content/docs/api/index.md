@@ -27,7 +27,11 @@ Trình duyệt chỉ gọi `/api/*` **cùng origin** với trang. Next.js chuy�
 | Khách của cơ sở | Phiên sau mã email (BR-16) | `__Host-sapio_customer`, chỉ trên tên miền con của cơ sở |
 
 - Token phiên là 32 byte ngẫu nhiên. Máy chủ chỉ lưu SHA-256 của token (T-08).
-- Request đổi dữ liệu (`POST`, `PUT`, `PATCH`, `DELETE`) phải có header `Origin` thuộc danh sách tin cậy. Sai thì trả 403 `ORIGIN_NOT_ALLOWED`.
+- Request đổi dữ liệu (`POST`, `PUT`, `PATCH`, `DELETE`) được kiểm nguồn gốc theo thứ tự:
+  1. Có `Sec-Fetch-Site`: nhận `same-origin` và `none`, từ chối giá trị khác.
+  2. Không có `Sec-Fetch-Site`, có `Origin`: nhận khi `Origin` cùng host với request hoặc thuộc danh sách tin cậy; không thì từ chối.
+  3. Không có cả hai header: **cho qua**.
+  Từ chối trả 403 `ORIGIN_NOT_ALLOWED`. Trình duyệt luôn gửi ít nhất một trong hai header khi trang web gọi tới, nên request thiếu cả hai đến từ client không phải trình duyệt (Server Component, curl, Scalar, test), không phải từ trang của kẻ tấn công.
 - Route của một cơ sở có slug trong đường dẫn (`/v1/tenants/{slug}/...`). Máy chủ kiểm membership rồi mới đặt `app.tenant_id` cho RLS (T-07, T-15).
 
 ## Lỗi

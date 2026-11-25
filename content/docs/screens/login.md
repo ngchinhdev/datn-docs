@@ -33,6 +33,8 @@ Bố cục `AuthPage`: khối giới thiệu bên trái, form bên phải. Màn 
 | 12 | Đặt lại mật khẩu | Nút phụ, cao 48 | | Ẩn | Chỉ hiện khi đang khóa. Tới như mục 8 |
 | 13 | Ghi chú cho khách | Chữ nhỏ, có viền trên | | | "Bạn là khách đặt lịch? Đăng nhập trên trang của tiệm bằng mã gửi qua email." |
 | 14 | Chưa có cơ sở | Chữ kèm link | | | "Chưa có cơ sở trên Sapio? Đăng ký, dùng thử 7 ngày", link tới `/signup` |
+| 15 | Ngôn ngữ | Nút `VI` hoặc `EN`, thanh trên | Tiếng Việt | Hiện ngôn ngữ đang dùng. Cách làm ở [T-21](../decisions/t21-i18n-next-intl.md) |
+| 16 | Giao diện | Nút trăng hoặc mặt trời, thanh trên | Theo hệ thống | Chuyển sáng và tối |
 
 ## Xử lý
 
@@ -49,6 +51,7 @@ Bố cục `AuthPage`: khối giới thiệu bên trái, form bên phải. Màn 
 | Sửa mục 6 trong lúc khóa | Ẩn mục 5 và mục 12, mục 11 bấm lại được. Khóa gắn với email, nên email khác vẫn thử được |
 | API trả 400 `VALIDATION_FAILED` | Mỗi phần tử của `errors` báo bằng `message` dưới ô có tên `field` (`email` là mục 6, `password` là mục 9) |
 | API trả 429 `RATE_LIMITED` | Mục 9: "Thử quá nhiều lần. Thử lại sau {Retry-After} giây." |
+| Bấm mục 15 | Đổi ngôn ngữ của cả trang, kể cả câu báo lỗi đang hiện. Địa chỉ và nội dung đã nhập giữ nguyên. Lựa chọn nhớ cho lần mở sau |
 | Lỗi mạng hoặc 5xx | Mục 9: "Chưa đăng nhập được, thử lại sau." Lỗi 5xx có `requestId`, thêm "Mã lỗi: {requestId}" (BR-79) |
 
 ## MH-63: đăng nhập quản trị nền tảng

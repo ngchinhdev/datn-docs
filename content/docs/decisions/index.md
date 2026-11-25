@@ -48,6 +48,7 @@ Mỗi quyết định một trang: bối cảnh, lựa chọn, lý do, hệ qu�
 | [T-18](./t18-admin-subdomain.md) | Quản trị nền tảng trên tên miền con riêng |
 | [T-19](./t19-api-docs.md) | Tài liệu API sinh từ OpenAPI, xem bằng Scalar và fumadocs-openapi |
 | [T-20](./t20-same-origin-api.md) | Trình duyệt gọi API cùng origin qua /api |
+| [T-21](./t21-i18n-next-intl.md) | Hai ngôn ngữ Việt và Anh bằng next-intl |
 
 ## Nguồn
 
