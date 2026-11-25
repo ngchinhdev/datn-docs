@@ -78,9 +78,9 @@ Ba dòng của mục 6:
 |---|---|
 | Mở trang | Máy chủ gọi API #7 với `token` trong địa chỉ. 200 thì hiện form, mục 3 lấy `email` của phản hồi. 410, hoặc địa chỉ không có `token`, thì hiện trang "Link không còn dùng được". Trang đặt `referrer` là `no-referrer` để token không lọt ra ngoài qua header `Referer`. Đang có phiên vẫn vào được trang |
 | Gõ vào mục 4 | Hiện mục 6, ẩn mục 5 |
-| Nhấn mục 8 hoặc Enter | Kiểm trên máy theo BR-73.1 trước. Mục 4 ngắn hơn 15 ký tự, kể cả trống, thì báo ở mục 5 "Mật khẩu cần ít nhất 15 ký tự."; dài hơn 128 thì "Mật khẩu tối đa 128 ký tự."; không gọi API. Hết lỗi thì gọi API #8 với `{ token, password: mục 4 }`; trong lúc chờ, nút hiện vòng xoay và không bấm được |
+| Nhấn mục 8 hoặc Enter | Kiểm trên máy theo BR-73.1 trước. Mục 4 ngắn hơn 15 ký tự, kể cả trống, thì báo ở mục 5 "Mật khẩu cần ít nhất 15 ký tự."; dài hơn 128 thì "Mật khẩu quá dài."; không gọi API. Hết lỗi thì gọi API #8 với `{ token, password: mục 4 }`; trong lúc chờ, nút hiện vòng xoay và không bấm được |
 | API trả 200 | Chuyển tới `redirectTo`. Phiên mới (không giữ đăng nhập) thay phiên cũ của trình duyệt này, mọi phiên khác của tài khoản bị thu hồi (BR-77.5) |
-| API trả 400 `VALIDATION_FAILED` | Mục 5 hiện `message` của lỗi `password`: `TOO_SHORT` "Mật khẩu cần ít nhất 15 ký tự.", `TOO_LONG` "Mật khẩu tối đa 128 ký tự.", `TOO_COMMON` "Mật khẩu quá phổ biến, dễ bị đoán. Chọn mật khẩu khác." Link vẫn dùng được |
+| API trả 400 `VALIDATION_FAILED` | Mục 5 hiện `message` của lỗi `password`: `TOO_SHORT` "Mật khẩu cần ít nhất 15 ký tự.", `TOO_LONG` "Mật khẩu quá dài.", `TOO_COMMON` "Mật khẩu quá phổ biến, dễ bị đoán. Chọn mật khẩu khác." Link vẫn dùng được |
 | API trả 410 `RESET_LINK_INVALID` | Thay trang bằng "Link không còn dùng được" |
 | API trả 429 `RATE_LIMITED` | Mục 5: "Thử quá nhiều lần. Thử lại sau {Retry-After} giây." |
 | Lỗi mạng hoặc 5xx | Mục 5: "Chưa đặt được mật khẩu, thử lại sau." Lỗi 5xx có `requestId` thì thêm "Mã lỗi: {requestId}" (BR-79) |
