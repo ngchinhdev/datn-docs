@@ -63,3 +63,4 @@ Layout của `/app` gọi API #3; trả 401 thì chuyển tới `/login?next={đ
 | Lời mời đang chờ (nhận, từ chối) | Thuộc MH-05 (BR-78) |
 | Trạng thái "Tạm dừng" và ghi chú gói hết hạn | Thuộc bảng gói (BR-82). Hiện mọi cơ sở là `active` hoặc `locked` |
 | Trang báo khóa đầy đủ (lý do, thời điểm khóa) | Thuộc MH-10 |
+| Cập nhật "Dùng gần nhất" khi đăng nhập có `?next=` | Đăng nhập có `?next=` đi thẳng tới đường dẫn đó mà không gọi API #5, nên `lastUsed` chưa đổi. Nhãn của mục 7 chỉ đổi khi chọn cơ sở ở màn này |
