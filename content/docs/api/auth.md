@@ -16,7 +16,7 @@ Nghiệp vụ ở [Xác thực nhân sự](../features/auth.md). Quy ước chun
 | 5 | `POST /v1/auth/workspaces/{slug}/enter` | Nhân sự | 200 | `NOT_FOUND` | BR-79 |
 | 6 | `POST /v1/auth/password/forgot` | Công khai | 202 | | BR-77.1, 77.3 |
 | 7 | `POST /v1/auth/password/reset/check` | Công khai | 200 | `RESET_LINK_INVALID` | BR-77.2, 77.6 |
-| 8 | `POST /v1/auth/password/reset` | Công khai | 200, đặt cookie | `RESET_LINK_INVALID`, `PASSWORD_TOO_SHORT`, `PASSWORD_TOO_LONG`, `PASSWORD_TOO_COMMON` | BR-73, BR-77 |
+| 8 | `POST /v1/auth/password/reset` | Công khai | 200, đặt cookie | `RESET_LINK_INVALID` | BR-73, BR-77 |
 | 9 | `POST /v1/platform/auth/login` | Công khai | 200, đặt cookie | `INVALID_CREDENTIALS`, `LOGIN_LOCKED` | BR-76, T-18 |
 | 10 | `POST /v1/platform/auth/logout` | Công khai | 204, xóa cookie | | BR-76.12 |
 | 11 | `GET /v1/platform/auth/session` | Quản trị nền tảng | 200 | `UNAUTHENTICATED` | BR-76.11 |
@@ -111,15 +111,18 @@ Khi gửi: đánh dấu `replaced_at` cho các link cũ còn hiệu lực, tạo
 
 `POST /v1/auth/password/reset` với body `{ token, password }`.
 
-1. Link không dùng được: trả **410** `RESET_LINK_INVALID`.
-2. Mật khẩu sai BR-73: trả **422** `PASSWORD_TOO_SHORT`, `PASSWORD_TOO_LONG` hoặc `PASSWORD_TOO_COMMON`. Link vẫn còn dùng được.
-3. Làm các việc sau trong **một transaction**:
+1. Body sai schema: trả **400** `VALIDATION_FAILED`. Mật khẩu ngắn hơn 15 hoặc dài hơn 128 ký tự (BR-73.1) báo ở đây: `errors` có `password` với `TOO_SHORT` hoặc `TOO_LONG`.
+2. Link không dùng được: trả **410** `RESET_LINK_INVALID`.
+3. Mật khẩu nằm trong danh sách phổ biến (BR-73.3): trả **400** `VALIDATION_FAILED`, `errors` có `password` với `TOO_COMMON`.
+4. Làm các việc sau trong **một transaction**:
    - lưu hash mới;
    - đánh dấu link đã dùng;
    - thu hồi mọi phiên của tài khoản;
    - xóa `login_throttles` của email;
    - tạo phiên mới với `remember = false` (BR-77.5).
-4. Trả về giống đăng nhập: `{ user, redirectTo }`. `redirectTo` ưu tiên cơ sở dùng gần nhất.
+5. Trả về giống đăng nhập: `{ user, redirectTo }`. `redirectTo` ưu tiên cơ sở dùng gần nhất.
+
+Mọi lỗi mật khẩu ở bước 1 và 3 giữ link dùng được, nên người dùng sửa rồi gửi lại với cùng link. Hai request cùng lúc với một link thì chỉ một request qua bước 4, request kia nhận 410.
 
 ## 9 đến 11. Quản trị nền tảng
 

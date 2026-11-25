@@ -146,7 +146,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 | AC-16 | Vừa gửi link lúc 10:00:00 | Gửi lại lúc 10:00:30, rồi lúc 10:01:00 | Lần 10:00:30 không có thư. Lần 10:01:00 có thư, link 10:00 hết hiệu lực | BR-77.3 |
 | AC-17 | Link tạo lúc 10:00 | Mở lúc 10:31 | 410 `RESET_LINK_INVALID` | BR-77.2, 77.6 |
 | AC-18 | Link đã dùng | Dùng lại | 410 `RESET_LINK_INVALID` | BR-77.2 |
-| AC-19 | Mật khẩu mới 14 ký tự / nằm trong danh sách phổ biến | Đặt lại | 422 `PASSWORD_TOO_SHORT` / `PASSWORD_TOO_COMMON`, link vẫn dùng được | BR-73.1, 73.3 |
+| AC-19 | Mật khẩu mới 14 ký tự / nằm trong danh sách phổ biến | Đặt lại | 400 `VALIDATION_FAILED`, `errors[0]` là `password` với `TOO_SHORT` / `TOO_COMMON`; link vẫn dùng được | BR-73.1, 73.3 |
 | AC-20 | Có 2 phiên ở 2 máy, đang bị khóa | Đặt lại thành công | Cả 2 phiên cũ trả 401; đăng nhập được ngay | BR-77.5 |
 | AC-21 | Mật khẩu `123456` (tài khoản mẫu) | Đăng nhập | Vào được: đăng nhập không kiểm độ dài | BR-73.5 |
 | AC-22 | Tài khoản thuộc 1 cơ sở, vai kỹ thuật viên | Đăng nhập | Nơi đến là Lịch của tôi của cơ sở đó | BR-79 |
