@@ -16,7 +16,7 @@ Nghiệp vụ ở [Xác thực nhân sự](../features/auth.md). Quy ước chun
 | 5 | `POST /v1/auth/workspaces/{slug}/enter` | Nhân sự | 200 | `NOT_FOUND` | BR-79 |
 | 6 | `POST /v1/auth/password/forgot` | Công khai | 202 | | BR-77.1, 77.3 |
 | 7 | `POST /v1/auth/password/reset/check` | Công khai | 200 | `RESET_LINK_INVALID` | BR-77.2, 77.6 |
-| 8 | `POST /v1/auth/password/reset` | Công khai | 200, đặt cookie | `RESET_LINK_INVALID`, `PASSWORD_TOO_SHORT`, `PASSWORD_TOO_LONG`, `PASSWORD_TOO_COMMON` | BR-73, BR-77 |
+| 8 | `POST /v1/auth/password/reset` | Công khai | 200, đặt cookie | `RESET_LINK_INVALID` | BR-73, BR-77 |
 | 9 | `POST /v1/platform/auth/login` | Công khai | 200, đặt cookie | `INVALID_CREDENTIALS`, `LOGIN_LOCKED` | BR-76, T-18 |
 | 10 | `POST /v1/platform/auth/logout` | Công khai | 204, xóa cookie | | BR-76.12 |
 | 11 | `GET /v1/platform/auth/session` | Quản trị nền tảng | 200 | `UNAUTHENTICATED` | BR-76.11 |
@@ -101,7 +101,7 @@ Máy chủ chỉ gửi email khi đủ cả ba điều kiện:
 - không phải tài khoản quản trị nền tảng;
 - link gần nhất đã tạo cách đây ít nhất 60 giây.
 
-Khi gửi: đánh dấu `replaced_at` cho các link cũ còn hiệu lực, tạo link mới hạn 30 phút, đưa email vào hàng đợi (BR-77.2, 77.3). Link có dạng `{WEB_ORIGIN}/reset-password?token=…`.
+Khi gửi: đánh dấu `replaced_at` cho các link cũ còn hiệu lực, tạo link mới hạn 30 phút, đưa email vào hàng đợi (BR-77.2, 77.3). Link có dạng `{WEB_ORIGIN}/reset-password?token=…`. Request không chờ hàng đợi nhận email, để thời gian trả lời không khác nhau rõ giữa email có và không có tài khoản.
 
 ## 7. Kiểm link đặt lại
 
@@ -111,15 +111,18 @@ Khi gửi: đánh dấu `replaced_at` cho các link cũ còn hiệu lực, tạo
 
 `POST /v1/auth/password/reset` với body `{ token, password }`.
 
-1. Link không dùng được: trả **410** `RESET_LINK_INVALID`.
-2. Mật khẩu sai BR-73: trả **422** `PASSWORD_TOO_SHORT`, `PASSWORD_TOO_LONG` hoặc `PASSWORD_TOO_COMMON`. Link vẫn còn dùng được.
-3. Làm các việc sau trong **một transaction**:
+1. Body sai schema: trả **400** `VALIDATION_FAILED`. Mật khẩu ngắn hơn 15 hoặc dài hơn 128 ký tự (BR-73.1) báo ở đây: `errors` có `password` với `TOO_SHORT` hoặc `TOO_LONG`.
+2. Link không dùng được: trả **410** `RESET_LINK_INVALID`.
+3. Mật khẩu nằm trong danh sách phổ biến (BR-73.3): trả **400** `VALIDATION_FAILED`, `errors` có `password` với `TOO_COMMON`.
+4. Làm các việc sau trong **một transaction**:
    - lưu hash mới;
    - đánh dấu link đã dùng;
    - thu hồi mọi phiên của tài khoản;
    - xóa `login_throttles` của email;
    - tạo phiên mới với `remember = false` (BR-77.5).
-4. Trả về giống đăng nhập: `{ user, redirectTo }`. `redirectTo` ưu tiên cơ sở dùng gần nhất.
+5. Trả về giống đăng nhập: `{ user, redirectTo }`. `redirectTo` ưu tiên cơ sở dùng gần nhất.
+
+Mọi lỗi mật khẩu ở bước 1 và 3 giữ link dùng được, nên người dùng sửa rồi gửi lại với cùng link. Hai request cùng lúc với một link thì chỉ một request qua bước 4, request kia nhận 410.
 
 ## 9 đến 11. Quản trị nền tảng
 
@@ -135,7 +138,7 @@ Giống đăng nhập, phiên và đăng xuất của nhân sự, chỉ khác nh
 
 Scalar (`http://localhost:4000/docs`) có sẵn các ca thử có tên cho mỗi endpoint: chọn trong danh sách ví dụ của request, hoặc của phản hồi từng status. Mọi tài khoản mẫu có mật khẩu `123456`. Dữ liệu mẫu tạo bằng `pnpm --filter @datn/api db:seed`; thêm `-- --reset` để xóa dữ liệu mẫu (kể cả phiên và bộ đếm sai) rồi tạo lại. Danh sách ca nằm ở `apps/api/src/openapi/examples/auth.ts`, và một test chạy từng ca trên dữ liệu mẫu để kiểm kết quả ghi dưới đây.
 
-Ca nào làm đổi dữ liệu thì chạy lại cho kết quả khác: "Sai lần thứ 3" tăng bộ đếm của `sapkhoa@tocmay.vn`, nên lần chạy sau đã là lần thứ 4. `--reset` đưa bộ đếm về như ban đầu.
+Ca nào làm đổi dữ liệu thì chạy lại cho kết quả khác: "Sai lần thứ 3" tăng bộ đếm của `sapkhoa@tocmay.vn`, nên lần chạy sau đã là lần thứ 4. `--reset` đưa bộ đếm về như ban đầu. Ca "Thành công" của #8 dùng hết link còn hạn và đổi mật khẩu của `datlai@tocmay.vn`: chạy lại `db:seed` đưa cả hai về như ban đầu.
 
 ### Đăng nhập nhân sự (#1, `POST /v1/auth/login`)
 
@@ -171,6 +174,37 @@ Cần đăng nhập trước bằng tài khoản ghi ở cột "Đăng nhập l�
 | Cơ sở của mình | `chinh@tocmay.vn` | `toc-may` | 200, `redirectTo` là `/app/toc-may/calendar` |
 | Cơ sở của người khác | `chinh@tocmay.vn` | `nail-ha-vy` | 404 `NOT_FOUND` |
 | Cơ sở bị khóa | `chu@toccu.vn` | `toc-cu` | 200, `redirectTo` là `/app/toc-cu/calendar` (khung ứng dụng hiện trang báo khóa) |
+
+### Quên mật khẩu (#6, `POST /v1/auth/password/forgot`)
+
+Email gửi đi xem ở Mailpit (`http://localhost:8025`). Gọi lại với cùng email trong 60 giây thì vẫn 202 và không có email nào mới (BR-77.3).
+
+| Ca | Email | Kết quả |
+|---|---|---|
+| Có tài khoản | `chinh@tocmay.vn` | 202, một email đặt lại trong Mailpit |
+| Không có tài khoản | `khongco@email.vn` | 202, cùng phản hồi, không có email |
+| Quản trị nền tảng | `quantri@sapio.vn` | 202, cùng phản hồi, không có email |
+
+### Kiểm link đặt lại (#7, `POST /v1/auth/password/reset/check`)
+
+Tài khoản `datlai@tocmay.vn` (quản lý của `toc-may`) có ba link với token cố định. Link còn hạn có hạn một năm, để còn dùng được khi thử lại sau.
+
+| Ca | `token` | Kết quả |
+|---|---|---|
+| Link còn hạn | `mau-link-con-han` | 200, `email` là `datlai@tocmay.vn` |
+| Link đã hết hạn | `mau-link-het-han` | 410 `RESET_LINK_INVALID` |
+| Link đã dùng | `mau-link-da-dung` | 410 `RESET_LINK_INVALID` |
+| Link hỏng | `link-khong-ton-tai` | 410 `RESET_LINK_INVALID`, thân giống ca "Link đã hết hạn" (trừ `requestId`) |
+
+### Đặt lại mật khẩu (#8, `POST /v1/auth/password/reset`)
+
+| Ca | `token` | `password` | Kết quả |
+|---|---|---|---|
+| Thành công | `mau-link-con-han` | `mot cau mat khau moi de nho` | 200, `redirectTo` là `/app/toc-may/calendar` |
+| Mật khẩu ngắn | `mau-link-con-han` | `ngan` | 400 `VALIDATION_FAILED`, `errors[0]` là `password` `TOO_SHORT` |
+| Mật khẩu phổ biến | `mau-link-con-han` | `1q2w3e4r5t6y7u8i9o0p` | 400 `VALIDATION_FAILED`, `errors[0]` là `password` `TOO_COMMON` |
+| Link đã dùng | `mau-link-da-dung` | `mot cau mat khau moi de nho` | 410 `RESET_LINK_INVALID` |
+| Link hỏng | `link-khong-ton-tai` | `mot cau mat khau moi de nho` | 410 `RESET_LINK_INVALID`, thân giống ca "Link đã dùng" (trừ `requestId`) |
 
 ### Phiên (#3, #11)
 

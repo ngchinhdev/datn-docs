@@ -73,6 +73,7 @@ Mã theo trường:
 | `INVALID_EMAIL` | Sai định dạng email |
 | `TOO_SHORT` | Ngắn hơn mức tối thiểu (trừ trường hợp `REQUIRED`) |
 | `TOO_LONG` | Dài hơn mức tối đa |
+| `TOO_COMMON` | Mật khẩu nằm trong danh sách mật khẩu phổ biến (BR-73.3) |
 | `INVALID_VALUE` | Mọi lỗi còn lại: sai kiểu, sai dạng, ngoài danh sách cho phép |
 
 Câu `detail` của từng `code` và câu `message` của từng mã theo trường (kể cả câu riêng của trường `email`, `password`) nằm ở `packages/shared/src/errors.ts`. API và web dùng chung file đó.
@@ -88,6 +89,7 @@ Lỗi dùng chung:
 | 403 | `FORBIDDEN` | Có phiên nhưng không có quyền |
 | 403 | `ORIGIN_NOT_ALLOWED` | Header `Origin` không thuộc danh sách tin cậy |
 | 404 | `NOT_FOUND` | Không có tài nguyên, hoặc không thuộc cơ sở của phiên |
+| 410 | `RESET_LINK_INVALID` | Link đặt lại mật khẩu đã dùng, hết hạn, đã bị thay hoặc không có. Câu `detail`: "Link không còn dùng được." |
 | 429 | `RATE_LIMITED` | Gọi quá nhiều lần. Có header `Retry-After` (giây) |
 | 500 | `INTERNAL_ERROR` | Lỗi máy chủ. Thân lỗi không chứa chi tiết nào của lỗi |
 
