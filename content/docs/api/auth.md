@@ -25,6 +25,8 @@ Giới hạn theo IP (`RATE_LIMITED`): #1 và #9 tối đa 20 lần mỗi phút,
 
 ## 1. Đăng nhập
 
+Tham chiếu: [Đăng nhập](./reference/auth/authLogin.mdx)
+
 `POST /v1/auth/login`
 
 | Trường | Kiểu | Bắt buộc | Ghi chú |
@@ -61,13 +63,19 @@ Trả về 200:
 
 ## 2. Đăng xuất
 
+Tham chiếu: [Đăng xuất](./reference/auth/authLogout.mdx)
+
 `POST /v1/auth/logout`. Đặt `revoked_at` cho phiên của cookie, rồi xóa cookie. Không có phiên vẫn trả 204, để bấm hai lần không báo lỗi.
 
 ## 3. Phiên hiện tại
 
+Tham chiếu: [Xem phiên hiện tại](./reference/auth/authSession.mdx)
+
 `GET /v1/auth/session`. Trả về `{ user, remember, expiresAt }`. Phiên có `remember` thì mỗi lần gọi API được tính là một lần dùng: cập nhật `last_used_at`, `expires_at` và `Max-Age` của cookie. Để đỡ ghi DB, chỉ cập nhật khi `last_used_at` đã cũ hơn 5 phút (BR-76.10).
 
 ## 4. Danh sách cơ sở
+
+Tham chiếu: [Danh sách cơ sở](./reference/auth/authWorkspaces.mdx)
 
 `GET /v1/auth/workspaces`. Dùng cho Chọn cơ sở (MH-06). Đọc `memberships` trong `withUser(userId, ...)` rồi nối với `tenants` ([ERD](../architecture/erd.md), T-07).
 
@@ -90,9 +98,13 @@ Khi chưa có bảng gói thì mọi cơ sở là `active`.
 
 ## 5. Vào một cơ sở
 
+Tham chiếu: [Vào một cơ sở](./reference/auth/authEnter.mdx)
+
 `POST /v1/auth/workspaces/{slug}/enter`. Ghi `users.last_tenant_id` rồi trả về `{ redirectTo }`, là trang đầu của cơ sở đó theo vai trò. Tài khoản không có membership ở cơ sở này thì trả **404** `NOT_FOUND`, không phải 403, để không lộ slug có tồn tại.
 
 ## 6. Quên mật khẩu
+
+Tham chiếu: [Gửi link đặt lại mật khẩu](./reference/auth/authForgotPassword.mdx)
 
 `POST /v1/auth/password/forgot` với body `{ email }`. Luôn trả **202** với body rỗng (BR-77.1).
 
@@ -105,9 +117,13 @@ Khi gửi: đánh dấu `replaced_at` cho các link cũ còn hiệu lực, tạo
 
 ## 7. Kiểm link đặt lại
 
+Tham chiếu: [Kiểm tra link đặt lại](./reference/auth/authCheckResetLink.mdx)
+
 `POST /v1/auth/password/reset/check` với body `{ token }`. Link còn dùng được thì trả 200 `{ email }`, để màn đặt lại hiện email đang đặt. Link đã dùng, hết hạn hoặc đã bị thay thì trả **410** `RESET_LINK_INVALID` (BR-77.6). Token gửi trong body chứ không gửi trong URL của API, để không ghi vào log truy cập.
 
 ## 8. Đặt lại mật khẩu
+
+Tham chiếu: [Đặt mật khẩu mới](./reference/auth/authResetPassword.mdx)
 
 `POST /v1/auth/password/reset` với body `{ token, password }`.
 
@@ -125,6 +141,8 @@ Khi gửi: đánh dấu `replaced_at` cho các link cũ còn hiệu lực, tạo
 Mọi lỗi mật khẩu ở bước 1 và 3 giữ link dùng được, nên người dùng sửa rồi gửi lại với cùng link. Hai request cùng lúc với một link thì chỉ một request qua bước 4, request kia nhận 410.
 
 ## 9 đến 11. Quản trị nền tảng
+
+Tham chiếu: [Đăng nhập quản trị](./reference/platform-auth/platformAuthLogin.mdx), [Đăng xuất quản trị](./reference/platform-auth/platformAuthLogout.mdx), [Xem phiên quản trị](./reference/platform-auth/platformAuthSession.mdx).
 
 Giống đăng nhập, phiên và đăng xuất của nhân sự, chỉ khác những điểm sau:
 
