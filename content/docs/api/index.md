@@ -7,7 +7,7 @@ description: Địa chỉ, xác thực, định dạng lỗi và cách đọc c�
 
 - **Schema** (tham số, body, kiểu trả về) sinh từ code: NestJS cùng schema Zod trong `packages/shared`, xuất ra `openapi.json`. Không viết tay schema ở đây.
 - Khi chạy `apps/api`, giao diện **Scalar** ở `http://localhost:4000/docs` cho gọi thử từng endpoint (T-19).
-- Các trang trong mục API này viết phần code không tự nói ra được: quyền, lỗi nghiệp vụ, quy tắc nghiệp vụ, thứ tự xử lý. Bảng tham chiếu đầy đủ sinh từ `openapi.json` bằng fumadocs-openapi (T-19).
+- Các trang trong mục API này viết phần code không tự nói ra được: quyền, lỗi nghiệp vụ, quy tắc nghiệp vụ, thứ tự xử lý. Bảng tham chiếu đầy đủ từng endpoint (đường dẫn, tham số, thân yêu cầu, phản hồi) nằm ở nhóm [Tham chiếu](./reference/index.md), sinh từ `openapi.json` (T-19).
 
 ## Địa chỉ
 
