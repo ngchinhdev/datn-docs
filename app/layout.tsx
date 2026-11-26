@@ -2,6 +2,7 @@ import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata } from 'next';
 import { Be_Vietnam_Pro } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { i18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import './global.css';
 import './sapio/tokens.css';
@@ -25,7 +26,9 @@ export default function Layout({ children }: { children: ReactNode }) {
     <html lang="vi" suppressHydrationWarning className={cn('font-sans', beVietnam.variable)}>
       <body className="flex min-h-screen flex-col">
         {/* tokens.css switches theme on [data-theme], shadcn and Fumadocs on .dark. */}
-        <RootProvider theme={{ attribute: ['class', 'data-theme'] }}>{children}</RootProvider>
+        <RootProvider theme={{ attribute: ['class', 'data-theme'] }} i18n={i18n}>
+          {children}
+        </RootProvider>
       </body>
     </html>
   );
