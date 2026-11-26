@@ -45,7 +45,7 @@ Repo có hai vùng:
 
 `sessions/archive/initial-analysis.md` là bản phân tích ban đầu, **rộng hơn phạm vi đồ án**: chỉ tham khảo, không làm theo.
 
-Link giữa các trang trong `content/docs` ghi đường dẫn tới file, có đuôi `.md` (`../features/auth.md#muc`), vì Fumadocs chỉ đổi link dạng này sang URL của trang. Tên thư mục và tên file bằng tiếng Anh, nội dung bằng tiếng Việt.
+Link giữa các trang trong `content/docs` ghi đường dẫn tới file, có đuôi `.md` (`../features/auth.md#muc`), vì Fumadocs chỉ đổi link dạng này sang URL của trang. Tên thư mục và tên file bằng tiếng Anh, nội dung bằng tiếng Việt. Trang tham chiếu API sinh từ OpenAPI không có file `.md`: link tới đó ghi `./reference/<tag>/<operationId>.mdx` (tương đối so với trang đang viết, như `./reference/auth/authLogin.mdx` trong `api/auth.md`).
 
 ## Tóm tắt kỹ thuật (chi tiết ở T-xx)
 
@@ -89,6 +89,7 @@ Repo này (`datn-docs`):
 pnpm install
 pnpm dev        # http://localhost:3100/docs và /mock (3000 là web của datn-saas)
 pnpm build
+pnpm sync:openapi [đường dẫn]   # chép openapi.json của API vào openapi/sapio.json; chạy mỗi khi API đổi, commit cùng PR
 ```
 
 Lệnh của `datn-saas` xem `datn-saas/CLAUDE.md`.
