@@ -4,6 +4,7 @@
 /* Fumadocs reads the shadcn variables below, so docs and mock share one theme. */
 @import 'fumadocs-ui/css/shadcn.css';
 @import 'fumadocs-ui/css/preset.css';
+@import 'fumadocs-openapi/css/preset.css';
 
 @custom-variant dark (&:is(.dark *));
 
