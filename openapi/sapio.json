@@ -1,0 +1,2984 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "operationId": "healthGet",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "API, cơ sở dữ liệu và Redis đều hoạt động",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "down"
+                      ]
+                    },
+                    "db": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "down"
+                      ]
+                    },
+                    "redis": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "down"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "db",
+                    "redis"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Một thành phần phụ thuộc đang ngừng hoạt động",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "down"
+                      ]
+                    },
+                    "db": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "down"
+                      ]
+                    },
+                    "redis": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "down"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "db",
+                    "redis"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Kiểm tra tình trạng hệ thống",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "operationId": "authLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  },
+                  "remember": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              },
+              "examples": {
+                "chu-mot-co-so": {
+                  "summary": "Chủ một cơ sở",
+                  "value": {
+                    "email": "chinh@tocmay.vn",
+                    "password": "123456"
+                  }
+                },
+                "ky-thuat-vien": {
+                  "summary": "Kỹ thuật viên",
+                  "value": {
+                    "email": "mai@tocmay.vn",
+                    "password": "123456"
+                  }
+                },
+                "nhieu-co-so": {
+                  "summary": "Nhiều cơ sở",
+                  "value": {
+                    "email": "linh.pham@email.vn",
+                    "password": "123456"
+                  }
+                },
+                "chua-co-co-so": {
+                  "summary": "Chưa thuộc cơ sở nào",
+                  "value": {
+                    "email": "moi@email.vn",
+                    "password": "123456"
+                  }
+                },
+                "co-so-bi-khoa": {
+                  "summary": "Cơ sở bị khóa",
+                  "value": {
+                    "email": "chu@toccu.vn",
+                    "password": "123456"
+                  }
+                },
+                "sai-mat-khau": {
+                  "summary": "Sai mật khẩu",
+                  "value": {
+                    "email": "chinh@tocmay.vn",
+                    "password": "sai-mat-khau"
+                  }
+                },
+                "sai-lan-thu-3": {
+                  "summary": "Sai lần thứ 3",
+                  "value": {
+                    "email": "sapkhoa@tocmay.vn",
+                    "password": "sai-mat-khau"
+                  }
+                },
+                "dang-bi-khoa": {
+                  "summary": "Đang bị khóa",
+                  "value": {
+                    "email": "dakhoa@tocmay.vn",
+                    "password": "123456"
+                  }
+                },
+                "email-khong-ton-tai": {
+                  "summary": "Email không tồn tại",
+                  "value": {
+                    "email": "khongco@email.vn",
+                    "password": "sai-mat-khau"
+                  }
+                },
+                "quan-tri-nham-cua": {
+                  "summary": "Quản trị vào nhầm cửa",
+                  "value": {
+                    "email": "quantri@sapio.vn",
+                    "password": "123456"
+                  }
+                },
+                "email-sai-dang": {
+                  "summary": "Email sai dạng",
+                  "value": {
+                    "email": "abc",
+                    "password": "123456"
+                  }
+                },
+                "mat-khau-trong": {
+                  "summary": "Mật khẩu trống",
+                  "value": {
+                    "email": "chinh@tocmay.vn",
+                    "password": ""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đăng nhập xong, đặt cookie phiên",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "redirectTo": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "user",
+                    "redirectTo"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "chu-mot-co-so": {
+                    "summary": "Chủ một cơ sở",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "chinh@tocmay.vn",
+                        "name": "Chính Nguyễn"
+                      },
+                      "redirectTo": "/app/toc-may/calendar"
+                    }
+                  },
+                  "ky-thuat-vien": {
+                    "summary": "Kỹ thuật viên",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "mai@tocmay.vn",
+                        "name": "Trần Thị Mai"
+                      },
+                      "redirectTo": "/app/toc-may/my/schedule"
+                    }
+                  },
+                  "nhieu-co-so": {
+                    "summary": "Nhiều cơ sở",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "linh.pham@email.vn",
+                        "name": "Phạm Khánh Linh"
+                      },
+                      "redirectTo": "/select-workspace"
+                    }
+                  },
+                  "chua-co-co-so": {
+                    "summary": "Chưa thuộc cơ sở nào",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "moi@email.vn",
+                        "name": "Người mới"
+                      },
+                      "redirectTo": "/select-workspace"
+                    }
+                  },
+                  "co-so-bi-khoa": {
+                    "summary": "Cơ sở bị khóa",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "chu@toccu.vn",
+                        "name": "Chủ Tiệm Tóc Cũ"
+                      },
+                      "redirectTo": "/select-workspace"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: dữ liệu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATION_FAILED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thông tin chưa hợp lệ."
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "password"
+                          },
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "REQUIRED",
+                              "INVALID_EMAIL",
+                              "TOO_SHORT",
+                              "TOO_LONG",
+                              "TOO_COMMON",
+                              "INVALID_VALUE"
+                            ],
+                            "example": "REQUIRED"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Nhập mật khẩu."
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "code",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "errors",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 400,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Thông tin chưa hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "errors": [
+                      {
+                        "field": "password",
+                        "code": "REQUIRED",
+                        "message": "Nhập mật khẩu."
+                      }
+                    ]
+                  }
+                },
+                "examples": {
+                  "email-sai-dang": {
+                    "summary": "Email sai dạng",
+                    "value": {
+                      "status": 400,
+                      "code": "VALIDATION_FAILED",
+                      "detail": "Thông tin chưa hợp lệ.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                      "errors": [
+                        {
+                          "field": "email",
+                          "code": "INVALID_EMAIL",
+                          "message": "Email chưa đúng. Ví dụ: an@tiemcuaban.vn."
+                        }
+                      ]
+                    }
+                  },
+                  "mat-khau-trong": {
+                    "summary": "Mật khẩu trống",
+                    "value": {
+                      "status": 400,
+                      "code": "VALIDATION_FAILED",
+                      "detail": "Thông tin chưa hợp lệ.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                      "errors": [
+                        {
+                          "field": "password",
+                          "code": "REQUIRED",
+                          "message": "Nhập mật khẩu."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "INVALID_CREDENTIALS: email hoặc mật khẩu chưa đúng",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_CREDENTIALS"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Email hoặc mật khẩu chưa đúng."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "remainingAttempts": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 2
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "INVALID_CREDENTIALS",
+                    "detail": "Email hoặc mật khẩu chưa đúng.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "remainingAttempts": 2
+                  }
+                },
+                "examples": {
+                  "sai-mat-khau": {
+                    "summary": "Sai mật khẩu",
+                    "value": {
+                      "status": 401,
+                      "code": "INVALID_CREDENTIALS",
+                      "detail": "Email hoặc mật khẩu chưa đúng.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  },
+                  "sai-lan-thu-3": {
+                    "summary": "Sai lần thứ 3",
+                    "value": {
+                      "status": 401,
+                      "code": "INVALID_CREDENTIALS",
+                      "detail": "Email hoặc mật khẩu chưa đúng.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                      "remainingAttempts": 2
+                    }
+                  },
+                  "email-khong-ton-tai": {
+                    "summary": "Email không tồn tại",
+                    "value": {
+                      "status": 401,
+                      "code": "INVALID_CREDENTIALS",
+                      "detail": "Email hoặc mật khẩu chưa đúng.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  },
+                  "quan-tri-nham-cua": {
+                    "summary": "Quản trị vào nhầm cửa",
+                    "value": {
+                      "status": 401,
+                      "code": "INVALID_CREDENTIALS",
+                      "detail": "Email hoặc mật khẩu chưa đúng.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "LOGIN_LOCKED: đăng nhập đang bị tạm khóa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        423
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "LOGIN_LOCKED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Tạm khóa đăng nhập do nhập sai mật khẩu nhiều lần."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "lockedUntil": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId",
+                    "lockedUntil"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 423,
+                    "code": "LOGIN_LOCKED",
+                    "detail": "Tạm khóa đăng nhập do nhập sai mật khẩu nhiều lần.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "lockedUntil": "2026-11-24T03:15:00.000Z"
+                  }
+                },
+                "examples": {
+                  "dang-bi-khoa": {
+                    "summary": "Đang bị khóa",
+                    "value": {
+                      "status": 423,
+                      "code": "LOGIN_LOCKED",
+                      "detail": "Tạm khóa đăng nhập do nhập sai mật khẩu nhiều lần.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                      "lockedUntil": "2027-11-24T03:15:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: gọi quá nhiều lần, thử lại sau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        429
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RATE_LIMITED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thử quá nhiều lần. Thử lại sau."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 429,
+                    "code": "RATE_LIMITED",
+                    "detail": "Thử quá nhiều lần. Thử lại sau.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Đăng nhập",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "operationId": "authLogout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Đã thu hồi phiên và xóa cookie; không có phiên vẫn trả 204"
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "summary": "Đăng xuất",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/session": {
+      "get": {
+        "operationId": "authSession",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Phiên còn hiệu lực; trả về người dùng và hạn phiên",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "remember": {
+                      "type": "boolean"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    }
+                  },
+                  "required": [
+                    "user",
+                    "remember",
+                    "expiresAt"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "ok": {
+                    "summary": "Đang đăng nhập",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "chinh@tocmay.vn",
+                        "name": "Chính Nguyễn"
+                      },
+                      "remember": false,
+                      "expiresAt": "2026-11-24T15:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED: chưa đăng nhập hoặc phiên đã hết hạn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "UNAUTHENTICATED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Phiên đăng nhập đã hết. Đăng nhập lại."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "UNAUTHENTICATED",
+                    "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "Phiên hết hạn hoặc đã đăng xuất",
+                    "value": {
+                      "status": 401,
+                      "code": "UNAUTHENTICATED",
+                      "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "summary": "Xem phiên hiện tại",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/workspaces": {
+      "get": {
+        "operationId": "authWorkspaces",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Danh sách cơ sở của tài khoản, kèm vai trò và trạng thái",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "slug": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "role": {
+                        "type": "string",
+                        "enum": [
+                          "owner",
+                          "manager",
+                          "receptionist",
+                          "technician"
+                        ]
+                      },
+                      "branch": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                          null
+                        ]
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "active",
+                          "plan-only",
+                          "paused",
+                          "locked"
+                        ]
+                      },
+                      "lastUsed": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "slug",
+                      "name",
+                      "role",
+                      "branch",
+                      "status",
+                      "lastUsed"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "examples": {
+                  "nhieu-co-so": {
+                    "summary": "Nhiều cơ sở",
+                    "value": [
+                      {
+                        "slug": "nail-ha-vy",
+                        "name": "Nail Hạ Vy",
+                        "role": "receptionist",
+                        "branch": null,
+                        "status": "active",
+                        "lastUsed": false
+                      },
+                      {
+                        "slug": "toc-may",
+                        "name": "Salon Tóc Mây",
+                        "role": "receptionist",
+                        "branch": null,
+                        "status": "active",
+                        "lastUsed": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED: chưa đăng nhập hoặc phiên đã hết hạn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "UNAUTHENTICATED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Phiên đăng nhập đã hết. Đăng nhập lại."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "UNAUTHENTICATED",
+                    "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "Phiên hết hạn hoặc đã đăng xuất",
+                    "value": {
+                      "status": 401,
+                      "code": "UNAUTHENTICATED",
+                      "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "summary": "Danh sách cơ sở",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/workspaces/{slug}/enter": {
+      "post": {
+        "operationId": "authEnter",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "examples": {
+              "co-so-cua-minh": {
+                "summary": "Cơ sở của mình",
+                "value": "toc-may"
+              },
+              "co-so-cua-nguoi-khac": {
+                "summary": "Cơ sở của người khác",
+                "value": "nail-ha-vy"
+              },
+              "co-so-bi-khoa": {
+                "summary": "Cơ sở bị khóa",
+                "value": "toc-cu"
+              }
+            },
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Đã vào cơ sở; trả về trang đầu của cơ sở theo vai trò",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "redirectTo": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "redirectTo"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "co-so-cua-minh": {
+                    "summary": "Cơ sở của mình",
+                    "value": {
+                      "redirectTo": "/app/toc-may/calendar"
+                    }
+                  },
+                  "co-so-bi-khoa": {
+                    "summary": "Cơ sở bị khóa",
+                    "value": {
+                      "redirectTo": "/app/toc-cu/calendar"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED: chưa đăng nhập hoặc phiên đã hết hạn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "UNAUTHENTICATED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Phiên đăng nhập đã hết. Đăng nhập lại."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "UNAUTHENTICATED",
+                    "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "Phiên hết hạn hoặc đã đăng xuất",
+                    "value": {
+                      "status": 401,
+                      "code": "UNAUTHENTICATED",
+                      "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "NOT_FOUND: tài khoản không thuộc cơ sở này",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        404
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "NOT_FOUND"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Không tìm thấy."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 404,
+                    "code": "NOT_FOUND",
+                    "detail": "Không tìm thấy.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "co-so-cua-nguoi-khac": {
+                    "summary": "Cơ sở của người khác",
+                    "value": {
+                      "status": 404,
+                      "code": "NOT_FOUND",
+                      "detail": "Không tìm thấy.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "summary": "Vào một cơ sở",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/password/forgot": {
+      "post": {
+        "operationId": "authForgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              },
+              "examples": {
+                "co-tai-khoan": {
+                  "summary": "Có tài khoản",
+                  "value": {
+                    "email": "chinh@tocmay.vn"
+                  }
+                },
+                "khong-co-tai-khoan": {
+                  "summary": "Không có tài khoản",
+                  "value": {
+                    "email": "khongco@email.vn"
+                  }
+                },
+                "quan-tri-nen-tang": {
+                  "summary": "Quản trị nền tảng",
+                  "value": {
+                    "email": "quantri@sapio.vn"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Luôn trả 202, không có body, dù email có tài khoản hay không (BR-77.1)"
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: dữ liệu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATION_FAILED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thông tin chưa hợp lệ."
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "password"
+                          },
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "REQUIRED",
+                              "INVALID_EMAIL",
+                              "TOO_SHORT",
+                              "TOO_LONG",
+                              "TOO_COMMON",
+                              "INVALID_VALUE"
+                            ],
+                            "example": "REQUIRED"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Nhập mật khẩu."
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "code",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "errors",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 400,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Thông tin chưa hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "errors": [
+                      {
+                        "field": "password",
+                        "code": "REQUIRED",
+                        "message": "Nhập mật khẩu."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: gọi quá nhiều lần, thử lại sau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        429
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RATE_LIMITED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thử quá nhiều lần. Thử lại sau."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 429,
+                    "code": "RATE_LIMITED",
+                    "detail": "Thử quá nhiều lần. Thử lại sau.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Gửi link đặt lại mật khẩu",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/password/reset/check": {
+      "post": {
+        "operationId": "authCheckResetLink",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "token"
+                ]
+              },
+              "examples": {
+                "link-con-han": {
+                  "summary": "Link còn hạn",
+                  "value": {
+                    "token": "mau-link-con-han"
+                  }
+                },
+                "link-het-han": {
+                  "summary": "Link đã hết hạn",
+                  "value": {
+                    "token": "mau-link-het-han"
+                  }
+                },
+                "link-da-dung": {
+                  "summary": "Link đã dùng",
+                  "value": {
+                    "token": "mau-link-da-dung"
+                  }
+                },
+                "link-hong": {
+                  "summary": "Link hỏng",
+                  "value": {
+                    "token": "link-khong-ton-tai"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Link còn dùng được; email là tài khoản sẽ được đặt mật khẩu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "email"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "link-con-han": {
+                    "summary": "Link còn hạn",
+                    "value": {
+                      "email": "datlai@tocmay.vn"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: dữ liệu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATION_FAILED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thông tin chưa hợp lệ."
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "password"
+                          },
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "REQUIRED",
+                              "INVALID_EMAIL",
+                              "TOO_SHORT",
+                              "TOO_LONG",
+                              "TOO_COMMON",
+                              "INVALID_VALUE"
+                            ],
+                            "example": "REQUIRED"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Nhập mật khẩu."
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "code",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "errors",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 400,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Thông tin chưa hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "errors": [
+                      {
+                        "field": "password",
+                        "code": "REQUIRED",
+                        "message": "Nhập mật khẩu."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "RESET_LINK_INVALID: link hết hạn, đã dùng hoặc không tồn tại",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        410
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RESET_LINK_INVALID"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Link không còn dùng được."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 410,
+                    "code": "RESET_LINK_INVALID",
+                    "detail": "Link không còn dùng được.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "link-het-han": {
+                    "summary": "Link đã hết hạn",
+                    "value": {
+                      "status": 410,
+                      "code": "RESET_LINK_INVALID",
+                      "detail": "Link không còn dùng được.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  },
+                  "link-da-dung": {
+                    "summary": "Link đã dùng",
+                    "value": {
+                      "status": 410,
+                      "code": "RESET_LINK_INVALID",
+                      "detail": "Link không còn dùng được.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  },
+                  "link-hong": {
+                    "summary": "Link hỏng",
+                    "value": {
+                      "status": 410,
+                      "code": "RESET_LINK_INVALID",
+                      "detail": "Link không còn dùng được.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: gọi quá nhiều lần, thử lại sau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        429
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RATE_LIMITED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thử quá nhiều lần. Thử lại sau."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 429,
+                    "code": "RATE_LIMITED",
+                    "detail": "Thử quá nhiều lần. Thử lại sau.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Kiểm tra link đặt lại",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/password/reset": {
+      "post": {
+        "operationId": "authResetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 15,
+                    "maxLength": 128
+                  }
+                },
+                "required": [
+                  "token",
+                  "password"
+                ]
+              },
+              "examples": {
+                "thanh-cong": {
+                  "summary": "Thành công",
+                  "value": {
+                    "token": "mau-link-con-han",
+                    "password": "mot cau mat khau moi de nho"
+                  }
+                },
+                "mat-khau-ngan": {
+                  "summary": "Mật khẩu ngắn",
+                  "value": {
+                    "token": "mau-link-con-han",
+                    "password": "ngan"
+                  }
+                },
+                "mat-khau-pho-bien": {
+                  "summary": "Mật khẩu phổ biến",
+                  "value": {
+                    "token": "mau-link-con-han",
+                    "password": "1q2w3e4r5t6y7u8i9o0p"
+                  }
+                },
+                "link-da-dung": {
+                  "summary": "Link đã dùng",
+                  "value": {
+                    "token": "mau-link-da-dung",
+                    "password": "mot cau mat khau moi de nho"
+                  }
+                },
+                "link-hong": {
+                  "summary": "Link hỏng",
+                  "value": {
+                    "token": "link-khong-ton-tai",
+                    "password": "mot cau mat khau moi de nho"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đã đặt mật khẩu mới và mở phiên, đặt cookie phiên",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "redirectTo": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "user",
+                    "redirectTo"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "thanh-cong": {
+                    "summary": "Thành công",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "datlai@tocmay.vn",
+                        "name": "Nguyễn Văn Đặt Lại"
+                      },
+                      "redirectTo": "/app/toc-may/calendar"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: mật khẩu quá ngắn, quá dài hoặc quá phổ biến",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATION_FAILED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thông tin chưa hợp lệ."
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "password"
+                          },
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "REQUIRED",
+                              "INVALID_EMAIL",
+                              "TOO_SHORT",
+                              "TOO_LONG",
+                              "TOO_COMMON",
+                              "INVALID_VALUE"
+                            ],
+                            "example": "REQUIRED"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Nhập mật khẩu."
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "code",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "errors",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 400,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Thông tin chưa hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "errors": [
+                      {
+                        "field": "password",
+                        "code": "REQUIRED",
+                        "message": "Nhập mật khẩu."
+                      }
+                    ]
+                  }
+                },
+                "examples": {
+                  "mat-khau-ngan": {
+                    "summary": "Mật khẩu ngắn",
+                    "value": {
+                      "status": 400,
+                      "code": "VALIDATION_FAILED",
+                      "detail": "Thông tin chưa hợp lệ.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                      "errors": [
+                        {
+                          "field": "password",
+                          "code": "TOO_SHORT",
+                          "message": "Mật khẩu cần ít nhất 15 ký tự."
+                        }
+                      ]
+                    }
+                  },
+                  "mat-khau-pho-bien": {
+                    "summary": "Mật khẩu phổ biến",
+                    "value": {
+                      "status": 400,
+                      "code": "VALIDATION_FAILED",
+                      "detail": "Thông tin chưa hợp lệ.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                      "errors": [
+                        {
+                          "field": "password",
+                          "code": "TOO_COMMON",
+                          "message": "Mật khẩu quá phổ biến, dễ bị đoán. Chọn mật khẩu khác."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "RESET_LINK_INVALID: link hết hạn, đã dùng hoặc không tồn tại",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        410
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RESET_LINK_INVALID"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Link không còn dùng được."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 410,
+                    "code": "RESET_LINK_INVALID",
+                    "detail": "Link không còn dùng được.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "link-da-dung": {
+                    "summary": "Link đã dùng",
+                    "value": {
+                      "status": 410,
+                      "code": "RESET_LINK_INVALID",
+                      "detail": "Link không còn dùng được.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  },
+                  "link-hong": {
+                    "summary": "Link hỏng",
+                    "value": {
+                      "status": 410,
+                      "code": "RESET_LINK_INVALID",
+                      "detail": "Link không còn dùng được.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: gọi quá nhiều lần, thử lại sau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        429
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RATE_LIMITED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thử quá nhiều lần. Thử lại sau."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 429,
+                    "code": "RATE_LIMITED",
+                    "detail": "Thử quá nhiều lần. Thử lại sau.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Đặt mật khẩu mới",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/platform/auth/login": {
+      "post": {
+        "operationId": "platformAuthLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1024
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              },
+              "examples": {
+                "quan-tri-dung": {
+                  "summary": "Quản trị đăng nhập đúng",
+                  "value": {
+                    "email": "quantri@sapio.vn",
+                    "password": "123456"
+                  }
+                },
+                "quan-tri-sai-mat-khau": {
+                  "summary": "Sai mật khẩu",
+                  "value": {
+                    "email": "quantri@sapio.vn",
+                    "password": "sai-mat-khau"
+                  }
+                },
+                "nhan-su-nham-cua": {
+                  "summary": "Nhân sự vào nhầm cửa",
+                  "value": {
+                    "email": "chinh@tocmay.vn",
+                    "password": "123456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Đăng nhập xong, đặt cookie phiên quản trị",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "user"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "quan-tri-dung": {
+                    "summary": "Quản trị đăng nhập đúng",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "quantri@sapio.vn",
+                        "name": "Quản trị Sapio"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: dữ liệu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATION_FAILED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thông tin chưa hợp lệ."
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "password"
+                          },
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "REQUIRED",
+                              "INVALID_EMAIL",
+                              "TOO_SHORT",
+                              "TOO_LONG",
+                              "TOO_COMMON",
+                              "INVALID_VALUE"
+                            ],
+                            "example": "REQUIRED"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Nhập mật khẩu."
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "code",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "errors",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 400,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Thông tin chưa hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "errors": [
+                      {
+                        "field": "password",
+                        "code": "REQUIRED",
+                        "message": "Nhập mật khẩu."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "INVALID_CREDENTIALS: email hoặc mật khẩu chưa đúng",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_CREDENTIALS"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Email hoặc mật khẩu chưa đúng."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "remainingAttempts": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 2
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "INVALID_CREDENTIALS",
+                    "detail": "Email hoặc mật khẩu chưa đúng.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "remainingAttempts": 2
+                  }
+                },
+                "examples": {
+                  "quan-tri-sai-mat-khau": {
+                    "summary": "Sai mật khẩu",
+                    "value": {
+                      "status": 401,
+                      "code": "INVALID_CREDENTIALS",
+                      "detail": "Email hoặc mật khẩu chưa đúng.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  },
+                  "nhan-su-nham-cua": {
+                    "summary": "Nhân sự vào nhầm cửa",
+                    "value": {
+                      "status": 401,
+                      "code": "INVALID_CREDENTIALS",
+                      "detail": "Email hoặc mật khẩu chưa đúng.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "423": {
+            "description": "LOGIN_LOCKED: đăng nhập đang bị tạm khóa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        423
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "LOGIN_LOCKED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Tạm khóa đăng nhập do nhập sai mật khẩu nhiều lần."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    },
+                    "lockedUntil": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId",
+                    "lockedUntil"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 423,
+                    "code": "LOGIN_LOCKED",
+                    "detail": "Tạm khóa đăng nhập do nhập sai mật khẩu nhiều lần.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "lockedUntil": "2026-11-24T03:15:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: gọi quá nhiều lần, thử lại sau",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        429
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RATE_LIMITED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thử quá nhiều lần. Thử lại sau."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 429,
+                    "code": "RATE_LIMITED",
+                    "detail": "Thử quá nhiều lần. Thử lại sau.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Đăng nhập quản trị",
+        "tags": [
+          "platform-auth"
+        ]
+      }
+    },
+    "/v1/platform/auth/logout": {
+      "post": {
+        "operationId": "platformAuthLogout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Đã thu hồi phiên và xóa cookie; không có phiên vẫn trả 204"
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "platformSession": []
+          }
+        ],
+        "summary": "Đăng xuất quản trị",
+        "tags": [
+          "platform-auth"
+        ]
+      }
+    },
+    "/v1/platform/auth/session": {
+      "get": {
+        "operationId": "platformAuthSession",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Phiên còn hiệu lực; trả về quản trị viên và hạn phiên",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    }
+                  },
+                  "required": [
+                    "user",
+                    "expiresAt"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "ok": {
+                    "summary": "Đang đăng nhập",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "quantri@sapio.vn",
+                        "name": "Quản trị Sapio"
+                      },
+                      "expiresAt": "2026-11-24T05:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED: chưa đăng nhập hoặc phiên đã hết hạn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "UNAUTHENTICATED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Phiên đăng nhập đã hết. Đăng nhập lại."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "UNAUTHENTICATED",
+                    "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "Phiên hết hạn hoặc đã đăng xuất",
+                    "value": {
+                      "status": 401,
+                      "code": "UNAUTHENTICATED",
+                      "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "platformSession": []
+          }
+        ],
+        "summary": "Xem phiên quản trị",
+        "tags": [
+          "platform-auth"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Sapio API",
+    "description": "",
+    "version": "v1",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Xác thực nhân sự"
+    },
+    {
+      "name": "platform-auth",
+      "description": "Xác thực quản trị nền tảng"
+    },
+    {
+      "name": "platform",
+      "description": "Hệ thống"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:4000",
+      "description": "Dev"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "staffSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-sapio_session",
+        "description": "Cookie phiên nhân sự. Khi chạy dev trên http, tên là sapio_session (không có tiền tố __Host-)."
+      },
+      "platformSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "__Host-sapio_admin",
+        "description": "Cookie phiên quản trị nền tảng. Khi chạy dev trên http, tên là sapio_admin (không có tiền tố __Host-)."
+      }
+    },
+    "schemas": {}
+  }
+}
