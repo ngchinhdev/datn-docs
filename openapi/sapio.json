@@ -152,6 +152,13 @@
                     "password": "123456"
                   }
                 },
+                "chua-xac-thuc-email": {
+                  "summary": "Chưa xác thực email",
+                  "value": {
+                    "email": "chuaxacthuc@email.vn",
+                    "password": "123456"
+                  }
+                },
                 "co-so-bi-khoa": {
                   "summary": "Cơ sở bị khóa",
                   "value": {
@@ -295,6 +302,17 @@
                         "name": "Người mới"
                       },
                       "redirectTo": "/select-workspace"
+                    }
+                  },
+                  "chua-xac-thuc-email": {
+                    "summary": "Chưa xác thực email",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "chuaxacthuc@email.vn",
+                        "name": "Chưa Xác Thực"
+                      },
+                      "redirectTo": "/signup?step=verify"
                     }
                   },
                   "co-so-bi-khoa": {
@@ -808,12 +826,20 @@
                       "type": "string",
                       "format": "date-time",
                       "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    "emailVerified": {
+                      "type": "boolean"
+                    },
+                    "canCreateTrial": {
+                      "type": "boolean"
                     }
                   },
                   "required": [
                     "user",
                     "remember",
-                    "expiresAt"
+                    "expiresAt",
+                    "emailVerified",
+                    "canCreateTrial"
                   ],
                   "additionalProperties": false
                 },
@@ -827,7 +853,9 @@
                         "name": "Chính Nguyễn"
                       },
                       "remember": false,
-                      "expiresAt": "2026-11-24T15:00:00.000Z"
+                      "expiresAt": "2026-11-24T15:00:00.000Z",
+                      "emailVerified": true,
+                      "canCreateTrial": false
                     }
                   }
                 }
@@ -2936,6 +2964,2355 @@
           "platform-auth"
         ]
       }
+    },
+    "/v1/signup/account": {
+      "post": {
+        "operationId": "signupCreateAccount",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "example": "Nguyễn Văn An"
+                  },
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "example": "an@tiemcuaban.vn"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 15,
+                    "maxLength": 128
+                  },
+                  "acceptTerms": {
+                    "type": "boolean",
+                    "example": true
+                  }
+                },
+                "required": [
+                  "fullName",
+                  "email",
+                  "password",
+                  "acceptTerms"
+                ]
+              },
+              "examples": {
+                "email-moi": {
+                  "summary": "Email mới",
+                  "value": {
+                    "fullName": "Nguyễn Văn An",
+                    "email": "an.moi@email.vn",
+                    "password": "mot cau mat khau de nho",
+                    "acceptTerms": true
+                  }
+                },
+                "email-da-xac-thuc": {
+                  "summary": "Email đã xác thực",
+                  "value": {
+                    "fullName": "Nguyễn Văn An",
+                    "email": "chinh@tocmay.vn",
+                    "password": "mot cau mat khau de nho",
+                    "acceptTerms": true
+                  }
+                },
+                "dang-ky-lai": {
+                  "summary": "Đăng ký lại",
+                  "value": {
+                    "fullName": "Chưa Xác Thực",
+                    "email": "chuaxacthuc@email.vn",
+                    "password": "mot cau mat khau de nho",
+                    "acceptTerms": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Đã tạo (hoặc đăng ký lại) tài khoản chưa xác thực, gửi mã, đặt cookie phiên",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "codeExpiresAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                      "example": "2026-11-27T03:25:00.000Z"
+                    },
+                    "resendAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                      "example": "2026-11-27T03:16:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "user",
+                    "codeExpiresAt",
+                    "resendAt"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "email-moi": {
+                    "summary": "Email mới",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "an.moi@email.vn",
+                        "name": "Nguyễn Văn An"
+                      },
+                      "codeExpiresAt": "2026-11-24T03:10:00.000Z",
+                      "resendAt": "2026-11-24T03:01:00.000Z"
+                    }
+                  },
+                  "dang-ky-lai": {
+                    "summary": "Đăng ký lại",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "chuaxacthuc@email.vn",
+                        "name": "Chưa Xác Thực"
+                      },
+                      "codeExpiresAt": "2026-11-24T03:10:00.000Z",
+                      "resendAt": "2026-11-24T03:01:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: dữ liệu không hợp lệ, kể cả mật khẩu quá ngắn hoặc quá phổ biến",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATION_FAILED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thông tin chưa hợp lệ."
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "password"
+                          },
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "REQUIRED",
+                              "INVALID_EMAIL",
+                              "TOO_SHORT",
+                              "TOO_LONG",
+                              "TOO_COMMON",
+                              "INVALID_VALUE"
+                            ],
+                            "example": "REQUIRED"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Nhập mật khẩu."
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "code",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "errors",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 400,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Thông tin chưa hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "errors": [
+                      {
+                        "field": "password",
+                        "code": "REQUIRED",
+                        "message": "Nhập mật khẩu."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "EMAIL_TAKEN: email thuộc về tài khoản đã xác thực",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        409
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "EMAIL_TAKEN"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Email này đã có tài khoản Sapio."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 409,
+                    "code": "EMAIL_TAKEN",
+                    "detail": "Email này đã có tài khoản Sapio.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "email-da-xac-thuc": {
+                    "summary": "Email đã xác thực",
+                    "value": {
+                      "status": 409,
+                      "code": "EMAIL_TAKEN",
+                      "detail": "Email này đã có tài khoản Sapio.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: gọi quá nhiều lần; CODE_LIMIT_REACHED: email đã đủ 5 mã trong một giờ",
+            "headers": {
+              "Retry-After": {
+                "description": "Số giây phải chờ",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            429
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "RATE_LIMITED"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Thử quá nhiều lần. Thử lại sau."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 429,
+                        "code": "RATE_LIMITED",
+                        "detail": "Thử quá nhiều lần. Thử lại sau.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            429
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "CODE_LIMIT_REACHED"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Đã gửi quá nhiều mã tới email này. Thử lại sau."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 429,
+                        "code": "CODE_LIMIT_REACHED",
+                        "detail": "Đã gửi quá nhiều mã tới email này. Thử lại sau.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "Tạo tài khoản",
+        "tags": [
+          "signup"
+        ]
+      }
+    },
+    "/v1/signup/verify": {
+      "post": {
+        "operationId": "signupVerify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$",
+                    "example": "123456"
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              },
+              "examples": {
+                "ma-dung": {
+                  "summary": "Mã đúng",
+                  "value": {
+                    "code": "123456"
+                  }
+                },
+                "ma-sai": {
+                  "summary": "Mã sai",
+                  "value": {
+                    "code": "000000"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mã đúng: email đã xác thực, phiên hiện tại dùng tiếp",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "email",
+                        "name"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "user"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "ma-dung": {
+                    "summary": "Mã đúng",
+                    "value": {
+                      "user": {
+                        "id": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e11",
+                        "email": "chuaxacthuc@email.vn",
+                        "name": "Chưa Xác Thực"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: mã không đúng 6 chữ số; CODE_INVALID: mã sai, kèm số lần còn lại",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            400
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Thông tin chưa hợp lệ."
+                          ]
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "example": "password"
+                              },
+                              "code": {
+                                "type": "string",
+                                "enum": [
+                                  "REQUIRED",
+                                  "INVALID_EMAIL",
+                                  "TOO_SHORT",
+                                  "TOO_LONG",
+                                  "TOO_COMMON",
+                                  "INVALID_VALUE"
+                                ],
+                                "example": "REQUIRED"
+                              },
+                              "message": {
+                                "type": "string",
+                                "example": "Nhập mật khẩu."
+                              }
+                            },
+                            "required": [
+                              "field",
+                              "code",
+                              "message"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "errors",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 400,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "Thông tin chưa hợp lệ.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                        "errors": [
+                          {
+                            "field": "password",
+                            "code": "REQUIRED",
+                            "message": "Nhập mật khẩu."
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            400
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "CODE_INVALID"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Mã chưa đúng."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "attemptsLeft": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 2
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId",
+                        "attemptsLeft"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 400,
+                        "code": "CODE_INVALID",
+                        "detail": "Mã chưa đúng.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                        "attemptsLeft": 2
+                      }
+                    }
+                  ]
+                },
+                "examples": {
+                  "ma-sai": {
+                    "summary": "Mã sai",
+                    "value": {
+                      "status": 400,
+                      "code": "CODE_INVALID",
+                      "detail": "Mã chưa đúng.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                      "attemptsLeft": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED: chưa đăng nhập hoặc phiên đã hết hạn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "UNAUTHENTICATED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Phiên đăng nhập đã hết. Đăng nhập lại."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "UNAUTHENTICATED",
+                    "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "Phiên hết hạn hoặc đã đăng xuất",
+                    "value": {
+                      "status": 401,
+                      "code": "UNAUTHENTICATED",
+                      "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_VERIFIED: email đã được xác thực",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        409
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ALREADY_VERIFIED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Email này đã được xác thực."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 409,
+                    "code": "ALREADY_VERIFIED",
+                    "detail": "Email này đã được xác thực.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "CODE_EXPIRED: mã hết hạn, đã bị thay hoặc đã bị hủy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        410
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "CODE_EXPIRED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Mã đã hết hạn hoặc đã bị hủy. Gửi mã mới."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 410,
+                    "code": "CODE_EXPIRED",
+                    "detail": "Mã đã hết hạn hoặc đã bị hủy. Gửi mã mới.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: gọi quá nhiều lần, thử lại sau",
+            "headers": {
+              "Retry-After": {
+                "description": "Số giây phải chờ",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        429
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RATE_LIMITED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thử quá nhiều lần. Thử lại sau."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 429,
+                    "code": "RATE_LIMITED",
+                    "detail": "Thử quá nhiều lần. Thử lại sau.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "summary": "Nhập mã xác thực",
+        "tags": [
+          "signup"
+        ]
+      }
+    },
+    "/v1/signup/resend": {
+      "post": {
+        "operationId": "signupResend",
+        "parameters": [],
+        "responses": {
+          "202": {
+            "description": "Đã gửi mã mới; mã cũ hết hiệu lực",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "codeExpiresAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                      "example": "2026-11-27T03:25:00.000Z"
+                    },
+                    "resendAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                      "example": "2026-11-27T03:16:00.000Z"
+                    }
+                  },
+                  "required": [
+                    "codeExpiresAt",
+                    "resendAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED: chưa đăng nhập hoặc phiên đã hết hạn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "UNAUTHENTICATED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Phiên đăng nhập đã hết. Đăng nhập lại."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "UNAUTHENTICATED",
+                    "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "Phiên hết hạn hoặc đã đăng xuất",
+                    "value": {
+                      "status": 401,
+                      "code": "UNAUTHENTICATED",
+                      "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORIGIN_NOT_ALLOWED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Yêu cầu không hợp lệ."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "detail": "Yêu cầu không hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "ALREADY_VERIFIED: email đã được xác thực",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        409
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ALREADY_VERIFIED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Email này đã được xác thực."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 409,
+                    "code": "ALREADY_VERIFIED",
+                    "detail": "Email này đã được xác thực.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RESEND_TOO_SOON: chưa đủ 60 giây kể từ mã trước; CODE_LIMIT_REACHED: email đã đủ 5 mã trong một giờ; RATE_LIMITED: gọi quá nhiều lần",
+            "headers": {
+              "Retry-After": {
+                "description": "Số giây phải chờ",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            429
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "RESEND_TOO_SOON"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Chờ một lúc rồi gửi lại mã."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 429,
+                        "code": "RESEND_TOO_SOON",
+                        "detail": "Chờ một lúc rồi gửi lại mã.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            429
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "CODE_LIMIT_REACHED"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Đã gửi quá nhiều mã tới email này. Thử lại sau."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 429,
+                        "code": "CODE_LIMIT_REACHED",
+                        "detail": "Đã gửi quá nhiều mã tới email này. Thử lại sau.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            429
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "RATE_LIMITED"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Thử quá nhiều lần. Thử lại sau."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 429,
+                        "code": "RATE_LIMITED",
+                        "detail": "Thử quá nhiều lần. Thử lại sau.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                      }
+                    }
+                  ]
+                },
+                "examples": {
+                  "gui-lai-som": {
+                    "summary": "Gửi lại sớm",
+                    "value": {
+                      "status": 429,
+                      "code": "RESEND_TOO_SOON",
+                      "detail": "Chờ một lúc rồi gửi lại mã.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "summary": "Gửi lại mã",
+        "tags": [
+          "signup"
+        ]
+      }
+    },
+    "/v1/signup/slug": {
+      "get": {
+        "operationId": "signupCheckSlug",
+        "parameters": [
+          {
+            "name": "value",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "description": "Slug muốn dùng, không được chuẩn hóa",
+            "examples": {
+              "slug-con-trong": {
+                "summary": "Slug còn trống",
+                "value": "quan-moi"
+              },
+              "slug-da-co": {
+                "summary": "Slug đã có",
+                "value": "toc-may"
+              },
+              "slug-danh-rieng": {
+                "summary": "Slug dành riêng",
+                "value": "signup"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Slug dùng được hay không; chỉ là gợi ý, kết quả cuối cùng do lúc tạo cơ sở quyết định",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "INVALID_FORMAT",
+                        "RESERVED",
+                        "TAKEN"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "available"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "slug-con-trong": {
+                    "summary": "Slug còn trống",
+                    "value": {
+                      "available": true
+                    }
+                  },
+                  "slug-da-co": {
+                    "summary": "Slug đã có",
+                    "value": {
+                      "available": false,
+                      "reason": "TAKEN"
+                    }
+                  },
+                  "slug-danh-rieng": {
+                    "summary": "Slug dành riêng",
+                    "value": {
+                      "available": false,
+                      "reason": "RESERVED"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: thiếu hoặc quá dài",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATION_FAILED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thông tin chưa hợp lệ."
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "password"
+                          },
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "REQUIRED",
+                              "INVALID_EMAIL",
+                              "TOO_SHORT",
+                              "TOO_LONG",
+                              "TOO_COMMON",
+                              "INVALID_VALUE"
+                            ],
+                            "example": "REQUIRED"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Nhập mật khẩu."
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "code",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "errors",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 400,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Thông tin chưa hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "errors": [
+                      {
+                        "field": "password",
+                        "code": "REQUIRED",
+                        "message": "Nhập mật khẩu."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED: chưa đăng nhập hoặc phiên đã hết hạn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "UNAUTHENTICATED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Phiên đăng nhập đã hết. Đăng nhập lại."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "UNAUTHENTICATED",
+                    "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "Phiên hết hạn hoặc đã đăng xuất",
+                    "value": {
+                      "status": 401,
+                      "code": "UNAUTHENTICATED",
+                      "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "EMAIL_NOT_VERIFIED: tài khoản chưa xác thực email",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "EMAIL_NOT_VERIFIED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Email chưa được xác thực."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 403,
+                    "code": "EMAIL_NOT_VERIFIED",
+                    "detail": "Email chưa được xác thực.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "RATE_LIMITED: gọi quá nhiều lần, thử lại sau",
+            "headers": {
+              "Retry-After": {
+                "description": "Số giây phải chờ",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        429
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "RATE_LIMITED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thử quá nhiều lần. Thử lại sau."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 429,
+                    "code": "RATE_LIMITED",
+                    "detail": "Thử quá nhiều lần. Thử lại sau.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "summary": "Kiểm slug",
+        "tags": [
+          "signup"
+        ]
+      }
+    },
+    "/v1/signup/business": {
+      "post": {
+        "operationId": "signupCreateBusiness",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "example": "Salon Tóc Mây"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 40,
+                    "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$",
+                    "example": "toc-may"
+                  },
+                  "branch": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "example": "Chi nhánh Quận 1"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "0912 345 678"
+                      },
+                      "address": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255,
+                        "example": "12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "phone",
+                      "address"
+                    ]
+                  },
+                  "openingHours": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "weekday": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 6
+                        },
+                        "opens": {
+                          "type": "string",
+                          "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+                          "example": "08:00"
+                        },
+                        "closes": {
+                          "type": "string",
+                          "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$",
+                          "example": "20:00"
+                        }
+                      },
+                      "required": [
+                        "weekday",
+                        "opens",
+                        "closes"
+                      ]
+                    }
+                  },
+                  "resources": {
+                    "type": "object",
+                    "properties": {
+                      "chairs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 20,
+                        "example": 2
+                      },
+                      "beds": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 20,
+                        "example": 0
+                      },
+                      "rooms": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 20,
+                        "example": 1
+                      }
+                    },
+                    "required": [
+                      "chairs",
+                      "beds",
+                      "rooms"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "slug",
+                  "branch",
+                  "openingHours",
+                  "resources"
+                ]
+              },
+              "examples": {
+                "tao-co-so": {
+                  "summary": "Tạo cơ sở",
+                  "value": {
+                    "name": "Quán Mới",
+                    "slug": "quan-moi",
+                    "branch": {
+                      "name": "Chi nhánh 1",
+                      "phone": "0912 345 678",
+                      "address": "12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh"
+                    },
+                    "openingHours": [
+                      {
+                        "weekday": 1,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 2,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 3,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 4,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 5,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 6,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      }
+                    ],
+                    "resources": {
+                      "chairs": 2,
+                      "beds": 0,
+                      "rooms": 1
+                    }
+                  }
+                },
+                "da-dung-thu": {
+                  "summary": "Đã dùng thử",
+                  "value": {
+                    "name": "Quán Mới",
+                    "slug": "quan-moi",
+                    "branch": {
+                      "name": "Chi nhánh 1",
+                      "phone": "0912 345 678",
+                      "address": "12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh"
+                    },
+                    "openingHours": [
+                      {
+                        "weekday": 1,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 2,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 3,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 4,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 5,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 6,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      }
+                    ],
+                    "resources": {
+                      "chairs": 2,
+                      "beds": 0,
+                      "rooms": 1
+                    }
+                  }
+                },
+                "chua-xac-thuc": {
+                  "summary": "Chưa xác thực",
+                  "value": {
+                    "name": "Quán Mới",
+                    "slug": "quan-moi",
+                    "branch": {
+                      "name": "Chi nhánh 1",
+                      "phone": "0912 345 678",
+                      "address": "12 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh"
+                    },
+                    "openingHours": [
+                      {
+                        "weekday": 1,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 2,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 3,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 4,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 5,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      },
+                      {
+                        "weekday": 6,
+                        "opens": "08:00",
+                        "closes": "20:00"
+                      }
+                    ],
+                    "resources": {
+                      "chairs": 2,
+                      "beds": 0,
+                      "rooms": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Đã tạo cơ sở dùng thử 7 ngày; trả về slug, hạn dùng thử và trang đầu",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "example": "toc-may"
+                    },
+                    "trialEndsAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                      "example": "2026-11-16T17:00:00.000Z"
+                    },
+                    "redirectTo": {
+                      "type": "string",
+                      "example": "/app/toc-may/calendar"
+                    }
+                  },
+                  "required": [
+                    "slug",
+                    "trialEndsAt",
+                    "redirectTo"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "tao-co-so": {
+                    "summary": "Tạo cơ sở",
+                    "value": {
+                      "slug": "quan-moi",
+                      "trialEndsAt": "2026-11-30T17:00:00.000Z",
+                      "redirectTo": "/app/quan-moi/calendar"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "VALIDATION_FAILED: dữ liệu không hợp lệ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "VALIDATION_FAILED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Thông tin chưa hợp lệ."
+                      ]
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "password"
+                          },
+                          "code": {
+                            "type": "string",
+                            "enum": [
+                              "REQUIRED",
+                              "INVALID_EMAIL",
+                              "TOO_SHORT",
+                              "TOO_LONG",
+                              "TOO_COMMON",
+                              "INVALID_VALUE"
+                            ],
+                            "example": "REQUIRED"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "Nhập mật khẩu."
+                          }
+                        },
+                        "required": [
+                          "field",
+                          "code",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "errors",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 400,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Thông tin chưa hợp lệ.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10",
+                    "errors": [
+                      {
+                        "field": "password",
+                        "code": "REQUIRED",
+                        "message": "Nhập mật khẩu."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "UNAUTHENTICATED: chưa đăng nhập hoặc phiên đã hết hạn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "number",
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "UNAUTHENTICATED"
+                      ]
+                    },
+                    "detail": {
+                      "type": "string",
+                      "enum": [
+                        "Phiên đăng nhập đã hết. Đăng nhập lại."
+                      ]
+                    },
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "code",
+                    "detail",
+                    "requestId"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "status": 401,
+                    "code": "UNAUTHENTICATED",
+                    "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                    "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                  }
+                },
+                "examples": {
+                  "expired": {
+                    "summary": "Phiên hết hạn hoặc đã đăng xuất",
+                    "value": {
+                      "status": 401,
+                      "code": "UNAUTHENTICATED",
+                      "detail": "Phiên đăng nhập đã hết. Đăng nhập lại.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "EMAIL_NOT_VERIFIED: tài khoản chưa xác thực email; ORIGIN_NOT_ALLOWED: yêu cầu đến từ nguồn không được phép",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            403
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "ORIGIN_NOT_ALLOWED"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Yêu cầu không hợp lệ."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 403,
+                        "code": "ORIGIN_NOT_ALLOWED",
+                        "detail": "Yêu cầu không hợp lệ.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            403
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "EMAIL_NOT_VERIFIED"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Email chưa được xác thực."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 403,
+                        "code": "EMAIL_NOT_VERIFIED",
+                        "detail": "Email chưa được xác thực.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                      }
+                    }
+                  ]
+                },
+                "examples": {
+                  "chua-xac-thuc": {
+                    "summary": "Chưa xác thực",
+                    "value": {
+                      "status": 403,
+                      "code": "EMAIL_NOT_VERIFIED",
+                      "detail": "Email chưa được xác thực.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "SLUG_TAKEN: đã có cơ sở dùng địa chỉ này; TRIAL_USED: tài khoản đã tạo cơ sở dùng thử",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            409
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "SLUG_TAKEN"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Đã có cơ sở dùng địa chỉ này."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 409,
+                        "code": "SLUG_TAKEN",
+                        "detail": "Đã có cơ sở dùng địa chỉ này.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "number",
+                          "enum": [
+                            409
+                          ]
+                        },
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "TRIAL_USED"
+                          ]
+                        },
+                        "detail": {
+                          "type": "string",
+                          "enum": [
+                            "Tài khoản này đã tạo cơ sở dùng thử."
+                          ]
+                        },
+                        "requestId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "code",
+                        "detail",
+                        "requestId"
+                      ],
+                      "additionalProperties": false,
+                      "example": {
+                        "status": 409,
+                        "code": "TRIAL_USED",
+                        "detail": "Tài khoản này đã tạo cơ sở dùng thử.",
+                        "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                      }
+                    }
+                  ]
+                },
+                "examples": {
+                  "da-dung-thu": {
+                    "summary": "Đã dùng thử",
+                    "value": {
+                      "status": 409,
+                      "code": "TRIAL_USED",
+                      "detail": "Tài khoản này đã tạo cơ sở dùng thử.",
+                      "requestId": "0193a5c2-7e4b-7d2a-9c1e-5b8f3a6d2e10"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "staffSession": []
+          }
+        ],
+        "summary": "Tạo cơ sở",
+        "tags": [
+          "signup"
+        ]
+      }
     }
   },
   "info": {
@@ -2947,15 +5324,23 @@
   "tags": [
     {
       "name": "auth",
-      "description": "Xác thực nhân sự"
+      "description": "Xác thực nhân sự",
+      "x-displayName": "Xác thực nhân sự"
+    },
+    {
+      "name": "signup",
+      "description": "Đăng ký cơ sở",
+      "x-displayName": "Đăng ký cơ sở"
     },
     {
       "name": "platform-auth",
-      "description": "Xác thực quản trị nền tảng"
+      "description": "Xác thực quản trị nền tảng",
+      "x-displayName": "Xác thực quản trị nền tảng"
     },
     {
       "name": "platform",
-      "description": "Hệ thống"
+      "description": "Hệ thống",
+      "x-displayName": "Hệ thống"
     }
   ],
   "servers": [

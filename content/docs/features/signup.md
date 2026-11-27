@@ -33,7 +33,7 @@ Email được **chuẩn hóa** như ở [Xác thực nhân sự](./auth.md#khá
 |---|---|
 | BR-74.1 | Mã gồm **6 chữ số**, sinh bằng `crypto`. DB chỉ lưu hash của mã (HMAC-SHA-256 với khóa của máy chủ, vì 6 chữ số dễ dò ngược nếu chỉ băm SHA-256) |
 | BR-74.2 | Mã hết hạn sau **10 phút** kể từ lúc gửi |
-| BR-74.3 | Mỗi lần gửi mã mới thì mọi mã cũ của tài khoản đó hết hiệu lực |
+| BR-74.3 | Mỗi lần gửi mã mới thì mọi mã cũ của tài khoản đó hết hiệu lực. Nhập một mã cũ báo mã hết hạn và không tính là lần nhập sai (BR-74.4) |
 | BR-74.4 | Nhập sai **3 lần** thì mã đó bị hủy, phải gửi mã mới. Câu báo kèm số lần còn lại: còn 2, còn 1; lần sai thứ 3 báo mã đã bị hủy |
 | BR-74.5 | "Gửi lại mã" ở bước 2 dùng được sau **60 giây** kể từ lần gửi trước. Yêu cầu sớm hơn bị từ chối, không gửi gì, và cho biết còn phải chờ bao nhiêu giây. Đăng ký lại ở bước 1 không bị hạn 60 giây này nhưng vẫn bị BR-74.6 |
 | BR-74.6 | Tối đa **5 mã mỗi giờ** cho một email, tính cả mã gửi khi đăng ký và đăng ký lại. Quá thì từ chối tới khi mã cũ nhất của giờ đó đủ 1 giờ |
