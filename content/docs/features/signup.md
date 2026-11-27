@@ -19,7 +19,7 @@ description: Tạo tài khoản chủ cơ sở, xác thực email bằng mã 6 s
 |---|---|---|
 | Tài khoản chưa xác thực | `users.email_verified_at` rỗng | Tài khoản vừa tạo ở bước 1, chưa nhập đúng mã. Nằm chung bảng `users` |
 | Mã xác thực | `email_verification` | Mã 6 số gửi tới email ở bước 2 |
-| Lần dùng thử | `trial_claim` | Dấu vết một tài khoản đã tạo cơ sở dùng thử (BR-74.19) |
+| Lần dùng thử | `trial_claim` | Dấu vết một email đã xác thực đã tạo cơ sở dùng thử, khóa theo email (BR-74.19) |
 | Cơ sở dùng thử | `tenant` có `subscription.status = trialing` | Cơ sở vừa tạo, gói Chuyên nghiệp (`pro`), 7 ngày (BR-80) |
 | Loại tài nguyên mặc định | `resource_type` | Bốn loại có sẵn khi tạo cơ sở: Nhân viên (`is_staff`), Ghế, Giường, Phòng (D-16) |
 
@@ -59,7 +59,7 @@ Email được **chuẩn hóa** như ở [Xác thực nhân sự](./auth.md#khá
 | BR-74.16 | Bước 3 nhận: tên cơ sở; slug (BR-72); chi nhánh đầu tiên gồm tên, số điện thoại (chuẩn hóa theo BR-61), địa chỉ; giờ mở cửa 7 ngày; số Ghế, Giường, Phòng |
 | BR-74.17 | **Giờ mở cửa:** mỗi ngày một khung. Mặc định 08:00 đến 20:00, Chủ Nhật nghỉ. Ít nhất một ngày mở; ngày mở có giờ đóng sau giờ mở. Nghỉ trưa, nhiều khung một ngày và ngày đặc biệt chỉnh sau (BR-02) |
 | BR-74.18 | **Tài nguyên:** cơ sở mới có 4 loại mặc định: Nhân viên (`is_staff`), Ghế, Giường, Phòng (D-16). Bước này hỏi số lượng của ba loại không phải nhân viên, mỗi loại từ 0 đến 20, mặc định Ghế 1, Giường 0, Phòng 0. Tài nguyên đặt tên "Ghế 1", "Ghế 2", "Giường 1"... và thuộc chi nhánh đầu tiên. Không tạo tài nguyên nhân viên |
-| BR-74.19 | **Mỗi tài khoản tạo cơ sở dùng thử một lần.** Lần tạo thành công ghi một dòng `trial_claims`. Tài khoản đã có dòng này thì mọi yêu cầu tạo cơ sở bị từ chối |
+| BR-74.19 | **Mỗi email đã xác thực chỉ tạo được một cơ sở dùng thử** (BR-74). Lần tạo thành công ghi một dòng `trial_claims`, khóa chính là email, kèm `user_id` và `tenant_id`. Email đã có dòng này thì mọi yêu cầu tạo cơ sở bị từ chối `TRIAL_USED`; vi phạm khóa chính của `trial_claims` (hai yêu cầu cùng lúc) cũng trả `TRIAL_USED` |
 | BR-74.20 | Bấm "Tạo cơ sở" thì trong **một transaction** tạo: `tenants`, `memberships` vai chủ cơ sở (`owner`), `branches` (múi giờ `Asia/Ho_Chi_Minh`), `opening_hours`, 4 `resource_types`, các `resources`, `subscriptions` trạng thái `trialing` gói `pro`, `trial_claims`, cùng dòng mặc định của `booking_policies` và `tenant_profiles`. Một bước lỗi thì không tạo gì cả |
 | BR-74.21 | Slug đã có người dùng lúc lưu (kể cả hai người bấm cùng lúc, hoặc slug nằm trong `tenant_slug_history`) thì báo "đã có cơ sở dùng địa chỉ này", không lỗi 500; không tạo gì và người dùng sửa slug rồi gửi lại. Kiểm slug khi rời ô chỉ là gợi ý: kết quả cuối cùng do lúc lưu quyết định |
 | BR-74.22 | Tạo xong thì đặt `users.last_tenant_id` là cơ sở mới |
@@ -166,7 +166,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 | AC-43 | Body tạo cơ sở: tất cả ngày nghỉ / một ngày có giờ đóng bằng hoặc trước giờ mở / Ghế 21 / Giường -1 / slug `signup` / số điện thoại `123` | Tạo cơ sở | 400 `VALIDATION_FAILED`, `errors` chỉ ra đúng trường; không tạo gì | BR-74.16, 74.17, 74.18, BR-72 |
 | AC-44 | Tài khoản đủ điều kiện | Tạo cơ sở mà chỉ gửi giờ mở cửa mặc định, Ghế 2, Giường 0, Phòng 1 | Cơ sở có đúng 4 `resource_types`; 3 `resources` tên "Ghế 1", "Ghế 2", "Phòng 1" thuộc chi nhánh đầu; 7 ngày giờ mở cửa với Chủ Nhật không có dòng | BR-74.17, 74.18 |
 | AC-45 | Tài khoản đã tạo cơ sở dùng thử | Gửi lại yêu cầu tạo (cùng hoặc khác slug) | 409 `TRIAL_USED`; số `tenants` không đổi | BR-74.19 |
-| AC-46 | Cùng một tài khoản | Hai yêu cầu tạo cơ sở chạy cùng lúc | Đúng một yêu cầu 201, yêu cầu kia 409 `TRIAL_USED`; có đúng một `tenants`, một `trial_claims` | BR-74.19 |
+| AC-46 | Cùng một tài khoản (cùng email) | Hai yêu cầu tạo cơ sở chạy cùng lúc | Đúng một yêu cầu 201, yêu cầu kia 409 `TRIAL_USED` (kể cả khi vi phạm khóa chính của `trial_claims`); có đúng một `tenants`, một `trial_claims` | BR-74.19 |
 | AC-47 | Tài khoản đủ điều kiện | Tạo cơ sở, rồi đọc DB | Có `tenants`, `memberships` vai `owner`, `branches` với múi giờ `Asia/Ho_Chi_Minh`, `opening_hours`, `resource_types`, `resources`, `subscriptions` (`trialing`, gói `pro`), `trial_claims`, `booking_policies`, `tenant_profiles` | BR-74.20 |
 | AC-48 | Tài khoản đủ điều kiện, bước tạo `resources` gây lỗi (chèn lỗi bằng test) | Tạo cơ sở | Lỗi trả về; không có dòng nào của cơ sở này ở bất kỳ bảng nào, kể cả `trial_claims`; gửi lại sau khi hết lỗi thì tạo được | BR-74.20 |
 | AC-49 | Cơ sở `toc-may` đã có | Tạo cơ sở với slug `toc-may` | 409 `SLUG_TAKEN`; không tạo gì; tài khoản tạo lại được với slug khác | BR-74.21 |

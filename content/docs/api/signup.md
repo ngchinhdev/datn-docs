@@ -158,11 +158,11 @@ Xử lý, theo thứ tự:
 3. Email chưa xác thực: **403** `EMAIL_NOT_VERIFIED` (BR-74.15).
 4. Làm các việc sau trong **một transaction**:
    1. Khóa dòng `users` của phiên (`SELECT ... FOR UPDATE`) rồi đọc lại `email_verified_at`. Hai request cùng một tài khoản xếp hàng ở đây.
-   2. Email đã có dòng `trial_claims`: **409** `TRIAL_USED` (BR-74.19).
+   2. Email của tài khoản đã có dòng `trial_claims` (khóa chính là email): **409** `TRIAL_USED` (BR-74.19).
    3. Slug có trong `tenants` hoặc `tenant_slug_history`: **409** `SLUG_TAKEN` (BR-74.21).
    4. Tạo các dòng của BR-74.20; đặt `app.tenant_id` bằng id cơ sở mới cho các bảng có RLS (T-07). `trial_ends_at` tính theo BR-74.23 từ `Clock`.
    5. Đặt `users.last_tenant_id` (BR-74.22).
-5. Vi phạm khóa duy nhất của `tenants.slug` ở bước 4.4 (hai tài khoản khác nhau cùng lúc): hủy transaction, trả **409** `SLUG_TAKEN`. Không trả 500.
+5. Vi phạm khóa duy nhất của `tenants.slug` ở bước 4.4 (hai tài khoản khác nhau cùng lúc): hủy transaction, trả **409** `SLUG_TAKEN`. Vi phạm khóa chính của `trial_claims` ở bước 4.4: hủy transaction, trả **409** `TRIAL_USED`. Không trả 500.
 
 Trả về 201:
 

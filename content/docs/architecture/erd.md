@@ -34,7 +34,7 @@ Các bảng này **không có RLS theo tenant**: chúng là dữ liệu của n�
 | `email_verifications` | `user_id` FK, `email`, `code_hash`, `purpose` (`signup`), `expires_at`, `attempts`, `consumed_at?`, `revoked_at?` | Mã 6 số khi đăng ký (BR-74.1 đến 74.8). `user_id` gắn mã với tài khoản chưa xác thực, nên đổi email (BR-74.12) không làm mất liên kết. `code_hash` là HMAC-SHA-256. `revoked_at` đặt khi mã bị thay bằng mã mới hoặc sai 3 lần; `consumed_at` chỉ đặt khi nhập đúng. Mã còn hiệu lực: cả hai cột rỗng, chưa quá `expires_at`. `created_at` là lúc gửi: dùng cho hạn 60 giây và đếm 5 mã mỗi giờ theo `email` (BR-74.5, BR-74.6), nên có chỉ mục `(email, created_at)` |
 | `tenants` | `slug text`, `name`, `monogram`, `locked_at?`, `lock_reason?`, `created_by` FK `users` | U `slug` (BR-72). Khóa vi phạm là `locked_at` (BR-75) |
 | `tenant_slug_history` | `tenant_id`, `slug`, `changed_at` | U `slug`. Link cũ tự chuyển sang slug mới (BR-72) |
-| `trial_claims` | `email text` PK, `tenant_id` FK, `claimed_at` | Một dòng cho mỗi tài khoản đã tạo cơ sở dùng thử, ghi trong transaction tạo cơ sở (BR-74.19, BR-74.20) |
+| `trial_claims` | `email text` PK, `user_id` FK, `tenant_id` FK, `claimed_at` | Một dòng cho mỗi email đã xác thực đã tạo cơ sở dùng thử, ghi trong transaction tạo cơ sở (BR-74.19, BR-74.20). Vi phạm PK trả `TRIAL_USED` |
 | `plans` | `code`, `name`, `monthly_price_vnd`, `features text[]`, `limits jsonb` | Như [T-17](../decisions/t17-plan-entitlements.md) |
 | `subscriptions` | `tenant_id` U, `plan_code`, `status`, `trial_ends_at?`, `current_period_end?`, `pending_plan_code?` | Như T-17 |
 | `platform_payments` | `tenant_id`, `provider_ref` U, `kind` (`buy`, `renew`, `upgrade`), `plan_code`, `months`, `amount_vnd`, `paid_at` | Chỉ thêm (BR-88) |
