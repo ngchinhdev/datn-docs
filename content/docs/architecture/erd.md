@@ -59,8 +59,8 @@ erDiagram
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `tenant_profiles` | `tenant_id` PK, `brand_color`, `logo_url?` | Thương hiệu của cơ sở |
-| `booking_policies` | `tenant_id` PK, `min_lead_minutes`, `max_days_ahead`, `change_cutoff_minutes`, `max_reschedules`, `no_show_after_minutes`, `deposit_after_no_shows`, `hold_minutes` (10), `otp_ttl_minutes`, `otp_max_attempts`, `refund_rules jsonb` | Các tham số X, Y, N, M, K của BR-06 đến BR-10, BR-16, BR-23. Giá trị mặc định đặt lúc tạo cơ sở |
+| `tenant_profiles` | `tenant_id` PK, `brand_color`, `logo_url?` | Thương hiệu của cơ sở. Bảng do tính năng dùng nó thêm vào, kèm migration điền dòng mặc định cho cơ sở có sẵn; từ migration đó, bước tạo cơ sở ở đăng ký tạo luôn dòng này |
+| `booking_policies` | `tenant_id` PK, `min_lead_minutes`, `max_days_ahead`, `change_cutoff_minutes`, `max_reschedules`, `no_show_after_minutes`, `deposit_after_no_shows`, `hold_minutes` (10), `otp_ttl_minutes`, `otp_max_attempts`, `refund_rules jsonb` | Các tham số X, Y, N, M, K của BR-06 đến BR-10, BR-16, BR-23. Bảng do tính năng dùng nó thêm vào, kèm migration điền dòng mặc định cho cơ sở có sẵn; từ migration đó, bước tạo cơ sở ở đăng ký tạo luôn dòng này |
 | `branches` | `tenant_id`, `name`, `address`, `phone`, `timezone` (`Asia/Ho_Chi_Minh`), `slot_step_minutes` (15), `archived_at?` | BR-58. Gói Cơ bản chỉ 1 chi nhánh đang dùng (BR-83) |
 | `opening_hours` | `tenant_id`, `branch_id` FK, `weekday smallint`, `opens time`, `closes time` | Nhiều dòng mỗi ngày là nhiều khung (sáng, chiều). `check (opens < closes)` |
 | `special_days` | `tenant_id`, `branch_id` FK, `date`, `note` | U `(branch_id, date)`. Ngày đặc biệt thay giờ thường lệ (BR-02) |
