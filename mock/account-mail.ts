@@ -52,6 +52,34 @@ export function resetMail(
   };
 }
 
+/** The code that confirms the email of a new account (BR-74). It is typed in step 2 of the sign-up. */
+export function verifyMail(input: {
+  name: string;
+  email: string;
+  code: string;
+  expiresAt: string;
+  attempts: number;
+  now: string;
+  seq: number;
+}): AccountMail {
+  return {
+    id: `mail-verify-${input.seq}`,
+    at: input.now,
+    to: input.email,
+    subject: 'Mã xác thực email Sapio',
+    lead: `Chào ${firstName(input.name)}, đây là mã để xác thực email ${input.email} và hoàn tất đăng ký cơ sở trên Sapio.`,
+    rows: [
+      ['Mã xác thực', `${input.code.slice(0, 3)} ${input.code.slice(3)}`],
+      ['Dùng được tới', formatMoment(input.expiresAt)],
+      ['Nhập sai tối đa', `${input.attempts} lần`],
+    ],
+    action: { label: 'Nhập mã', href: '/mock/signup?step=verify' },
+    notes: [
+      'Không chia sẻ mã này cho ai. Không phải bạn đăng ký? Bỏ qua email này, tài khoản chưa xác thực không làm được gì.',
+    ],
+  };
+}
+
 export function lockMail(account: Account, until: string, now: string, seq: number): AccountMail {
   return {
     id: `mail-lock-${seq}`,

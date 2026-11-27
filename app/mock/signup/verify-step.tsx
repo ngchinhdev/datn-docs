@@ -2,19 +2,23 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useAccountStore } from '@/components/mock/account-store';
 import { useAuthText } from '@/components/mock/auth-text';
 import { Button } from '@/components/sapio/button';
 import { OTP_LENGTH, OtpField } from '@/components/sapio/otp-field';
 import { SignupLayout } from '@/components/sapio/signup-layout';
 import { useMockNow } from '@/components/sapio/use-mock-now';
 import { useToast } from '@/components/sapio/toast';
-import { MOCK_NOW } from '@/mock/time';
+import { verifyMail } from '@/mock/account-mail';
+import { addMinutes, MOCK_NOW } from '@/mock/time';
 import {
   CODE_ATTEMPTS,
+  CODE_MINUTES,
   FIRST_RESEND_SECONDS,
   RESEND_SECONDS,
   WRONG_CODE,
   formatResendIn,
+  sampleCode,
   type SignupDraft,
 } from '@/mock/signup';
 
@@ -37,6 +41,7 @@ export function VerifyStep({
   const { t } = useAuthText();
   const text = t.signup.verify;
   const now = useMockNow();
+  const { now: mailNow, patch } = useAccountStore();
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [attemptsLeft, setAttemptsLeft] = useState(CODE_ATTEMPTS);
@@ -66,6 +71,20 @@ export function VerifyStep({
     setAttemptsLeft(CODE_ATTEMPTS);
     setSentAt(now);
     setCooldown(RESEND_SECONDS);
+    patch((d) => ({
+      mails: [
+        ...d.mails,
+        verifyMail({
+          name: draft.fullName,
+          email: draft.email,
+          code: sampleCode(d.mails.length),
+          expiresAt: addMinutes(mailNow, CODE_MINUTES),
+          attempts: CODE_ATTEMPTS,
+          now: mailNow,
+          seq: d.mails.length + 1,
+        }),
+      ],
+    }));
     toast({ text: text.resent(draft.email) });
     document.getElementById(OTP_ID)?.focus();
   }
@@ -79,6 +98,9 @@ export function VerifyStep({
           {text.sentTo} <strong className="font-semibold text-(--ink)">{draft.email}</strong>.{' '}
           <Link href="/mock/signup?step=account" className="sp-link">
             {text.editEmail}
+          </Link>{' '}
+          <Link href="/mock/mailbox" className="sp-link">
+            {text.mailbox}
           </Link>
         </>
       }

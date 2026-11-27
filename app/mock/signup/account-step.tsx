@@ -3,11 +3,22 @@
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
+import { useAccountStore } from '@/components/mock/account-store';
 import { useAuthText } from '@/components/mock/auth-text';
 import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
 import { SignupLayout } from '@/components/sapio/signup-layout';
-import { emailError, passwordError, type SignupDraft } from '@/mock/signup';
+import { verifyMail } from '@/mock/account-mail';
+import {
+  CODE_ATTEMPTS,
+  CODE_MINUTES,
+  emailError,
+  isEmailTaken,
+  passwordError,
+  sampleCode,
+  type SignupDraft,
+} from '@/mock/signup';
+import { addMinutes } from '@/mock/time';
 
 type Key = 'fullName' | 'email' | 'password' | 'terms';
 const IDS: Record<Key, string> = {
@@ -35,6 +46,7 @@ export function AccountStep({
   const [submitted, setSubmitted] = useState(false);
   const [shown, setShown] = useState(false);
   const { lang, t } = useAuthText();
+  const { now, patch } = useAccountStore();
   const text = t.signup.account;
 
   const errors: Record<Key, string | null> = {
@@ -44,6 +56,21 @@ export function AccountStep({
     terms: draft.terms ? null : t.errors.termsRequired,
   };
   const shownError = (key: Key) => (submitted || touched[key] ? errors[key] : null);
+  // A verified account owns the email: the message carries the way to sign in (BR-74.10).
+  const emailMessage =
+    shownError('email') && isEmailTaken(draft.email) ? (
+      <>
+        {shownError('email')}{' '}
+        <Link
+          href={`/mock/login?email=${encodeURIComponent(draft.email.trim())}`}
+          className="sp-link"
+        >
+          {t.errors.emailRegisteredAction}
+        </Link>
+      </>
+    ) : (
+      shownError('email')
+    );
   const touch = (key: Key) => () => setTouched((t) => ({ ...t, [key]: true }));
 
   function submit(e: FormEvent) {
@@ -54,7 +81,23 @@ export function AccountStep({
       document.getElementById(IDS[first])?.focus();
       return;
     }
-    update({ passwordOk: true, email: draft.email.trim() });
+    const email = draft.email.trim();
+    update({ passwordOk: true, email });
+    // The sample mailbox gets the email with the code (BR-74.1).
+    patch((d) => ({
+      mails: [
+        ...d.mails,
+        verifyMail({
+          name: draft.fullName,
+          email,
+          code: sampleCode(d.mails.length),
+          expiresAt: addMinutes(now, CODE_MINUTES),
+          attempts: CODE_ATTEMPTS,
+          now,
+          seq: d.mails.length + 1,
+        }),
+      ],
+    }));
     onNext();
   }
 
@@ -83,13 +126,7 @@ export function AccountStep({
             onBlur={touch('fullName')}
           />
         </Field>
-        <Field
-          id="su-mail"
-          label="Email"
-          size="md"
-          help={text.emailHelp}
-          error={shownError('email')}
-        >
+        <Field id="su-mail" label="Email" size="md" help={text.emailHelp} error={emailMessage}>
           <input
             id="su-mail"
             type="email"
