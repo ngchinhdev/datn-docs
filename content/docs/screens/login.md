@@ -40,11 +40,11 @@ Bố cục `AuthPage`: khối giới thiệu bên trái, form bên phải. Màn 
 
 | Khi | Xử lý |
 |---|---|
-| Mở trang | Gọi API #3. Đang có phiên thì chuyển tới `?next=` nếu hợp lệ, nếu không thì tới `/select-workspace`. Chưa có phiên thì hiện form, đặt con trỏ vào mục 6, hoặc vào mục 7 khi mục 6 đã có sẵn email |
+| Mở trang | Gọi API #3. Đang có phiên thì chuyển tới `?next=` nếu hợp lệ, nếu không thì tới `/select-workspace`; phiên của tài khoản chưa xác thực email (`emailVerified = false`) thì tới `/signup?step=verify`. Chưa có phiên thì hiện form, đặt con trỏ vào mục 6, hoặc vào mục 7 khi mục 6 đã có sẵn email |
 | `?next=` | Chỉ nhận đường dẫn tương đối bắt đầu bằng `/app/`. Giá trị khác thì bỏ qua, để không bị lợi dụng chuyển hướng sang trang lạ |
 | Sửa mục 6 | Ẩn mục 9 |
 | Nhấn mục 11 hoặc Enter | Kiểm trên máy trước. Mục 6 trống hoặc sai dạng thì báo dưới mục 6 "Email chưa đúng. Ví dụ: an@tiemcuaban.vn." Mục 7 trống thì báo ở mục 9 "Nhập mật khẩu." Có lỗi thì không gọi API. Hết lỗi thì gọi API #1 với `{ email: mục 6, password: mục 7, remember: mục 10 }`; trong lúc chờ, mục 11 hiện vòng xoay và không bấm được |
-| API trả 200 | Chuyển tới `?next=` nếu hợp lệ. Nếu không: tới `redirectTo` |
+| API trả 200 | Chuyển tới `?next=` nếu hợp lệ, trừ khi `redirectTo` là `/signup?step=verify` (tài khoản chưa xác thực email) thì luôn tới đó. Nếu không: tới `redirectTo` |
 | API trả 401 `INVALID_CREDENTIALS` | Xóa mục 7 rồi đặt con trỏ vào đó. Mục 9: "Email hoặc mật khẩu chưa đúng.", có `remainingAttempts` thì thêm "Còn {n} lần thử, sau đó tạm khóa 15 phút." |
 | API trả 423 `LOGIN_LOCKED` | Xóa mục 7, ẩn mục 9. Mục 5: "Tạm khóa đăng nhập tới {HH:mm}." và "Mật khẩu sai 5 lần liên tiếp. Đã gửi email báo cho {mục 6}. Muốn vào ngay thì đặt lại mật khẩu." Mục 11 không bấm được, chữ đổi thành "Đăng nhập lại sau {m:ss}" và đếm ngược tới `lockedUntil`. Hiện mục 12. Giờ hiển thị theo `Asia/Ho_Chi_Minh` |
 | Hết giờ đếm ngược | Ẩn mục 5 và mục 12, mục 11 bấm lại được |

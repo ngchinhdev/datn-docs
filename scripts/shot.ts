@@ -1,10 +1,12 @@
 /*
  * Full-page screenshots of mock routes, to compare with design/screens by eye.
- * Run: pnpm shot <route>... [--phone] [--dark] [--collapsed] [--login <email>]
+ * Run: pnpm shot <route>... [--phone] [--dark] [--collapsed] [--login <email>] [--session <key>=<json>]
  * Needs `pnpm dev` running on port 3100. Images go to `.shots/<route>[-phone][-dark][-collapsed].png`.
  * With `--login`, the sign-in form is filled and sent first (the session is kept per tab); for
  * routes under `/mock/admin` it is the form of `/mock/admin/login`.
  * With `--collapsed`, the sidebar of the app frame starts as the 68px rail.
+ * With `--session key=value` (repeatable), a value is put in sessionStorage before the page loads:
+ * the draft that a later step of a flow needs, such as `sapio.signup`.
  */
 import { mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
@@ -15,10 +17,16 @@ const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(`--${name}`);
 const loginAt = args.indexOf('--login');
 const loginEmail = loginAt >= 0 ? args[loginAt + 1] : undefined;
-const routes = args.filter((a, i) => !a.startsWith('--') && (loginAt < 0 || i !== loginAt + 1));
+const isSessionValue = (i: number) => args[i - 1] === '--session';
+const routes = args.filter(
+  (a, i) => !a.startsWith('--') && !isSessionValue(i) && (loginAt < 0 || i !== loginAt + 1),
+);
+const sessionItems = args.filter((_, i) => isSessionValue(i));
 
 if (routes.length === 0) {
-  console.error('Usage: pnpm shot <route>... [--phone] [--dark] [--collapsed] [--login <email>]');
+  console.error(
+    'Usage: pnpm shot <route>... [--phone] [--dark] [--collapsed] [--login <email>] [--session <key>=<json>]',
+  );
   process.exit(1);
 }
 
@@ -34,6 +42,13 @@ await context.addInitScript(
   (theme) => localStorage.setItem('theme', theme),
   dark ? 'dark' : 'light',
 );
+for (const item of sessionItems) {
+  const at = item.indexOf('=');
+  await context.addInitScript(
+    ([key, value]) => sessionStorage.setItem(key!, value!),
+    [item.slice(0, at), item.slice(at + 1)],
+  );
+}
 // The sidebar of the app frame keeps its choice here.
 if (flag('collapsed')) {
   await context.addInitScript(() => localStorage.setItem('sapio.sidebar', 'collapsed'));

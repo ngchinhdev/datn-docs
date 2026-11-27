@@ -1,10 +1,9 @@
 import { AUTH_COPY, type AuthLang } from './auth-copy';
 import { fold } from './customers';
+import { accounts } from './fixtures/accounts';
 import { COMMON_PASSWORDS } from './fixtures/common-passwords';
-import { industryTemplates } from './fixtures/templates';
-import type { IndustryTemplate, SampleService, SampleServiceVariant } from './fixtures/types';
+import type { SampleServiceVariant } from './fixtures/types';
 import { tenantFixtures } from './fixtures';
-import { formatDuration, formatVnd } from './format';
 
 export const STEPS = ['account', 'verify', 'business', 'done'] as const;
 export type SignupStep = (typeof STEPS)[number];
@@ -40,13 +39,15 @@ export function passwordError(password: string, lang: AuthLang = 'vi'): string |
 
 export const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
-/** One trial per verified email (BR-74); these already own a tenant. */
-const REGISTERED_EMAILS = ['chinh@tocmay.vn'];
+/** Emails of verified accounts: step 1 reports that the account exists (BR-74.10). */
+const VERIFIED_EMAILS = accounts.map((account) => account.email);
+
+export const isEmailTaken = (email: string) => VERIFIED_EMAILS.includes(email.trim().toLowerCase());
 
 export function emailError(email: string, lang: AuthLang = 'vi'): string | null {
   const e = AUTH_COPY[lang].errors;
   if (!isEmail(email)) return e.emailInvalid;
-  if (REGISTERED_EMAILS.includes(email.trim().toLowerCase())) return e.emailRegistered;
+  if (isEmailTaken(email)) return e.emailRegistered;
   return null;
 }
 
@@ -56,8 +57,13 @@ export function emailError(email: string, lang: AuthLang = 'vi'): string | null 
 /** Any six digits are accepted except this one, which shows the error state. */
 export const WRONG_CODE = '000000';
 export const CODE_ATTEMPTS = 3;
+export const CODE_MINUTES = 10;
 export const FIRST_RESEND_SECONDS = 42;
 export const RESEND_SECONDS = 60;
+
+/** The codes the sample mailbox shows, one per email sent. */
+const SAMPLE_CODES = ['482915', '730264', '195847'];
+export const sampleCode = (sent: number) => SAMPLE_CODES[sent % SAMPLE_CODES.length]!;
 
 /** `0:42`. */
 export const formatResendIn = (seconds: number) =>
@@ -120,70 +126,20 @@ export function slugFromName(name: string): string {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Industries
+// Resources
 
-export type IndustryId = 'salon' | 'nail' | 'spa' | 'pet';
+/** What the third step counts: the new tenant has these three non-staff types (D-16, BR-74.18). */
+export const RESOURCE_KEYS = ['chairs', 'beds', 'rooms'] as const;
+export type ResourceKey = (typeof RESOURCE_KEYS)[number];
 
-/** Every new tenant starts from the hair salon template; sign-up does not ask for an industry. */
-export const SIGNUP_INDUSTRY: IndustryId = 'salon';
+export const DEFAULT_COUNTS: Record<ResourceKey, number> = { chairs: 1, beds: 0, rooms: 0 };
 
-export interface IndustryOption {
-  id: IndustryId;
-  title: string;
-  description: string;
-  /** The template this card installs; `null` while the template does not exist yet. */
-  template: IndustryTemplate | null;
-}
-
-const SIGNUP_ID: Record<string, IndustryId> = {
-  hair_salon: 'salon',
-  nail_salon: 'nail',
-  beauty_spa: 'spa',
-  pet_spa: 'pet',
-};
-
-/** One card per template that is not hidden; only an `open` one can be picked (BR-70). */
-export const industries: IndustryOption[] = industryTemplates
-  .filter((t) => t.status !== 'hidden' && SIGNUP_ID[t.id])
-  .map((t) => ({
-    id: SIGNUP_ID[t.id]!,
-    title: t.name,
-    description: t.cardDescription,
-    template: t.status === 'open' ? t : null,
-  }));
-
-export const industryById = (id: IndustryId | null) => industries.find((i) => i.id === id);
-
-/** The resource types a tenant counts at sign-up: everything except the staff type. */
-export const placedResourceTypes = (template: IndustryTemplate) =>
-  template.resourceTypes.filter((type) => !type.isStaff);
-
-/** Minutes the customer is in the shop: all segments except the preparation at the start. */
+/** Minutes the customer is in the shop (the template screen of the platform admin reads it). */
 export function sampleMinutes(variant: SampleServiceVariant): number {
   const lead = variant.segments.findIndex((segment) => segment.kind !== 'prep');
   return variant.segments
     .slice(lead < 0 ? variant.segments.length : lead)
     .reduce((sum, segment) => sum + segment.minutes, 0);
-}
-
-export interface PreviewLine {
-  label: string;
-  detail: string;
-}
-
-/** The lines of the sample-service list: a line per variant, or one "từ …" line when the subject sets the price. */
-export function previewLines(services: SampleService[]): PreviewLine[] {
-  return services.flatMap((service) => {
-    if (service.priceBySubject) {
-      const lowest = service.variants.reduce((a, b) => (b.priceVnd < a.priceVnd ? b : a));
-      return [{ label: service.name, detail: `từ ${formatVnd(lowest.priceVnd)}` }];
-    }
-    const single = service.variants.length === 1;
-    return service.variants.map((variant) => ({
-      label: single ? service.name : `${service.name} · ${variant.name}`,
-      detail: `${formatDuration(sampleMinutes(variant))} · ${formatVnd(variant.priceVnd)}`,
-    }));
-  });
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -215,7 +171,7 @@ export const HOUR_OPTIONS = Array.from({ length: 35 }, (_, i) => {
 export const defaultHours = (): DayHours[] =>
   WEEK.map(({ weekday }) => ({ open: weekday !== 0, from: '08:00', to: '20:00' }));
 
-export const COUNT_MIN = 1;
+export const COUNT_MIN = 0;
 export const COUNT_MAX = 20;
 
 export interface SignupDraft {
@@ -233,8 +189,8 @@ export interface SignupDraft {
   phone: string;
   address: string;
   hours: DayHours[];
-  /** Resource count by the template's resource type name. */
-  counts: Record<string, number>;
+  /** How many of each non-staff resource type the first branch starts with. */
+  counts: Record<ResourceKey, number>;
   created: boolean;
 }
 
@@ -251,13 +207,13 @@ export const emptyDraft = (): SignupDraft => ({
   phone: '',
   address: '',
   hours: defaultHours(),
-  counts: {},
+  counts: { ...DEFAULT_COUNTS },
   created: false,
 });
 
-/** The count for one resource type: what the owner set, else the template's suggestion. */
-export const countOf = (draft: SignupDraft, name: string, fallback: number) =>
-  draft.counts[name] ?? fallback;
+/** The count for one resource type: what the owner set, else the default. */
+export const countOf = (draft: SignupDraft, key: ResourceKey) =>
+  draft.counts[key] ?? DEFAULT_COUNTS[key];
 
 /** A step can be opened only when every step before it is done. */
 export function canOpen(step: SignupStep, draft: SignupDraft): boolean {
@@ -267,7 +223,7 @@ export function canOpen(step: SignupStep, draft: SignupDraft): boolean {
     case 'verify':
       return draft.passwordOk;
     case 'business':
-      return draft.passwordOk && draft.verified && Boolean(industryById(SIGNUP_INDUSTRY)?.template);
+      return draft.passwordOk && draft.verified;
     case 'done':
       return draft.created;
   }
@@ -311,13 +267,14 @@ export function businessErrors(draft: SignupDraft, lang: AuthLang = 'vi'): Busin
 export const hasBusinessErrors = (e: BusinessErrors) =>
   Object.keys(e).some((k) => k !== 'days') || Object.keys(e.days).length > 0;
 
-/** "3 ghế cắt và 1 giường gội": the resources of the first branch, in words. */
-export function describeResources(draft: SignupDraft, template: IndustryTemplate): string {
-  const parts = placedResourceTypes(template).map(
-    (type) => `${countOf(draft, type.name, type.defaultCount)} ${type.name.toLowerCase()}`,
+/** "2 ghế, 1 giường và 1 phòng": the resources of the first branch, in words; types with none are left out. */
+export function describeResources(draft: SignupDraft, lang: AuthLang = 'vi'): string {
+  const text = AUTH_COPY[lang].signup.business;
+  const parts = RESOURCE_KEYS.filter((key) => countOf(draft, key) > 0).map((key) =>
+    text.resources[key].count(countOf(draft, key)),
   );
   if (parts.length < 2) return parts.join('');
-  return `${parts.slice(0, -1).join(', ')} và ${parts.at(-1)}`;
+  return `${parts.slice(0, -1).join(', ')} ${text.and} ${parts.at(-1)}`;
 }
 
 /** BR-80: a new tenant tries Sapio for 7 days, counting the day it was created. */

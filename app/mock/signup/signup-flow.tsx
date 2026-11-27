@@ -84,14 +84,7 @@ export function SignupFlow() {
     case 'verify':
       return <VerifyStep draft={draft} update={update} onNext={() => go('business')} />;
     case 'business':
-      return (
-        <BusinessStep
-          draft={draft}
-          update={update}
-          onBack={() => go('verify')}
-          onNext={() => go('done')}
-        />
-      );
+      return <BusinessStep draft={draft} update={update} onNext={() => go('done')} />;
     case 'done':
       return <DoneStep draft={draft} />;
   }

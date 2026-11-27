@@ -58,7 +58,7 @@ export function Field({
   label: string;
   optional?: boolean;
   help?: ReactNode;
-  error?: string | null | undefined;
+  error?: ReactNode;
   /** The value passed a check that took time (address is free): help turns green with a tick. */
   ok?: boolean;
   /** Fixed text after the input inside the box: ".sapio.vn". */

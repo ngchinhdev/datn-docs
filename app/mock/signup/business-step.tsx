@@ -7,7 +7,6 @@ import { Button } from '@/components/sapio/button';
 import { Field } from '@/components/sapio/form';
 import { QuantityInput } from '@/components/sapio/quantity-input';
 import { SignupLayout } from '@/components/sapio/signup-layout';
-import { useToast } from '@/components/sapio/toast';
 import { siteHost, BASE_DOMAIN } from '@/mock/site';
 import {
   COUNT_MAX,
@@ -15,15 +14,13 @@ import {
   HOUR_OPTIONS,
   WEEK,
   businessErrors,
+  RESOURCE_KEYS,
   countOf,
   hasBusinessErrors,
-  industryById,
-  SIGNUP_INDUSTRY,
   slugFormatError,
   slugFromName,
   slugTaken,
   type SignupDraft,
-  placedResourceTypes,
 } from '@/mock/signup';
 
 type SlugCheck = 'idle' | 'checking' | 'free' | 'taken';
@@ -78,22 +75,18 @@ function HourSelect({
   );
 }
 
-/** Step 4: name, address, first branch, opening hours and how many of each resource. */
+/** Step 3: name, address, first branch, opening hours and how many of each resource. */
 export function BusinessStep({
   draft,
   update,
-  onBack,
   onNext,
 }: {
   draft: SignupDraft;
   update: (patch: Partial<SignupDraft>) => void;
-  onBack: () => void;
   onNext: () => void;
 }) {
-  const toast = useToast();
   const { lang, t } = useAuthText();
   const text = t.signup.business;
-  const template = industryById(SIGNUP_INDUSTRY)?.template;
   const [submitted, setSubmitted] = useState(false);
   const [slugBlurred, setSlugBlurred] = useState(false);
   const [check, setCheck] = useState<SlugCheck>('idle');
@@ -112,8 +105,6 @@ export function BusinessStep({
     );
     return () => clearTimeout(timer);
   }, [draft.slug]);
-
-  if (!template) return null;
 
   const shows = (key: 'businessName' | 'branchName' | 'phone' | 'address') =>
     submitted ? (errors[key] ?? null) : null;
@@ -156,25 +147,10 @@ export function BusinessStep({
       title={text.title}
       lead={text.lead}
       maxWidth={720}
-      top={
-        <button
-          type="button"
-          className="sp-btn sp-btn--ghost sp-btn--sm"
-          onClick={() => toast({ text: text.saved })}
-        >
-          <span className="max-md:hidden">{text.saveLater}</span>
-          <span className="md:hidden">{text.saveLaterShort}</span>
-        </button>
-      }
       actions={
-        <>
-          <Button variant="secondary" onClick={onBack}>
-            {t.common.back}
-          </Button>
-          <Button type="submit" form="signup-business" variant="primary">
-            {text.create}
-          </Button>
-        </>
+        <Button type="submit" form="signup-business" variant="primary">
+          {text.create}
+        </Button>
       }
     >
       <form id="signup-business" noValidate onSubmit={submit} className="contents">
@@ -324,21 +300,21 @@ export function BusinessStep({
         </Card>
 
         <Card id="bz-resources" title={text.resourcesTitle} hint={text.resourcesHint}>
-          {placedResourceTypes(template).map((type, i) => (
-            <div key={type.name} className="flex items-center justify-between gap-(--space-3)">
+          {RESOURCE_KEYS.map((key, i) => (
+            <div key={key} className="flex items-center justify-between gap-(--space-3)">
               <span className="flex flex-col">
                 <label htmlFor={`bz-res-${i}`} className="text-sm leading-5 font-medium">
-                  {type.name}
+                  {text.resources[key].name}
                 </label>
-                <span className="sp-field__help">{type.hint}</span>
+                <span className="sp-field__help">{text.resources[key].hint}</span>
               </span>
               <QuantityInput
                 id={`bz-res-${i}`}
-                noun={type.name.toLowerCase()}
-                value={countOf(draft, type.name, type.defaultCount)}
+                noun={text.resources[key].noun}
+                value={countOf(draft, key)}
                 min={COUNT_MIN}
                 max={COUNT_MAX}
-                onChange={(value) => update({ counts: { ...draft.counts, [type.name]: value } })}
+                onChange={(value) => update({ counts: { ...draft.counts, [key]: value } })}
               />
             </div>
           ))}

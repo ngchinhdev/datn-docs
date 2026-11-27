@@ -49,6 +49,7 @@ Mỗi quyết định một trang: bối cảnh, lựa chọn, lý do, hệ qu�
 | [T-19](./t19-api-docs.md) | Tài liệu API sinh từ OpenAPI, xem bằng Scalar và fumadocs-openapi |
 | [T-20](./t20-same-origin-api.md) | Trình duyệt gọi API cùng origin qua /api |
 | [T-21](./t21-i18n-next-intl.md) | Hai ngôn ngữ Việt và Anh bằng next-intl |
+| [T-22](./t22-signup-email-exposure.md) | Đăng ký: để lộ email đã có tài khoản, và cho đăng ký lại tài khoản chưa xác thực |
 
 ## Nguồn
 

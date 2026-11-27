@@ -28,7 +28,8 @@ const vi = {
     passwordLong: (max: number) => `Mật khẩu dài tối đa ${max} ký tự.`,
     passwordCommon: 'Mật khẩu này quá phổ biến, chọn câu khác.',
     emailInvalid: 'Email chưa đúng. Ví dụ: an@tiemcuaban.vn.',
-    emailRegistered: 'Email này đã có một cơ sở. Đăng nhập để vào cơ sở của bạn.',
+    emailRegistered: 'Email này đã có tài khoản Sapio.',
+    emailRegisteredAction: 'Đăng nhập',
     nameEmpty: 'Nhập họ và tên.',
     termsRequired: 'Cần đồng ý điều khoản để tiếp tục.',
     slugEmpty: 'Nhập địa chỉ trang đặt lịch.',
@@ -140,7 +141,8 @@ const vi = {
       title: 'Nhập mã trong email',
       sentTo: 'Đã gửi mã 6 số tới',
       editEmail: 'Sửa email',
-      help: 'Gõ đủ 6 số là tự xác nhận. Không thấy email? Xem trong thư rác.',
+      help: 'Gõ đủ 6 số là tự xác nhận. Mã dùng được 10 phút. Không thấy email? Xem trong thư rác.',
+      mailbox: 'Mock: mở hộp thư mẫu',
       submit: 'Xác nhận',
       resend: 'Gửi lại mã',
       resendIn: (time: string) => `Gửi lại mã sau ${time}`,
@@ -152,9 +154,6 @@ const vi = {
     business: {
       title: 'Thông tin cơ sở',
       lead: 'Tên cơ sở, địa chỉ trang đặt lịch, chi nhánh đầu tiên và giờ mở cửa.',
-      saveLater: 'Lưu và làm tiếp sau',
-      saveLaterShort: 'Lưu, làm sau',
-      saved: 'Đã lưu. Đăng nhập lại để làm tiếp (mock chưa có đăng nhập).',
       create: 'Tạo cơ sở',
       addressTitle: 'Tên và địa chỉ trang đặt lịch',
       addressHint:
@@ -182,13 +181,34 @@ const vi = {
       closesAt: (day: string) => `${day}, đóng cửa lúc`,
       closed: 'Nghỉ',
       resourcesTitle: 'Tài nguyên ban đầu',
-      resourcesHint: 'Số lượng ở chi nhánh này. Đặt tên từng cái sau trong Cài đặt › Tài nguyên.',
+      resourcesHint:
+        'Số lượng ở chi nhánh này. Tên tự đặt là Ghế 1, Ghế 2...; đổi tên trong Cài đặt › Tài nguyên.',
+      resources: {
+        chairs: {
+          name: 'Ghế',
+          hint: 'Ghế cắt, ghế làm móng. Mỗi ghế một khách một lúc.',
+          noun: 'ghế',
+          count: (n: number) => `${n} ghế`,
+        },
+        beds: {
+          name: 'Giường',
+          hint: 'Giường gội, massage, chăm sóc da.',
+          noun: 'giường',
+          count: (n: number) => `${n} giường`,
+        },
+        rooms: {
+          name: 'Phòng',
+          hint: 'Phòng xông, phòng trị liệu.',
+          noun: 'phòng',
+          count: (n: number) => `${n} phòng`,
+        },
+      },
+      and: 'và',
     },
     done: {
       title: (name: string) => `${name} đã được tạo`,
-      lead: (branch: string, services: number, resources: string) =>
-        `Đã có chi nhánh ${branch}, ${services} dịch vụ mẫu, ${resources}.`,
-      activate: 'Kích hoạt gói ngay',
+      lead: (branch: string, resources: string) =>
+        `Đã có chi nhánh ${branch}${resources ? `, ${resources}` : ''}.`,
       enter: 'Vào trang quản trị',
       pageTitle: 'Trang đặt lịch',
       notOpen: 'Chưa nhận lịch',
@@ -196,17 +216,10 @@ const vi = {
       copied: (host: string) => `Đã sao chép ${host}.`,
       preview: 'Xem thử',
       pageHelp:
-        'Trang đặt lịch nhận khách sau khi bạn kích hoạt gói. Trước đó chỉ bạn xem thử được.',
+        'Trong thời gian dùng thử, trang đặt lịch chưa nhận khách. Chỉ bạn, khi đã đăng nhập, xem thử được.',
       trialTitle: (days: number, date: string) => `Dùng thử ${days} ngày, đến 23:59 ngày ${date}`,
       trialBody: (days: number) =>
-        `Trong thời gian dùng thử, bạn thêm nhân viên, dịch vụ, tài nguyên, xếp ca và xem thử trang đặt lịch. Đặt lịch online và tạo lịch hẹn mở khi kích hoạt gói. Hết ${days} ngày mà chưa kích hoạt thì tài khoản chỉ còn trang mua gói; dữ liệu vẫn được giữ.`,
-      nextTitle: 'Việc nên làm tiếp',
-      next: (services: number) => [
-        { title: 'Thêm nhân viên và kỹ năng', where: 'Cài đặt › Nhân sự' },
-        { title: `Kiểm tra giá và thời lượng ${services} dịch vụ mẫu`, where: 'Cài đặt › Dịch vụ' },
-        { title: 'Xếp ca tuần đầu', where: 'Xếp ca' },
-        { title: 'Tải logo, chọn màu cho trang đặt lịch', where: 'Cài đặt › Thương hiệu' },
-      ],
+        `Trong thời gian dùng thử, bạn thêm nhân viên, dịch vụ, tài nguyên, xếp ca và xem thử trang đặt lịch. Chưa nhận đặt lịch online và chưa tạo được lịch hẹn. Hết ${days} ngày mà chưa kích hoạt gói thì tài khoản chỉ còn trang mua gói; dữ liệu vẫn được giữ.`,
     },
   },
   forgot: {
@@ -303,7 +316,8 @@ const en: AuthCopy = {
     passwordLong: (max) => `The password can be at most ${max} characters.`,
     passwordCommon: 'This password is too common, pick another sentence.',
     emailInvalid: 'That email does not look right. Example: an@yoursalon.com.',
-    emailRegistered: 'This email already has a business. Sign in to open it.',
+    emailRegistered: 'This email already has a Sapio account.',
+    emailRegisteredAction: 'Sign in',
     nameEmpty: 'Enter your full name.',
     termsRequired: 'Agree to the terms to continue.',
     slugEmpty: 'Enter the address of your booking page.',
@@ -415,7 +429,8 @@ const en: AuthCopy = {
       title: 'Enter the code from your email',
       sentTo: 'We sent a 6-digit code to',
       editEmail: 'Edit email',
-      help: 'Type all 6 digits and it confirms by itself. No email? Check your spam folder.',
+      help: 'Type all 6 digits and it confirms by itself. The code works for 10 minutes. No email? Check your spam folder.',
+      mailbox: 'Mock: open the sample mailbox',
       submit: 'Confirm',
       resend: 'Resend code',
       resendIn: (time) => `Resend code in ${time}`,
@@ -427,9 +442,6 @@ const en: AuthCopy = {
     business: {
       title: 'Business details',
       lead: 'Business name, booking page address, first branch and opening hours.',
-      saveLater: 'Save and continue later',
-      saveLaterShort: 'Save, later',
-      saved: 'Saved. Sign in again to continue (the mock has no sign-in here).',
       create: 'Create business',
       addressTitle: 'Name and booking page address',
       addressHint:
@@ -457,13 +469,34 @@ const en: AuthCopy = {
       closesAt: (day) => `${day}, closes at`,
       closed: 'Closed',
       resourcesTitle: 'Starting resources',
-      resourcesHint: 'The count at this branch. Name each one later in Settings › Resources.',
+      resourcesHint:
+        'The count at this branch. They are named Chair 1, Chair 2 and so on; rename them later in Settings › Resources.',
+      resources: {
+        chairs: {
+          name: 'Chairs',
+          hint: 'Cutting chairs, nail chairs. One client per chair at a time.',
+          noun: 'chair',
+          count: (n) => `${n} ${n === 1 ? 'chair' : 'chairs'}`,
+        },
+        beds: {
+          name: 'Beds',
+          hint: 'Wash beds, massage, skin care.',
+          noun: 'bed',
+          count: (n) => `${n} ${n === 1 ? 'bed' : 'beds'}`,
+        },
+        rooms: {
+          name: 'Rooms',
+          hint: 'Steam rooms, treatment rooms.',
+          noun: 'room',
+          count: (n) => `${n} ${n === 1 ? 'room' : 'rooms'}`,
+        },
+      },
+      and: 'and',
     },
     done: {
       title: (name) => `${name} is ready`,
-      lead: (branch, services, resources) =>
-        `${branch} branch, ${services} sample services and ${resources} are set up.`,
-      activate: 'Activate a plan now',
+      lead: (branch, resources) =>
+        `${branch} branch is set up${resources ? ` with ${resources}` : ''}.`,
       enter: 'Open the admin area',
       pageTitle: 'Booking page',
       notOpen: 'Not taking bookings',
@@ -471,23 +504,10 @@ const en: AuthCopy = {
       copied: (host) => `Copied ${host}.`,
       preview: 'Preview',
       pageHelp:
-        'The booking page takes clients once you activate a plan. Until then only you can preview it.',
+        'During the trial the booking page takes no clients. Only you, once signed in, can preview it.',
       trialTitle: (days, date) => `${days}-day trial, until 23:59 on ${date}`,
       trialBody: (days) =>
-        `During the trial you can add staff, services and resources, set shifts and preview the booking page. Online booking and creating appointments open when you activate a plan. If you have not activated one after ${days} days, the account only shows the plan page; your data stays.`,
-      nextTitle: 'What to do next',
-      next: (services) => [
-        { title: 'Add staff and skills', where: 'Settings › Staff' },
-        {
-          title: `Check the price and duration of ${services} sample services`,
-          where: 'Settings › Services',
-        },
-        { title: 'Plan the first week of shifts', where: 'Shifts' },
-        {
-          title: 'Upload a logo and pick colors for the booking page',
-          where: 'Settings › Branding',
-        },
-      ],
+        `During the trial you can add staff, services and resources, set shifts and preview the booking page. Online booking is off and appointments cannot be created yet. If you have not activated a plan after ${days} days, the account only shows the plan page; your data stays.`,
     },
   },
   forgot: {

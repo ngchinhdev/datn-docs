@@ -29,7 +29,7 @@ Bố cục `AuthPage` như [Đăng nhập](./login.md): khối giới thiệu b�
 | 8 | Bị khóa | Chữ cạnh mũi tên của mục 6 | | "Bị Sapio khóa", ở cơ sở có `status` là `locked` |
 | 9 | Chưa có cơ sở | Chữ | | "Chưa có cơ sở nào. Đăng ký cơ sở của riêng bạn để bắt đầu dùng thử." Thay cho mục 5 |
 | 10 | Lỗi | Chữ báo lỗi, `role="alert"` | Ẩn | Dưới danh sách |
-| 11 | Đăng ký cơ sở của riêng bạn | Link | | Tới `/signup` |
+| 11 | Đăng ký cơ sở của riêng bạn | Link | | Tới `/signup?step=business`. Chỉ hiện khi API #3 trả `canCreateTrial = true`; tài khoản đã tạo cơ sở dùng thử thì không hiện (BR-74.19) |
 | 12 | Đăng xuất | Nút chữ, cạnh mục 11 | | |
 | 13 | Ngôn ngữ, giao diện | Hai nút ở thanh trên | | Như mục 15 và 16 của [Đăng nhập](./login.md) |
 
@@ -37,7 +37,7 @@ Bố cục `AuthPage` như [Đăng nhập](./login.md): khối giới thiệu b�
 
 | Khi | Xử lý |
 |---|---|
-| Mở trang | Máy chủ gọi API #3 và #4. Chưa có phiên hoặc phiên hết hạn thì chuyển tới `/login` |
+| Mở trang | Máy chủ gọi API #3 và #4. Chưa có phiên hoặc phiên hết hạn thì chuyển tới `/login`. Phiên của tài khoản chưa xác thực email (`emailVerified = false`) thì chuyển tới `/signup?step=verify` |
 | Bấm mục 6 | Gọi API #5 với `slug` của cơ sở. Trong lúc chờ, dòng đó hiện vòng xoay thay mũi tên và mọi dòng không bấm được |
 | API trả 200 | Chuyển tới `redirectTo` |
 | API trả 401 | Chuyển tới `/login` |

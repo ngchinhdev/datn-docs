@@ -19,7 +19,7 @@ Kế hoạch này chỉ chia việc. Trang nào ở trên nói khác kế hoạc
 | A3 | `feat/password-reset` | API #6 đến #8, MH-04 | 15–20 |
 | A4 | `datn-docs` | fumadocs-openapi đọc `openapi.json` | |
 
-Đợt sau: đăng ký cơ sở và xác thực email (MH-02), lời mời (MH-05), OTP khách (MH-16).
+Đợt sau: lời mời (MH-05), OTP khách (MH-16). Đăng ký cơ sở và xác thực email (MH-02) ở `signup.md`.
 
 ## A1. API xác thực
 
