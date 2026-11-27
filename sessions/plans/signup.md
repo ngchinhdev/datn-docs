@@ -35,12 +35,13 @@ Kế hoạch này chỉ chia việc. Trang nào ở trên nói khác kế hoạc
 
 Đầu việc:
 
-- Migration: thêm `user_id`, `revoked_at` cho `email_verifications`, bảng `trial_claims`, và các bảng của ERD mục 2 đến 4 mà transaction tạo cơ sở ghi vào (`branches`, `opening_hours`, `resource_types`, `resources`, `plans`, `subscriptions`; thêm cột còn thiếu của `tenants`, không có `monogram`). Không tạo `booking_policies` và `tenant_profiles`. RLS theo T-07.
+- Migration: đặt `email_verified_at = created_at` cho mọi `users` đang có (tài khoản hiện có đều đã dùng được, không bị xem là chưa xác thực). Thêm `user_id`, `revoked_at` cho `email_verifications`, bảng `trial_claims`, và các bảng của ERD mục 2 đến 4 mà transaction tạo cơ sở ghi vào (`branches`, `opening_hours`, `resource_types`, `resources`, `plans`, `subscriptions`; thêm cột còn thiếu của `tenants`, không có `monogram`). Không tạo `booking_policies` và `tenant_profiles`. RLS theo T-07.
 - Domain (hàm thuần, thời gian từ `Clock`): sinh và so mã, `trialEndsAt(createdAt, timeZone)` (test thuộc tính và hai ca gần nửa đêm), tên tài nguyên "Ghế 1".
 - Endpoint #1 đến #5 của `api/signup.md`; guard cho phiên chưa xác thực (`EMAIL_NOT_VERIFIED`); `GET /v1/auth/session` thêm `emailVerified`, `canCreateTrial`; `redirectTo` của đăng nhập cho tài khoản chưa xác thực; giới hạn theo IP.
 - Email "Mã xác thực email Sapio" theo `verifyMail` của `datn-docs/mock/account-mail.ts`, qua hàng đợi `mail`.
 - Schema Zod và mã lỗi ở `packages/shared`.
-- Scalar và dữ liệu mẫu theo mục "Thử trong Scalar" của `api/signup.md`; `plans` có `basic` và `pro`; mọi cơ sở mẫu có dòng `trial_claims`.
+- Scalar và dữ liệu mẫu theo mục "Thử trong Scalar" của `api/signup.md`; `plans` có `basic` và `pro`; mọi cơ sở mẫu có dòng `trial_claims`; seed đặt `email_verified_at` cho mọi tài khoản trừ `chuaxacthuc@email.vn`.
+- Biến môi trường mới cho khóa HMAC của mã xác thực (`SIGNUP_CODE_HMAC_KEY`), ghi vào `.env.example`; thiếu khóa thì API không khởi động.
 - Xuất `openapi.json`, chạy `pnpm sync:openapi` ở `datn-docs`, thêm link "Tham chiếu" vào `api/signup.md`.
 - Test AC-24 đến AC-56. Các ca chạy đồng thời (AC-46, AC-51) và hoàn tác transaction (AC-48) là integration test với Testcontainers, không mock DB.
 
