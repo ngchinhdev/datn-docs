@@ -27,14 +27,14 @@ Các bảng này **không có RLS theo tenant**: chúng là dữ liệu của n�
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `users` | `email text`, `password_hash`, `name`, `email_verified_at?`, `is_platform_admin bool`, `last_tenant_id?` FK `tenants` | U `email`. Tài khoản nhân sự, dùng chung cho mọi cơ sở (một người làm ở hai cơ sở có một tài khoản). `last_tenant_id` là cơ sở dùng gần nhất (BR-79) |
+| `users` | `email text`, `password_hash`, `name`, `email_verified_at?`, `is_platform_admin bool`, `last_tenant_id?` FK `tenants` | U `email`. Tài khoản nhân sự, dùng chung cho mọi cơ sở (một người làm ở hai cơ sở có một tài khoản). `last_tenant_id` là cơ sở dùng gần nhất (BR-79). `email_verified_at` rỗng là tài khoản chưa xác thực: dòng vẫn nằm ở bảng này, đăng ký lại được (BR-74.11) và chỉ dùng được bước xác thực (BR-74.13) |
 | `sessions` | `user_id` FK, `door` (`staff`, `platform`), `token_hash`, `remember bool`, `created_at`, `last_used_at`, `expires_at`, `revoked_at?`, `ip`, `user_agent` | U `token_hash` (SHA-256 của token). Phiên nhân sự và quản trị nền tảng (T-08, BR-76.9 đến 76.12) |
 | `login_throttles` | `email text` PK, `failed_count int`, `locked_until?`, `updated_at` | Bộ đếm sai theo email, có cả email không có tài khoản (BR-76.2 đến 76.8). Tăng bằng một câu `INSERT ... ON CONFLICT DO UPDATE` để hai request cùng lúc không đếm thiếu |
 | `password_resets` | `user_id` FK, `token_hash`, `created_at`, `expires_at`, `used_at?`, `replaced_at?` | U `token_hash`. Link đặt lại mật khẩu (BR-77) |
-| `email_verifications` | `email`, `code_hash`, `purpose` (`signup`), `expires_at`, `attempts`, `consumed_at?` | Mã 6 số khi đăng ký (BR-74) |
+| `email_verifications` | `user_id` FK, `email`, `code_hash`, `purpose` (`signup`), `expires_at`, `attempts`, `consumed_at?`, `revoked_at?` | Mã 6 số khi đăng ký (BR-74.1 đến 74.8). `user_id` gắn mã với tài khoản chưa xác thực, nên đổi email (BR-74.12) không làm mất liên kết. `code_hash` là HMAC-SHA-256. `revoked_at` đặt khi mã bị thay bằng mã mới hoặc sai 3 lần; `consumed_at` chỉ đặt khi nhập đúng. Mã còn hiệu lực: cả hai cột rỗng, chưa quá `expires_at`. `created_at` là lúc gửi: dùng cho hạn 60 giây và đếm 5 mã mỗi giờ theo `email` (BR-74.5, BR-74.6), nên có chỉ mục `(email, created_at)` |
 | `tenants` | `slug text`, `name`, `monogram`, `locked_at?`, `lock_reason?`, `created_by` FK `users` | U `slug` (BR-72). Khóa vi phạm là `locked_at` (BR-75) |
 | `tenant_slug_history` | `tenant_id`, `slug`, `changed_at` | U `slug`. Link cũ tự chuyển sang slug mới (BR-72) |
-| `trial_claims` | `email text` PK, `tenant_id`, `claimed_at` | Một email đã xác thực chỉ dùng thử một lần (BR-74) |
+| `trial_claims` | `email text` PK, `tenant_id` FK, `claimed_at` | Một dòng cho mỗi tài khoản đã tạo cơ sở dùng thử, ghi trong transaction tạo cơ sở (BR-74.19, BR-74.20) |
 | `plans` | `code`, `name`, `monthly_price_vnd`, `features text[]`, `limits jsonb` | Như [T-17](../decisions/t17-plan-entitlements.md) |
 | `subscriptions` | `tenant_id` U, `plan_code`, `status`, `trial_ends_at?`, `current_period_end?`, `pending_plan_code?` | Như T-17 |
 | `platform_payments` | `tenant_id`, `provider_ref` U, `kind` (`buy`, `renew`, `upgrade`), `plan_code`, `months`, `amount_vnd`, `paid_at` | Chỉ thêm (BR-88) |
@@ -295,7 +295,7 @@ Tiêu chí của giai đoạn 1: mọi BR có chỗ đứng trong ERD.
 | BR-73 | `users.password_hash` (kiểm lúc đặt) |
 | BR-76 | `login_throttles`, `sessions` |
 | BR-77 | `password_resets`, `sessions.revoked_at` |
-| BR-74 | `trial_claims` |
+| BR-74 | `email_verifications`, `users.email_verified_at`, `trial_claims` |
 | BR-80 đến BR-88 | `plans`, `subscriptions`, `platform_payments` (T-17) |
 
 ## 13. Câu hỏi còn mở

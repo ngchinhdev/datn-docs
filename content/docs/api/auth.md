@@ -43,7 +43,7 @@ Xử lý, theo thứ tự:
    - Đủ 5 lần: đặt `locked_until` = bây giờ + 15 phút, trả **423** `LOGIN_LOCKED`. Tài khoản có thật thì đưa email báo khóa vào hàng đợi (BR-76.6).
    - Chưa đủ 5: trả **401** `INVALID_CREDENTIALS`. Từ lần thứ 3 thì kèm `remainingAttempts` (BR-76.3).
 4. Đúng: xóa dòng `login_throttles`, tạo phiên (BR-76.9, 76.10), đặt cookie. `remember = false` thì cookie không có `Max-Age`.
-5. Tính nơi đến theo bảng "Vào cơ sở sau khi đăng nhập" của [tính năng](../features/auth.md#vào-cơ-sở-sau-khi-đăng-nhập-một-phần-của-br-79).
+5. Tính nơi đến theo bảng "Vào cơ sở sau khi đăng nhập" của [tính năng](../features/auth.md#vào-cơ-sở-sau-khi-đăng-nhập-một-phần-của-br-79). Tài khoản chưa xác thực email thì nơi đến là `/signup?step=verify` (BR-74.14); đăng nhập không gửi mã.
 
 Trả về 200:
 
@@ -54,7 +54,7 @@ Trả về 200:
 }
 ```
 
-`redirectTo` là đường dẫn giao diện chuyển tới: trang đầu của cơ sở (`/app/{slug}/calendar`, hoặc `/app/{slug}/my/schedule` với kỹ thuật viên), hoặc `/select-workspace` khi cần chọn cơ sở.
+`redirectTo` là đường dẫn giao diện chuyển tới: trang đầu của cơ sở (`/app/{slug}/calendar`, hoặc `/app/{slug}/my/schedule` với kỹ thuật viên), `/select-workspace` khi cần chọn cơ sở, hoặc `/signup?step=verify` khi tài khoản chưa xác thực email.
 
 | Status | `code` | Trường thêm | Câu hiển thị (MH-03) |
 |---|---|---|---|
@@ -71,7 +71,7 @@ Tham chiếu: [Đăng xuất](./reference/auth/authLogout.mdx)
 
 Tham chiếu: [Xem phiên hiện tại](./reference/auth/authSession.mdx)
 
-`GET /v1/auth/session`. Trả về `{ user, remember, expiresAt }`. Phiên có `remember` thì mỗi lần gọi API được tính là một lần dùng: cập nhật `last_used_at`, `expires_at` và `Max-Age` của cookie. Để đỡ ghi DB, chỉ cập nhật khi `last_used_at` đã cũ hơn 5 phút (BR-76.10).
+`GET /v1/auth/session`. Trả về `{ user, remember, expiresAt, emailVerified, canCreateTrial }`. `emailVerified` là `false` với tài khoản chưa xác thực email; `canCreateTrial` là `true` khi tài khoản đã xác thực và chưa tạo cơ sở dùng thử (BR-74.19). Giao diện dùng hai trường này để chọn bước của `/signup` và để hiện nút "Đăng ký cơ sở của riêng bạn" ở Chọn cơ sở. Phiên có `remember` thì mỗi lần gọi API được tính là một lần dùng: cập nhật `last_used_at`, `expires_at` và `Max-Age` của cookie. Để đỡ ghi DB, chỉ cập nhật khi `last_used_at` đã cũ hơn 5 phút (BR-76.10).
 
 ## 4. Danh sách cơ sở
 
@@ -166,6 +166,7 @@ Ca nào làm đổi dữ liệu thì chạy lại cho kết quả khác: "Sai l�
 | Kỹ thuật viên | `mai@tocmay.vn` | 200, `redirectTo` là `/app/toc-may/my/schedule` |
 | Nhiều cơ sở | `linh.pham@email.vn` | 200, `redirectTo` là `/select-workspace` |
 | Chưa thuộc cơ sở nào | `moi@email.vn` | 200, `redirectTo` là `/select-workspace` |
+| Chưa xác thực email | `chuaxacthuc@email.vn` | 200, `redirectTo` là `/signup?step=verify` |
 | Cơ sở bị khóa | `chu@toccu.vn` (chủ `toc-cu`, cơ sở đã bị khóa) | 200, `redirectTo` là `/select-workspace` |
 | Sai mật khẩu | `chinh@tocmay.vn` với `sai-mat-khau` | 401 `INVALID_CREDENTIALS` |
 | Sai lần thứ 3 | `sapkhoa@tocmay.vn` (đã sai 2 lần) với `sai-mat-khau` | 401 `INVALID_CREDENTIALS`, `remainingAttempts` là 2 |

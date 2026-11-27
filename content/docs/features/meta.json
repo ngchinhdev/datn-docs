@@ -2,6 +2,7 @@
   "title": "Tính năng",
   "pages": [
     "auth",
+    "signup",
     "business-rules"
   ]
 }

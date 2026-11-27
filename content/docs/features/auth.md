@@ -7,7 +7,7 @@ description: Đăng nhập, phiên, khóa tạm khi sai nhiều lần, quên và
 
 | Có trong tính năng này | Ở tính năng khác |
 |---|---|
-| Đăng nhập nhân sự (MH-03) và quản trị nền tảng (MH-63) | Đăng ký cơ sở, xác thực email (MH-02, BR-74) |
+| Đăng nhập nhân sự (MH-03) và quản trị nền tảng (MH-63) | Đăng ký cơ sở, xác thực email (MH-02, BR-74): [Đăng ký cơ sở](./signup.md) |
 | Phiên, đăng xuất | Lời mời nhân sự (MH-05, BR-78) |
 | Khóa tạm khi sai nhiều lần | Đăng nhập khách bằng mã email (MH-16, BR-16, BR-17) |
 | Quên và đặt lại mật khẩu (MH-04) | Trang cơ sở bị khóa, hết gói (BR-79, BR-82) |
@@ -75,12 +75,13 @@ Email luôn được **chuẩn hóa** trước khi so và lưu: bỏ khoảng tr
 
 | Tài khoản thuộc | Sau khi đăng nhập | Sau khi đặt lại mật khẩu |
 |---|---|---|
+| Email chưa xác thực | `/signup?step=verify` (BR-74.14) | như cột trái |
 | 0 cơ sở | Chọn cơ sở (MH-06), danh sách trống, có nút "Đăng ký cơ sở của riêng bạn" | như cột trái |
 | 1 cơ sở vào được | Trang đầu theo vai trò: Lịch, hoặc Lịch của tôi với kỹ thuật viên | như cột trái |
 | 1 cơ sở tạm dừng (nhân viên của cơ sở hết gói) | Chọn cơ sở | như cột trái |
 | Nhiều cơ sở | Chọn cơ sở, cơ sở dùng gần nhất có nhãn | Cơ sở dùng gần nhất nếu vào được, nếu không thì Chọn cơ sở |
 
-Chủ cơ sở hết gói vào thẳng trang Gói Sapio. Cơ sở bị khóa mở trang báo khóa (BR-79). "Dùng gần nhất" là cơ sở cuối cùng tài khoản đã vào.
+Nút "Đăng ký cơ sở của riêng bạn" chỉ hiện với tài khoản đã xác thực email và chưa tạo cơ sở dùng thử; bấm vào thì vào thẳng bước 3 của [Đăng ký cơ sở](./signup.md#đường-vào). Chủ cơ sở hết gói vào thẳng trang Gói Sapio. Cơ sở bị khóa mở trang báo khóa (BR-79). "Dùng gần nhất" là cơ sở cuối cùng tài khoản đã vào.
 
 ## Luồng đăng nhập
 

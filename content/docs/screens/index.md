@@ -50,7 +50,7 @@ Danh sách này rút từ [phạm vi làm chắc](../overview/scope.md#31-làm-c
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
 | MH-01 | Trang giới thiệu Sapio | `/` | Ai cũng xem | 1 | Vẽ | **Đã chọn.** Một trang: lời giới thiệu kèm ảnh lịch nhiều cột, tính năng chính, bảng giá hai gói lấy từ dữ liệu (BR-83), nút "Đăng ký cơ sở" và "Đăng nhập" |
-| MH-02 | Đăng ký cơ sở | `/signup?step=account\|verify\|business\|done` | CCS | 1 | Vẽ | **Đã chọn.** Tài khoản (mật khẩu BR-73) → mã 6 số qua email → tên, địa chỉ `toc-may.sapio.vn`, chi nhánh đầu, giờ mở cửa, số tài nguyên → đã tạo, **dùng thử 7 ngày**. BR-72, BR-74, BR-80 |
+| MH-02 | Đăng ký cơ sở | `/signup?step=account\|verify\|business\|done` | CCS | 1 | Vẽ | **Đã chọn.** Tài khoản (mật khẩu BR-73) → mã 6 số qua email → tên, địa chỉ `toc-may.sapio.vn`, chi nhánh đầu, giờ mở cửa, số Ghế, Giường, Phòng → đã tạo, **dùng thử 7 ngày**. BR-72, BR-74, BR-80. [Đặc tả](./signup.md) |
 | MH-03 | Đăng nhập | `/login` | Nhân sự | 1 | Vẽ | **Đã chọn.** Email + mật khẩu, "Giữ đăng nhập trên máy này"; sai thì báo chung, từ lần 3 báo số lần còn lại, sai 5 lần tạm khóa 15 phút (BR-76) |
 | MH-04 | Quên và đặt lại mật khẩu | `/forgot-password`, `/reset-password` | Nhân sự | 1 | Vẽ | **Đã chọn.** Luôn báo cùng một câu; link 30 phút, dùng một lần, gửi lại sau 60 giây; đặt xong đăng xuất máy khác, vào cơ sở dùng gần nhất (BR-73, BR-77) |
 | MH-05 | Nhận lời mời | `/invite/[token]` | LT, KTV, QL | 1 | Vẽ | **Đã chọn.** Thẻ lời mời (vai trò, chi nhánh, người mời, hết hạn). Email chưa có tài khoản: điền tên, tạo mật khẩu; đã có: đăng nhập đúng email đó. Từ chối được; hết hạn, thu hồi, đã dùng có trang riêng (BR-78) |

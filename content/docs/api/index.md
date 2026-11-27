@@ -22,7 +22,7 @@ Trình duyệt chỉ gọi `/api/*` **cùng origin** với trang. Next.js chuy�
 
 | Ai | Cách | Cookie |
 |---|---|---|
-| Nhân sự | Phiên, sau `POST /v1/auth/login` | `__Host-sapio_session`: `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, không có `Domain` |
+| Nhân sự | Phiên, sau `POST /v1/auth/login` hoặc `POST /v1/signup/account` | `__Host-sapio_session`: `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, không có `Domain` |
 | Quản trị nền tảng | Phiên, sau `POST /v1/platform/auth/login` | `__Host-sapio_admin`: như trên nhưng `SameSite=Strict` |
 | Khách của cơ sở | Phiên sau mã email (BR-16) | `__Host-sapio_customer`, chỉ trên tên miền con của cơ sở |
 
@@ -88,6 +88,7 @@ Lỗi dùng chung:
 | 401 | `UNAUTHENTICATED` | Không có phiên, hoặc phiên đã hết hạn hay bị thu hồi |
 | 403 | `FORBIDDEN` | Có phiên nhưng không có quyền |
 | 403 | `ORIGIN_NOT_ALLOWED` | Header `Origin` không thuộc danh sách tin cậy |
+| 403 | `EMAIL_NOT_VERIFIED` | Phiên của tài khoản chưa xác thực email gọi endpoint ngoài bước xác thực ([Đăng ký cơ sở](./signup.md)) |
 | 404 | `NOT_FOUND` | Không có tài nguyên, hoặc không thuộc cơ sở của phiên |
 | 410 | `RESET_LINK_INVALID` | Link đặt lại mật khẩu đã dùng, hết hạn, đã bị thay hoặc không có. Câu `detail`: "Link không còn dùng được." |
 | 429 | `RATE_LIMITED` | Gọi quá nhiều lần. Có header `Retry-After` (giây) |
@@ -104,3 +105,4 @@ Lỗi dùng chung:
 | Nhóm | Trang |
 |---|---|
 | Xác thực nhân sự và quản trị nền tảng | [Xác thực](./auth.md) |
+| Đăng ký cơ sở, xác thực email, tạo cơ sở dùng thử | [Đăng ký cơ sở](./signup.md) |
