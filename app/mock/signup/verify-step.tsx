@@ -98,7 +98,8 @@ export function VerifyStep({
           {text.sentTo} <strong className="font-semibold text-(--ink)">{draft.email}</strong>.{' '}
           <Link href="/mock/signup?step=account" className="sp-link">
             {text.editEmail}
-          </Link>{' '}
+          </Link>
+          <span aria-hidden="true"> · </span>
           <Link href="/mock/mailbox" className="sp-link">
             {text.mailbox}
           </Link>
