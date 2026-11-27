@@ -15,7 +15,7 @@ Nghiệp vụ ở [Đăng ký cơ sở](../features/signup.md). Quy ước chung
 | 4 | `GET /v1/signup/slug` | Phiên đã xác thực | 200 | `EMAIL_NOT_VERIFIED` | BR-72 |
 | 5 | `POST /v1/signup/business` | Phiên đã xác thực | 201 | `SLUG_TAKEN`, `TRIAL_USED`, `EMAIL_NOT_VERIFIED` | BR-74.15 đến 74.23, BR-80 |
 
-Phiên ở đây là phiên cửa `staff` (BR-76.9), cùng cookie `__Host-sapio_session`. Phiên của tài khoản chưa xác thực chỉ dùng được ở #2, #3, [`GET /v1/auth/session`](./auth.md#3-phiên-hiện-tại) và [`POST /v1/auth/logout`](./auth.md#2-đăng-xuất); mọi endpoint khác của nhân sự trả **403** `EMAIL_NOT_VERIFIED` (BR-74.13). Kiểm slug (#4) cũng vậy.
+Phiên ở đây là phiên cửa `staff` (BR-76.9), cùng cookie `__Host-sapio_session`. Phiên của tài khoản chưa xác thực chỉ dùng được ở #2, #3, [`GET /v1/auth/session`](./auth.md#3-phiên-hiện-tại) và [`POST /v1/auth/logout`](./auth.md#2-đăng-xuất); mọi endpoint khác của nhân sự trả **403** `EMAIL_NOT_VERIFIED` (BR-74.13). Kiểm slug (#4) cũng vậy: phiên chưa xác thực bị từ chối trước khi kiểm `value`. Riêng #5 kiểm schema trước, rồi mới tới email đã xác thực.
 
 ## Giới hạn theo IP
 
@@ -31,6 +31,8 @@ Phiên ở đây là phiên cửa `staff` (BR-76.9), cùng cookie `__Host-sapio_
 Ngoài giới hạn theo IP, mã gửi đi còn bị giới hạn theo email (BR-74.5, BR-74.6) ở #1 và #3.
 
 ## 1. Tạo tài khoản
+
+Tham chiếu: [Tạo tài khoản](./reference/signup/signupCreateAccount.mdx)
 
 `POST /v1/signup/account`
 
@@ -77,6 +79,8 @@ Trả về 201, kèm cookie phiên:
 
 ## 2. Nhập mã xác thực
 
+Tham chiếu: [Nhập mã xác thực](./reference/signup/signupVerify.mdx)
+
 `POST /v1/signup/verify`
 
 | Trường | Kiểu | Bắt buộc | Ghi chú |
@@ -88,10 +92,15 @@ Xử lý, theo thứ tự:
 1. Body sai schema: **400** `VALIDATION_FAILED`.
 2. Tài khoản đã xác thực: **409** `ALREADY_VERIFIED`.
 3. Tìm mã mới nhất còn hiệu lực: chưa dùng, chưa bị hủy, chưa hết hạn. Không có thì **410** `CODE_EXPIRED`. Trường hợp này gộp mã hết hạn (BR-74.2), mã đã bị thay (BR-74.3), mã đã bị hủy sau 3 lần sai (BR-74.4) và chưa từng có mã.
-4. So hash của `code` (so sánh thời gian không đổi). Sai thì tăng `attempts` bằng một câu `UPDATE ... SET attempts = attempts + 1 ... RETURNING`, để hai request cùng lúc không đếm thiếu:
-   - `attempts` mới nhỏ hơn 3: **400** `CODE_INVALID` với `attemptsLeft` = 3 − `attempts`.
-   - `attempts` mới bằng 3: hủy mã, **400** `CODE_INVALID` với `attemptsLeft = 0`.
-5. Đúng: trong một transaction, đánh dấu mã đã dùng (`consumed_at`) và đặt `users.email_verified_at` (BR-74.7).
+4. So hash của `code` với mã đó (so sánh thời gian không đổi):
+   - Khớp: sang bước 5.
+   - Không khớp, nhưng khớp một mã cũ khác của tài khoản (đã bị thay, hết hạn hoặc đã bị hủy): **410** `CODE_EXPIRED`. Không tính là lần nhập sai.
+   - Không khớp mã nào: tăng `attempts`.
+     - `attempts` mới nhỏ hơn 3: **400** `CODE_INVALID` với `attemptsLeft` = 3 − `attempts`.
+     - `attempts` mới bằng 3: hủy mã, **400** `CODE_INVALID` với `attemptsLeft = 0`.
+5. Đúng: đánh dấu mã đã dùng (`consumed_at`) và đặt `users.email_verified_at` (BR-74.7).
+
+Các bước 2 đến 5 chạy trong một transaction giữ khóa dòng `users` của tài khoản (`SELECT ... FOR UPDATE`), nên các lần nhập của một tài khoản xếp hàng và hai request cùng lúc không đếm thiếu lần sai.
 
 Trả về 200 `{ user }` như #1. Phiên hiện tại dùng tiếp, không tạo phiên mới.
 
@@ -102,6 +111,8 @@ Trả về 200 `{ user }` như #1. Phiên hiện tại dùng tiếp, không tạ
 | 409 | `ALREADY_VERIFIED` | | Không hiện; giao diện sang bước 3 |
 
 ## 3. Gửi lại mã
+
+Tham chiếu: [Gửi lại mã](./reference/signup/signupResend.mdx)
 
 `POST /v1/signup/resend`, không có body.
 
@@ -119,6 +130,8 @@ Trả về **202** với `{ codeExpiresAt, resendAt }` như #1.
 
 ## 4. Kiểm slug
 
+Tham chiếu: [Kiểm slug](./reference/signup/signupCheckSlug.mdx)
+
 `GET /v1/signup/slug?value={slug}`
 
 `value` bắt buộc, tối đa 64 ký tự; thiếu hoặc dài hơn thì **400** `VALIDATION_FAILED`. Không chuẩn hóa `value`.
@@ -133,6 +146,8 @@ Trả về 200:
 Thứ tự xét `reason`: `INVALID_FORMAT`, `RESERVED`, `TAKEN`. Kết quả chỉ để gợi ý khi rời ô slug: slug không được giữ chỗ, quyết định nằm ở #5 (BR-74.21).
 
 ## 5. Tạo cơ sở
+
+Tham chiếu: [Tạo cơ sở](./reference/signup/signupCreateBusiness.mdx)
 
 `POST /v1/signup/business`
 
@@ -184,7 +199,7 @@ Trả về 201:
 
 ## Thử trong Scalar
 
-Mọi tài khoản mẫu có mật khẩu `123456`. Email gửi đi xem ở Mailpit (`http://localhost:8025`). Dữ liệu mẫu có thêm tài khoản `chuaxacthuc@email.vn` (chưa xác thực, có mã còn hạn `123456`). Ca nào làm đổi dữ liệu thì chạy lại cho kết quả khác; `db:seed -- --reset` đưa về như ban đầu.
+Mọi tài khoản mẫu có mật khẩu `123456`. Email gửi đi xem ở Mailpit (`http://localhost:8025`). Dữ liệu mẫu có thêm tài khoản `chuaxacthuc@email.vn` (chưa xác thực, có mã còn hạn `123456`) và `havy.nail@email.vn` (chủ `nail-ha-vy`, để mọi cơ sở mẫu có dòng `trial_claims`). Danh sách ca nằm ở `apps/api/src/openapi/examples/signup.ts`, và một test chạy từng ca trên dữ liệu mẫu để kiểm kết quả ghi dưới đây. Ca nào làm đổi dữ liệu thì chạy lại cho kết quả khác; `db:seed -- --reset` đưa về như ban đầu.
 
 | Ca | Endpoint | Đăng nhập là | Đầu vào | Kết quả |
 |---|---|---|---|---|
