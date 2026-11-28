@@ -15,7 +15,7 @@ description: Các bảng của Sapio theo phân hệ, khóa, ràng buộc, RLS, 
 - **Trạng thái:** `text` kèm `check (status in (...))`, dễ thêm giá trị hơn kiểu `enum` của Postgres. Dữ liệu trạng thái mô tả ở [mục 11](#11-vòng-đời-trạng-thái).
 - **Xóa:** cấu hình (dịch vụ, tài nguyên, nhân viên) không xóa cứng khi đã có lịch tham chiếu, mà đặt `archived_at`. Lịch hẹn, tiền, sổ cái, nhật ký không bao giờ xóa.
 - **Cột chung:** `created_at timestamptz not null default now()`. Bảng sửa được có thêm `updated_at`. Không liệt kê lại hai cột này trong các bảng dưới đây.
-- **JSONB** chỉ dùng cho cấu hình có hình dạng thay đổi theo cơ sở: quy tắc hoàn cọc, chia hoa hồng. Hình dạng được kiểm bằng schema Zod trong `packages/shared` (quy tắc 8).
+- **JSONB** chỉ dùng cho cấu hình có hình dạng thay đổi theo cơ sở: quy tắc hoàn cọc. Hình dạng được kiểm bằng schema Zod trong `packages/shared` (quy tắc 8).
 - **Tên:** bảng và cột viết `snake_case` (`password_resets.expires_at`); code TypeScript dùng camelCase, Drizzle đổi qua lại bằng `casing: 'snake_case'`.
 - **Email và slug** lưu kiểu `text`, đã chuẩn hóa ở tầng ứng dụng (email: bỏ khoảng trắng hai đầu, chữ thường; slug theo BR-72). DB so khớp nguyên văn.
 
@@ -74,7 +74,7 @@ Nhân viên là một **tài nguyên** có loại `is_staff` (thuật ngữ). M�
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `resource_types` | `tenant_id`, `name`, `is_staff bool`, `sort` | Cơ sở mới có sẵn: Nhân viên, Ghế, Giường, Phòng. Loại `is_staff` không sửa, không xóa; loại khác thêm, đổi tên, xóa khi không còn tài nguyên (BR-93.16 đến 93.19). U `(tenant_id, lower(name))`. Ví dụ Tóc Mây: Thợ, Ghế cắt, Giường gội; Lá Sen: Kỹ thuật viên, Giường, Bồn ngâm, Phòng xông |
+| `resource_types` | `tenant_id`, `name`, `is_staff bool`, `sort` | Cơ sở mới có sẵn: Nhân viên, Ghế, Giường, Phòng. Loại `is_staff` không sửa, không xóa; loại khác thêm, đổi tên, xóa khi không còn tài nguyên và không đoạn hay dọn dẹp nào của dịch vụ chiếm (BR-93.16 đến 93.19, BR-94.32). U `(tenant_id, lower(name))`. Ví dụ Tóc Mây: Thợ, Ghế cắt, Giường gội; Lá Sen: Kỹ thuật viên, Giường, Bồn ngâm, Phòng xông |
 | `resources` | `tenant_id`, `branch_id` FK, `resource_type_id` FK, `name`, `sort`, `archived_at?` | Ghế 1, Phòng xông 2, Mai. U `(tenant_id, branch_id, lower(name))` trên các dòng `archived_at is null` (BR-93.21). `sort` là thứ tự trong nhóm (chi nhánh, loại) (BR-93.23). `archived_at` có giá trị là ngừng dùng, không dùng lại (BR-93.27) |
 | `resource_pauses` | `tenant_id`, `resource_id` FK, `starts_at`, `ends_at`, `reason`, `created_at` | Tạm ngưng bảo trì (MH-46, BR-93.24). `check (starts_at < ends_at)`; exclusion constraint chống hai khoảng của một tài nguyên chồng nhau ([mục 10](#10-ràng-buộc-quan-trọng)). Mở lại đặt `ends_at` là lúc bấm hoặc xóa dòng chưa bắt đầu (BR-93.25). Trừ khỏi thời gian khả dụng |
 | `staff_levels` | `tenant_id`, `level smallint`, `name` | U `(tenant_id, level)`. Thợ, Thợ chính, Thợ cả (BR-56) |
@@ -89,13 +89,13 @@ Nhân viên là một **tài nguyên** có loại `is_staff` (thuật ngữ). M�
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `service_groups` | `tenant_id`, `name`, `sort` | Cắt, Nhuộm và uốn |
-| `services` | `tenant_id`, `group_id?` FK, `name`, `description?`, `deposit_vnd?`, `bookable_online bool`, `commission_split jsonb?`, `sort`, `archived_at?` | BR-55. `commission_split` khi dịch vụ cần hai loại nhân viên (BR-43, [mục 13](#13-câu-hỏi-còn-mở)) |
-| `service_variants` | `tenant_id`, `service_id` FK, `name`, `short_name`, `price_vnd`, `sort`, `archived_at?` | `price_vnd` là giá gốc. Khách tự chọn biến thể (BR-13). U `(service_id, name)` trên các dòng chưa lưu trữ (BR-55) |
-| `service_segments` | `tenant_id`, `variant_id` FK, `position smallint`, `kind` (`prep`, `work`, `wait`), `minutes`, `label?` | U `(variant_id, position)`. `check (minutes > 0)`. Chuẩn bị chỉ đứng đầu (BR-50), kiểm bằng trigger |
-| `segment_resource_types` | `tenant_id`, `segment_id` FK, `resource_type_id` FK | PK cặp hai cột. Đoạn `wait` không có loại `is_staff` (BR-50, trigger) |
-| `variant_cleanups` | `tenant_id`, `variant_id` FK, `resource_type_id` FK, `minutes` | PK `(variant_id, resource_type_id)`. Dọn dẹp sau khi dùng (BR-52) |
-| `service_prices` | `tenant_id`, `variant_id` FK, `branch_id?`, `level?`, `price_vnd` | U `(variant_id, branch_id, level)` (coi rỗng là một giá trị: `nulls not distinct`). Giá theo chi nhánh và theo cấp. Giá áp dụng là dòng cụ thể nhất: chi nhánh và cấp, rồi cấp, rồi chi nhánh, rồi `price_vnd` |
+| `service_groups` | `tenant_id`, `name`, `sort` | Cắt, Nhuộm và uốn. U `(tenant_id, lower(name))` (BR-94.3); tên "Khác" giữ chỗ ở ứng dụng (BR-94.7). `sort` là thứ tự nhóm (BR-94.5) |
+| `services` | `tenant_id`, `group_id?` FK, `name`, `description?`, `deposit_vnd?`, `bookable_online bool`, `sort`, `archived_at?` | BR-55, BR-94.8. U `(tenant_id, lower(name))` trên các dòng `archived_at is null`. `sort` là thứ tự trong nhóm `group_id`, rỗng là nhóm "Khác" (BR-94.11); chỉ mục `(tenant_id, group_id, sort)`. FK `(tenant_id, group_id)` không `on delete`: xóa nhóm thì ứng dụng đặt `group_id` rỗng cho dịch vụ đã ngừng dùng trước, dịch vụ đang dùng còn thì khóa ngoại chặn (BR-94.6). `archived_at` có giá trị là ngừng dùng, dùng lại được (BR-94.12, BR-94.13). `deposit_vnd` chưa có API (BR-29) |
+| `service_variants` | `tenant_id`, `service_id` FK, `name`, `short_name`, `price_vnd`, `sort`, `archived_at?` | `price_vnd` là giá gốc: `check (price_vnd between 0 and 100000000 and price_vnd % 1000 = 0)` (BR-94.19). Khách tự chọn biến thể (BR-13). U `(service_id, lower(name))` trên các dòng `archived_at is null` (BR-55, BR-94.18). `short_name` 1 đến 20 ký tự. `archived_at` có giá trị là đã xóa: giữ đoạn, dọn dẹp, giá để lịch hẹn sau này còn trỏ tới (BR-94.21) |
+| `service_segments` | `tenant_id`, `variant_id` FK, `position smallint`, `kind` (`prep`, `work`, `wait`), `minutes`, `label` | U `(variant_id, position)`, `check (position between 1 and 8)`. `check (minutes between 5 and 480 and minutes % 5 = 0)`. `label` 1 đến 40 ký tự. Dãy đoạn của một biến thể kiểm bằng constraint trigger hoãn tới cuối transaction ([mục 10](#10-ràng-buộc-quan-trọng)), vì lần lưu thay cả dãy (BR-94.22 đến 94.27) |
+| `segment_resource_types` | `tenant_id`, `segment_id` FK, `resource_type_id` FK | PK cặp hai cột. Kiểm lúc commit: mỗi đoạn có ít nhất một loại, đoạn `work` có loại `is_staff`, đoạn `wait` không có loại `is_staff` (BR-94.26, trigger) |
+| `variant_cleanups` | `tenant_id`, `variant_id` FK, `resource_type_id` FK, `minutes` | PK `(variant_id, resource_type_id)`. `check (minutes between 5 and 120 and minutes % 5 = 0)`. Loại không phải `is_staff` (trigger); loại phải có đoạn của biến thể chiếm (kiểm ở ứng dụng). Dọn dẹp sau khi dùng (BR-52, BR-94.28) |
+| `service_prices` | `tenant_id`, `variant_id` FK, `branch_id?`, `level?`, `price_vnd` | U `(variant_id, branch_id, level)` (coi rỗng là một giá trị: `nulls not distinct`). Giá theo chi nhánh và theo cấp, `price_vnd` cùng luật giá như `service_variants`. Giá áp dụng là dòng cụ thể nhất: chi nhánh và cấp, rồi cấp, rồi chi nhánh, rồi `price_vnd`. Màn Dịch vụ chỉ ghi dòng có `branch_id` và `level` rỗng (BR-94.29); dòng có `level` do Nhân sự ghi |
 
 Một biến thể có mẫu chiếm dụng tính được hoàn toàn từ `service_segments`, `segment_resource_types` và `variant_cleanups` (thuật toán, mục 2.2). Không lưu sẵn kết quả tính.
 
@@ -240,7 +240,7 @@ alter table resource_pauses add constraint resource_pauses_no_overlap
 ```
 
 - Ngày `2000-01-01` chỉ để đổi `time` thành `timestamp`; `date + time` là phép toán bất biến nên dùng được trong chỉ mục. Khoảng nửa mở `[)` cho phép khung nối liền (đóng 12:00, mở 12:00).
-- Các ràng buộc duy nhất theo tên (BR-93.4, BR-93.17, BR-93.21) là chỉ mục duy nhất trên `lower(name)`, một phần với điều kiện `archived_at is null` cho `branches` và `resources`. Lúc hai yêu cầu cùng lúc, vi phạm chỉ mục báo `NAME_TAKEN`, không báo 500.
+- Các ràng buộc duy nhất theo tên (BR-93.4, BR-93.17, BR-93.21, BR-94.3, BR-94.8, BR-94.18) là chỉ mục duy nhất trên `lower(name)`, một phần với điều kiện `archived_at is null` cho `branches`, `resources`, `services` và `service_variants`. Lúc hai yêu cầu cùng lúc, vi phạm chỉ mục báo `NAME_TAKEN`, không báo 500.
 
 **Khóa ngoại kèm tenant:** ví dụ
 
@@ -252,7 +252,8 @@ alter table appointment_items add constraint appointment_items_appointment_fk
 **Trigger** (viết bằng migration SQL tùy chỉnh, có test, T-06):
 - `ledger_entries`, `audit_logs`, `platform_payments`, `package_usages`: chặn `UPDATE`, `DELETE`. Riêng `reversed_at` của `package_usages` được phép đặt một lần.
 - `ledger_transactions`: tổng bút toán bằng 0, kiểm lúc commit.
-- `service_segments`: chuẩn bị chỉ đứng đầu. `segment_resource_types`: đoạn chờ không có loại nhân viên.
+- `service_segments` (constraint trigger hoãn, chạy lúc commit, kiểm cả dãy đoạn của biến thể có dòng bị đổi): Chuẩn bị chỉ ở `position` 1 và đoạn liền sau là Làm; Chờ nằm giữa hai đoạn Làm; có ít nhất một đoạn Làm; phần khách thấy, từ đầu đoạn Làm đầu đến cuối đoạn Làm cuối, tối đa 480 phút (BR-94.23 đến 94.27).
+- `segment_resource_types` (hoãn, lúc commit): mỗi đoạn có ít nhất một loại; đoạn Làm có loại nhân viên; đoạn Chờ không có loại nhân viên (BR-94.26). `variant_cleanups`: loại không phải nhân viên (BR-94.28).
 - `staff_profiles`: tài nguyên phải thuộc loại `is_staff`.
 - `appointment_items.staff_resource_id`: người đó có kỹ năng làm dịch vụ (BR-03). Kiểm ở ứng dụng, trigger chặn lần cuối.
 
@@ -313,7 +314,7 @@ Tiêu chí của giai đoạn 1: mọi BR có chỗ đứng trong ERD.
 | BR-22 | `promotions`, `vouchers`, dòng `discount` |
 | BR-23, BR-24, BR-28 | `booking_policies.refund_rules`, `appointments.cancelled_by`, `refunds` |
 | BR-26, BR-27 | `package_usages`, `customer_packages.unit_price_vnd` |
-| BR-40 đến BR-43 | `commission_rules`, `commission_periods`, `services.commission_split` |
+| BR-40 đến BR-42 | `commission_rules`, `commission_periods` |
 | BR-56, BR-57 | `service_prices`, `staff_levels`, `staff_profiles.level`; `appointment_items.staff_choice` |
 | BR-58 | `branches.slot_step_minutes` |
 | BR-60, BR-61 | unique `(tenant_id, phone_e164)` |
@@ -327,6 +328,7 @@ Tiêu chí của giai đoạn 1: mọi BR có chỗ đứng trong ERD.
 | BR-74 | `email_verifications`, `users.email_verified_at`, `trial_claims` |
 | BR-80 đến BR-88 | `plans`, `subscriptions`, `platform_payments` (T-17) |
 | BR-93 | `branches.archived_at`, `opening_hours`, `special_days`, `special_day_hours`, `resource_types`, `resources.archived_at`, `resources.sort`, `resource_pauses`; `plans.limits` |
+| BR-94 | `service_groups`, `services` (`archived_at`, `sort`, `bookable_online`), `service_variants` (`archived_at`, `sort`), `service_segments`, `segment_resource_types`, `variant_cleanups`, `service_prices` (dòng `level` rỗng); constraint trigger của dãy đoạn |
 
 ## 13. Câu hỏi còn mở
 
@@ -337,7 +339,6 @@ Mỗi câu có đề xuất. Khi chốt thì chuyển thành BR.
    - *Đề xuất:* email đã xác thực thắng, vì đó là thứ vừa được chứng minh. Số điện thoại mới được lưu cho khách A nếu A chưa có số. Nếu A đã có số khác thì ghi chú cho lễ tân, không tự đổi.
 3. **Bỏ kỹ năng khi nhân viên còn lịch sắp tới cho dịch vụ đó.**
    - *Đề xuất:* cho bỏ. Hiện danh sách lịch bị ảnh hưởng, xử lý như nghỉ phép (BR-11): khách chọn đích danh thì hỏi ý, "Bất kỳ ai" thì hệ thống tự xếp người khác.
-4. **Dịch vụ cần hai nhân viên** (BR-43). Mô hình cho phép một đoạn chiếm hai loại nhân viên (Thợ chính, Thợ phụ), mỗi loại một người. Khi đó mục lịch hẹn có hai người: `appointment_items.staff_resource_id` chỉ giữ người của loại đầu tiên, người còn lại lấy từ `resource_bookings`.
-   - *Đề xuất:* chấp nhận cách này cho đồ án. Hoa hồng chia theo `services.commission_split`.
+4. (đã bỏ, BR-43: mỗi mục lịch hẹn có một người làm; mọi đoạn Làm chiếm loại nhân viên, BR-94.26.)
 5. **Giữ chỗ khi lễ tân đặt tại quầy** (câu hỏi mở cũ).
    - *Đề xuất:* không giữ chỗ. Lễ tân tạo thẳng lịch `confirmed`, exclusion constraint vẫn chặn trùng.

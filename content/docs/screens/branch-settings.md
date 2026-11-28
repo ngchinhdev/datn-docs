@@ -135,6 +135,11 @@ Lỗi của mục 1 hiện ngay dưới ô: "Chọn ngày." / "Chọn ngày từ
 
 Mock: chi nhánh đầu tiên là chi nhánh mọi màn khác của mock đọc, nên khi cơ sở có chi nhánh khác thì hộp xác nhận của chi nhánh đầu tiên báo điều đó và nút "Ngừng dùng" không bấm được. Chi nhánh thêm ở MH-42 ngừng dùng được. Lịch, ca và dịch vụ của mock chỉ có chi nhánh đầu tiên; chi nhánh thêm hiện ở MH-42, MH-43 và MH-46.
 
+### Giới hạn
+
+- Hỏi trước khi rời trang chỉ bắt link trong ứng dụng và việc đóng tab; không bắt nút Back của trình duyệt.
+- "Hôm nay", mốc của ngày đặc biệt sớm nhất chọn được và của việc ẩn ngày đã qua, tính lúc mở trang; để trang mở qua nửa đêm thì phải tải lại.
+
 ### Điện thoại
 
 Các thẻ xếp dọc. Bảng ở mục 9 và mục 13 cuộn ngang trong thẻ của nó. Thanh lưu nằm trên thanh điều hướng dưới. Hộp "Thêm ngày đặc biệt" và hộp xác nhận ngừng dùng là hộp giữa màn.
@@ -231,7 +236,7 @@ Nội dung: "Tài nguyên không nhận lịch mới và không dùng lại đư
 | Bấm "Thêm loại" | Trống: "Nhập tên loại." Trùng một loại: "Đã có loại tên này." Hết lỗi thì API #7; 201 thì loại mới hiện cuối danh sách và ở bộ lọc Loại |
 | Bấm "Đổi tên" | Tên thành ô nhập với "Lưu" và "Hủy"; lỗi như dòng trên. API #8 |
 | Bấm "Xóa" | Loại còn tài nguyên, kể cả đã ngừng dùng, thì nút khóa, dòng phụ "Còn tài nguyên, không xóa được". Loại trống: hộp "Xóa loại {tên}?" với nút "Xóa" nguy hiểm. API #9 |
-| API trả 409 `RESOURCE_TYPE_IN_USE` | Hộp thông báo "Còn {n} tài nguyên thuộc loại này, kể cả đã ngừng dùng, nên không xóa được." (có dịch vụ thì thêm "Dịch vụ {tên} đang dùng loại này.") |
+| API trả 409 `RESOURCE_TYPE_IN_USE` | Hộp thông báo "Còn {n} tài nguyên thuộc loại này, kể cả đã ngừng dùng, nên không xóa được." Một dịch vụ chiếm loại này thì thay bằng "Dịch vụ {tên} đang dùng loại này." |
 | API trả 409 `NAME_TAKEN` | Dưới ô nhập: "Đã có loại tên này." |
 
 ### Điện thoại

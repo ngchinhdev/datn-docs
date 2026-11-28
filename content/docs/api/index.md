@@ -131,3 +131,4 @@ Mọi route có `{slug}` (`/v1/tenants/{slug}/...`) đi qua một guard dùng ch
 | Xác thực nhân sự và quản trị nền tảng | [Xác thực](./auth.md) |
 | Đăng ký cơ sở, xác thực email, tạo cơ sở dùng thử | [Đăng ký cơ sở](./signup.md) |
 | Chi nhánh, giờ mở cửa, ngày đặc biệt, loại tài nguyên, tài nguyên | [Chi nhánh và tài nguyên](./branch-settings.md) |
+| Nhóm dịch vụ, dịch vụ, biến thể, đoạn, dọn dẹp, giá chi nhánh | [Dịch vụ](./services.md) |

@@ -34,13 +34,15 @@ Một biến thể dịch vụ là dãy đoạn liên tiếp tính từ **gốc*
 
 - loại: `prep` (chuẩn bị), `work` (làm) hoặc `wait` (chờ);
 - thời lượng;
-- tập loại tài nguyên bị chiếm. Đoạn `wait` không được có loại nhân viên.
+- tập loại tài nguyên bị chiếm, ít nhất một loại. Đoạn `work` có loại nhân viên, đoạn `wait` không có (BR-94.26).
 
-Ngoài ra, mỗi loại tài nguyên có một thời gian **dọn sau khi dùng** `c_k`. Việc dọn bắt đầu ngay khi đoạn cuối dùng loại đó kết thúc, không chờ cả dịch vụ xong (BR-52). Nhờ vậy bồn tắm được rửa trong lúc bé đang sấy.
+Dãy đoạn hợp lệ khi có ít nhất một đoạn `work`; `prep` chỉ ở đầu và liền sau là `work`; `wait` nằm giữa hai đoạn `work` (BR-94.23 đến 94.25).
+
+Ngoài ra, mỗi loại tài nguyên có một thời gian **dọn sau khi dùng** `c_k`. Việc dọn bắt đầu ngay khi đoạn cuối dùng loại đó kết thúc, không chờ cả dịch vụ xong (BR-52). Nhờ vậy bồn ngâm được rửa trong lúc khách còn xông hơi.
 
 Từ đó tính được:
 
-- `prepLen`: tổng thời lượng các đoạn `prep` đứng đầu.
+- `prepLen`: thời lượng đoạn `prep` ở vị trí đầu, 0 nếu không có (BR-94.23).
 - **Phần khách thấy** `[prepLen, visibleEnd)`, với `visibleEnd` là cuối đoạn `work` cuối cùng. Giờ khách thấy `T = t0 + prepLen`.
 - **Mẫu chiếm dụng** của loại `k`: `O_k = normalize(các đoạn dùng k ∪ [lastEnd_k, lastEnd_k + c_k))`. Đây là danh sách khoảng tương đối so với `t0`.
 

@@ -16,6 +16,9 @@ Dùng **đúng một tên** cho mỗi khái niệm, cả trong tài liệu lẫn
 | Loại tài nguyên | `resourceType` | Dịch vụ yêu cầu loại tài nguyên, hệ thống tự chọn tài nguyên cụ thể còn rảnh |
 | Dịch vụ | `service` | Thứ khách đặt; có biến thể, giá, các đoạn chiếm dụng |
 | Biến thể dịch vụ | `serviceVariant` | Cùng dịch vụ nhưng khác thời lượng, giá (tóc ngắn/dài, liệu trình 60/90 phút); khách tự chọn khi đặt (BR-13) |
+| Nhóm dịch vụ | `serviceGroup` | Tiêu đề gom dịch vụ ở trang khách và danh sách (Cắt, Nhuộm và uốn); dịch vụ không nhóm hiện cuối dưới tên "Khác" (BR-94.7) |
+| Tên trên lịch | `shortName` | Nhãn ngắn của biến thể trên lịch lễ tân, tối đa 20 ký tự (BR-94.18) |
+| Giá gốc, giá riêng chi nhánh | `priceVnd`, `branchPrices` | Giá của biến thể; chi nhánh có thể đặt giá riêng, không đặt thì dùng giá gốc (BR-02, BR-94.29) |
 | Đoạn chiếm dụng | `serviceSegment` | Một khoảng thời gian trong dịch vụ mà một loại tài nguyên bị chiếm, ví dụ thợ bận 0–20', rảnh 20–50', bận 50–70' |
 | Đoạn chờ | `segment.kind = 'wait'` | Đoạn mà nhân viên được rảnh nhưng ghế, giường, phòng vẫn bị chiếm (processing time) |
 | Đoạn chuẩn bị | `segment.kind = 'prep'` | Đoạn đầu dịch vụ, trước giờ hẹn, khách không thấy; ví dụ thợ pha thuốc (BR-51) |
