@@ -67,14 +67,14 @@ description: Chủ cơ sở quản lý nhóm dịch vụ, dịch vụ, biến th
 | Mã | Quy tắc |
 |---|---|
 | BR-94.8 | Tên dịch vụ 1 đến 80 ký tự, chuẩn hóa như BR-94.3; không trùng tên dịch vụ đang dùng khác của cơ sở (không phân biệt hoa thường): 409 `NAME_TAKEN`. Tên dịch vụ đã ngừng dùng không tính. Mô tả cho khách 0 đến 500 ký tự. Nhóm là một nhóm của cơ sở hoặc rỗng |
-| BR-94.9 | Thêm dịch vụ bằng hộp nhỏ gồm tên, nhóm và một biến thể đầu: tên biến thể, giá, số phút của một đoạn Làm chiếm loại nhân viên. Hệ thống tạo biến thể đó với một đoạn Làm tên "Làm" chiếm loại nhân viên, không dọn dẹp, "Tên trên lịch" bằng tên biến thể cắt còn 20 ký tự, không giá chi nhánh. Dịch vụ mới chưa nhận đặt online (BR-94.10) và xếp cuối nhóm. Tạo xong mở trang chi tiết để chỉnh tiếp |
+| BR-94.9 | Thêm dịch vụ bằng hộp nhỏ gồm tên, nhóm và một biến thể đầu: tên biến thể, giá, số phút của một đoạn Làm chiếm loại nhân viên. Hệ thống tạo biến thể đó với một đoạn Làm tên "Làm" chiếm loại nhân viên, không dọn dẹp, "Tên trên lịch" bằng tên dịch vụ cắt còn 20 ký tự, không giá chi nhánh. Dịch vụ mới chưa nhận đặt online (BR-94.10) và xếp cuối nhóm. Tạo xong mở trang chi tiết để chỉnh tiếp |
 | BR-94.10 | Nhận đặt online bật hoặc tắt ngay ở danh sách, và ở trang chi tiết. Tắt thì dịch vụ không hiện ở trang khách và chatbot; lễ tân vẫn chọn được (BR-30). Dịch vụ mới tạo ở trạng thái tắt, vì chưa có ai được xếp làm (BR-03) |
 | BR-94.11 | Thứ tự dịch vụ tính trong nhóm (hoặc trong nhóm "Khác"), là thứ tự hiện ở danh sách và trang khách. Đổi thứ tự gửi cả nhóm một lần; `ids` phải đúng bằng tập dịch vụ đang dùng của nhóm: 409 `ORDER_MISMATCH`. Đổi nhóm của một dịch vụ thì dịch vụ xếp cuối nhóm mới |
 | BR-94.12 | Ngừng dùng đặt `archived_at`, không xóa gì: biến thể, đoạn, dọn dẹp, giá chi nhánh giữ nguyên. Dịch vụ không hiện ở trang khách, lễ tân không chọn được. Không có thao tác xóa hẳn dịch vụ. **Áp dụng khi có lịch hẹn:** lịch đã đặt giữ nguyên và vẫn hiện ở lịch |
 | BR-94.13 | Dùng lại bỏ `archived_at` và kiểm tên như BR-94.8: trùng một dịch vụ đang dùng thì 409 `NAME_TAKEN`. Dịch vụ xếp cuối nhóm của nó; "Nhận đặt online" giữ giá trị trước khi ngừng dùng. Dùng lại dịch vụ đang dùng: 409 `SERVICE_NOT_ARCHIVED` |
 | BR-94.14 | Dịch vụ đã ngừng dùng chỉ đọc: sửa, đổi "Nhận đặt online" hoặc ngừng dùng lần nữa trả 409 `SERVICE_ARCHIVED`. Muốn sửa thì dùng lại trước |
 | BR-94.15 | Danh sách lọc theo nhóm (kể cả "Khác"), theo trạng thái (đang dùng, đã ngừng dùng, tất cả; mặc định đang dùng) và theo tên (chứa chuỗi, không phân biệt hoa thường và dấu). Sắp theo thứ tự nhóm, rồi thứ tự dịch vụ; dịch vụ không nhóm ở cuối |
-| BR-94.16 | Trang chi tiết lưu **một lần** cả thông tin chung, "Nhận đặt online", các biến thể, đoạn, dọn dẹp và giá chi nhánh trong một transaction; lỗi một phần thì không đổi gì. Biến thể đã có giữ id, biến thể mới nhận id mới. Hai lần lưu cùng một dịch vụ chạy cùng lúc xếp hàng theo khóa dòng dịch vụ |
+| BR-94.16 | Trang chi tiết lưu **một lần** cả thông tin chung, "Nhận đặt online", các biến thể, đoạn, dọn dẹp và giá chi nhánh trong một transaction; lỗi một phần thì không đổi gì. Biến thể đã có giữ id, biến thể mới nhận id mới. Hai lần lưu cùng một dịch vụ chạy cùng lúc xếp hàng theo khóa dòng dịch vụ. Không có kiểm phiên bản: lần lưu sau ghi đè lần trước |
 
 ### Biến thể (BR-94.17 đến BR-94.21)
 
@@ -107,7 +107,7 @@ description: Chủ cơ sở quản lý nhóm dịch vụ, dịch vụ, biến th
 
 | Mã | Quy tắc |
 |---|---|
-| BR-94.29 | Mỗi biến thể có thể đặt giá cho từng chi nhánh **đang dùng**, theo luật giá của BR-94.19; không đặt là dùng giá gốc (BR-02). Mỗi chi nhánh một giá. Chi nhánh đã ngừng dùng: 409 `BRANCH_ARCHIVED`. Giá đã đặt cho chi nhánh sau này ngừng dùng giữ nguyên, không hiện và không bị lần lưu nào đổi. Giá ở một chi nhánh là giá chi nhánh nếu có, không thì giá gốc |
+| BR-94.29 | Mỗi biến thể có thể đặt giá cho từng chi nhánh **đang dùng**, theo luật giá của BR-94.19; không đặt là dùng giá gốc (BR-02). Mỗi chi nhánh một giá. Chi nhánh đã ngừng dùng: 409 `BRANCH_ARCHIVED`. Giá đã đặt cho chi nhánh sau này ngừng dùng giữ nguyên, không hiện và không bị lần lưu nào đổi. Giá ở một chi nhánh là giá chi nhánh nếu có, không thì giá gốc. Giao diện hiện khối giá chi nhánh khi cơ sở có từ hai chi nhánh đang dùng, hoặc khi biến thể đang sửa đã có giá riêng ở một chi nhánh đang dùng |
 
 ### Chi nhánh thiếu tài nguyên (BR-94.30)
 
@@ -207,7 +207,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 | # | Cho | Khi | Thì | Quy tắc |
 |---|---|---|---|---|
 | AC-118 | `toc-may`: Cắt tóc, Gội sấy, Nhuộm tóc đang dùng; "Uốn" đã ngừng dùng | `GET` danh sách mặc định; `status=archived`; `status=all`; `groupId`; `q=nhuom`; `q=NHUỘM` | Chỉ dịch vụ đang dùng; chỉ đã ngừng dùng; cả hai; chỉ nhóm đó; cả hai `q` trả "Nhuộm tóc"; mỗi dòng có `variantCount`, `visibleMinutes`, `priceFromVnd` | BR-94.15 |
-| AC-119 | Chủ `toc-may` | Thêm dịch vụ "Uốn tóc", nhóm Nhuộm và uốn, biến thể "Tóc ngắn", giá 600.000, 90 phút | 201 với dạng chi tiết: một biến thể, một đoạn Làm tên "Làm" 90 phút chiếm loại Thợ, `shortName = "Tóc ngắn"`, không dọn dẹp, `bookableOnline = false`, `sort` sau mọi dịch vụ của nhóm | BR-94.9, BR-94.10, BR-94.11 |
+| AC-119 | Chủ `toc-may` | Thêm dịch vụ "Uốn tóc", nhóm Nhuộm và uốn, biến thể "Tóc ngắn", giá 600.000, 90 phút | 201 với dạng chi tiết: một biến thể, một đoạn Làm tên "Làm" 90 phút chiếm loại Thợ, `shortName = "Uốn tóc"`, không dọn dẹp, `bookableOnline = false`, `sort` sau mọi dịch vụ của nhóm | BR-94.9, BR-94.10, BR-94.11 |
 | AC-120 | Chủ `toc-may` | Thêm dịch vụ với tên rỗng / 81 ký tự; biến thể tên rỗng / 41 ký tự; phút 4 / 7 / 485; giá 150.500 / -1 / 100.001.000 | Mỗi ca 400 `VALIDATION_FAILED`, `errors` chỉ đúng trường (`name`, `variant.name`, `variant.minutes`, `variant.priceVnd`); không tạo gì | BR-94.8, BR-94.9, BR-94.18, BR-94.19, BR-94.22 |
 | AC-121 | Đã có "Cắt tóc"; "Cắt tóc cũ" đã ngừng dùng | Thêm " cắt  tóc "; thêm "Cắt tóc cũ"; thêm với `groupId` của `la-sen` | 409 `NAME_TAKEN`; 201; 404 `NOT_FOUND` | BR-94.8 |
 | AC-122 | Gói không giới hạn | Hai yêu cầu thêm dịch vụ cùng tên chạy cùng lúc | Đúng một 201, yêu cầu kia 409 `NAME_TAKEN` | BR-94.8 |
@@ -220,7 +220,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 | AC-129 | Chủ `toc-may` | `DELETE /v1/tenants/toc-may/services/{id}` | 404 `NOT_FOUND`; dịch vụ còn nguyên | BR-94.12 |
 | AC-130 | Dịch vụ Nhuộm tóc hai biến thể | `PUT` đổi tên, mô tả, giữ biến thể "Tóc ngắn" (có id) đổi giá, bỏ "Tóc dài", thêm "Tóc uốn" (không id) | 200; "Tóc ngắn" giữ id; "Tóc uốn" có id mới; đọc lại thấy đúng, theo thứ tự gửi; `updatedAt` đổi | BR-94.16 |
 | AC-131 | Một lần lưu có thông tin chung hợp lệ nhưng một đoạn sai | `PUT` | 400 `VALIDATION_FAILED`; tên và mô tả trong yêu cầu không được lưu; biến thể cũ không đổi | BR-94.16 |
-| AC-132 | Hai `PUT` cùng một dịch vụ, nội dung khác nhau, chạy cùng lúc | Chạy cả hai | Cả hai trả 200 theo thứ tự khóa; kết quả đọc lại bằng đúng của yêu cầu sau; không biến thể nhân đôi, không 500 | BR-94.16 |
+| AC-132 | Hai `PUT` cùng một dịch vụ, cùng tập id biến thể, nội dung khác nhau, chạy cùng lúc; rồi một `PUT` ẩn biến thể V, và một `PUT` đến sau gửi id của V | Chạy các `PUT` | Hai `PUT` đầu cùng 200 theo thứ tự khóa, kết quả đọc lại là của yêu cầu sau; không biến thể nhân đôi, không 500. `PUT` gửi id của V: 404 `NOT_FOUND`, không đổi gì | BR-94.16, BR-94.21 |
 
 ### Biến thể
 
@@ -278,7 +278,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 
 | # | Cho | Khi | Thì | Quy tắc |
 |---|---|---|---|---|
-| AC-155 | Loại X không có tài nguyên, chỉ một đoạn của biến thể đã xóa chiếm; loại Y chỉ dịch vụ đã ngừng dùng chiếm; loại Z chỉ một dòng dọn dẹp chiếm; loại W không ai dùng | Xóa X; Y; Z; W | 409 `RESOURCE_TYPE_IN_USE` cho X, Y, Z; 204 cho W | BR-94.32, BR-93.19 |
+| AC-155 | Loại X không có tài nguyên, chỉ một đoạn của biến thể đã xóa chiếm; loại Y chỉ dịch vụ đã ngừng dùng chiếm; loại W không ai dùng | Xóa X; Y; W | 409 `RESOURCE_TYPE_IN_USE` cho X, Y; 204 cho W | BR-94.32, BR-93.19 |
 
 ### Giới hạn
 

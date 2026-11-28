@@ -197,7 +197,7 @@ Xử lý, sau các bước chung:
 
 1. `groupId` không thuộc cơ sở: **404** `NOT_FOUND`.
 2. Tên trùng dịch vụ đang dùng khác (không phân biệt hoa thường): **409** `NAME_TAKEN`. Vi phạm chỉ mục duy nhất `(tenant_id, lower(name))` của dịch vụ đang dùng cũng trả mã này.
-3. Tạo dịch vụ với `bookableOnline = false`, `sort` bằng lớn nhất của nhóm cộng 1, và một biến thể: `shortName` là `variant.name` cắt còn 20 ký tự; một đoạn `work` tên "Làm", `minutes` như trên, chiếm loại nhân viên của cơ sở; không dọn dẹp, không giá chi nhánh (BR-94.9).
+3. Tạo dịch vụ với `bookableOnline = false`, `sort` bằng lớn nhất của nhóm cộng 1, và một biến thể: `shortName` là `name` (tên dịch vụ) cắt còn 20 ký tự, bỏ khoảng trắng thừa ở cuối; một đoạn `work` tên "Làm", `minutes` như trên, chiếm loại nhân viên của cơ sở; không dọn dẹp, không giá chi nhánh (BR-94.9).
 
 Trả về 201 với [Chi tiết dịch vụ](#hình-dạng-dùng-chung).
 

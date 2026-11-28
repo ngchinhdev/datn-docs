@@ -129,11 +129,11 @@ Một biểu mẫu, một thanh lưu cho cả dịch vụ (BR-94.16). Máy tính
 | | **Thẻ "Thời gian và tài nguyên · {biến thể}"** | | | | |
 | 14 | Thêm đoạn | Nút nhỏ | | | Khóa khi đã có 8 đoạn, kèm gợi ý "Tối đa 8 đoạn." |
 | 15 | Trục thời gian | `SegmentTimeline` | | Ví dụ hẹn 09:00 | Mỗi loại tài nguyên một hàng, thêm hàng "Khách thấy". Bấm một thanh thì chọn đúng dòng ở mục 16 và ngược lại |
-| 16 | Bảng đoạn | `SegmentTable` | Ít nhất một đoạn Làm | | Cột: nút kéo (kéo, hoặc lấy tiêu điểm rồi bấm ↑ ↓), tên đoạn trên lịch, loại (Chuẩn bị, Làm, Chờ), phút, loại tài nguyên chiếm (nút bật tắt), nút xóa. Đoạn Chờ khóa các loại nhân viên. Xóa khóa khi chỉ còn một đoạn |
-| 17 | Dọn dẹp sau khi dùng | Ô số theo từng loại | Không | 0 | Mỗi loại không phải nhân viên mà ít nhất một đoạn chiếm một ô, hậu tố "phút"; 0 đến 120, bước 5. Gợi ý "bắt đầu ngay khi đoạn cuối dùng tài nguyên đó kết thúc" |
+| 16 | Bảng đoạn | `SegmentTable` | Ít nhất một đoạn Làm | | Cột: hai nút "Lên", "Xuống" (đoạn đầu khóa "Lên", đoạn cuối khóa "Xuống"), tên đoạn trên lịch, loại (Chuẩn bị, Làm, Chờ), phút, loại tài nguyên chiếm (nút bật tắt), nút xóa. Đoạn Chờ khóa các loại nhân viên. Xóa khóa khi chỉ còn một đoạn. Không kéo thả |
+| 17 | Dọn dẹp sau khi dùng | Ô số theo từng loại | Không | 0 | Mỗi loại không phải nhân viên mà ít nhất một đoạn chiếm một ô, hậu tố "phút"; 0 đến 120, bước 5. 0 là không dọn: không gửi dòng dọn dẹp cho loại đó; 5 đến 120 bước 5 thì gửi. Gợi ý "bắt đầu ngay khi đoạn cuối dùng tài nguyên đó kết thúc" |
 | | **Thẻ "Giá · {biến thể}"** | | | | |
 | 18 | Giá gốc | Ô nhập số, hậu tố ₫ | Có | Giá hiện tại | 0 đến 100.000.000, bội của 1.000. Hiện `500.000` |
-| 19 | Giá riêng chi nhánh | Bảng | Không | Trống | Chỉ hiện khi cơ sở có từ hai chi nhánh đang dùng. Mỗi chi nhánh đang dùng một dòng: tên, ô giá (trống là dùng giá gốc, gợi ý trong ô "Giá gốc {giá}"), nút "Dùng giá gốc" khi ô có giá (BR-94.29) |
+| 19 | Giá riêng chi nhánh | Bảng | Không | Trống | Hiện khi cơ sở có từ hai chi nhánh đang dùng, hoặc khi biến thể đang sửa đã có giá riêng ở một chi nhánh đang dùng (để còn thấy và bấm "Dùng giá gốc"). Mỗi chi nhánh đang dùng một dòng: tên, ô giá (trống là dùng giá gốc, gợi ý trong ô "Giá gốc {giá}"), nút "Dùng giá gốc" khi ô có giá (BR-94.29) |
 | 20 | Giá theo cấp | Công tắc và bảng | | Tắt | Chỉ ở mock |
 | | **Thẻ "Ai làm được"** | | | | Chỉ ở mock |
 | 21 | Thanh lưu | `SaveBar` | | Ẩn khi chưa đổi | "{n} thay đổi chưa lưu" kèm, khi có lịch hẹn, " · {m} lịch đã đặt giữ thời gian và giá cũ (BR-12)"; hai nút "Bỏ thay đổi", "Lưu". Còn lỗi thì "Còn lỗi cần sửa trước khi lưu." và nút "Lưu" khóa |
@@ -159,14 +159,14 @@ Lỗi hiện dưới ô của nó khi ô đã được chạm hoặc đã bấm 
 | Giá gốc, giá chi nhánh | "Nhập giá từ 0 đến 100.000.000 ₫, bội của 1.000." |
 | Tên đoạn trống | "Nhập tên đoạn." |
 | Số phút của đoạn | "Nhập số phút từ 5 đến 480, bước 5." |
-| Chuẩn bị không ở đầu | "Chuẩn bị chỉ đứng đầu. Kéo đoạn này lên đầu hoặc đổi loại." |
+| Chuẩn bị không ở đầu | "Chuẩn bị chỉ đứng đầu. Đưa đoạn này lên đầu hoặc đổi loại." |
 | Chuẩn bị không có Làm ngay sau | "Sau đoạn Chuẩn bị phải là đoạn Làm." |
 | Chờ không nằm giữa hai đoạn Làm | "Đoạn Chờ phải nằm giữa hai đoạn Làm." |
 | Đoạn không chiếm loại nào | "Chọn ít nhất một loại tài nguyên." |
 | Đoạn Làm không chiếm loại nhân viên | "Đoạn Làm cần {tên loại nhân viên}: mỗi lịch hẹn có một người làm." |
 | Không có đoạn Làm | Dưới bảng đoạn: "Cần ít nhất một đoạn Làm: đó là lúc khách có mặt." |
 | Phần khách thấy quá 8 giờ | Dưới bảng đoạn: "Phần khách thấy tối đa 8 giờ, hiện {x}." |
-| Dọn dẹp | "Nhập số phút từ 0 đến 120, bước 5." |
+| Dọn dẹp | "Nhập số phút từ 0 đến 120, bước 5." Ô 0 là không dọn, không gửi dòng dọn dẹp cho loại đó (BR-94.28) |
 
 ### Xử lý
 
@@ -175,6 +175,7 @@ Lỗi hiện dưới ô của nó khi ô đã được chạm hoặc đã bấm 
 | Sửa bất kỳ ô nào | Chưa gọi API; thanh lưu hiện và đếm thay đổi. Rời trang khi còn thay đổi hỏi "Rời trang này?" |
 | Bấm "Thêm biến thể" | Thêm biến thể "Biến thể mới" ở cuối, là bản chép của biến thể đang sửa (đoạn, dọn dẹp, giá gốc), và chọn nó |
 | Bấm "Nhân bản" ở khung tên biến thể | Như "Thêm biến thể", tên "{tên} (bản sao)" cắt cho vừa 40 ký tự, "Tên trên lịch" "{tên trên lịch} 2" cắt cho vừa 20 ký tự. Không chép giá riêng chi nhánh |
+| Bấm "Lên", "Xuống" của một đoạn | Đổi chỗ với đoạn liền trên hoặc dưới trong bản nháp; tiêu điểm ở nút vừa bấm theo đoạn đã đổi chỗ. Kiểm dãy đoạn chạy lại ngay (BR-94.23 đến 94.25) |
 | Bấm "Lên", "Xuống" ở khung tên biến thể | Đổi chỗ trong bản nháp; thứ tự này là thứ tự khách thấy (BR-94.20) |
 | Bấm "Xóa biến thể" | Bỏ khỏi bản nháp, không hỏi lại; biến thể bị ẩn khi lưu (BR-94.21). Khóa khi chỉ còn một biến thể |
 | Bấm "Lưu" (mục 21) | Còn lỗi thì không gọi API, con trỏ tới mục lỗi đầu tiên. Hết lỗi thì gọi API #9 với cả dịch vụ |
@@ -194,4 +195,4 @@ Hỏi trước khi rời trang chỉ bắt link trong ứng dụng và việc đ
 
 ### Điện thoại
 
-Tiêu đề nằm trong thanh trên cùng cùng nút quay về Dịch vụ. Các khối xếp dọc theo thứ tự: thẻ chọn biến thể (các tab), trục thời gian thu nhỏ (cột nhãn 44px), danh sách thẻ đoạn kèm "Thêm đoạn" và dọn dẹp, thẻ "Giá · {biến thể}" với nút "Sửa giá", "Thông tin chung", "Biến thể", "Ai làm được" (mock). Bấm một đoạn mở bảng trượt từ dưới lên để sửa tên, loại, phút, loại tài nguyên chiếm, hoặc xóa đoạn. "Sửa giá" mở bảng trượt có giá gốc, giá riêng chi nhánh (khi có từ hai chi nhánh) và giá theo cấp (mock). Cảnh báo thiếu tài nguyên (mục 11) hiện trong thẻ "Biến thể" như ở máy tính. Thanh lưu nằm trên thanh điều hướng dưới. Xem trước bên phải không có; trục thu nhỏ thay cho nó.
+Tiêu đề nằm trong thanh trên cùng cùng nút quay về Dịch vụ. Các khối xếp dọc theo thứ tự: thẻ chọn biến thể (các tab), trục thời gian thu nhỏ (cột nhãn 44px), danh sách thẻ đoạn kèm "Thêm đoạn" và dọn dẹp, thẻ "Giá · {biến thể}" với nút "Sửa giá", "Thông tin chung", "Biến thể", "Ai làm được" (mock). Bấm một đoạn mở bảng trượt từ dưới lên để đưa đoạn lên hoặc xuống ("Lên", "Xuống"), sửa tên, loại, phút, loại tài nguyên chiếm, hoặc xóa đoạn. "Sửa giá" mở bảng trượt có giá gốc, giá riêng chi nhánh (khi mục 19 hiện) và giá theo cấp (mock). Cảnh báo thiếu tài nguyên (mục 11) hiện trong thẻ "Biến thể" như ở máy tính. Thanh lưu nằm trên thanh điều hướng dưới. Xem trước bên phải không có; trục thu nhỏ thay cho nó.
