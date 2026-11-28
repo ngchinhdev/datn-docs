@@ -89,14 +89,16 @@ export function ResourcesScreen({ tenantSlug }: { tenantSlug: string }) {
 
   const fromIso = validInput(from) ? fromInput(from) : null;
   const toIso = validInput(to) ? fromInput(to) : null;
+  /** BR-93.24: a start before now is stored as now. */
+  const startIso = fromIso && fromIso < MOCK_NOW ? MOCK_NOW : fromIso;
   const impactsOf = (resource: Resource | null, a: string | null, b: string | null) =>
     resource && a && b && a < b
       ? outageImpact({ fixture, resourceId: resource.id, from: a, to: b, now: MOCK_NOW })
       : [];
   const impacts = useMemo(
-    () => impactsOf(stopping, fromIso, toIso),
+    () => impactsOf(stopping, startIso, toIso),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [stopping, fromIso, toIso, fixture],
+    [stopping, startIso, toIso, fixture],
   );
   const archiveImpacts = useMemo(
     () => impactsOf(archiving, MOCK_NOW, FOREVER),
@@ -105,8 +107,8 @@ export function ResourcesScreen({ tenantSlug }: { tenantSlug: string }) {
   );
   const stuck = impacts.filter((i) => !i.moved);
   const overlaps =
-    stopping && fromIso && toIso
-      ? outages.some((o) => o.resourceId === stopping.id && o.from < toIso && fromIso < o.to)
+    stopping && startIso && toIso
+      ? outages.some((o) => o.resourceId === stopping.id && o.from < toIso && startIso < o.to)
       : false;
   const problem =
     !fromIso || !toIso
@@ -158,12 +160,12 @@ export function ResourcesScreen({ tenantSlug }: { tenantSlug: string }) {
       : '';
 
   function stop() {
-    if (!stopping || problem || !fromIso || !toIso) return;
+    if (!stopping || problem || !startIso || !toIso) return;
     const placed = place(stopping, impacts, stopping.name, `Tạm ngưng ${stopping.name}`);
     const outage: ResourceOutage = {
       id: `${fixture.tenant.id}-out-${(outageSequence += 1)}`,
       resourceId: stopping.id,
-      from: fromIso,
+      from: startIso,
       to: toIso,
       reason: reason.trim(),
     };

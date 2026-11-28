@@ -90,7 +90,7 @@ Một biểu mẫu, một thanh lưu cho cả ba thẻ (BR-93.8).
 | 5 | Tên chi nhánh | Ô nhập | Có | Tên hiện tại | |
 | 6 | Số điện thoại | Ô nhập `type="tel"` | Có | Số hiện tại, hiện dạng `028 3930 1234` | Gợi ý "Khách thấy số này khi không tự đổi, hủy được lịch (BR-08)." |
 | 7 | Địa chỉ | Ô nhập | Có | Địa chỉ hiện tại | |
-| 8 | Múi giờ | Ô chọn bị khóa | | `Asia/Ho_Chi_Minh (GMT+7)` | Gợi ý "Mọi giờ trên trang khách và lịch theo múi giờ này." Không đổi được (BR-93.6) |
+| 8 | Múi giờ | Ô chữ bị khóa (`disabled`, nền xám `--fill-tonal`, chữ mờ, con trỏ cấm), không có mũi tên chọn | | `Asia/Ho_Chi_Minh (GMT+7)` | Gợi ý "Mọi giờ trên trang khách và lịch theo múi giờ này." Không đổi được (BR-93.6) |
 | | **Thẻ "Giờ mở cửa"** | | | | |
 | 9 | Bảy dòng ngày, Thứ Hai đến Chủ Nhật | Bảng | Ít nhất một ngày mở | Giờ hiện tại | Mỗi dòng: tên ngày, các khung (hai ô giờ `HH:mm` và nút bỏ khung), ô tích "Nghỉ", nút "Thêm khung". Ngày nghỉ hiện "Nghỉ cả ngày". Tối đa 4 khung mỗi ngày: đủ 4 thì nút "Thêm khung" ẩn |
 | 10 | Ghi chú thẻ | Chữ | | | "Mỗi ngày nhiều khung được, khung không chồng nhau (BR-02). Ca nhân viên có thể bắt đầu trước giờ mở cửa (BR-35)." |
@@ -192,7 +192,7 @@ Rỗng: lọc không khớp thì "Không có tài nguyên nào khớp." kèm nú
 
 | # | Mục | Loại | Ghi chú |
 |---|---|---|---|
-| 1 | Từ, Đến | Hai ô `datetime-local` | Mặc định từ bây giờ đến 4 giờ sau |
+| 1 | Từ, Đến | Hai ô `datetime-local` | Mặc định từ bây giờ đến 4 giờ sau. "Từ" trước bây giờ thì khoảng bắt đầu từ bây giờ (BR-93.24) |
 | 2 | Lý do | Ô nhập | Bắt buộc |
 | 3 | Lỗi | Chữ `role="status"` | "Chọn giờ bắt đầu và kết thúc." / "Giờ kết thúc phải sau giờ bắt đầu." / "Khoảng ngưng phải còn tới sau bây giờ." / "Nhập lý do." |
 | 4 | Lịch bị ảnh hưởng | Danh sách | **Áp dụng khi có lịch hẹn.** Tiêu đề "{n} lịch dùng {tên} trong khoảng này" hoặc "Không có lịch nào dùng {tên} trong khoảng này"; mỗi lịch: giờ, khách, dịch vụ, người làm, và "{tài nguyên} trống" (tự chuyển, không báo khách) hoặc lý do không còn chỗ (vào "Cần xếp lại") |

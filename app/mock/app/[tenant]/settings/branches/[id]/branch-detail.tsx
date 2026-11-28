@@ -293,9 +293,13 @@ function BranchForm({ tenantSlug, saved }: { tenantSlug: string; saved: Branch }
                 label="Múi giờ"
                 help="Mọi giờ trên trang khách và lịch theo múi giờ này."
               >
-                <select id="b-z" value={draft.timeZone} disabled onChange={() => undefined}>
-                  <option value={draft.timeZone}>{draft.timeZone} (GMT+7)</option>
-                </select>
+                <input
+                  id="b-z"
+                  className="cursor-not-allowed bg-(--fill-tonal)! text-(--ink-muted)!"
+                  value={`${draft.timeZone} (GMT+7)`}
+                  disabled
+                  readOnly
+                />
               </Field>
             </div>
           </section>

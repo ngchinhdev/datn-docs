@@ -7,7 +7,7 @@ Nghiệp vụ ở [Chi nhánh và tài nguyên](../features/branch-settings.md).
 
 ## Danh sách
 
-Mọi endpoint có `{slug}` trong đường dẫn (`/v1/tenants/{slug}/...`) và chỉ **chủ cơ sở** (`owner`) gọi được (BR-93.1).
+Mọi endpoint có `{slug}` trong đường dẫn (`/v1/tenants/{slug}/...`) và chỉ **chủ cơ sở** (`owner`) gọi được (BR-93.1). Quản lý, lễ tân, kỹ thuật viên đọc chi nhánh và tài nguyên qua endpoint của tính năng dùng nó (bộ chọn chi nhánh, Lịch, Xếp ca); nhóm endpoint này giữ chỉ chủ cơ sở.
 
 | # | Endpoint | Thành công | Lỗi nghiệp vụ | Quy tắc |
 |---|---|---|---|---|
@@ -327,8 +327,8 @@ Trả về 200 `{ "ids": [...] }` là thứ tự vừa lưu.
 
 | Trường | Kiểu | Bắt buộc | Ghi chú |
 |---|---|---|---|
-| `startsAt` | string, ISO 8601 UTC | Có | Có thể trước lúc bấm |
-| `endsAt` | string, ISO 8601 UTC | Có | Sau `startsAt` và sau `Clock.now()` |
+| `startsAt` | string, ISO 8601 UTC | Có | Trước `Clock.now()` thì lưu và trả về bằng `Clock.now()` (BR-93.24) |
+| `endsAt` | string, ISO 8601 UTC | Có | Sau `startsAt` (giá trị gửi lên) và sau `Clock.now()` |
 | `reason` | string, 1 đến 200 | Có | |
 
 Xử lý, sau các bước chung:
