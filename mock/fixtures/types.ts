@@ -130,12 +130,14 @@ export interface Service {
   id: string;
   tenantId: string;
   name: string;
-  /** The heading the service is listed under, e.g. "Massage". */
+  /** The heading the service is listed under, e.g. "Massage"; empty is the group "Khác" (BR-94.7). */
   group: string;
   /** Shown to the customer under the name. */
   description?: string;
   /** Off hides the service on the customer page. */
   bookableOnline: boolean;
+  /** ISO 8601, UTC. Out of use: hidden from customers and not offered at the desk; can be used again (BR-94.12). */
+  archivedAt?: string;
   variants: ServiceVariant[];
 }
 

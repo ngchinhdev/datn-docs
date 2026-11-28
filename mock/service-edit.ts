@@ -1,6 +1,8 @@
 // Editing a service in the settings pages: segment list operations, checks and change count.
 // Pure functions over fixtures; no React.
 import type { Service, ServiceSegment, ServiceVariant, SegmentKind, Staff } from './fixtures';
+import { visibleMinutes } from './occupation';
+import { LIMITS, MINUTES_PROBLEM, PRICE_PROBLEM, priceProblem } from './service-settings';
 
 export const MIN_MINUTES = 5;
 export const MAX_MINUTES = 480;
@@ -100,22 +102,53 @@ export interface SegmentErrors {
   uses?: string;
 }
 
+/** What the segment checks need to know about the staff type (BR-94.26). */
+export interface SegmentRules {
+  staffTypeIds: ReadonlySet<string>;
+  /** Name of the staff type, for the message: "Thợ". */
+  staffName: string;
+}
+
 /** What is wrong with each segment, by index; segments without a problem are absent. */
-export function segmentErrors(segments: DraftSegment[]): Record<number, SegmentErrors> {
+export function segmentErrors(
+  segments: DraftSegment[],
+  rules: SegmentRules,
+): Record<number, SegmentErrors> {
   const errors: Record<number, SegmentErrors> = {};
   segments.forEach((s, i) => {
     const e: SegmentErrors = {};
     if (!s.name.trim()) e.name = 'Nhập tên đoạn.';
-    if (s.kind === 'prep' && segments.slice(0, i).some((x) => x.kind !== 'prep')) {
-      e.kind = 'Chuẩn bị chỉ đứng đầu. Kéo đoạn này lên đầu hoặc đổi loại.';
+    if (s.kind === 'prep') {
+      if (i !== 0) e.kind = 'Chuẩn bị chỉ đứng đầu. Kéo đoạn này lên đầu hoặc đổi loại.';
+      else if (segments[1]?.kind !== 'work') e.kind = 'Sau đoạn Chuẩn bị phải là đoạn Làm.';
     }
-    if (s.minutesText !== undefined) {
-      e.minutes = `Nhập số phút từ ${MIN_MINUTES} đến ${MAX_MINUTES}, bước ${MINUTE_STEP}.`;
+    if (
+      s.kind === 'wait' &&
+      (segments[i - 1]?.kind !== 'work' || segments[i + 1]?.kind !== 'work')
+    ) {
+      e.kind = 'Đoạn Chờ phải nằm giữa hai đoạn Làm.';
     }
+    if (s.minutesText !== undefined) e.minutes = MINUTES_PROBLEM;
     if (s.resourceTypeIds.length === 0) e.uses = 'Chọn ít nhất một loại tài nguyên.';
+    else if (s.kind === 'work' && !s.resourceTypeIds.some((t) => rules.staffTypeIds.has(t))) {
+      e.uses = `Đoạn Làm cần ${rules.staffName}: mỗi lịch hẹn có một người làm.`;
+    }
     if (Object.keys(e).length) errors[i] = e;
   });
   return errors;
+}
+
+/** Minutes the customer sees: from the first Làm to the last (BR-51). */
+export const visibleOf = (variant: Pick<DraftVariant, 'segments'>) =>
+  visibleMinutes({ segments: layout(variant.segments) });
+
+/** The text of "Phần khách thấy tối đa 8 giờ, hiện 8 giờ 30." */
+export function visibleProblem(variant: Pick<DraftVariant, 'segments'>): string | null {
+  const minutes = visibleOf(variant);
+  if (minutes <= LIMITS.visibleMinutes) return null;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `Phần khách thấy tối đa 8 giờ, hiện ${h} giờ${m ? ` ${m}` : ''}.`;
 }
 
 /** Problems of a whole variant that no single row shows. */
@@ -124,9 +157,15 @@ export function variantProblems(variant: DraftVariant): string[] {
   if (!variant.segments.some((s) => s.kind === 'work')) {
     problems.push(`${variant.name}: cần ít nhất một đoạn Làm.`);
   }
-  if (variant.priceVnd <= 0n) problems.push(`${variant.name}: nhập giá lớn hơn 0.`);
-  if (variant.pricesByLevel?.some((p) => p <= 0n)) {
-    problems.push(`${variant.name}: nhập giá lớn hơn 0 cho mọi cấp.`);
+  if (variant.segments.length > LIMITS.segments) {
+    problems.push(`${variant.name}: tối đa ${LIMITS.segments} đoạn.`);
+  }
+  const tooLong = visibleProblem(variant);
+  if (tooLong) problems.push(`${variant.name}: ${tooLong}`);
+  if (!variant.shortName.trim()) problems.push(`${variant.name}: nhập tên trên lịch.`);
+  if (priceProblem(variant.priceVnd)) problems.push(`${variant.name}: ${PRICE_PROBLEM}`);
+  if (variant.pricesByLevel?.some((p) => priceProblem(p))) {
+    problems.push(`${variant.name}: ${PRICE_PROBLEM}`);
   }
   return problems;
 }
@@ -161,9 +200,9 @@ export function duplicateVariantNames(variants: readonly Pick<ServiceVariant, 'n
 }
 
 /** Everything the page checks before it lets the owner save. */
-export function allProblems(draft: DraftService) {
+export function allProblems(draft: DraftService, rules: SegmentRules) {
   const duplicates = duplicateVariantNames(draft.variants);
-  const rows = draft.variants.some((v) => Object.keys(segmentErrors(v.segments)).length > 0);
+  const rows = draft.variants.some((v) => Object.keys(segmentErrors(v.segments, rules)).length > 0);
   const variants = draft.variants.flatMap(variantProblems);
   const nameMissing = draft.variants.some((v) => !v.name.trim());
   return {
@@ -194,8 +233,10 @@ export function countChanges(
   saved: Service,
   skills: readonly string[],
   savedSkills: readonly string[],
+  /** Changes outside the service itself that the same save writes: prices of the branches. */
+  extra = 0,
 ): number {
-  let n = 0;
+  let n = extra;
   const base: (keyof Service)[] = ['name', 'group', 'description', 'bookableOnline'];
   for (const key of base) if (!same(draft[key], saved[key])) n++;
   if (!same(depositOf(draft), depositOf(saved))) n++;

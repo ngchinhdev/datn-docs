@@ -183,6 +183,7 @@ export function SegmentTable({
                     <CellField id={`seg-${i}-name-err`} error={e.name} width={112}>
                       <input
                         type="text"
+                        maxLength={40}
                         value={segment.name}
                         aria-label={`Tên đoạn ${n} trên lịch`}
                         aria-invalid={e.name ? true : undefined}

@@ -690,7 +690,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'DS',
     routes: ['/app/[tenant]/settings/services'],
-    note: 'Nhóm dịch vụ, kéo đổi thứ tự, bật/tắt đặt online',
+    note: 'Dịch vụ theo nhóm, tìm theo tên, lọc theo nhóm và trạng thái; nhóm dịch vụ (thêm, đổi tên, xóa, Lên/Xuống); hộp thêm dịch vụ; bật/tắt đặt online; ngừng dùng và dùng lại (BR-94)',
   },
   {
     code: 'MH-45',
@@ -700,7 +700,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/app/[tenant]/settings/services/[id]'],
-    note: 'Màn đặc trưng thứ hai. Biến thể khách tự chọn, tên không trùng (BR-13, BR-55); các đoạn chiếm dụng vẽ trên trục thời gian, mỗi đoạn chọn loại tài nguyên (BR-04, BR-05); kỹ năng (BR-03); giá theo cấp nhân viên; xem trước khối lịch hẹn như trên lịch lễ tân',
+    note: 'Màn đặc trưng thứ hai. Biến thể khách tự chọn, tên không trùng (BR-13, BR-55); các đoạn chiếm dụng vẽ trên trục thời gian, mỗi đoạn chọn loại tài nguyên, dãy đoạn hợp lệ (BR-50 đến BR-52, BR-94); giá gốc và giá riêng chi nhánh, cảnh báo chi nhánh thiếu tài nguyên; xem trước khối lịch hẹn như trên lịch lễ tân. Giá theo cấp, ai làm được, đặt cọc: bản nháp, làm cùng Nhân sự và giai đoạn 4',
   },
   {
     code: 'MH-46',
@@ -875,7 +875,7 @@ const rows: Row[] = [
 ];
 
 /** Screens that are signed off; every other screen with links is in progress. */
-const APPROVED = new Set(['MH-02', 'MH-42', 'MH-43', 'MH-46']);
+const APPROVED = new Set(['MH-02', 'MH-42', 'MH-43', 'MH-44', 'MH-45', 'MH-46']);
 
 /** Screens to agree on with the supervisor. */
 export const mockScreens: (MockScreen & { status: ScreenStatus; links: ScreenLink[] })[] = (

@@ -1,10 +1,11 @@
 /*
  * Full-page screenshots of mock routes, to compare with design/screens by eye.
- * Run: pnpm shot <route>... [--phone] [--dark] [--collapsed] [--login <email>] [--session <key>=<json>]
+ * Run: pnpm shot <route>... [--phone] [--dark] [--collapsed] [--height <px>] [--login <email>] [--session <key>=<json>]
  * Needs `pnpm dev` running on port 3100. Images go to `.shots/<route>[-phone][-dark][-collapsed].png`.
  * With `--login`, the sign-in form is filled and sent first (the session is kept per tab); for
  * routes under `/mock/admin` it is the form of `/mock/admin/login`.
  * With `--collapsed`, the sidebar of the app frame starts as the 68px rail.
+ * With `--height <px>`, the window is that tall: the app frame scrolls inside itself, so a tall window shows more of a long page.
  * With `--session key=value` (repeatable), a value is put in sessionStorage before the page loads:
  * the draft that a later step of a flow needs, such as `sapio.signup`.
  */
@@ -17,22 +18,30 @@ const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(`--${name}`);
 const loginAt = args.indexOf('--login');
 const loginEmail = loginAt >= 0 ? args[loginAt + 1] : undefined;
+const heightAt = args.indexOf('--height');
 const isSessionValue = (i: number) => args[i - 1] === '--session';
 const routes = args.filter(
-  (a, i) => !a.startsWith('--') && !isSessionValue(i) && (loginAt < 0 || i !== loginAt + 1),
+  (a, i) =>
+    !a.startsWith('--') &&
+    !isSessionValue(i) &&
+    (loginAt < 0 || i !== loginAt + 1) &&
+    (heightAt < 0 || i !== heightAt + 1),
 );
 const sessionItems = args.filter((_, i) => isSessionValue(i));
 
 if (routes.length === 0) {
   console.error(
-    'Usage: pnpm shot <route>... [--phone] [--dark] [--collapsed] [--login <email>] [--session <key>=<json>]',
+    'Usage: pnpm shot <route>... [--phone] [--dark] [--collapsed] [--height <px>] [--login <email>] [--session <key>=<json>]',
   );
   process.exit(1);
 }
 
 const phone = flag('phone');
 const dark = flag('dark');
-const viewport = phone ? { width: 390, height: 844 } : { width: 1440, height: 900 };
+const height = heightAt >= 0 ? Number(args[heightAt + 1]) : undefined;
+const viewport = phone
+  ? { width: 390, height: height ?? 844 }
+  : { width: 1440, height: height ?? 900 };
 
 mkdirSync('.shots', { recursive: true });
 const browser = await chromium.launch();

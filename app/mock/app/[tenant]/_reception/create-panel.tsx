@@ -104,8 +104,10 @@ export function CreatePanel({
     (picked?.kind === 'new' && !phoneError && !nameError);
 
   // ---- Service, variant, person, time ----
-  const [serviceId, setServiceId] = useState(fixture.services[0]?.id ?? '');
-  const service = fixture.services.find((s) => s.id === serviceId) ?? fixture.services[0]!;
+  // A service out of use is not offered at the desk (BR-94.12).
+  const offered = fixture.services.filter((s) => !s.archivedAt);
+  const [serviceId, setServiceId] = useState(offered[0]?.id ?? '');
+  const service = offered.find((s) => s.id === serviceId) ?? offered[0] ?? fixture.services[0]!;
   const capable = capableStaff(service, fixture.staff);
   const [chosenVariantId, setChosenVariantId] = useState('');
   const variant: ServiceVariant | null =
@@ -415,7 +417,7 @@ export function CreatePanel({
               setChosenVariantId('');
             }}
           >
-            {fixture.services.map((s) => (
+            {offered.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
               </option>

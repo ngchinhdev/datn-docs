@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo } from 'react';
+import { useServiceStore } from '@/components/mock/service-store';
 import { SuspendedGate } from '@/components/mock/site-suspended';
 import { useLiveFixture } from '@/components/mock/use-live-fixture';
 import { bookingWindow } from '@/mock/policy';
@@ -13,6 +14,7 @@ import { visibleMinutes } from '@/mock/occupation';
 import { formatTime, MOCK_NOW, MOCK_TODAY } from '@/mock/time';
 import type { BusinessHours, Service, ServiceVariant, Weekday } from '@/mock/fixtures';
 import { hoursByDay, WEEK, WEEKDAY_NAME, windowsText } from '@/mock/shop';
+import { OTHER_GROUP } from '@/mock/service-settings';
 import { staffNounOf } from '@/mock/staff-noun';
 
 function variantSummary(service: Service): string {
@@ -111,20 +113,26 @@ function TenantContent({ tenantSlug }: { tenantSlug: string }) {
     return times.sort()[0]!;
   }, [staffSlots]);
 
-  // Group services
+  // Group services in the order the owner set; services with no group come last, under "Khác" (BR-94.5, BR-94.7)
+  const { groups: groupOrder } = useServiceStore();
   const groupedServices = useMemo(() => {
     const groups: { name: string; services: Service[] }[] = [];
     for (const service of fixture.services) {
       if (!service.bookableOnline) continue;
-      let grp = groups.find((g) => g.name === service.group);
+      const name = service.group || OTHER_GROUP;
+      let grp = groups.find((g) => g.name === name);
       if (!grp) {
-        grp = { name: service.group, services: [] };
+        grp = { name, services: [] };
         groups.push(grp);
       }
       grp.services.push(service);
     }
-    return groups;
-  }, [fixture.services]);
+    const rank = (name: string) => {
+      const at = groupOrder.indexOf(name);
+      return at < 0 ? groupOrder.length : at;
+    };
+    return groups.sort((a, b) => rank(a.name) - rank(b.name));
+  }, [fixture.services, groupOrder]);
 
   const hoursFormatted = useMemo(() => {
     return formatHoursGroup(branch.businessHours);
