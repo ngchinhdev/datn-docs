@@ -3,7 +3,7 @@ title: Chiến lược kiểm thử
 description: Các tầng kiểm thử, công cụ, quy ước và cách các bài kiểm thử phục vụ thực nghiệm E1–E8 trong báo cáo.
 ---
 
-Kiểm thử là **sản phẩm chính** của đồ án, không phải phần phụ: bảy bài toán khó được chứng minh bằng số liệu từ các bài kiểm thử dưới đây (xem Roadmap mục 11, thực nghiệm E1–E9).
+Kiểm thử là **sản phẩm chính** của đồ án, không phải phần phụ: bảy bài toán khó được chứng minh bằng số liệu từ các bài kiểm thử dưới đây (xem Roadmap mục 11, thực nghiệm E1–E8).
 
 ## Các tầng
 
