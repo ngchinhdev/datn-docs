@@ -81,7 +81,63 @@ Kế hoạch này chỉ chia việc. Trang nào ở trên nói khác kế hoạc
 ## Prompt S1
 
 ```
+Làm trong datn-saas: git checkout main && git pull && git checkout -b feat/services-api.
+Repo datn-docs: git checkout main && git pull (PR #30 đã merge).
 
+Đọc: datn-docs/CLAUDE.md, datn-saas/CLAUDE.md, mục mới nhất của sessions/progress/,
+sessions/plans/services.md (mục S1 là danh sách việc), features/services.md, api/services.md,
+erd.md mục 5 và 10, api/branch-settings.md #9, features/branch-settings.md (BR-93.19, AC-89).
+Làm theo khuôn đã có của branch-settings: apps/api/src/branch-settings/* (controller → service →
+domain + repository), database/constraint-violation.ts, tenant-scope.ts, openapi/examples/*,
+test/support/{branch-world,tenant-client,test-app,fake-clock}.ts, packages/shared/src/branch-settings.ts,
+hai migration 20261128071539/071551 (bảng trước, ràng buộc/RLS/trigger sau).
+
+Việc:
+1. Migration mới (không sửa migration cũ): service_groups, services, service_variants, service_segments,
+   segment_resource_types, variant_cleanups, service_prices theo ERD mục 5. Mọi bảng có tenant_id,
+   RLS ENABLE + FORCE, khóa ngoại kép (tenant_id, id). Chỉ mục duy nhất theo lower(name): nhóm; dịch
+   vụ với archived_at is null; biến thể theo service_id với archived_at is null. service_prices U
+   (variant_id, branch_id, level) nulls not distinct. Các check theo ERD (giá 0..100000000 bội 1000,
+   phút đoạn 5..480 bội 5, position 1..8, dọn dẹp 5..120 bội 5). Constraint trigger DEFERRABLE INITIALLY
+   DEFERRED kiểm cả dãy đoạn của biến thể lúc commit: BR-94.22 đến 94.27 (kể cả phần khách thấy ≤ 480)
+   và luật loại tài nguyên của BR-94.26; dọn dẹp không phải loại is_staff. Tên constraint, trigger rõ
+   ràng để constraint-violation.ts dịch sang mã nghiệp vụ; trigger raise với mã/constraint name để
+   chuyển thành 400 VALIDATION_FAILED, không lọt 500. Trigger bỏ qua biến thể đã archived.
+2. Tìm không phân biệt dấu (BR-94.15, AC-118 "q=nhuom"): đề xuất cách trong PR (extension unaccent
+   bọc trong hàm immutable, hoặc cột tên đã bỏ dấu sinh ở ứng dụng). Chọn cách nhẹ hơn, ghi "Tự quyết";
+   không thêm thư viện mới. Đ thường thì chuẩn hóa cả "đ" → "d".
+3. packages/shared/src/services.ts: schema Zod strict cho mọi body/response của 13 endpoint, giới hạn
+   (LIMITS) và hàm kiểm dãy đoạn thuần dùng chung với web (trả lỗi theo đường dẫn field như
+   variants.{i}.segments.{j}.kind). Mã lỗi mới thêm vào errors.ts.
+4. apps/api/src/services/: module, controller, service, repository, domain (chuẩn hóa tên, kiểm đoạn,
+   kiểm dọn dẹp, phân loại biến thể giữ/mới/ẩn, priceAt(variant, branch), kiểm order). Endpoint #1–#13
+   đúng thứ tự xử lý của api/services.md; PUT /services/order khai trước /services/{serviceId}.
+   @Roles('owner') cho mọi endpoint, guard gói/khóa như branch-settings. #9 khóa dòng dịch vụ
+   (SELECT … FOR UPDATE) trong withTenant; #4, #5 khóa nhóm; đổi nhóm của dịch vụ khóa nhóm đích để
+   AC-116 đúng. Giới hạn theo phiên dùng chung với branch-settings.
+5. Sửa endpoint #9 của branch-settings (xóa loại tài nguyên): còn segment_resource_types hoặc
+   variant_cleanups chiếm (kể cả biến thể ẩn, dịch vụ ngừng dùng) thì 409 RESOURCE_TYPE_IN_USE (AC-89,
+   AC-155). Trả kèm tên một dịch vụ để giao diện hiện "Dịch vụ {tên} đang dùng loại này." nếu api
+   doc đã có trường đó; không có thì không thêm.
+6. upcomingAppointments luôn 0, ghi TODO(BR-94.31). deposit_vnd có cột, không nhận, không trả.
+7. Seed (scripts/seed.ts, id cố định): nhóm và dịch vụ của toc-may và la-sen theo
+   datn-docs/mock/fixtures/{salon,la-sen}-services.ts, dùng loại tài nguyên mà seed chi nhánh đã có;
+   bỏ phần giá theo cấp và người làm. Ví dụ OpenAPI ở openapi/examples/services.ts và các ca
+   "Thử trong Scalar" của api/services.md chạy đúng trên seed.
+8. Test: AC-103 đến AC-153, AC-155, AC-156; tên test bắt đầu bằng mã BR. Đồng thời (AC-111, 116, 122,
+   132) là integration với Testcontainers, không mock DB. Unit cho domain (AC-151, kiểm dãy đoạn) có
+   test thuộc tính fast-check: sinh dãy ngẫu nhiên, đối chiếu với bản kiểm viết thẳng từng luật;
+   đối chiếu luôn cả trigger DB với hàm shared trên một mẫu dãy (một int-spec). Test ghi thẳng SQL bằng
+   app_user một biến thể có Chờ ở cuối: bị chặn lúc commit. RLS: id của la-sen trả 404.
+
+Xong datn-saas: pnpm lint && pnpm typecheck && pnpm test && pnpm test:integration qua. Mở PR
+feat/services-api, mục "Tự quyết", không merge.
+
+Sau đó trong datn-docs, nhánh docs/services-s1: pnpm sync:openapi với openapi.json mới; thêm link
+"Tham chiếu" vào api/services.md như api/branch-settings.md; ghi prompt này vào mục "Prompt S1" của
+sessions/plans/services.md; chỗ code buộc phải khác đặc tả thì sửa đặc tả và ghi lý do trong PR; thêm
+mục tiến độ. Chạy pnpm build, prettier --check. Mở PR, không merge.
+Chỗ đặc tả mâu thuẫn hoặc không làm được thì dừng lại hỏi mình.
 ```
 
 ## Prompt S2

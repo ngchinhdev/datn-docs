@@ -48,7 +48,7 @@ Cùng hạn mức với [Chi nhánh và tài nguyên](./branch-settings.md#giớ
 | 409 | `SERVICE_ARCHIVED` | | Sửa, đổi "Nhận đặt online" hoặc ngừng dùng dịch vụ đã ngừng dùng |
 | 409 | `SERVICE_NOT_ARCHIVED` | | Dùng lại dịch vụ đang dùng |
 | 409 | `BRANCH_ARCHIVED` | | Đặt giá cho chi nhánh đã ngừng dùng ([#9](#9-lưu-cả-dịch-vụ)) |
-| 409 | `RESOURCE_TYPE_IN_USE` | | Xóa loại tài nguyên đang được đoạn hoặc dọn dẹp của biến thể nào chiếm (BR-94.32), ở [#9 của Chi nhánh và tài nguyên](./branch-settings.md#9-xóa-loại-tài-nguyên) |
+| 409 | `RESOURCE_TYPE_IN_USE` | `serviceName` | Xóa loại tài nguyên đang được đoạn hoặc dọn dẹp của biến thể nào chiếm (BR-94.32), ở [#9 của Chi nhánh và tài nguyên](./branch-settings.md#9-xóa-loại-tài-nguyên) |
 
 ## Hình dạng dùng chung
 
@@ -121,11 +121,15 @@ Chi tiết dịch vụ (đọc ở #8, trả về ở #7 và #9):
 
 ## 1. Danh sách nhóm dịch vụ
 
+Tham chiếu: [Danh sách nhóm dịch vụ](./reference/services/serviceGroupsList.mdx)
+
 `GET /v1/tenants/{slug}/service-groups`
 
 Trả về 200 `{ "items": [...] }`, mỗi phần tử như [Nhóm dịch vụ](#hình-dạng-dùng-chung), sắp theo `sort` rồi `created_at`. Không có dòng "Khác" (BR-94.7).
 
 ## 2. Thêm nhóm dịch vụ
+
+Tham chiếu: [Thêm nhóm dịch vụ](./reference/services/serviceGroupsCreate.mdx)
 
 `POST /v1/tenants/{slug}/service-groups`
 
@@ -141,15 +145,19 @@ Tên trùng nhóm khác (không phân biệt hoa thường), hoặc là "Khác":
 
 ## 3. Đổi tên nhóm dịch vụ
 
+Tham chiếu: [Đổi tên nhóm dịch vụ](./reference/services/serviceGroupsRename.mdx)
+
 `PATCH /v1/tenants/{slug}/service-groups/{groupId}`, body `{ "name": "..." }` như [#2](#2-thêm-nhóm-dịch-vụ).
 
 Tên trùng nhóm khác hoặc là "Khác": **409** `NAME_TAKEN`. Giữ nguyên tên và chỉ đổi hoa thường không phải trùng. Trả về 200 với một phần tử như [Nhóm dịch vụ](#hình-dạng-dùng-chung).
 
 ## 4. Xóa nhóm dịch vụ
 
+Tham chiếu: [Xóa nhóm dịch vụ](./reference/services/serviceGroupsRemove.mdx)
+
 `DELETE /v1/tenants/{slug}/service-groups/{groupId}`
 
-1. Khóa dòng nhóm (`SELECT ... FOR UPDATE`). Chờ các yêu cầu đang gán dịch vụ vào nhóm này, vì khóa ngoại giữ khóa dòng đó tới khi chúng xong.
+1. Khóa dòng nhóm (`SELECT ... FOR UPDATE`). Chờ các yêu cầu đang gán dịch vụ vào nhóm này: thêm dịch vụ và lưu dịch vụ đọc nhóm đích bằng `SELECT ... FOR SHARE`, và khóa ngoại giữ khóa dòng đó tới khi chúng xong. Nếu một dịch vụ được dùng lại giữa lúc đếm và lúc xóa, khóa ngoại từ chối lần xóa; lần xóa được làm lại và đếm thấy dịch vụ đó.
 2. Đếm dịch vụ đang dùng của nhóm. Còn: **409** `SERVICE_GROUP_IN_USE` với `count`.
 3. Đặt `group_id` của dịch vụ đã ngừng dùng thuộc nhóm về rỗng, rồi xóa dòng nhóm.
 
@@ -161,6 +169,8 @@ Trả về 204.
 
 ## 5. Đổi thứ tự nhóm dịch vụ
 
+Tham chiếu: [Đổi thứ tự nhóm dịch vụ](./reference/services/serviceGroupsOrder.mdx)
+
 `PUT /v1/tenants/{slug}/service-groups/order`, body `{ "ids": [...] }`.
 
 Khóa các dòng nhóm (`SELECT ... FOR UPDATE`). `ids` không đúng bằng tập mọi nhóm của cơ sở (thiếu, thừa, trùng, hoặc id của cơ sở khác): **409** `ORDER_MISMATCH`. Đặt `sort` là 1, 2, 3... theo `ids`. Trả về 200 `{ "ids": [...] }` là thứ tự vừa lưu.
@@ -170,6 +180,8 @@ Khóa các dòng nhóm (`SELECT ... FOR UPDATE`). `ids` không đúng bằng t�
 | 409 | `ORDER_MISMATCH` | Tải lại danh sách; hộp thông báo "Danh sách vừa đổi, hãy thử lại." |
 
 ## 6. Danh sách dịch vụ
+
+Tham chiếu: [Danh sách dịch vụ](./reference/services/servicesList.mdx)
 
 `GET /v1/tenants/{slug}/services?groupId=&status=active|archived|all&q=`
 
@@ -182,6 +194,8 @@ Khóa các dòng nhóm (`SELECT ... FOR UPDATE`). `ids` không đúng bằng t�
 Trả về 200 `{ "items": [...] }`, mỗi phần tử như [Một dòng của danh sách](#hình-dạng-dùng-chung). Sắp theo `sort` của nhóm, rồi `sort` của dịch vụ, rồi `created_at`; dịch vụ không nhóm ở cuối (BR-94.15). `groupId` không thuộc cơ sở: 404 `NOT_FOUND`.
 
 ## 7. Thêm dịch vụ
+
+Tham chiếu: [Thêm dịch vụ](./reference/services/servicesCreate.mdx)
 
 `POST /v1/tenants/{slug}/services`
 
@@ -207,11 +221,15 @@ Trả về 201 với [Chi tiết dịch vụ](#hình-dạng-dùng-chung).
 
 ## 8. Chi tiết dịch vụ
 
+Tham chiếu: [Chi tiết dịch vụ](./reference/services/servicesDetail.mdx)
+
 `GET /v1/tenants/{slug}/services/{serviceId}`
 
 Trả về 200 với [Chi tiết dịch vụ](#hình-dạng-dùng-chung). Xem được cả dịch vụ đã ngừng dùng.
 
 ## 9. Lưu cả dịch vụ
+
+Tham chiếu: [Lưu cả dịch vụ](./reference/services/servicesSave.mdx)
 
 `PUT /v1/tenants/{slug}/services/{serviceId}`
 
@@ -258,14 +276,14 @@ Xử lý, sau các bước chung:
    | `variants.{i}.segments.{j}.resourceTypeIds` | `REQUIRED`, `INVALID_VALUE` | Rỗng; một loại hai lần |
    | `variants.{i}.cleanups.{k}.minutes` | `INVALID_VALUE` | Ngoài 5 đến 120, hoặc không là bội của 5 |
    | `variants.{i}.cleanups.{k}.resourceTypeId`, `…branchPrices.{k}.branchId` | `INVALID_VALUE` | Một giá trị hai lần trong cùng biến thể |
-2. Dịch vụ đã ngừng dùng: **409** `SERVICE_ARCHIVED`.
-3. Tìm các id trong body theo `tenant_id`: `groupId`, `resourceTypeId` của đoạn và dọn dẹp, `branchId` của giá, `variants[].id` không thuộc cơ sở hoặc không phải biến thể đang dùng của dịch vụ này: **404** `NOT_FOUND`. `branchId` là chi nhánh đã ngừng dùng: **409** `BRANCH_ARCHIVED`.
+2. Khóa dòng dịch vụ (`SELECT ... FOR NO KEY UPDATE`); hai `PUT` cùng dịch vụ xếp hàng ở đây, và các bước sau đọc dữ liệu mà lần lưu trước để lại. Dịch vụ đã ngừng dùng: **409** `SERVICE_ARCHIVED`.
+3. Tìm các id trong body theo `tenant_id`: `groupId`, `resourceTypeId` của đoạn và dọn dẹp, `branchId` của giá, `variants[].id` không thuộc cơ sở hoặc không phải biến thể đang dùng của dịch vụ này: **404** `NOT_FOUND`. Nhóm đích được đọc bằng `SELECT ... FOR SHARE`, nên xóa nhóm chạy cùng lúc không để dịch vụ trỏ tới nhóm đã xóa (AC-116). `branchId` là chi nhánh đã ngừng dùng: **409** `BRANCH_ARCHIVED`.
 4. Các luật cần biết loại nhân viên, báo **400** `VALIDATION_FAILED`: mọi đoạn Làm phải chiếm loại nhân viên, đoạn Chờ không chiếm loại nhân viên và phải chiếm ít nhất một loại khác (BR-94.26) báo ở `…segments.{j}.resourceTypeIds`; `…cleanups.{k}.resourceTypeId` là loại nhân viên hoặc không đoạn nào của biến thể chiếm (BR-94.28).
 5. Tên trùng dịch vụ đang dùng khác: **409** `NAME_TAKEN`.
-6. Trong transaction, khóa dòng dịch vụ (`SELECT ... FOR UPDATE`); hai `PUT` cùng dịch vụ xếp hàng ở đây. Ghi theo thứ tự:
+6. Ghi theo thứ tự, trong transaction đã khóa ở bước 2:
    1. Cập nhật `name`, `description`, `bookable_online`, `updated_at`; nếu `groupId` đổi thì `sort` bằng lớn nhất của nhóm mới cộng 1.
    2. Biến thể đang dùng không có trong `variants` thì đặt `archived_at` bằng `Clock.now()` (BR-94.21). Làm bước này trước khi ghi biến thể khác, để tên của biến thể vừa ẩn dùng lại được trong cùng lần lưu (BR-94.18).
-   3. Biến thể có `id`: cập nhật `name`, `short_name`, `price_vnd`, `sort`. Biến thể không có `id`: tạo mới.
+   3. Biến thể có `id`: cập nhật `name`, `short_name`, `price_vnd`, `sort`; tên đổi chỗ giữa hai biến thể được giữ (A thành B, B thành A) thì mỗi biến thể lấy tạm id của nó làm tên trước, để chỉ mục duy nhất không thấy hai tên trùng. Biến thể không có `id`: tạo mới.
    4. Với mỗi biến thể: thay toàn bộ đoạn và loại tài nguyên mỗi đoạn, thay toàn bộ dọn dẹp, thay các dòng `service_prices` có `branch_id` thuộc chi nhánh đang dùng và `level` rỗng. Dòng giá của chi nhánh đã ngừng dùng không bị chạm tới (BR-94.29).
 7. Vi phạm chỉ mục duy nhất của tên dịch vụ hoặc tên biến thể do hai yêu cầu cùng lúc: **409** `NAME_TAKEN`; vi phạm khóa ngoại của nhóm: **404** `NOT_FOUND`.
 
@@ -280,11 +298,15 @@ Trả về 200 với [Chi tiết dịch vụ](#hình-dạng-dùng-chung). Lịch
 
 ## 10. Bật tắt nhận đặt online
 
+Tham chiếu: [Bật tắt nhận đặt online](./reference/services/servicesSetBookable.mdx)
+
 `PATCH /v1/tenants/{slug}/services/{serviceId}`, body `{ "bookableOnline": true }`. Body có trường khác bị từ chối ở bước chung 2.
 
 Dịch vụ đã ngừng dùng: **409** `SERVICE_ARCHIVED`. Trả về 200 với một dòng như [Một dòng của danh sách](#hình-dạng-dùng-chung).
 
 ## 11. Ngừng dùng dịch vụ
+
+Tham chiếu: [Ngừng dùng dịch vụ](./reference/services/servicesArchive.mdx)
 
 `POST /v1/tenants/{slug}/services/{serviceId}/archive`, không có body.
 
@@ -295,6 +317,8 @@ Dịch vụ đã ngừng dùng: **409** `SERVICE_ARCHIVED`. Trả về 200 với
 Trả về 200 với một dòng như [Một dòng của danh sách](#hình-dạng-dùng-chung).
 
 ## 12. Dùng lại dịch vụ
+
+Tham chiếu: [Dùng lại dịch vụ](./reference/services/servicesRestore.mdx)
 
 `POST /v1/tenants/{slug}/services/{serviceId}/restore`, không có body.
 
@@ -311,6 +335,8 @@ Trả về 200 với một dòng như [Một dòng của danh sách](#hình-dạ
 
 ## 13. Đổi thứ tự dịch vụ
 
+Tham chiếu: [Đổi thứ tự dịch vụ](./reference/services/servicesOrder.mdx)
+
 `PUT /v1/tenants/{slug}/services/order`
 
 | Trường | Kiểu | Bắt buộc | Ghi chú |
@@ -319,7 +345,7 @@ Trả về 200 với một dòng như [Một dòng của danh sách](#hình-dạ
 | `ids` | mảng uuid | Có | Thứ tự mới của cả nhóm |
 
 1. `groupId` không thuộc cơ sở: **404** `NOT_FOUND`.
-2. Khóa các dòng dịch vụ đang dùng của nhóm (`SELECT ... FOR UPDATE`). `ids` không đúng bằng tập đó (thiếu, thừa, trùng, id của nhóm khác, hoặc dịch vụ đã ngừng dùng): **409** `ORDER_MISMATCH`.
+2. Khóa các dòng dịch vụ đang dùng của nhóm (`SELECT ... FOR NO KEY UPDATE`). `ids` không đúng bằng tập đó (thiếu, thừa, trùng, id của nhóm khác, hoặc dịch vụ đã ngừng dùng): **409** `ORDER_MISMATCH`.
 3. Đặt `sort` là 1, 2, 3... theo thứ tự `ids`.
 
 Trả về 200 `{ "ids": [...] }` là thứ tự vừa lưu.
