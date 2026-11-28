@@ -7,7 +7,7 @@ Nghiệp vụ ở [Chi nhánh và tài nguyên](../features/branch-settings.md).
 
 ## Danh sách
 
-Mọi endpoint có `{slug}` trong đường dẫn (`/v1/tenants/{slug}/...`) và chỉ **chủ cơ sở** (`owner`) gọi được (BR-93.1).
+Mọi endpoint có `{slug}` trong đường dẫn (`/v1/tenants/{slug}/...`) và chỉ **chủ cơ sở** (`owner`) gọi được (BR-93.1). Quản lý, lễ tân, kỹ thuật viên đọc chi nhánh và tài nguyên qua endpoint của tính năng dùng nó (bộ chọn chi nhánh, Lịch, Xếp ca); nhóm endpoint này giữ chỉ chủ cơ sở.
 
 | # | Endpoint | Thành công | Lỗi nghiệp vụ | Quy tắc |
 |---|---|---|---|---|
@@ -64,6 +64,8 @@ Giới hạn của gói (`PLAN_LIMIT_REACHED`) khác với giới hạn này: n�
 
 ## 1. Danh sách chi nhánh
 
+Tham chiếu: [Danh sách chi nhánh](./reference/branch-settings/branchesList.mdx)
+
 `GET /v1/tenants/{slug}/branches?status=active|archived|all`
 
 `status` mặc định `active`. Trả về 200:
@@ -91,6 +93,8 @@ Giới hạn của gói (`PLAN_LIMIT_REACHED`) khác với giới hạn này: n�
 
 ## 2. Thêm chi nhánh
 
+Tham chiếu: [Thêm chi nhánh](./reference/branch-settings/branchesCreate.mdx)
+
 `POST /v1/tenants/{slug}/branches`
 
 | Trường | Kiểu | Bắt buộc | Ghi chú |
@@ -114,6 +118,8 @@ Trả về 201 với dạng chi tiết của [#3](#3-chi-tiết-chi-nhánh).
 | 409 | `NAME_TAKEN` | "Đã có chi nhánh tên này." |
 
 ## 3. Chi tiết chi nhánh
+
+Tham chiếu: [Chi tiết chi nhánh](./reference/branch-settings/branchesDetail.mdx)
 
 `GET /v1/tenants/{slug}/branches/{branchId}`
 
@@ -143,6 +149,8 @@ Trả về 200:
 `weekday` từ 0 (Chủ Nhật) đến 6; ngày không có phần tử là nghỉ. `openingHours` sắp theo `weekday` rồi `opens`. `specialDays` chỉ gồm ngày từ hôm nay (giờ chi nhánh) trở đi, sắp theo `date` (BR-93.14). Xem được cả chi nhánh đã ngừng dùng.
 
 ## 4. Sửa chi nhánh
+
+Tham chiếu: [Sửa chi nhánh](./reference/branch-settings/branchesUpdate.mdx)
 
 `PUT /v1/tenants/{slug}/branches/{branchId}`
 
@@ -176,6 +184,8 @@ Trả về 200 với dạng chi tiết của [#3](#3-chi-tiết-chi-nhánh).
 
 ## 5. Ngừng dùng chi nhánh
 
+Tham chiếu: [Ngừng dùng chi nhánh](./reference/branch-settings/branchesArchive.mdx)
+
 `POST /v1/tenants/{slug}/branches/{branchId}/archive`, không có body.
 
 1. Chi nhánh đã ngừng dùng: **409** `BRANCH_ARCHIVED`.
@@ -192,6 +202,8 @@ Trả về 200 với dạng chi tiết của [#3](#3-chi-tiết-chi-nhánh).
 | 409 | `BRANCH_ARCHIVED` | Tải lại trang, hiện chế độ chỉ đọc |
 
 ## 6. Danh sách loại tài nguyên
+
+Tham chiếu: [Danh sách loại tài nguyên](./reference/branch-settings/resourceTypesList.mdx)
 
 `GET /v1/tenants/{slug}/resource-types`
 
@@ -210,6 +222,8 @@ Trả về 200:
 
 ## 7. Thêm loại tài nguyên
 
+Tham chiếu: [Thêm loại tài nguyên](./reference/branch-settings/resourceTypesCreate.mdx)
+
 `POST /v1/tenants/{slug}/resource-types`
 
 | Trường | Kiểu | Bắt buộc | Ghi chú |
@@ -220,6 +234,8 @@ Tên trùng tên loại nào của cơ sở (không phân biệt hoa thường):
 
 ## 8. Đổi tên loại tài nguyên
 
+Tham chiếu: [Đổi tên loại tài nguyên](./reference/branch-settings/resourceTypesRename.mdx)
+
 `PATCH /v1/tenants/{slug}/resource-types/{typeId}`, body `{ "name": "..." }` như [#7](#7-thêm-loại-tài-nguyên).
 
 1. Loại nhân viên: **409** `RESOURCE_TYPE_PROTECTED`.
@@ -228,6 +244,8 @@ Tên trùng tên loại nào của cơ sở (không phân biệt hoa thường):
 Trả về 200 với một phần tử như ở #6.
 
 ## 9. Xóa loại tài nguyên
+
+Tham chiếu: [Xóa loại tài nguyên](./reference/branch-settings/resourceTypesRemove.mdx)
 
 `DELETE /v1/tenants/{slug}/resource-types/{typeId}`
 
@@ -244,6 +262,8 @@ Trả về 204.
 | 409 | `RESOURCE_TYPE_IN_USE` | "Còn {n} tài nguyên thuộc loại này, kể cả đã ngừng dùng, nên không xóa được." Khi có dịch vụ thêm "Dịch vụ {tên} đang dùng loại này." |
 
 ## 10. Danh sách tài nguyên
+
+Tham chiếu: [Danh sách tài nguyên](./reference/branch-settings/resourcesList.mdx)
 
 `GET /v1/tenants/{slug}/resources?branchId=&resourceTypeId=&status=active|archived|all`
 
@@ -278,6 +298,8 @@ Chỉ tài nguyên có loại không phải nhân viên (BR-93.20). `branchId`, 
 
 ## 11. Thêm tài nguyên
 
+Tham chiếu: [Thêm tài nguyên](./reference/branch-settings/resourcesCreate.mdx)
+
 `POST /v1/tenants/{slug}/resources`
 
 | Trường | Kiểu | Bắt buộc | Ghi chú |
@@ -297,6 +319,8 @@ Trả về 201 với một phần tử như ở [#10](#10-danh-sách-tài-nguyê
 
 ## 12. Đổi tên tài nguyên
 
+Tham chiếu: [Đổi tên tài nguyên](./reference/branch-settings/resourcesRename.mdx)
+
 `PATCH /v1/tenants/{slug}/resources/{resourceId}`, body `{ "name": "..." }`. Body có `branchId` hoặc `resourceTypeId` bị từ chối ở bước chung 2.
 
 1. Tài nguyên có loại nhân viên: **404** `NOT_FOUND` (màn này không quản lý nhân viên).
@@ -306,6 +330,8 @@ Trả về 201 với một phần tử như ở [#10](#10-danh-sách-tài-nguyê
 Trả về 200 với một phần tử như ở #10.
 
 ## 13. Đổi thứ tự tài nguyên
+
+Tham chiếu: [Đổi thứ tự tài nguyên](./reference/branch-settings/resourcesOrder.mdx)
 
 `PUT /v1/tenants/{slug}/resources/order`
 
@@ -323,12 +349,14 @@ Trả về 200 `{ "ids": [...] }` là thứ tự vừa lưu.
 
 ## 14. Tạm ngưng tài nguyên
 
+Tham chiếu: [Tạm ngưng tài nguyên](./reference/branch-settings/resourcesCreatePause.mdx)
+
 `POST /v1/tenants/{slug}/resources/{resourceId}/pauses`
 
 | Trường | Kiểu | Bắt buộc | Ghi chú |
 |---|---|---|---|
-| `startsAt` | string, ISO 8601 UTC | Có | Có thể trước lúc bấm |
-| `endsAt` | string, ISO 8601 UTC | Có | Sau `startsAt` và sau `Clock.now()` |
+| `startsAt` | string, ISO 8601 UTC | Có | Trước `Clock.now()` thì lưu và trả về bằng `Clock.now()` (BR-93.24) |
+| `endsAt` | string, ISO 8601 UTC | Có | Sau `startsAt` (giá trị gửi lên) và sau `Clock.now()` |
 | `reason` | string, 1 đến 200 | Có | |
 
 Xử lý, sau các bước chung:
@@ -346,6 +374,8 @@ Trả về 201 với `{ id, startsAt, endsAt, reason }` và, **khi có lịch h�
 
 ## 15. Mở lại tài nguyên
 
+Tham chiếu: [Mở lại tài nguyên](./reference/branch-settings/resourcesReopen.mdx)
+
 `DELETE /v1/tenants/{slug}/resources/{resourceId}/pauses/{pauseId}`
 
 1. Khoảng đã kết thúc (`endsAt` không sau `Clock.now()`): **409** `PAUSE_ENDED`.
@@ -355,6 +385,8 @@ Trả về 201 với `{ id, startsAt, endsAt, reason }` và, **khi có lịch h�
 Trả về 204.
 
 ## 16. Ngừng dùng tài nguyên
+
+Tham chiếu: [Ngừng dùng tài nguyên](./reference/branch-settings/resourcesArchive.mdx)
 
 `POST /v1/tenants/{slug}/resources/{resourceId}/archive`, không có body.
 

@@ -40,7 +40,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 - [ ] **Tự dùng thử** SimplyBook.me và ít nhất một phần mềm Việt Nam (MySpa, NanoSpa hoặc SalonHero); chụp màn hình, ghi lại họ làm gì, thiếu gì
 - [ ] Đọc tài liệu processing time của Mangomint, related resources của SimplyBook.me (nguồn cho chương 2)
 - [ ] Đọc 50–100 đánh giá 1–3 sao của các đối thủ trên App Store, Google Play, Capterra; tổng hợp nỗi đau (mục 12)
-- [ ] Đăng Google Form vào nhóm Facebook chủ salon, spa, nail, pet shop
+- [ ] Đăng Google Form vào nhóm Facebook chủ salon, spa, nail
 - [x] Tạo 2 repo `datn-saas`, `datn-docs`; đưa đề cương, roadmap, quyết định vào `datn-docs` (03/11)
 - [x] Dựng base source `datn-saas` theo [Kế hoạch dựng base source](./base-setup.md), Phần A (03/11, review 05/11)
 - [x] Dựng app docs + mock `datn-docs` theo [Kế hoạch dựng base source](./base-setup.md), Phần B (05/11, deploy 07/11: https://datn-docs.vercel.app)
@@ -98,8 +98,8 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 
 ### Giai đoạn 5 — Hoa hồng, thông báo, báo cáo (Tuần 21–23: 22/03 – 11/04)
 
-- [ ] Quy tắc hoa hồng (%, cố định, bán gói, khách chỉ định), ngày hiệu lực, chia nhiều thợ (BT5)
-- [ ] Chốt kỳ, thu hồi vào kỳ kế tiếp; nhân viên xem hoa hồng tạm tính
+- [ ] Quy tắc hoa hồng (%, cố định, bán gói, khách chỉ định), ngày hiệu lực (BT5)
+- [ ] Chốt kỳ, thu hồi khi hoàn tiền vào kỳ của ngày duyệt hoàn (BR-42); nhân viên xem hoa hồng tạm tính
 - [ ] Email xác nhận, nhắc lịch 24h và 2h bằng BullMQ delayed job
 - [ ] Báo cáo: doanh thu, tiền trả trước vs doanh thu thực hiện, tỉ lệ lấp đầy, tỉ lệ không đến
 - [ ] *(Nâng cao, nếu kịp)* Danh sách chờ
@@ -158,7 +158,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 
 ### 12.2. Google Form (dưới 3 phút)
 
-1. Cơ sở của anh/chị thuộc loại nào? (Salon tóc / Nail / Spa / Spa thú cưng / Khác)
+1. Cơ sở của anh/chị thuộc loại nào? (Salon tóc / Nail / Spa / Khác)
 2. Có bao nhiêu nhân viên kỹ thuật?
 3. Hiện nhận lịch hẹn bằng cách nào? (Sổ tay / Zalo, Messenger / Excel / Phần mềm: ___)
 4. Trong 1 tháng, khoảng bao nhiêu lần bị trùng lịch hoặc quên lịch?
@@ -173,11 +173,11 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 ## 13. Cấu trúc báo cáo đề xuất
 
 1. **Tổng quan:** bối cảnh, khảo sát hiện trạng (mục 12), bảng so sánh đối thủ có bằng chứng, **phạm vi áp dụng** (mục 2), mục tiêu, phạm vi đồ án
-2. **Cơ sở lý thuyết và các hệ thống liên quan:** mô hình đặt lịch của SimplyBook.me, Mangomint, Timely; SaaS multi-tenant, RLS, exclusion constraint, idempotency, sổ cái kế toán, outbox pattern, cấu hình theo ngành bằng dữ liệu, tool calling của LLM
-3. **Phân tích và thiết kế:** vai trò, use case, bảng BR, kiến trúc lõi + gói cấu hình, ERD, sơ đồ trạng thái, sequence
-4. **Giải quyết các bài toán khó:** BT1 → BT8, mỗi bài theo khung *vấn đề → hệ thống khác làm thế nào → phương án → lựa chọn → hiện thực*
-5. **Cài đặt và thực nghiệm:** giao diện chính của cả hai ngành, kết quả E1 → E9 kèm phân tích
-6. **Kết luận và hướng phát triển:** kết quả, hạn chế (nói thẳng), các phân hệ ở mục 3.3, ngành thứ ba trở đi
+2. **Cơ sở lý thuyết và các hệ thống liên quan:** mô hình đặt lịch của SimplyBook.me, Mangomint, Timely; SaaS multi-tenant, RLS, exclusion constraint, idempotency, sổ cái kế toán, outbox pattern, tool calling của LLM
+3. **Phân tích và thiết kế:** vai trò, use case, bảng BR, kiến trúc lõi, ERD, sơ đồ trạng thái, sequence
+4. **Giải quyết các bài toán khó:** BT1 → BT7, mỗi bài theo khung *vấn đề → hệ thống khác làm thế nào → phương án → lựa chọn → hiện thực*
+5. **Cài đặt và thực nghiệm:** giao diện chính (Salon Tóc Mây và Spa Lá Sen), kết quả E1 → E8 kèm phân tích
+6. **Kết luận và hướng phát triển:** kết quả, hạn chế (nói thẳng), các phân hệ ở mục 3.3
 
 ---
 
@@ -186,12 +186,11 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 | Rủi ro | Dấu hiệu sớm | Cách xử lý |
 |---|---|---|
 | Thuật toán giờ trống phức tạp hơn dự kiến | Tuần 11 chưa qua property test | Tạm bỏ đặt nhóm, giữ chuỗi dịch vụ; ghi rõ trong phần hạn chế |
-| Thiết kế bị viết cứng theo ngành salon | Gói thú cưng ở giai đoạn 1 cần thêm bảng riêng | Sửa mô hình ngay ở giai đoạn 1, khi còn rẻ |
-| Phình phạm vi | Muốn thêm kho, nha khoa, ngành thứ ba, app di động | Chỉ thêm khi M5 đã đạt; còn lại vào "Hướng phát triển" |
+| Phình phạm vi | Muốn thêm kho, nha khoa, app di động | Chỉ thêm khi M5 đã đạt; còn lại vào "Hướng phát triển" |
 | Cổng thanh toán không có môi trường thử | Không lấy được tài khoản thử | Giả lập webhook có chữ ký HMAC; vẫn chứng minh idempotency |
 | Chi phí AI | Chi phí API tăng khi test | Cache, giới hạn lượt, model nhỏ cho bộ đánh giá |
-| Không có người dùng thật | Google Form không ai trả lời | Thực nghiệm E1–E9 + SUS với bạn bè; nêu trung thực trong báo cáo |
-| Trễ tiến độ | Trễ quá 1 tuần ở bất kỳ mốc nào | Cắt mục "Nâng cao" trước, rồi đơn giản hóa chatbot; **không cắt E1–E5 và E9** |
+| Không có người dùng thật | Google Form không ai trả lời | Thực nghiệm E1–E8 + SUS với bạn bè; nêu trung thực trong báo cáo |
+| Trễ tiến độ | Trễ quá 1 tuần ở bất kỳ mốc nào | Cắt mục "Nâng cao" trước, rồi đơn giản hóa chatbot; **không cắt E1–E5** |
 | Code AI sinh ra sai nghiệp vụ | Test BR thất bại | Viết test BR trước, code sau; tự review mọi phần phân quyền và tiền |
 
 ---
@@ -200,10 +199,9 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 
 | Câu hỏi | Hướng trả lời |
 |---|---|
-| SimplyBook.me, Mangomint đã có tài nguyên và processing time, em làm lại để làm gì? | Không tuyên bố phát minh; đóng góp là kết hợp đầy đủ + chứng minh đúng đắn (E1, E2) + chống trùng ở tầng DB + nghiệp vụ tiền kiểu Việt Nam + tổng quát bằng cấu hình (E9). Dẫn bảng so sánh có ảnh chụp ở chương 1 |
+| SimplyBook.me, Mangomint đã có tài nguyên và processing time, em làm lại để làm gì? | Không tuyên bố phát minh; đóng góp là kết hợp đầy đủ + chứng minh đúng đắn (E1, E2) + chống trùng ở tầng DB + nghiệp vụ tiền kiểu Việt Nam. Dẫn bảng so sánh có ảnh chụp ở chương 1 |
 | Thị trường Việt Nam đã có MySpa, NanoSpa? | Như trên; thêm kết quả dùng thử ở giai đoạn 0 |
-| "Dùng cho mọi dịch vụ" có quá tham không? | Không phải mọi dịch vụ; chỉ dịch vụ theo lịch hẹn có ba đặc điểm (mục 2), kèm danh sách ngành không phù hợp và lý do |
-| Thêm ngành mới tốn bao nhiêu công? | Chỉ viết gói cấu hình; E9 cho thấy 0 dòng code lõi phải sửa |
+| "Dùng cho mọi dịch vụ" có quá tham không? | Không phải mọi dịch vụ; chỉ cơ sở làm đẹp (D-16), có chung ba đặc điểm (mục 2) |
 | Hai người bấm đặt cùng lúc thì sao? | Exclusion constraint; demo E2 |
 | Thợ đang ủ thuốc thì nhận khách khác được không? | Mô hình đoạn chiếm dụng, BR-05 |
 | Webhook về hai lần? | idempotency_key + transaction; E3 |
@@ -219,9 +217,8 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 ## 16. Nguyên tắc làm việc
 
 1. **Lõi trước, phụ sau.** Không đụng chatbot trước M5.
-2. **Không viết cứng theo ngành.** Mỗi khi muốn viết `if (industry === ...)` trong code lõi, dừng lại và đưa nó vào gói cấu hình.
-3. **Viết test BR trước khi code** phần đặt lịch, tiền, hoa hồng.
-4. **Mỗi tuần một dòng nhật ký tiến độ** trong `docs/progress.md`; cuối đồ án dùng làm phụ lục.
-5. **Dùng AI để sinh code nhưng tự review** mọi phần phân quyền, cô lập tenant và tiền.
-6. **Cuối mỗi giai đoạn, tự hỏi:** "Nếu bảo vệ ngay hôm nay, mình demo được gì và chứng minh được gì?"
-7. **Tài liệu này là tài liệu sống:** cập nhật sau mỗi mốc, nhưng chỉ *thu hẹp* phạm vi, không mở rộng.
+2. **Viết test BR trước khi code** phần đặt lịch, tiền, hoa hồng.
+3. **Mỗi tuần một dòng nhật ký tiến độ** trong `docs/progress.md`; cuối đồ án dùng làm phụ lục.
+4. **Dùng AI để sinh code nhưng tự review** mọi phần phân quyền, cô lập tenant và tiền.
+5. **Cuối mỗi giai đoạn, tự hỏi:** "Nếu bảo vệ ngay hôm nay, mình demo được gì và chứng minh được gì?"
+6. **Tài liệu này là tài liệu sống:** cập nhật sau mỗi mốc, nhưng chỉ *thu hẹp* phạm vi, không mở rộng.

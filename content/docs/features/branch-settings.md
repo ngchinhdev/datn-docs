@@ -24,6 +24,7 @@ description: Chủ cơ sở quản lý chi nhánh, giờ mở cửa, ngày đặ
 | Dùng lại chi nhánh hoặc tài nguyên đã ngừng dùng | Dùng lại kéo theo kiểm lại giới hạn gói và tên trùng | |
 | Bước lưới giờ của chi nhánh (`slot_step_minutes`, BR-58) | Chỉ trang đặt lịch đọc nó; mặc định 15 phút | Lõi đặt lịch, giai đoạn 3 |
 | Gỡ thành viên và nhân viên khỏi chi nhánh bị ngừng dùng | Bảng gắn chi nhánh nằm ở Nhân sự | Nhân sự (MH-47) |
+| Quản lý, lễ tân, kỹ thuật viên đọc chi nhánh và tài nguyên | Nhóm endpoint này giữ chỉ chủ cơ sở (BR-93.1, AC-58); các vai trò đó đọc qua endpoint của tính năng dùng nó | Bộ chọn chi nhánh, Lịch, Xếp ca |
 
 ## Khái niệm
 
@@ -89,7 +90,7 @@ description: Chủ cơ sở quản lý chi nhánh, giờ mở cửa, ngày đặ
 | BR-93.21 | Thêm tài nguyên: tên 1 đến 50 ký tự, một chi nhánh đang dùng, một loại không phải nhân viên. Tên không trùng tên tài nguyên đang dùng khác cùng chi nhánh (không phân biệt hoa thường): 409 `NAME_TAKEN`. Tài nguyên mới xếp cuối nhóm (chi nhánh, loại) |
 | BR-93.22 | Sau khi tạo chỉ đổi được tên. Chi nhánh và loại không đổi, vì dịch vụ chiếm theo loại và lịch hẹn gắn chi nhánh |
 | BR-93.23 | Thứ tự là thứ tự trong nhóm (chi nhánh, loại); BR-57 chọn tài nguyên theo thứ tự này ("Ghế 1" trước "Ghế 2"). Đổi thứ tự gửi cả nhóm một lần |
-| BR-93.24 | Tạm ngưng bảo trì: khoảng giờ `starts_at` đến `ends_at` kèm lý do 1 đến 200 ký tự. `ends_at` sau `starts_at` và sau lúc bấm. Khoảng không chồng khoảng khác của cùng tài nguyên (409 `PAUSE_OVERLAP`); nối liền được. Trong khoảng đó tài nguyên bị trừ khỏi thời gian khả dụng |
+| BR-93.24 | Tạm ngưng bảo trì: khoảng giờ `starts_at` đến `ends_at` kèm lý do 1 đến 200 ký tự. `ends_at` sau `starts_at` và sau `Clock.now()`. `starts_at` trước `Clock.now()` thì lưu bằng `Clock.now()`. Khoảng không chồng khoảng khác của cùng tài nguyên (409 `PAUSE_OVERLAP`); nối liền được. Trong khoảng đó tài nguyên bị trừ khỏi thời gian khả dụng |
 | BR-93.25 | Mở lại: khoảng đang diễn ra thì kết thúc ngay lúc bấm; chưa bắt đầu thì xóa; đã kết thúc: 409 `PAUSE_ENDED` |
 | BR-93.26 | **Áp dụng khi có lịch hẹn:** lịch dùng tài nguyên trong khoảng tạm ngưng thì chuyển sang tài nguyên cùng loại còn trống, không báo khách; không còn thì vào "Cần xếp lại" (BR-37, BR-35). Giao diện báo trước từng lịch sẽ đi đâu |
 | BR-93.27 | Ngừng dùng tài nguyên không xóa dòng; tài nguyên không nhận lịch mới và không dùng lại. Tài nguyên đã ngừng dùng không đổi tên, không tạm ngưng: 409 `RESOURCE_ARCHIVED`. **Áp dụng khi có lịch hẹn:** lịch sắp tới dùng nó xử lý như BR-93.26 |
@@ -198,7 +199,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 | AC-94 | Một tài nguyên | Đổi tên; gửi kèm `resourceTypeId` hoặc `branchId` | 200; 400 `VALIDATION_FAILED` ở trường thừa | BR-93.22 |
 | AC-95 | Nhóm có Ghế 1, Ghế 2, Ghế 3 | Gửi thứ tự mới (Ghế 3, Ghế 1, Ghế 2); gửi thiếu một id; gửi thêm id của nhóm khác | 200 và `GET` trả đúng thứ tự mới; hai ca sau 409 `ORDER_MISMATCH`, thứ tự không đổi | BR-93.23 |
 | AC-96 | Một tài nguyên đang hoạt động | Tạm ngưng từ 2026-12-01 08:00 đến 2026-12-01 12:00, lý do "Sửa ghế" | 201; `GET` tài nguyên có khoảng đó | BR-93.24 |
-| AC-97 | Giờ hiện tại 2026-11-28 10:00 | Tạm ngưng với `endsAt` bằng `startsAt` / `endsAt` trước 10:00 / lý do rỗng / lý do 201 ký tự | Mỗi ca 400 `VALIDATION_FAILED` ở `endsAt` hoặc `reason`; không đổi gì | BR-93.24 |
+| AC-97 | Giờ hiện tại 2026-11-28 10:00 | Tạm ngưng với `endsAt` bằng `startsAt` / `endsAt` trước 10:00 / lý do rỗng / lý do 201 ký tự; rồi với `startsAt` 08:00 cùng ngày, `endsAt` 12:00 | Bốn ca đầu 400 `VALIDATION_FAILED` ở `endsAt` hoặc `reason`, không đổi gì; ca cuối 201, `startsAt` lưu và trả về là 10:00 | BR-93.24 |
 | AC-98 | Đã có khoảng 08:00–12:00 ngày D | Tạm ngưng 11:00–14:00; tạm ngưng 12:00–14:00; hai yêu cầu chồng nhau chạy cùng lúc | 409 `PAUSE_OVERLAP`; 201; đúng một yêu cầu 201, yêu cầu kia 409 `PAUSE_OVERLAP` | BR-93.24 |
 | AC-99 | Ba khoảng: đang diễn ra, chưa bắt đầu, đã kết thúc | Mở lại từng khoảng | Khoảng đang diễn ra: 204, `endsAt` bằng lúc bấm; chưa bắt đầu: 204, dòng mất; đã kết thúc: 409 `PAUSE_ENDED` | BR-93.25 |
 | AC-100 | **Áp dụng khi có lịch hẹn.** Ngày D chỉ có Ghế 1 đến Ghế 3; Ghế 2 có lịch A 10:00–11:00, Ghế 3 có lịch B 10:30–11:30, Ghế 1 trống cả buổi | Tạm ngưng Ghế 2 cả ngày D, rồi tạm ngưng Ghế 3 cả ngày D | Sau lần đầu A chuyển sang Ghế 1, khách không nhận email; sau lần hai B không còn ghế (Ghế 1 bận bởi A) nên vào "Cần xếp lại" | BR-93.26 |

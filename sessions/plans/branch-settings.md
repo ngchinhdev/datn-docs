@@ -72,7 +72,29 @@ Kế hoạch này chỉ chia việc. Trang nào ở trên nói khác kế hoạc
 
 ## Prompt S1
 
-Viết sau khi review S0.
+```
+Làm trong datn-saas: git checkout main && git pull && git checkout -b feat/branch-settings-api.
+Đọc CLAUDE.md, mục mới nhất trong datn-docs/sessions/progress/, rồi datn-docs/sessions/plans/branch-settings.md
+(mục S1), features/branch-settings.md, api/branch-settings.md, api/index.md (mục "Quyền theo cơ sở
+và vai trò"), architecture/erd.md mục 3, 4, 10, decisions t07 và t17.
+Làm đúng các đầu việc S1 của kế hoạch. Lưu ý:
+- Commit theo thứ tự: migration → TenantGuard (@Roles, @RequiresFeature, entitlements với Clock) kèm
+  test → domain kèm test thuộc tính → endpoint chi nhánh → loại tài nguyên → tài nguyên và tạm ngưng →
+  seed và Scalar.
+- TenantGuard: trước khi bật luật "route có {slug} mà thiếu @Roles thì API không khởi động", liệt kê
+  các route /v1/tenants/{slug}/... đang có. Có route nào không hợp luật này thì dừng lại hỏi mình.
+- Lỗi do ràng buộc DB (chỉ mục duy nhất, exclusion, khóa ngoại) đổi sang mã nghiệp vụ ở repository,
+  theo tên constraint, không theo câu báo lỗi. Có test cho từng ca chạy đồng thời.
+- Tên đã chuẩn hóa (trim, gộp khoảng trắng) là tên được lưu, để chỉ mục lower(name) bắt được ca
+  " tóc mây  quận 3 ".
+- Các mục "áp dụng khi có lịch hẹn" trả 0 hoặc bỏ trường, ghi TODO kèm mã BR; không tạo bảng lịch hẹn.
+- seed.ts: thêm la-sen và dữ liệu như mục "Thử trong Scalar"; dùng setTenant từ tenant-scope.ts.
+- Xuất openapi.json, chạy pnpm sync:openapi ở datn-docs và thêm link "Tham chiếu" vào
+  api/branch-settings.md. Mở PR docs riêng cho phần này.
+Tài liệu là đặc tả; chỗ thiếu hoặc mâu thuẫn thì dừng lại hỏi mình, không tự đoán. Chạy pnpm lint,
+pnpm typecheck, pnpm test, pnpm test:integration. Mở PR, ghi mục "Tự quyết", thêm mục tiến độ ở
+datn-docs, không merge.
+```
 
 ## Prompt S2
 
