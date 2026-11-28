@@ -12,7 +12,6 @@ import {
   type PackageProduct,
   type Requeue,
   type Resource,
-  type ServedSubject,
   type Shift,
   type ShopConfig,
   type StaffTimeOff,
@@ -47,14 +46,10 @@ export interface ScheduleStore {
   addAppointment: (appt: Appointment) => void;
   removeAppointment: (id: string) => void;
   customers: Customer[];
-  servedSubjects: ServedSubject[];
   /** A customer or pet made while creating an appointment; `remove*` is the undo. */
   addCustomer: (customer: Customer) => void;
   replaceCustomer: (customer: Customer) => void;
   removeCustomer: (id: string) => void;
-  addSubject: (subject: ServedSubject) => void;
-  replaceSubject: (subject: ServedSubject) => void;
-  removeSubject: (id: string) => void;
   shifts: Shift[];
   setShifts: (shifts: Shift[]) => void;
   /** Leave requests; a technician's new one is pending until a manager decides (BR-11). */
@@ -91,7 +86,6 @@ export interface ScheduleStore {
 interface TenantScheduleData {
   appointments: Appointment[];
   customers: Customer[];
-  servedSubjects: ServedSubject[];
   shifts: Shift[];
   leaves: StaffTimeOff[];
   requeues: Requeue[];
@@ -121,7 +115,6 @@ function initialTenantData(slug: string): TenantScheduleData {
   return {
     appointments: fixture.appointments,
     customers: fixture.customers,
-    servedSubjects: fixture.servedSubjects,
     shifts: fixture.shifts,
     leaves: fixture.staffTimeOff,
     requeues: [],
@@ -257,36 +250,6 @@ export function ScheduleStoreProvider({
     [update],
   );
 
-  const addSubject = useCallback(
-    (subject: ServedSubject) => {
-      update((prev) => ({
-        ...prev,
-        servedSubjects: [...prev.servedSubjects, subject],
-      }));
-    },
-    [update],
-  );
-
-  const replaceSubject = useCallback(
-    (subject: ServedSubject) => {
-      update((prev) => ({
-        ...prev,
-        servedSubjects: prev.servedSubjects.map((s) => (s.id === subject.id ? subject : s)),
-      }));
-    },
-    [update],
-  );
-
-  const removeSubject = useCallback(
-    (id: string) => {
-      update((prev) => ({
-        ...prev,
-        servedSubjects: prev.servedSubjects.filter((s) => s.id !== id),
-      }));
-    },
-    [update],
-  );
-
   const setShifts = useCallback(
     (shifts: Shift[]) => {
       update((prev) => ({ ...prev, shifts }));
@@ -411,13 +374,9 @@ export function ScheduleStoreProvider({
       addAppointment,
       removeAppointment,
       customers: data.customers,
-      servedSubjects: data.servedSubjects,
       addCustomer,
       replaceCustomer,
       removeCustomer,
-      addSubject,
-      replaceSubject,
-      removeSubject,
       shifts: data.shifts,
       setShifts,
       leaves: data.leaves,
@@ -449,9 +408,6 @@ export function ScheduleStoreProvider({
       addCustomer,
       replaceCustomer,
       removeCustomer,
-      addSubject,
-      replaceSubject,
-      removeSubject,
       setShifts,
       addLeaves,
       replaceLeave,

@@ -427,9 +427,9 @@ report(
 );
 const otherTenant = sendInvitation(
   invitations,
-  memberEmails(accounts, members, 'sen'),
+  memberEmails(accounts, members, 'la-sen'),
   {
-    workspaceId: 'sen',
+    workspaceId: 'la-sen',
     email: 'thao.nguyen@email.vn',
     role: 'receptionist',
     branchId: 'sen-q7',
@@ -602,7 +602,7 @@ report(
     .filter((m) => m.accountId === linhId && m.role === 'receptionist')
     .map((m) => m.workspaceId)
     .sort()
-    .join() === 'havy,may,sen',
+    .join() === 'havy,la-sen,may',
   'BR-78: Linh là Lễ tân ở Tóc Mây, Lá Sen và Nail Hạ Vy',
 );
 report(
@@ -649,7 +649,7 @@ report(
 const hung = memberForRole(members, 'may', 'manager');
 report(
   hung?.staffResourceId === 'may-hung' &&
-    memberForRole(members, 'sen', 'manager')?.accountId === 'acc-khoa' &&
+    memberForRole(members, 'la-sen', 'manager')?.accountId === 'acc-khoa' &&
     memberForRole(members, 'may', 'receptionist')?.accountId === linhId &&
     memberForRole(members, 'may', 'technician', 'may-lan')?.staffResourceId === 'may-lan' &&
     memberForRole(members, 'may', 'technician')?.staffResourceId === 'may-mai',
@@ -788,7 +788,7 @@ report(
     ),
   ) === dest({ kind: 'enter', workspaceId: 'may', entry: 'locked' }) &&
     doorsWithLocks(accounts.find((a) => a.email === LINH)!.id, members, workspaces, lockedMay).find(
-      (d) => d.workspaceId === 'sen',
+      (d) => d.workspaceId === 'la-sen',
     )?.status === 'active',
   'BR-75: khóa một cơ sở thì chỉ cơ sở đó dừng; cơ sở khác của tài khoản vẫn mở',
 );

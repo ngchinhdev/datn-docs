@@ -246,8 +246,7 @@ export default async function MockIndexPage({ searchParams }: PageProps<'/mock/s
           ))}
           <p className="text-sm text-muted-foreground">
             {fixture.resources.length} tài nguyên, {fixture.staff.length} nhân viên,{' '}
-            {fixture.customers.length} khách, {fixture.servedSubjects.length} đối tượng được phục
-            vụ, {fixture.appointments.length} lịch hẹn.
+            {fixture.customers.length} khách, {fixture.appointments.length} lịch hẹn.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             {fixture.services.map((service) => (

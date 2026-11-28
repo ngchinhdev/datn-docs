@@ -10,7 +10,6 @@ import type {
   Appointment,
   LeaveHandling,
   Requeue,
-  ServedSubject,
   Service,
   ServiceVariant,
   StaffTimeOff,
@@ -18,9 +17,9 @@ import type {
 } from './fixtures/types.ts';
 
 export interface HeldItem {
-  /** Subject or person id with the position, so two items of one subject keep two keys. */
+  /** Guest name or `self` with the position, so two items of one person keep two keys. */
   key: string;
-  /** The name of the subject; absent when the customer is the only one served. */
+  /** The name of the companion this item is for; absent for the person who booked. */
   label?: string;
   service: Service;
   variant: ServiceVariant;
@@ -30,10 +29,10 @@ export interface HeldItem {
   priceVnd: bigint;
 }
 
-/** BR-19: more than one subject in a booking makes it a group; one subject, a chain. */
+/** BR-19: a companion in a booking makes it a group; one person with several items, a chain. */
 export function modeOf(appt: Appointment): BookingMode {
   if (appt.items.length < 2) return 'single';
-  return new Set(appt.items.map((i) => i.servedSubjectId)).size > 1 ? 'group' : 'chain';
+  return appt.items.some((i) => i.guestName) ? 'group' : 'chain';
 }
 
 const find = (fixture: TenantFixture, variantId: string) => {
@@ -44,21 +43,15 @@ const find = (fixture: TenantFixture, variantId: string) => {
   return null;
 };
 
-/** The items of a booking in the order the customer has them; `named` adds the subject's name. */
-export function heldItems(
-  fixture: TenantFixture,
-  appt: Appointment,
-  subjects: readonly ServedSubject[],
-  named: boolean,
-): HeldItem[] {
+/** The items of a booking in the order the customer has them; `named` adds the companion's name. */
+export function heldItems(fixture: TenantFixture, appt: Appointment, named: boolean): HeldItem[] {
   return appt.items.flatMap((item, i) => {
     const hit = find(fixture, item.serviceVariantId);
     if (!hit) return [];
-    const subject = subjects.find((s) => s.id === item.servedSubjectId);
     return [
       {
-        key: `${item.servedSubjectId || 'self'}:${i}`,
-        ...(named && subject ? { label: subject.name } : {}),
+        key: `${item.guestName ?? 'self'}:${i}`,
+        ...(named && item.guestName ? { label: item.guestName } : {}),
         ...hit,
         staffChoice: item.staffChoice === 'chosen' ? item.staffResourceId : ANY_STAFF,
         priceVnd: item.priceVnd,
@@ -146,62 +139,23 @@ export function bookingCode(fixture: TenantFixture, appt: Appointment): string {
 /** The choices that make a booking again: the same services, the same people, a new time. */
 export interface RebookChoice {
   picks: { serviceId: string; variantId: string }[];
-  chosenIds: string[];
-  serviceFor: Record<string, string>;
-  /** The services of the only subject, in order (BR-18). */
-  petChain: string[] | null;
   people:
     { id: string; name: string; pick: { serviceId: string; variantId: string } | null }[] | null;
   staffByKey: Record<string, string>;
 }
 
-export function rebookChoice(
-  fixture: TenantFixture,
-  appt: Appointment,
-  subjects: readonly ServedSubject[],
-): RebookChoice {
-  const asksSubject = fixture.template.vocabulary.subject !== null;
+export function rebookChoice(fixture: TenantFixture, appt: Appointment): RebookChoice {
   const mode = modeOf(appt);
-  const items = heldItems(fixture, appt, subjects, asksSubject || mode === 'group');
+  const items = heldItems(fixture, appt, mode === 'group');
   const pick = (it: HeldItem) => ({ serviceId: it.service.id, variantId: it.variant.id });
-  const empty = {
-    picks: [],
-    chosenIds: [],
-    serviceFor: {},
-    petChain: null,
-    people: null,
-    staffByKey: {},
-  };
+  const empty = { picks: [], people: null, staffByKey: {} };
 
-  if (asksSubject) {
-    const subjectIds = [...new Set(appt.items.map((i) => i.servedSubjectId))];
-    // One subject with several services is a chain, kept by service (BR-18); several subjects have
-    // one service each (BR-19).
-    if (subjectIds.length === 1) {
-      return {
-        ...empty,
-        chosenIds: subjectIds,
-        petChain: items.map((it) => it.service.id),
-        staffByKey: Object.fromEntries(items.map((it) => [it.service.id, it.staffChoice])),
-      };
-    }
-    return {
-      ...empty,
-      chosenIds: subjectIds,
-      serviceFor: Object.fromEntries(
-        appt.items.map((i, n) => [i.servedSubjectId, items[n]!.service.id]),
-      ),
-      staffByKey: Object.fromEntries(
-        appt.items.map((i, n) => [i.servedSubjectId, items[n]!.staffChoice]),
-      ),
-    };
-  }
   if (mode === 'group') {
     return {
       ...empty,
       people: items.map((it, n) => ({
         id: `p${n + 1}`,
-        name: n === 0 ? 'Bạn' : (it.label ?? ''),
+        name: it.label ?? 'Bạn',
         pick: pick(it),
       })),
       staffByKey: Object.fromEntries(items.map((it, n) => [`p${n + 1}`, it.staffChoice])),

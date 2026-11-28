@@ -300,7 +300,7 @@ export function freeSlots(query: AvailabilityQuery): FreeSlot[] {
   }));
 }
 
-// ---- A chain of services for one subject (BR-18) ----
+// ---- A chain of services for one person (BR-18) ----
 
 export interface ChainItemInput {
   variant: Pick<ServiceVariant, 'segments' | 'cleanupMinutes'>;
@@ -479,7 +479,7 @@ export function freeChainSlots(query: ChainQuery): FreeChainSlot[] {
   }));
 }
 
-// ---- A group: several subjects, one item each (BR-19) ----
+// ---- A group: several people, one item each (BR-19) ----
 
 export interface FindGroupInput extends FindChainInput {
   /** Longest gap between the first and the last start of a staggered suggestion, in minutes. */

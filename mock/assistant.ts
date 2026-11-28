@@ -8,10 +8,9 @@
 import { ANY_STAFF, freeSlots } from './availability.ts';
 import type { ChatbotSettings, Service, ServiceVariant, TenantFixture } from './fixtures/types.ts';
 import { openingWindows } from './hours.ts';
-import { matchesAttributes, priceRange, visibleMinutes } from './occupation.ts';
+import { priceRange, visibleMinutes } from './occupation.ts';
 import { bookingWindow } from './policy.ts';
 import { branchPhone } from './site.ts';
-import { isRequired, parseDecimal } from './subject-schema.ts';
 import { addDays, formatDay, formatTime, localDate, weekdayOf } from './time.ts';
 
 // ---- What the assistant answers with ----
@@ -122,7 +121,6 @@ export interface AssistantState {
   context: {
     serviceId?: string;
     variantId?: string;
-    attrs: Record<string, string>;
     staffResourceId?: string;
     lastSlots: SlotChoice[];
   };
@@ -134,7 +132,7 @@ export interface AssistantState {
 export const MAX_SLOTS = 6;
 
 export const initialState = (now: string): AssistantState => ({
-  context: { attrs: {}, lastSlots: [] },
+  context: { lastSlots: [] },
   unknownStreak: 0,
   usage: { date: localDate(now), sent: 0, monthSent: 0 },
 });
@@ -168,8 +166,7 @@ export const withDayUsedUp = (
 
 // ---- Where the button shows (BR-92) ----
 
-export type AssistantPage =
-  'home' | 'service' | 'subject' | 'datetime' | 'info' | 'confirm' | 'deposit';
+export type AssistantPage = 'home' | 'service' | 'datetime' | 'info' | 'confirm' | 'deposit';
 
 const HIDDEN_PAGES: AssistantPage[] = ['info', 'confirm', 'deposit'];
 
@@ -330,31 +327,6 @@ function matchServices(fixture: TenantFixture, folded: string): Service[] {
     } else if (weighted === best) found.push(service);
   }
   return found;
-}
-
-/** Values of the industry schema read from a message: "chó", "6 kg". */
-function readAttributes(fixture: TenantFixture, text: string, folded: string) {
-  const attrs: Record<string, string> = {};
-  const lower = text.toLowerCase();
-  const boundary = (word: string, source: string) =>
-    new RegExp(
-      `(?<![\\p{L}\\p{N}])${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`,
-      'u',
-    ).test(source);
-  for (const field of fixture.template.subjectSchema) {
-    if (field.type === 'enum') {
-      const exact = field.options.find((o) => boundary(o.label.toLowerCase(), lower));
-      const loose = field.options.find(
-        (o) => !STOP.has(fold(o.label)) && boundary(fold(o.label), folded),
-      );
-      const option = exact ?? loose;
-      if (option) attrs[field.key] = option.value;
-    } else if (field.type === 'number' && field.unit) {
-      const match = new RegExp(`(\\d+(?:[.,]\\d+)?)\\s*${fold(field.unit)}\\b`).exec(folded);
-      if (match) attrs[field.key] = String(parseDecimal(match[1]!));
-    }
-  }
-  return attrs;
 }
 
 /** The person the customer names, among those who do the service and take online bookings. */
@@ -560,7 +532,6 @@ function interpret(
   const slug = fixture.tenant.slug;
   const today = localDate(now);
   const folded = fold(input.text);
-  const subjectNoun = fixture.template.vocabulary.subject;
 
   const reception = (text: string, intent: Intent = 'reception') =>
     empty(intent, text, { cards: [receptionCard(fixture, now)] });
@@ -609,8 +580,6 @@ function interpret(
 
   const service =
     named[0] ?? (ctx.serviceId ? fixture.services.find((s) => s.id === ctx.serviceId) : undefined);
-  const attrs = { ...(named[0] && named[0].id !== ctx.serviceId ? {} : ctx.attrs) };
-  Object.assign(attrs, readAttributes(fixture, input.text, folded));
 
   if (wantsList && !named[0]) {
     return empty('priceList', 'Đây là các dịch vụ bạn đặt được online.', {
@@ -633,12 +602,12 @@ function interpret(
     return unknown(fixture, state, now);
   }
 
-  // The variant: named, tapped, or read from the subject's attributes (BR-13).
+  // The variant: tapped, or named by the customer (BR-13).
   let variant: ServiceVariant | undefined = input.variantId
     ? service.variants.find((v) => v.id === input.variantId)
     : undefined;
   if (!variant && service.variants.length === 1) variant = service.variants[0];
-  if (!variant && service.variantSelection === 'customer') {
+  if (!variant) {
     const hit = service.variants.filter(
       (v) => folded.includes(fold(v.name)) || folded.includes(fold(v.shortName)),
     );
@@ -649,36 +618,13 @@ function interpret(
           ? service.variants.find((v) => v.id === ctx.variantId)
           : undefined;
   }
-  if (!variant && service.variantSelection === 'subject') {
-    const matching = service.variants.filter((v) => matchesAttributes(v.match, attrs));
-    variant = matching.length === 1 ? matching[0] : undefined;
-  }
 
   const context = (v?: ServiceVariant) => {
     ctx.serviceId = service.id;
     if (v) ctx.variantId = v.id;
     else delete ctx.variantId;
-    ctx.attrs = attrs;
     if (staff) ctx.staffResourceId = staff.resourceId;
   };
-
-  // Subject-chosen variant not settled yet: ask for what is missing, with the choices as taps.
-  if (!variant && service.variantSelection === 'subject') {
-    context();
-    const missing = fixture.template.subjectSchema
-      .filter((f) => isRequired(f, attrs) && attrs[f.key] === undefined)
-      .map((f) => f.label.toLowerCase());
-    const what = subjectNoun ? `${subjectNoun}` : 'đối tượng';
-    return empty(
-      'ask',
-      `Giá ${service.name.toLowerCase()} tùy ${what}. ${
-        missing.length > 0
-          ? `Bạn cho mình biết ${missing.join(' và ')} của ${what} nhé.`
-          : `Bạn chọn một trong các loại dưới đây nhé.`
-      }`,
-      { suggestions: service.variants.map((v) => ({ label: v.name, variantId: v.id })) },
-    );
-  }
 
   const timeOfDay = TIME.exec(folded);
 

@@ -60,8 +60,7 @@ export function useServiceEditor(tenantSlug: string, serviceId: string) {
     () => new Set(fixture.resourceTypes.filter((t) => t.isStaff).map((t) => t.id)),
     [fixture],
   );
-  const schema = fixture.template.subjectSchema;
-  const problems = allProblems(draft, schema);
+  const problems = allProblems(draft);
   const cleanupErrors = Object.values(cleanupText).filter((text) => text !== '');
   const changes = countChanges(draft, saved, skills, savedSkills);
   const capable: Staff[] = staff.filter((s) => skills.includes(s.resourceId));
@@ -180,7 +179,6 @@ export function useServiceEditor(tenantSlug: string, serviceId: string) {
       id,
       name,
       shortName: copyOf ? `${base.shortName} 2` : name,
-      match: copyOf ? { ...base.match } : {},
       segments: base.segments.map((s) => ({ ...s })),
       cleanupMinutes: { ...base.cleanupMinutes },
     };
@@ -281,7 +279,6 @@ export function useServiceEditor(tenantSlug: string, serviceId: string) {
     depositText,
     setDeposit,
     staffTypeIds,
-    schema,
     discard,
     submit,
   };

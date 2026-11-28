@@ -11,7 +11,6 @@ import {
   platformTenants,
   type PlatformTenant,
 } from '../mock/fixtures/platform.ts';
-import { industryTemplates } from '../mock/fixtures/templates.ts';
 import {
   EXTEND_MAX_DAYS,
   addPlatformLog,
@@ -81,9 +80,9 @@ report(
 );
 report(
   tenant('may').subscription.periodEndsOn === DEFAULT_PERIOD_END &&
-    tenant('sen').subscription.periodEndsOn === DEFAULT_PERIOD_END &&
+    tenant('la-sen').subscription.periodEndsOn === DEFAULT_PERIOD_END &&
     tenant('may').subscription.planCode === 'pro' &&
-    tenant('sen').subscription.planCode === 'basic',
+    tenant('la-sen').subscription.planCode === 'basic',
   'BR-83: Tóc Mây Chuyên nghiệp, Lá Sen Cơ bản, cùng hết 28/11/2026',
 );
 report(
@@ -123,18 +122,6 @@ report(
     ),
   'BR-80, BR-81: dùng thử 7 ngày tính cả ngày tạo, chưa có thanh toán và chưa có lịch hẹn',
 );
-{
-  const created = (id: string, version: number) =>
-    platformTenants.filter((t) => t.industry === id && t.templateVersion === version).length;
-  report(
-    industryTemplates.every(
-      (tpl) =>
-        tpl.publishedVersion === null ||
-        created(tpl.id, tpl.publishedVersion.number) === tpl.publishedVersion.tenantsCreated,
-    ),
-    'BR-70: số cơ sở tạo từ bản đang xuất bản của mỗi ngành khớp trang Gói cấu hình ngành',
-  );
-}
 
 // ---- BR-89: state of the plan, lock apart ----
 

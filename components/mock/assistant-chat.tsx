@@ -29,17 +29,12 @@ import { addMinutes, formatDay, formatRange, formatTime, localDate, MOCK_NOW } f
 const LAUNCHER_ID = 'assistant-launcher';
 
 /** Which page of the customer area the assistant is on, `null` where it has no button. */
-function pageOf(
-  pathname: string,
-  tenantSlug: string,
-  step: string | null,
-  asksSubject: boolean,
-): AssistantPage | null {
+function pageOf(pathname: string, tenantSlug: string, step: string | null): AssistantPage | null {
   const base = `/mock/${tenantSlug}`;
   if (pathname === base) return 'home';
   if (pathname === `${base}/book`) {
-    const known = ['service', 'subject', 'datetime', 'info', 'confirm'] as const;
-    return known.find((s) => s === step) ?? (asksSubject ? 'subject' : 'service');
+    const known = ['service', 'datetime', 'info', 'confirm'] as const;
+    return known.find((s) => s === step) ?? 'service';
   }
   if (pathname.startsWith(`${base}/book/pay`)) return 'deposit';
   return null;
@@ -54,12 +49,7 @@ export function AssistantDock() {
   const suspended = useSiteSuspended(tenantSlug);
   const asked = useRef(false);
 
-  const page = pageOf(
-    pathname,
-    tenantSlug,
-    query.get('step'),
-    fixture.template.vocabulary.subject !== null,
-  );
+  const page = pageOf(pathname, tenantSlug, query.get('step'));
   const mode = entitlements(subscription, MOCK_NOW, catalog).mode;
   // A trial walks through the page but takes no booking, so the assistant holds nothing (BR-81).
   useEffect(() => setHoldOpen(mode === 'active'), [mode, setHoldOpen]);
@@ -471,7 +461,6 @@ function HoldCard({ card }: { card: Extract<AssistantCard, { kind: 'hold' }> }) 
   const day = formatDay(localDate(start));
   const person = fixture.staff.find((s) => s.resourceId === card.slot.staffResourceId);
   const price = appointment?.items[0]?.priceVnd ?? variant.priceVnd;
-  const asksSubject = fixture.template.vocabulary.subject !== null;
   const label = `${service.name}${service.variants.length > 1 ? ` · ${variant.name}` : ''}`;
 
   const details = (
@@ -506,7 +495,7 @@ function HoldCard({ card }: { card: Extract<AssistantCard, { kind: 'hold' }> }) 
               // The booking page carries on from the clock of the chat, tool or not.
               if (draft && card.appointmentId.endsWith(`-a-web${draft.id}`))
                 setDraft({ ...draft, now });
-              router.push(bookHref(tenantSlug, asksSubject ? 'subject' : 'info', query));
+              router.push(bookHref(tenantSlug, 'info', query));
             }}
           >
             Xác nhận bằng email

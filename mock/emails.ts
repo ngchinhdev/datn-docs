@@ -4,7 +4,7 @@
  * modules, so Node can run it (scripts/check-availability.ts).
  */
 import { formatVnd } from './format.ts';
-import type { Appointment, ServedSubject, TenantFixture } from './fixtures/types.ts';
+import type { Appointment, TenantFixture } from './fixtures/types.ts';
 import { refundPercent, refundVnd, replyDeadline } from './policy.ts';
 import { termsOfAppointment } from './terms.ts';
 import { heldItems, modeOf, openQuestion } from './reschedule.ts';
@@ -82,13 +82,11 @@ export function buildEmails(
   const shop = fixture.tenant.name;
   const from = `${shop} <no-reply@sapio.vn>`;
   const hello = `Chào ${firstName(customer?.name ?? 'bạn')}`;
-  const subjects: ServedSubject[] = fixture.servedSubjects;
-  const named = fixture.template.vocabulary.subject !== null;
   const nameOf = (id: string) => fixture.resources.find((r) => r.id === id)?.name ?? '';
 
   const describe = (appt: Appointment) => {
     const group = modeOf(appt) === 'group';
-    const items = heldItems(fixture, appt, subjects, named || group);
+    const items = heldItems(fixture, appt, group);
     const end = appt.bookings.reduce(
       (m, b) => (b.kind !== 'cleanup' && b.endAt > m ? b.endAt : m),
       appt.startAt,

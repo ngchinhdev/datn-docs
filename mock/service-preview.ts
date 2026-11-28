@@ -65,7 +65,6 @@ export function previewCalendar(
     items: [
       {
         serviceVariantId: variant.id,
-        servedSubjectId: '',
         staffResourceId: member.resourceId,
         staffChoice: 'any',
         priceVnd: variant.priceVnd,

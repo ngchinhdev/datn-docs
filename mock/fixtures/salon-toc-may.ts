@@ -10,7 +10,6 @@ import type {
   Branch,
   BusinessHours,
   Customer,
-  ServedSubject,
   Shift,
   Staff,
   StaffTimeOff,
@@ -195,26 +194,6 @@ const regulars: Customer[] = [
   },
 ];
 
-const regularSubjects: ServedSubject[] = (
-  [
-    ['thu', 'Nguyễn Minh Thư'],
-    ['an', 'Trần Bảo An'],
-    ['ha', 'Lê Thu Hà'],
-    ['tuan', 'Đỗ Anh Tuấn'],
-    ['ngoc', 'Hoàng Bích Ngọc'],
-    ['vy', 'Ngô Tường Vy'],
-    ['phuc', 'Bùi Hữu Phúc'],
-    ['van', 'Vũ Thanh Vân'],
-  ] as const
-).map(([key, name]) => ({
-  id: `may-s-${key}`,
-  tenantId,
-  customerId: `may-c-${key}`,
-  kind: 'self' as const,
-  name,
-  attributes: {},
-}));
-
 // Saturday 07/11/2026, as drawn in design/screens/LeTanChiTiet.dc.html and LeTanTaiNguyen.dc.html.
 const saturday: Appointment[] = [
   appointment(
@@ -225,7 +204,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'may-dye-short',
-        subjectId: 'may-s-ha',
         resourceIds: ['may-mai', 'may-chair-1', 'may-wash-1'],
       },
     ],
@@ -246,7 +224,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'may-cut-short',
-        subjectId: 'may-s-tuan',
         resourceIds: ['may-mai', 'may-chair-2'],
       },
     ],
@@ -255,7 +232,6 @@ const saturday: Appointment[] = [
   appointment('may-a-ngoc', 'may-c-ngoc', '2026-11-07T04:00:00Z', 'confirmed', [
     {
       variantId: 'may-cut-long',
-      subjectId: 'may-s-ngoc',
       resourceIds: ['may-mai', 'may-chair-1'],
       staffChoice: 'chosen',
     },
@@ -268,7 +244,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'may-wash-std',
-        subjectId: 'may-s-vy',
         resourceIds: ['may-lan', 'may-wash-1'],
       },
     ],
@@ -277,7 +252,6 @@ const saturday: Appointment[] = [
   appointment('may-a-phuc', 'may-c-phuc', '2026-11-07T02:15:00Z', 'no_show', [
     {
       variantId: 'may-cut-short',
-      subjectId: 'may-s-phuc',
       resourceIds: ['may-lan', 'may-chair-3'],
     },
   ]),
@@ -286,7 +260,7 @@ const saturday: Appointment[] = [
     null,
     '2026-11-07T03:30:00Z',
     'held',
-    [{ variantId: 'may-cut-short', subjectId: null, resourceIds: ['may-lan', 'may-chair-2'] }],
+    [{ variantId: 'may-cut-short', resourceIds: ['may-lan', 'may-chair-2'] }],
     { holdExpiresAt: '2026-11-07T03:27:42Z' },
   ),
   appointment(
@@ -297,12 +271,10 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'may-wash-std',
-        subjectId: 'may-s-an',
         resourceIds: ['may-hung', 'may-wash-1'],
       },
       {
         variantId: 'may-cut-short',
-        subjectId: 'may-s-an',
         resourceIds: ['may-hung', 'may-chair-3'],
       },
     ],
@@ -311,7 +283,6 @@ const saturday: Appointment[] = [
   appointment('may-a-van', 'may-c-van', '2026-11-07T04:30:00Z', 'confirmed', [
     {
       variantId: 'may-cut-short',
-      subjectId: 'may-s-van',
       resourceIds: ['may-hung', 'may-chair-2'],
     },
   ]),
@@ -323,7 +294,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'may-dye-long',
-        subjectId: 'may-s-thu',
         resourceIds: ['may-hung', 'may-chair-3', 'may-wash-1'],
         staffChoice: 'chosen',
       },
@@ -332,24 +302,22 @@ const saturday: Appointment[] = [
   ),
   // The afternoon, so a receptionist can book Lan at 14:00 on Ghế 2 (design/screens/LichTaoMoi.dc.html).
   appointment('may-a-lam', 'may-c-lam', '2026-11-07T06:30:00Z', 'confirmed', [
-    { variantId: 'may-cut-short', subjectId: 'may-s-lam', resourceIds: ['may-mai', 'may-chair-1'] },
+    { variantId: 'may-cut-short', resourceIds: ['may-mai', 'may-chair-1'] },
   ]),
   appointment('may-a-khanh', 'may-c-khanh', '2026-11-07T06:00:00Z', 'confirmed', [
     {
       variantId: 'may-cut-short',
-      subjectId: 'may-s-khanh',
       resourceIds: ['may-lan', 'may-chair-2'],
     },
   ]),
   appointment('may-a-quyen', 'may-c-quyen', '2026-11-07T08:00:00Z', 'confirmed', [
     {
       variantId: 'may-cut-long',
-      subjectId: 'may-s-quyen',
       resourceIds: ['may-lan', 'may-chair-2'],
     },
   ]),
   appointment('may-a-dieu', 'may-c-dieu', '2026-11-07T08:00:00Z', 'confirmed', [
-    { variantId: 'may-wash-std', subjectId: 'may-s-dieu', resourceIds: ['may-mai', 'may-wash-1'] },
+    { variantId: 'may-wash-std', resourceIds: ['may-mai', 'may-wash-1'] },
   ]),
   // Chị Quyên today within 4 hours (12:15 local = 05:15 UTC): past self-reschedule/cancel deadline (<4h).
   appointment(
@@ -360,7 +328,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'may-cut-short',
-        subjectId: 'may-s-quyen',
         resourceIds: ['may-mai', 'may-chair-1'],
         staffChoice: 'chosen',
       },
@@ -368,8 +335,8 @@ const saturday: Appointment[] = [
     { depositVnd: 100_000n },
   ),
 ];
-// Customers who only appear on the other days of the week. [key, name, call name, hair length]
-const others = (
+// Customers who only appear on the other days of the week. [key, name, call name]
+const others: Customer[] = (
   [
     ['lam', 'Phan Ngọc Lam', 'Chị Lam'],
     ['khanh', 'Trịnh Quốc Khánh', 'Anh Khánh'],
@@ -389,49 +356,39 @@ const others = (
 ).map(([key, name, callName], i) => {
   const isQuyen = key === 'quyen';
   return {
-    customer: {
-      id: `may-c-${key}`,
-      tenantId,
-      name,
-      callName,
-      phone: `+8490400${1000 + i}`,
-      visitCount: 1 + (i % 5),
-      ...(isQuyen
-        ? {
-            email: 'quyen@example.com',
-            consentAt: '2026-10-15T03:00:00Z',
-            packages: [
-              {
-                id: 'may-pkg-quyen-1',
-                productId: 'may-pkg-10',
-                name: 'Gói 10 lần gội sấy',
-                totalSessions: 10,
-                usedSessions: 4,
-                remainingSessions: 6,
-                expiresAt: '31/03/2027',
-                serviceVariantId: 'may-wash-std',
-                priceVnd: 700_000n,
-                unitPriceVnd: 80_000n,
-                note: 'Đặt Gội sấy thì buổi trong gói được trừ khi bạn làm xong.',
-              },
-            ],
-          }
-        : {}),
-    } satisfies Customer,
-    subject: {
-      id: `may-s-${key}`,
-      tenantId,
-      customerId: `may-c-${key}`,
-      kind: 'self',
-      name,
-      attributes: {},
-    } satisfies ServedSubject,
-  };
+    id: `may-c-${key}`,
+    tenantId,
+    name,
+    callName,
+    phone: `+8490400${1000 + i}`,
+    visitCount: 1 + (i % 5),
+    ...(isQuyen
+      ? {
+          email: 'quyen@example.com',
+          consentAt: '2026-10-15T03:00:00Z',
+          packages: [
+            {
+              id: 'may-pkg-quyen-1',
+              productId: 'may-pkg-10',
+              name: 'Gói 10 lần gội sấy',
+              totalSessions: 10,
+              usedSessions: 4,
+              remainingSessions: 6,
+              expiresAt: '31/03/2027',
+              serviceVariantId: 'may-wash-std',
+              priceVnd: 700_000n,
+              unitPriceVnd: 80_000n,
+              note: 'Đặt Gội sấy thì buổi trong gói được trừ khi bạn làm xong.',
+            },
+          ],
+        }
+      : {}),
+  } satisfies Customer;
 });
 
 // Customers of the appointments written by hand for 07/11 and later. Kept apart from the lists
 // the generators draw from, so adding them does not move the generated data.
-const handwritten2 = (
+const handwritten2: Customer[] = (
   [
     ['dieu', 'Vương Thị Diệu', 'Chị Diệu'],
     ['hang', 'Trương Thu Hằng', 'Chị Hằng'],
@@ -439,32 +396,22 @@ const handwritten2 = (
     ['hanh', 'Đoàn Mỹ Hạnh', 'Chị Hạnh'],
   ] as const
 ).map(([key, name, callName], i) => ({
-  customer: {
-    id: `may-c-${key}`,
-    tenantId,
-    name,
-    callName,
-    phone: `+8490600${1000 + i}`,
-    visitCount: 1 + (i % 3),
-  } satisfies Customer,
-  subject: {
-    id: `may-s-${key}`,
-    tenantId,
-    customerId: `may-c-${key}`,
-    kind: 'self',
-    name,
-    attributes: {},
-  } satisfies ServedSubject,
+  id: `may-c-${key}`,
+  tenantId,
+  name,
+  callName,
+  phone: `+8490600${1000 + i}`,
+  visitCount: 1 + (i % 3),
 }));
 
 // The week 02/11–08/11 books only the customers above; the rest come in earlier and later weeks.
-const weekSubjects = [...regularSubjects, ...others.map((o) => o.subject)];
+const weekCustomers = [...regulars, ...others];
 const people = generatePeople({
   seed: 20261101,
   prefix: 'may',
   tenantId,
   count: 109,
-  existing: [...regulars, ...others.map((o) => o.customer)],
+  existing: weekCustomers,
   notes: [
     'Da đầu nhạy cảm, dùng thuốc không amoniac.',
     'Thích ngồi ghế gần cửa sổ.',
@@ -472,25 +419,9 @@ const people = generatePeople({
     'Chỉ nhận cắt, không nhận nhuộm tại chỗ.',
     'Dị ứng mùi thuốc uốn.',
   ],
-  subjects: (rand, customer, n) => [
-    {
-      id: `may-s-g${n}`,
-      tenantId,
-      customerId: customer.id,
-      kind: 'self',
-      name: customer.name,
-      attributes: {},
-    },
-  ],
 });
-const everyone = [
-  ...regulars,
-  ...others.map((o) => o.customer),
-  ...people.customers,
-  ...handwritten2.map((o) => o.customer),
-];
-const servedSubjects = [...weekSubjects, ...people.subjects];
-const allSubjects = [...servedSubjects, ...handwritten2.map((o) => o.subject)];
+const everyone = [...weekCustomers, ...people, ...handwritten2];
+const generatedCustomers = [...weekCustomers, ...people];
 
 /** Local `YYYY-MM-DD` and `HH:mm` as a UTC instant. */
 const at = (date: string, hhmm: string) => new Date(`${date}T${hhmm}:00+07:00`).toISOString();
@@ -623,19 +554,17 @@ const sundayMai: Appointment[] = (
   appointment(`may-a-sun-${i + 1}`, `may-c-${key}`, sunday(time), 'confirmed', [
     {
       variantId: 'may-wash-std',
-      subjectId: `may-s-${key}`,
       resourceIds: ['may-mai', 'may-wash-1'],
     },
     {
       variantId: 'may-cut-long',
-      subjectId: `may-s-${key}`,
       resourceIds: ['may-mai', 'may-chair-1'],
     },
   ]),
 );
 sundayMai.push(
   appointment('may-a-sun-8', 'may-c-ngoc', sunday('19:30'), 'confirmed', [
-    { variantId: 'may-wash-std', subjectId: 'may-s-ngoc', resourceIds: ['may-mai', 'may-wash-1'] },
+    { variantId: 'may-wash-std', resourceIds: ['may-mai', 'may-wash-1'] },
   ]),
 );
 
@@ -650,17 +579,14 @@ const handwritten: Appointment[] = [
     [
       {
         variantId: 'may-wash-std',
-        subjectId: 'may-s-trang',
         resourceIds: ['may-mai', 'may-wash-1'],
       },
       {
         variantId: 'may-cut-short',
-        subjectId: 'may-s-trang',
         resourceIds: ['may-mai', 'may-chair-1'],
       },
       {
         variantId: 'may-dye-short',
-        subjectId: 'may-s-trang',
         resourceIds: ['may-mai', 'may-chair-1', 'may-wash-1'],
       },
     ],
@@ -675,7 +601,6 @@ const handwritten: Appointment[] = [
     [
       {
         variantId: 'may-dye-long',
-        subjectId: 'may-s-phuongthao',
         resourceIds: ['may-hung', 'may-chair-2', 'may-wash-1'],
       },
     ],
@@ -705,7 +630,7 @@ const week = generateWeek({
   resources,
   staff: staffList,
   staffTypeId: 'may-rt-stylist',
-  subjects: weekSubjects,
+  customers: weekCustomers,
   timeOff: staffTimeOff,
   shifts,
   build: appointment,
@@ -723,7 +648,7 @@ const longRun = {
   resources,
   staff: staffList,
   staffTypeId: 'may-rt-stylist',
-  subjects: servedSubjects,
+  customers: generatedCustomers,
   timeOff: staffTimeOff,
   shifts,
   build: appointment,
@@ -743,10 +668,10 @@ const history = generateWeek({
 const ahead: Appointment[] = [
   // Tuesday 10/11, Lan off: four appointments to deal with. Hùng is busy 17:00–18:00.
   appointment('may-a-hang', 'may-c-hang', at('2026-11-10', '12:00'), 'confirmed', [
-    { variantId: 'may-cut-long', subjectId: 'may-s-hang', resourceIds: ['may-lan', 'may-chair-2'] },
+    { variantId: 'may-cut-long', resourceIds: ['may-lan', 'may-chair-2'] },
   ]),
   appointment('may-a-kha', 'may-c-kha', at('2026-11-10', '13:00'), 'confirmed', [
-    { variantId: 'may-cut-short', subjectId: 'may-s-kha', resourceIds: ['may-lan', 'may-chair-3'] },
+    { variantId: 'may-cut-short', resourceIds: ['may-lan', 'may-chair-3'] },
   ]),
   appointment(
     'may-a-quyen-dye',
@@ -756,7 +681,6 @@ const ahead: Appointment[] = [
     [
       {
         variantId: 'may-dye-short',
-        subjectId: 'may-s-quyen',
         resourceIds: ['may-lan', 'may-chair-2', 'may-wash-1'],
         staffChoice: 'chosen',
       },
@@ -764,33 +688,31 @@ const ahead: Appointment[] = [
     { depositVnd: 100_000n },
   ),
   appointment('may-a-lam2', 'may-c-lam', at('2026-11-10', '17:30'), 'confirmed', [
-    { variantId: 'may-wash-std', subjectId: 'may-s-lam', resourceIds: ['may-lan', 'may-wash-1'] },
+    { variantId: 'may-wash-std', resourceIds: ['may-lan', 'may-wash-1'] },
   ]),
   // Mai is busier than Hùng that day, so Hùng is the one BR-57 would pick for Anh Kha.
   appointment('may-a-son-tue', 'may-c-son', at('2026-11-10', '10:00'), 'confirmed', [
-    { variantId: 'may-cut-long', subjectId: 'may-s-son', resourceIds: ['may-mai', 'may-chair-1'] },
+    { variantId: 'may-cut-long', resourceIds: ['may-mai', 'may-chair-1'] },
   ]),
   appointment('may-a-tam-tue', 'may-c-tam', at('2026-11-10', '16:00'), 'confirmed', [
-    { variantId: 'may-cut-short', subjectId: 'may-s-tam', resourceIds: ['may-mai', 'may-chair-3'] },
+    { variantId: 'may-cut-short', resourceIds: ['may-mai', 'may-chair-3'] },
   ]),
   appointment('may-a-hanh', 'may-c-hanh', at('2026-11-10', '17:00'), 'confirmed', [
     {
       variantId: 'may-cut-long',
-      subjectId: 'may-s-hanh',
       resourceIds: ['may-hung', 'may-chair-1'],
     },
   ]),
   // Friday 13/11: Hùng's two appointments after 15:00, for cutting his shift short.
   appointment('may-a-nhi-fri', 'may-c-nhi', at('2026-11-13', '10:00'), 'confirmed', [
-    { variantId: 'may-cut-long', subjectId: 'may-s-nhi', resourceIds: ['may-mai', 'may-chair-1'] },
+    { variantId: 'may-cut-long', resourceIds: ['may-mai', 'may-chair-1'] },
   ]),
   appointment('may-a-son-fri', 'may-c-son', at('2026-11-13', '13:00'), 'confirmed', [
-    { variantId: 'may-wash-std', subjectId: 'may-s-son', resourceIds: ['may-lan', 'may-wash-1'] },
+    { variantId: 'may-wash-std', resourceIds: ['may-lan', 'may-wash-1'] },
   ]),
   appointment('may-a-kha-fri', 'may-c-kha', at('2026-11-13', '16:00'), 'confirmed', [
     {
       variantId: 'may-cut-short',
-      subjectId: 'may-s-kha',
       resourceIds: ['may-hung', 'may-chair-1'],
     },
   ]),
@@ -802,7 +724,6 @@ const ahead: Appointment[] = [
     [
       {
         variantId: 'may-dye-short',
-        subjectId: 'may-s-hang',
         resourceIds: ['may-hung', 'may-chair-2', 'may-wash-1'],
         staffChoice: 'chosen',
       },
@@ -811,7 +732,7 @@ const ahead: Appointment[] = [
   ),
   // Saturday 14/11: Hùng off 14:00–17:00, two appointments inside.
   appointment('may-a-tam-sat', 'may-c-tam', at('2026-11-14', '14:30'), 'confirmed', [
-    { variantId: 'may-cut-long', subjectId: 'may-s-tam', resourceIds: ['may-hung', 'may-chair-1'] },
+    { variantId: 'may-cut-long', resourceIds: ['may-hung', 'may-chair-1'] },
   ]),
   appointment(
     'may-a-long-sat',
@@ -821,7 +742,6 @@ const ahead: Appointment[] = [
     [
       {
         variantId: 'may-dye-short',
-        subjectId: 'may-s-long',
         resourceIds: ['may-hung', 'may-chair-2', 'may-wash-1'],
         staffChoice: 'chosen',
       },
@@ -832,7 +752,6 @@ const ahead: Appointment[] = [
   appointment('may-a-quyen-upcoming', 'may-c-quyen', at('2026-11-21', '09:00'), 'confirmed', [
     {
       variantId: 'may-cut-short',
-      subjectId: 'may-s-quyen',
       resourceIds: ['may-mai', 'may-chair-1'],
       staffChoice: 'any',
     },
@@ -848,7 +767,6 @@ const quyenHistory: Appointment[] = [
     [
       {
         variantId: 'may-cut-short',
-        subjectId: 'may-s-quyen',
         resourceIds: ['may-mai', 'may-chair-1'],
         staffChoice: 'chosen',
       },
@@ -858,7 +776,6 @@ const quyenHistory: Appointment[] = [
   appointment('may-a-quyen-cancelled', 'may-c-quyen', at('2026-09-12', '16:00'), 'cancelled', [
     {
       variantId: 'may-wash-std',
-      subjectId: 'may-s-quyen',
       resourceIds: ['may-lan', 'may-wash-1'],
       staffChoice: 'chosen',
     },
@@ -922,7 +839,6 @@ export const salonTocMay: TenantFixture = {
   staffSeesCustomerPhone: false,
   services,
   customers: withVisitCounts(everyone, appointments),
-  servedSubjects: allSubjects,
   appointments,
   policies: hairSalonTemplate.defaultPolicies,
   packageCatalog: [

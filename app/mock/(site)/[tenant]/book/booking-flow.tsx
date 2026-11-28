@@ -16,7 +16,6 @@ import { PhoneField } from '@/components/sapio/phone-field';
 import { QuantityInput } from '@/components/sapio/quantity-input';
 import { SegmentedTabs } from '@/components/sapio/segmented';
 import { ServiceCart } from '@/components/sapio/service-cart';
-import { SubjectFields } from '@/components/sapio/subject-fields';
 import { ServiceVariantList } from '@/components/sapio/service-variant-list';
 import { SlotGrid } from '@/components/sapio/slot-grid';
 import {
@@ -34,7 +33,6 @@ import {
   type BookingState,
   type ChainPick,
   type Person,
-  type SubjectDraft as Draft,
 } from '@/components/mock/booking-draft';
 import { useCustomerSession } from '@/components/mock/customer-session';
 import { downloadIcs } from '@/components/mock/download-ics';
@@ -48,22 +46,10 @@ import { slotKey, type BookingSlot } from '@/mock/booking';
 import { bookingWindow, selfChangeBlock } from '@/mock/policy';
 import { termsOfAppointment } from '@/mock/terms';
 import { heldItems, modeOf, movedAppointment, openQuestion } from '@/mock/reschedule';
-import { matchesAttributes, priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
-import {
-  type LeaveHandling,
-  type ServedSubject,
-  type Service,
-  type ServiceVariant,
-} from '@/mock/fixtures';
+import { priceFor, priceRange, visibleMinutes } from '@/mock/occupation';
+import { type LeaveHandling, type Service, type ServiceVariant } from '@/mock/fixtures';
 import { formatMinutes, formatPhone, formatVnd, normalizePhone } from '@/mock/format';
 import { openingHours } from '@/mock/hours';
-import {
-  askedFields,
-  checkSubject,
-  describeSubject,
-  priceFactors,
-  type SubjectValues,
-} from '@/mock/subject-schema';
 import {
   addDays,
   addMinutes,
@@ -74,7 +60,7 @@ import {
   weekdayShort,
 } from '@/mock/time';
 
-type Step = 'service' | 'subject' | 'datetime' | 'info' | 'confirm';
+type Step = 'service' | 'datetime' | 'info' | 'confirm';
 type Part = 'morning' | 'afternoon' | 'evening';
 
 const HOLD_MINUTES = 10;
@@ -82,7 +68,7 @@ const HOLD_MINUTES = 10;
 const MAX_CHAIN = 4;
 /** `staffChoice` when the services of a chain have different people. */
 const MIXED = 'mixed';
-/** BR-19: at most four subjects in one booking. */
+/** BR-19: at most four people in one booking. */
 const MAX_PARTY = 4;
 /** Staggered suggestions shown per part of the day (BR-19). */
 const STAGGERED_PER_PART = 3;
@@ -94,15 +80,11 @@ const PARTS: { value: Part; label: string; from: number; to: number }[] = [
 ];
 
 const duration = visibleMinutes;
-const matches = (v: ServiceVariant, subject: ServedSubject) =>
-  matchesAttributes(v.match, subject.attributes);
 interface ChainItem {
-  /** Service id in a chain; subject or person id in a group. */
+  /** Service id in a chain; person id in a group. */
   key: string;
-  /** Name of the subject or person in a group. */
+  /** Name of the person in a group. */
   label?: string;
-  /** The pet or other subject the item is for, when the industry asks for one. */
-  subjectId?: string;
   service: Service;
   variant: ServiceVariant;
 }
@@ -136,8 +118,7 @@ export function BookingFlow({
   const { tenant, services, staff, resources } = fixture;
   const branch = fixture.branches[0]!;
   const toast = useToast();
-  const { vocabulary, subjectSchema } = fixture.template;
-  const staffNoun = vocabulary.staff;
+  const staffNoun = fixture.template.vocabulary.staff;
   /** BR-56: who is asked decides the price; people who can do the service, online only (BR-14). */
   const pricedStaff = (forService: string) =>
     staff
@@ -145,16 +126,12 @@ export function BookingFlow({
       .map((s) => ({ resourceId: s.resourceId, level: s.level }));
   const priceOf = (v: ServiceVariant, forService: string, who: string = ANY_STAFF) =>
     priceFor(v, who, pricedStaff(forService));
-  const subjectNoun = vocabulary.subject ?? '';
-  const asksSubject = vocabulary.subject !== null;
   const router = useRouter();
   const query = useSearchParams();
   const store = useScheduleStore();
   const session = useCustomerSession();
   const { draft: held, setDraft, seed } = useBookingDraft();
   const { commit, release } = useBookingCommit(tenantSlug);
-  // A session shows the subjects saved at this shop (BR-17); a new customer has none yet.
-  const saved = newCustomer ? [] : session.subjects;
   // `doi`: changing the time of a booking the customer has (BR-08); `hoi`: as the answer to a
   // question of the shop, which does not count as a change (BR-32, BR-33).
   const target =
@@ -165,9 +142,7 @@ export function BookingFlow({
   const answering = rescheduling && query.get('hoi') === '1';
   const steps: Step[] = rescheduling
     ? ['datetime', 'confirm']
-    : asksSubject
-      ? ['subject', 'datetime', 'info', 'confirm']
-      : ['service', 'datetime', 'info', 'confirm'];
+    : ['service', 'datetime', 'info', 'confirm'];
 
   // Coming back from the payment page (`giu=1`) picks the choices up where they were left;
   // "Đặt lại" (`lai=1`) starts from the choices of a past booking.
@@ -178,8 +153,7 @@ export function BookingFlow({
     query.get('lai') === '1' && seed?.tenantSlug === tenantSlug ? seed.state : null,
   );
   const saved0 = resume?.state ?? seeded;
-  const heldNamed = asksSubject || (target !== null && modeOf(target) === 'group');
-  const targetItems = target ? heldItems(fixture, target, store.servedSubjects, heldNamed) : [];
+  const targetItems = target ? heldItems(fixture, target, modeOf(target) === 'group') : [];
   const now = useMockNow(resume?.now);
   const holdAlive = Boolean(
     saved0?.holdExpiresAt && Date.parse(saved0.holdExpiresAt) > Date.parse(resume?.now ?? MOCK_NOW),
@@ -188,10 +162,10 @@ export function BookingFlow({
   const [stepParam, setStepParam] = useQueryState('step', steps[0]!);
   const preset = query.get('service');
   const presetService = services.find((s) => s.id === preset);
-  // Industries without a served subject build a chain of up to four services (BR-18).
+  // A chain of up to four services, one after the other (BR-18).
   const [picks, setPicks] = useState<ChainPick[]>(
     saved0?.picks ??
-      (!asksSubject && presetService && presetService.variants[0]
+      (presetService && presetService.variants[0]
         ? [{ serviceId: presetService.id, variantId: presetService.variants[0].id }]
         : []),
   );
@@ -199,19 +173,7 @@ export function BookingFlow({
     saved0?.staffByKey ?? Object.fromEntries(targetItems.map((it) => [it.key, it.staffChoice])),
   );
   const [perServiceOpen, setPerServiceOpen] = useState(false);
-  // Served subjects: a new customer starts with one blank form; a returning one picks saved ones.
-  const [drafts, setDrafts] = useState<Draft[]>(
-    saved0?.drafts ??
-      (asksSubject && newCustomer ? [{ id: 'new-1', name: '', values: {}, touched: [] }] : []),
-  );
-  const [chosenIds, setChosenIds] = useState<string[]>(
-    saved0?.chosenIds ?? (asksSubject && newCustomer ? ['new-1'] : []),
-  );
-  const [serviceFor, setServiceFor] = useState<Record<string, string>>(saved0?.serviceFor ?? {});
-  // One subject can have up to four services one after the other (BR-18); `null` until the
-  // customer picks, when the first service that fits is taken.
-  const [petChain, setPetChain] = useState<string[] | null>(saved0?.petChain ?? null);
-  // Without a served subject, "Đặt cho nhiều người" turns the booking into a group (BR-19).
+  // "Đặt cho nhiều người" turns the booking into a group (BR-19).
   const [people, setPeople] = useState<Person[] | null>(saved0?.people ?? null);
   const [changing, setChanging] = useState<string[]>([]);
   const [date, setDate] = useState(
@@ -236,42 +198,6 @@ export function BookingFlow({
   const [otp, setOtp] = useState('');
   const [confirmed, setConfirmed] = useState(false);
 
-  const checks = Object.fromEntries(
-    drafts.map((d) => [d.id, checkSubject(subjectSchema, subjectNoun, d.name, d.values)]),
-  );
-  const draftSubject = (d: Draft): ServedSubject | null =>
-    Object.keys(checks[d.id]!.errors).length === 0
-      ? {
-          id: d.id,
-          tenantId: tenant.id,
-          customerId: '',
-          kind: 'other',
-          name: d.name.trim(),
-          attributes: checks[d.id]!.attributes,
-        }
-      : null;
-  const subjectOf = (id: string) =>
-    saved.find((x) => x.id === id) ??
-    drafts.filter((d) => d.id === id).map(draftSubject)[0] ??
-    null;
-  /** BR-13: the variant of a service follows the attributes of the subject. */
-  const servicesFor = (subject: ServedSubject) =>
-    services.filter((sv) => sv.variants.some((v) => matches(v, subject)));
-  const serviceOf = (subject: ServedSubject, id: string) => {
-    const matching = servicesFor(subject);
-    return (
-      matching.find((sv) => sv.id === serviceFor[id]) ??
-      matching.find((sv) => sv.id === presetService?.id) ??
-      matching[0] ??
-      null
-    );
-  };
-  const onlyId = asksSubject && chosenIds.length === 1 ? chosenIds[0]! : null;
-  const onlySubject = onlyId ? subjectOf(onlyId) : null;
-  const petChainIds =
-    onlySubject && onlyId
-      ? (petChain ?? [serviceOf(onlySubject, onlyId)?.id].filter((x): x is string => Boolean(x)))
-      : [];
   const rawItems: ChainItem[] = target
     ? targetItems.map((it) => ({
         key: it.key,
@@ -279,68 +205,39 @@ export function BookingFlow({
         service: it.service,
         variant: it.variant,
       }))
-    : onlyId && onlySubject
-      ? petChainIds.flatMap((serviceId) => {
-          const sv = servicesFor(onlySubject).find((x) => x.id === serviceId);
-          const v = sv?.variants.find((x) => matches(x, onlySubject));
-          return sv && v
-            ? [{ key: sv.id, label: onlySubject.name, subjectId: onlyId, service: sv, variant: v }]
+    : people
+      ? people.flatMap((person, i) => {
+          const sv = services.find((x) => x.id === person.pick?.serviceId);
+          const v = sv?.variants.find((x) => x.id === person.pick?.variantId);
+          return sv && v && (i === 0 || person.name.trim())
+            ? [
+                {
+                  key: person.id,
+                  label: i === 0 ? 'Bạn' : person.name.trim(),
+                  service: sv,
+                  variant: v,
+                },
+              ]
             : [];
         })
-      : asksSubject
-        ? chosenIds.flatMap((id) => {
-            const subject = subjectOf(id);
-            const sv = subject && serviceOf(subject, id);
-            const v = subject && sv ? sv.variants.find((x) => matches(x, subject)) : undefined;
-            return subject && sv && v
-              ? [{ key: id, label: subject.name, subjectId: id, service: sv, variant: v }]
-              : [];
-          })
-        : people
-          ? people.flatMap((person, i) => {
-              const sv = services.find((x) => x.id === person.pick?.serviceId);
-              const v = sv?.variants.find((x) => x.id === person.pick?.variantId);
-              return sv && v && (i === 0 || person.name.trim())
-                ? [
-                    {
-                      key: person.id,
-                      label: i === 0 ? 'Bạn' : person.name.trim(),
-                      service: sv,
-                      variant: v,
-                    },
-                  ]
-                : [];
-            })
-          : picks.flatMap((pick) => {
-              const sv = services.find((x) => x.id === pick.serviceId);
-              const v = sv?.variants.find((x) => x.id === pick.variantId);
-              return sv && v ? [{ key: sv.id, service: sv, variant: v }] : [];
-            });
+      : picks.flatMap((pick) => {
+          const sv = services.find((x) => x.id === pick.serviceId);
+          const v = sv?.variants.find((x) => x.id === pick.variantId);
+          return sv && v ? [{ key: sv.id, service: sv, variant: v }] : [];
+        });
   const itemSig = rawItems
     .map((it) => `${it.key}:${it.label}:${it.service.id}:${it.variant.id}`)
     .join('|');
   // eslint-disable-next-line react-hooks/exhaustive-deps -- `itemSig` stands for `rawItems`
   const items = useMemo(() => rawItems, [itemSig]);
-  const wanted = target
-    ? targetItems.length
-    : onlyId
-      ? petChainIds.length
-      : asksSubject
-        ? chosenIds.length
-        : people
-          ? people.length
-          : picks.length;
-  /** Every subject or person asked for has a service. */
+  const wanted = target ? targetItems.length : people ? people.length : picks.length;
+  /** Every person asked for has a service. */
   const complete = items.length > 0 && items.length === wanted;
   const variant = items[0]?.variant ?? null;
-  // BR-18: one subject, services one after the other; BR-19: several subjects, one service each.
-  const group = target
-    ? modeOf(target) === 'group'
-    : (asksSubject ? chosenIds.length > 1 : people !== null) && items.length > 1;
-  const chain = target
-    ? modeOf(target) === 'chain'
-    : (asksSubject ? chosenIds.length === 1 : people === null) && items.length > 1;
-  const unit = vocabulary.subject ?? 'người';
+  // BR-18: one person, services one after the other; BR-19: several people, one service each.
+  const group = target ? modeOf(target) === 'group' : people !== null && items.length > 1;
+  const chain = target ? modeOf(target) === 'chain' : people === null && items.length > 1;
+  const unit = 'người';
   const choices = items.map((it) => staffByKey[it.key] ?? ANY_STAFF);
   const choiceKey = choices.join('|');
   /** One value when everyone asked for is the same, else `MIXED`. */
@@ -348,7 +245,6 @@ export function BookingFlow({
   // `?step=` is the source; a link to a step whose choices are missing falls back to the first step.
   const reachable: Record<Step, boolean> = {
     service: true,
-    subject: true,
     datetime: complete,
     info: Boolean(slot),
     confirm: Boolean(slot),
@@ -522,49 +418,6 @@ export function BookingFlow({
     });
     reset();
   }
-  function setPetServices(next: string[]) {
-    setPetChain(next);
-    reset();
-  }
-  function togglePetService(serviceId: string) {
-    setPetServices(
-      petChainIds.includes(serviceId)
-        ? petChainIds.filter((x) => x !== serviceId)
-        : petChainIds.length >= MAX_CHAIN
-          ? petChainIds
-          : [...petChainIds, serviceId],
-    );
-  }
-  function movePetService(serviceId: string, by: -1 | 1) {
-    const at = petChainIds.indexOf(serviceId);
-    const to = at + by;
-    if (at < 0 || to < 0 || to >= petChainIds.length) return;
-    const next = [...petChainIds];
-    [next[at], next[to]] = [next[to]!, next[at]!];
-    setPetServices(next);
-  }
-  function togglePet(id: string) {
-    setChosenIds((cur) =>
-      cur.includes(id) ? cur.filter((x) => x !== id) : cur.length >= MAX_PARTY ? cur : [...cur, id],
-    );
-    reset();
-  }
-  function addDraft() {
-    if (chosenIds.length >= MAX_PARTY) return;
-    const id = `new-${drafts.reduce((m, d) => Math.max(m, Number(d.id.slice(4))), 0) + 1}`;
-    setDrafts((cur) => [...cur, { id, name: '', values: {}, touched: [] }]);
-    setChosenIds((cur) => [...cur, id]);
-    reset();
-  }
-  function removeDraft(id: string) {
-    setDrafts((cur) => cur.filter((d) => d.id !== id));
-    setChosenIds((cur) => cur.filter((x) => x !== id));
-    reset();
-  }
-  function patchDraft(id: string, patch: (d: Draft) => Draft) {
-    setDrafts((cur) => cur.map((d) => (d.id === id ? patch(d) : d)));
-    reset();
-  }
   function startGroup() {
     const first = picks[0] ?? null;
     setPeople([
@@ -664,10 +517,6 @@ export function BookingFlow({
       state: {
         picks,
         people,
-        chosenIds,
-        drafts,
-        serviceFor,
-        petChain,
         staffByKey,
         date,
         name,
@@ -676,19 +525,15 @@ export function BookingFlow({
         slot,
         holdExpiresAt,
       } satisfies BookingState,
-      refs: items.map((it, i) => {
-        const fresh = drafts.find((d) => d.id === (it.subjectId ?? it.key));
-        const made = fresh ? draftSubject(fresh) : null;
-        return {
-          key: it.key,
-          ...(it.subjectId ? { subjectId: it.subjectId } : {}),
-          ...(it.label ? { label: it.label } : {}),
-          serviceId: it.service.id,
-          variantId: it.variant.id,
-          staffChoice: choices[i] ?? ANY_STAFF,
-          ...(made ? { newSubject: made } : {}),
-        };
-      }),
+      refs: items.map((it, i) => ({
+        key: it.key,
+        ...(it.label ? { label: it.label } : {}),
+        // BR-19: the first person is the one who books, the others are named companions.
+        ...(group && i > 0 && it.label ? { guestName: it.label } : {}),
+        serviceId: it.service.id,
+        variantId: it.variant.id,
+        staffChoice: choices[i] ?? ANY_STAFF,
+      })),
       mode: group ? 'group' : chain ? 'chain' : 'single',
       slot,
       holdExpiresAt,
@@ -724,7 +569,7 @@ export function BookingFlow({
   const infoReady =
     name.trim().length > 0 && Boolean(phoneE164) && isEmail(email) && /^\d{6}$/.test(otp);
 
-  /** "Mochi 10:00 · Lucky 10:30", in the order they start. */
+  /** "Bạn 10:00 · Hà 10:30", in the order they start. */
   const comboLabel = (x: BookingSlot) =>
     x.items
       .map((it, i) => ({ label: items[i]?.label ?? '', at: it.startAt }))
@@ -812,17 +657,14 @@ export function BookingFlow({
     </div>
   );
 
-  const hold = holdExpiresAt &&
-    slot &&
-    !confirmed &&
-    (step === 'subject' || step === 'info' || step === 'confirm') && (
-      <HoldBanner
-        expiresAt={holdExpiresAt}
-        now={now}
-        note={`${slotLine} · ${peopleNames}`}
-        onExpire={releaseHold}
-      />
-    );
+  const hold = holdExpiresAt && slot && !confirmed && (step === 'info' || step === 'confirm') && (
+    <HoldBanner
+      expiresAt={holdExpiresAt}
+      now={now}
+      note={`${slotLine} · ${peopleNames}`}
+      onExpire={releaseHold}
+    />
+  );
 
   const assistantNote = resume?.source === 'assistant' && (
     <p className="body-sm m-0 text-(--ink-muted)">Trợ lý đã điền sẵn dịch vụ, giờ và thợ.</p>
@@ -847,7 +689,7 @@ export function BookingFlow({
       Chọn {staffNoun.toLowerCase()} riêng cho từng dịch vụ
     </button>
   );
-  /** BR-19: each subject has its own person; the row opens the same sheet as a chain. */
+  /** BR-19: each person has their own technician; the row opens the same sheet as a chain. */
   const groupStaffCard = group && (
     <div className="flex items-center justify-between gap-(--space-3) rounded-(--radius-lg) bg-(--surface-raised) px-(--space-4) py-(--space-3) shadow-[0_0_0_1px_var(--line)]">
       <span className="flex min-w-0 flex-col">
@@ -1079,194 +921,6 @@ export function BookingFlow({
       label: 'Tiếp tục',
       disabled: items.length === 0,
       onClick: () => go(steps[1]!),
-    };
-  }
-
-  if (step === 'subject') {
-    const factors = priceFactors(subjectSchema, services[0]!);
-    title = vocabulary.subjectQuestion ?? '';
-    body = (
-      <div className="sp-stack">
-        {hold}
-        {assistantNote}
-        <p className="body-sm m-0 text-(--ink-muted)">
-          Chọn nhiều {subjectNoun} để đặt chung một lần, tối đa {MAX_PARTY}.
-        </p>
-        <div className="flex flex-col gap-(--space-2)" role="group" aria-label={subjectNoun}>
-          {saved.map((sv) => {
-            const checked = chosenIds.includes(sv.id);
-            return (
-              <label
-                key={sv.id}
-                className="sp-variant"
-                style={{ gridTemplateColumns: 'auto auto 1fr' }}
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  disabled={!checked && chosenIds.length >= MAX_PARTY}
-                  onChange={() => togglePet(sv.id)}
-                />
-                <span className="sp-avatar sp-avatar--sm" aria-hidden="true">
-                  {sv.name.charAt(0)}
-                </span>
-                <span className="flex flex-col">
-                  <span className="sp-variant__name">{sv.name}</span>
-                  <span className="sp-variant__meta">{describeSubject(subjectSchema, sv)}</span>
-                </span>
-              </label>
-            );
-          })}
-          {drafts.map((d) => {
-            const made = draftSubject(d);
-            return (
-              <div
-                key={d.id}
-                className="sp-stack rounded-(--radius-lg) bg-(--surface-raised) p-(--space-4) shadow-[0_0_0_1px_var(--line)]"
-              >
-                <SubjectFields
-                  idPrefix={`subject-${d.id}`}
-                  schema={subjectSchema}
-                  noun={subjectNoun}
-                  nameExample={vocabulary.subjectExample}
-                  name={d.name}
-                  values={d.values}
-                  onName={(v) => patchDraft(d.id, (x) => ({ ...x, name: v }))}
-                  onValue={(k, v) =>
-                    patchDraft(d.id, (x) => ({ ...x, values: { ...x.values, [k]: v } }))
-                  }
-                  error={(k) => (d.touched.includes(k) ? checks[d.id]!.errors[k] : undefined)}
-                  touch={(k) =>
-                    setDrafts((cur) =>
-                      cur.map((x) =>
-                        x.id === d.id && !x.touched.includes(k)
-                          ? { ...x, touched: [...x.touched, k] }
-                          : x,
-                      ),
-                    )
-                  }
-                />
-                <p className="body-sm m-0 text-(--ink-muted)" aria-live="polite">
-                  {made
-                    ? servicesFor(made).length > 0
-                      ? `Giá của ${made.name} hiện ở mục dịch vụ bên dưới.`
-                      : `Chưa có dịch vụ nào nhận ${subjectNoun} này.`
-                    : `Giá theo ${factors}, hiện ngay khi nhập.`}
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="self-start"
-                  onClick={() => removeDraft(d.id)}
-                >
-                  Bỏ {subjectNoun} này
-                </Button>
-              </div>
-            );
-          })}
-          <Button
-            variant="ghost"
-            className="h-12 justify-start"
-            disabled={chosenIds.length >= MAX_PARTY}
-            onClick={addDraft}
-          >
-            {vocabulary.addSubject}
-          </Button>
-        </div>
-        {onlyId && onlySubject && (
-          <section aria-labelledby="per-subject" className="sp-stack">
-            <h2 id="per-subject" className="heading m-0">
-              Dịch vụ cho {onlySubject.name}
-            </h2>
-            <p className="body-sm m-0 text-(--ink-muted)">
-              Chọn được nhiều dịch vụ, làm lần lượt trong một lần đến, tối đa {MAX_CHAIN}.
-            </p>
-            {petChainIds.length > 0 && (
-              <ServiceCart
-                max={MAX_CHAIN}
-                items={items.map((it, i) => ({
-                  id: it.service.id,
-                  name: it.service.name,
-                  detail: `${it.variant.name} · ${formatMinutes(duration(it.variant))} · ${formatVnd(priceOf(it.variant, it.service.id, choices[i]))}`,
-                }))}
-                onMove={movePetService}
-                onRemove={(serviceId) => togglePetService(serviceId)}
-                note={
-                  chain
-                    ? `Dịch vụ sau bắt đầu ngay khi dịch vụ trước xong. Tổng ${formatMinutes(totalMinutes)}.`
-                    : ''
-                }
-              />
-            )}
-            <ServiceVariantList
-              multiple
-              name={onlySubject.name}
-              selected={petChainIds}
-              onSelect={togglePetService}
-              variants={servicesFor(onlySubject).map((sv) => {
-                const v = sv.variants.find((x) => matches(x, onlySubject))!;
-                return {
-                  id: sv.id,
-                  name: sv.name,
-                  meta: `${v.name} · ${formatMinutes(duration(v))}`,
-                  price: formatVnd(priceOf(v, sv.id)),
-                  disabled: !petChainIds.includes(sv.id) && petChainIds.length >= MAX_CHAIN,
-                };
-              })}
-            />
-            <p className="body-sm m-0 text-(--ink-muted)">
-              Giá theo {factors} của {onlySubject.name}. Đặt cho từ hai {subjectNoun} trở lên thì
-              mỗi {subjectNoun} một dịch vụ.
-            </p>
-          </section>
-        )}
-        {chosenIds.length > 1 && (
-          <section aria-labelledby="per-subject" className="sp-stack">
-            <h2 id="per-subject" className="heading m-0">
-              Dịch vụ cho từng {subjectNoun}
-            </h2>
-            {chosenIds.map((id) => {
-              const subject = subjectOf(id);
-              if (!subject) return null;
-              const current = serviceOf(subject, id);
-              return (
-                <ServiceVariantList
-                  key={id}
-                  groupName={`service-${id}`}
-                  name={subject.name}
-                  selected={current?.id ?? null}
-                  onSelect={(serviceId) => {
-                    setServiceFor((c) => ({ ...c, [id]: serviceId }));
-                    reset();
-                  }}
-                  variants={servicesFor(subject).map((sv) => {
-                    const v = sv.variants.find((x) => matches(x, subject))!;
-                    return {
-                      id: sv.id,
-                      name: sv.name,
-                      meta: `${v.name} · ${formatMinutes(duration(v))}`,
-                      price: formatVnd(priceOf(v, sv.id)),
-                    };
-                  })}
-                />
-              );
-            })}
-            <p className="body-sm m-0 text-(--ink-muted)">
-              Giá theo {factors} của từng {subjectNoun}. Mỗi {subjectNoun} một dịch vụ trong lần đặt
-              này.
-            </p>
-          </section>
-        )}
-      </div>
-    );
-    cta = {
-      title: complete ? formatVnd(anyPrice) : `Chưa chọn ${subjectNoun}`,
-      subtitle: complete
-        ? `${[...new Set(items.map((it) => it.label))].join(', ')} · ${[...new Set(items.map((it) => it.service.name))].join(', ')}`
-        : undefined,
-      label: 'Tiếp tục',
-      disabled: !complete,
-      onClick: () => go('datetime'),
     };
   }
 

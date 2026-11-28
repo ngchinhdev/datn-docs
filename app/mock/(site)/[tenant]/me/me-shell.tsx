@@ -9,19 +9,16 @@ import { cn } from '@/lib/utils';
 import { fixtureBySlug } from '@/mock/selection';
 
 /** Pages of the account that exist; the tab bar lists these. */
-const BUILT = new Set(['', '/subjects', '/wallet', '/profile']);
-
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const BUILT = new Set(['', '/wallet', '/profile']);
 
 /** The account of one shop: header, the tab bar, and a way to the login when there is no session. */
 export function MeShell({ tenantSlug, children }: { tenantSlug: string; children: ReactNode }) {
   const fixture = fixtureBySlug(tenantSlug)!;
-  const { tenant, template } = fixture;
+  const { tenant } = fixture;
   const router = useRouter();
   const pathname = usePathname();
   const { isLoggedIn, hydrated } = useCustomerSession();
   const base = `/mock/${tenantSlug}/me`;
-  const subject = template.vocabulary.subject;
 
   // Sent to the login only when the page opens without a session: a page that logs out goes
   // wherever it likes.
@@ -34,7 +31,6 @@ export function MeShell({ tenantSlug, children }: { tenantSlug: string; children
 
   const tabs = [
     { path: '', label: 'Lịch hẹn' },
-    ...(subject ? [{ path: '/subjects', label: `${capitalize(subject)} của tôi` }] : []),
     { path: '/wallet', label: 'Gói và ví' },
     { path: '/profile', label: 'Thông tin' },
   ].filter((t) => BUILT.has(t.path));

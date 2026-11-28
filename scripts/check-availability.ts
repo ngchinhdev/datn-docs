@@ -675,7 +675,7 @@ report(
   );
 }
 
-// ---- Group of several subjects (BR-19) ----
+// ---- Group of several people (BR-19) ----
 
 const groupInput = (
   resources: CoreResource[],
@@ -849,7 +849,6 @@ report(
     id: 'other',
     customerId: null,
     refs,
-    subjectIds: [''],
     slot: first,
     status: 'confirmed',
   });
@@ -885,7 +884,6 @@ report(
     id: 'mine',
     customerId: 'c',
     refs,
-    subjectIds: ['s'],
     slot: first,
     status: 'confirmed',
     depositVnd: 100_000n,
@@ -907,14 +905,12 @@ report(
   const refs: BookingItemRef[] = [
     {
       key: 'sen-massage',
-      subjectId: 'sen-s-linh',
       serviceId: 'sen-massage',
       variantId: 'sen-massage-60',
       staffChoice: ANY_STAFF,
     },
     {
       key: 'sen-facial',
-      subjectId: 'sen-s-linh',
       serviceId: 'sen-facial',
       variantId: 'sen-facial-std',
       staffChoice: ANY_STAFF,
@@ -926,12 +922,10 @@ report(
     'BR-18: Massage 60′ rồi Chăm sóc da mặt, mục sau bắt đầu khi mục trước xong',
     `${slots.length} giờ`,
   );
-  const linh = sen.servedSubjects.find((x) => x.id === 'sen-s-linh')!;
   const same = {
     ...sen.appointments[0]!,
     items: refs.map((r) => ({
       serviceVariantId: r.variantId,
-      servedSubjectId: linh.id,
       staffResourceId: 'sen-thao',
       staffChoice: 'any' as const,
       priceVnd: 0n,
@@ -1007,7 +1001,6 @@ report(
       heldItems(
         fixture,
         fixture.appointments.find((a) => a.id === 'may-a-quyen-upcoming')!,
-        fixture.servedSubjects,
         false,
       ),
     ),
@@ -1094,7 +1087,7 @@ report(
       openQuestion('may-a-hang', fixture.staffTimeOff, []) === null,
     'Lịch 10/11 của Chị Quyên đang chờ trả lời đổi sang Mai; lịch "Bất kỳ ai" thì không có câu hỏi',
   );
-  const items = heldItems(fixture, appt, fixture.servedSubjects, false);
+  const items = heldItems(fixture, appt, false);
   const refs = refsOfItems(items);
   const NOW_Q = '2026-11-07T03:20:00Z';
   const lanOff = bookingSlots(fixture, refs, modeOf(appt), '2026-11-10', NOW_Q, {
@@ -1105,7 +1098,7 @@ report(
     'Đổi giờ lịch đích danh: Lan có đơn nghỉ chờ duyệt ngày 10/11 nên ngày đó không có giờ (BR-11)',
   );
   const next = fixture.appointments.find((a) => a.id === 'may-a-quyen-upcoming')!;
-  const nextRefs = refsOfItems(heldItems(fixture, next, fixture.servedSubjects, false));
+  const nextRefs = refsOfItems(heldItems(fixture, next, false));
   const mine = bookingSlots(fixture, nextRefs, 'single', '2026-11-21', NOW_Q, {
     appointments: fixture.appointments.filter((a) => a.id !== next.id),
   }).main;

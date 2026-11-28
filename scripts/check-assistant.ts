@@ -178,6 +178,15 @@ const sen = spaLaSen;
     'BR-13: Lá Sen "Massage body bao nhiêu tiền?" ra thẻ có hai biến thể 60 và 90 phút',
     lines.map((l) => `${l.name} ${formatVnd(l.priceVnd)}`).join(', ') || last.intent,
   );
+  const asked = chat(sen, ['Massage body còn giờ không?']).last;
+  report(
+    asked.intent === 'ask' &&
+      asked.cards.length === 0 &&
+      asked.suggestions.length === 2 &&
+      /loại nào/.test(asked.text),
+    'BR-13: dịch vụ có hai biến thể, hỏi giờ trống thì hỏi lại khách chọn loại, chưa đưa giờ',
+    asked.text,
+  );
   const single = card(chat(sen, ['Ngâm bùn, xông hơi bao nhiêu?']).last, 'service')?.lines;
   report(
     single?.length === 1 && single[0]?.priceVnd === 450_000n && single[0].minutes === 90,

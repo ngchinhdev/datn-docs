@@ -1,6 +1,6 @@
 import type { Service, ServiceSegment } from './types.ts';
 
-const tenantId = 'sen';
+const tenantId = 'la-sen';
 const tech = 'sen-rt-tech';
 const bed = 'sen-rt-bed';
 const tub = 'sen-rt-tub';
@@ -21,7 +21,6 @@ export const spaServices: Service[] = [
     name: 'Ngâm bùn, xông hơi',
     group: 'Trị liệu',
     description: 'Ngâm bùn khoáng, xông hơi thảo mộc, thoa dưỡng thể.',
-    variantSelection: 'customer',
     bookableOnline: true,
     variants: [
       {
@@ -30,7 +29,6 @@ export const spaServices: Service[] = [
         shortName: 'Ngâm bùn',
         priceVnd: 450_000n,
         depositVnd: 100_000n,
-        match: {},
         segments: [
           {
             startMinute: 0,
@@ -64,7 +62,6 @@ export const spaServices: Service[] = [
     name: 'Massage body',
     group: 'Massage',
     description: 'Massage toàn thân với tinh dầu.',
-    variantSelection: 'customer',
     bookableOnline: true,
     variants: [
       {
@@ -72,7 +69,6 @@ export const spaServices: Service[] = [
         name: '60 phút',
         shortName: 'Massage 60′',
         priceVnd: 350_000n,
-        match: {},
         segments: bedSegments('Massage', 60),
         cleanupMinutes: { [bed]: 5 },
       },
@@ -81,7 +77,6 @@ export const spaServices: Service[] = [
         name: '90 phút',
         shortName: 'Massage 90′',
         priceVnd: 500_000n,
-        match: {},
         segments: bedSegments('Massage', 90),
         cleanupMinutes: { [bed]: 5 },
       },
@@ -94,7 +89,6 @@ export const spaServices: Service[] = [
     name: 'Chăm sóc da mặt',
     group: 'Chăm sóc da',
     description: 'Làm sạch, đắp mặt nạ, massage mặt và dưỡng.',
-    variantSelection: 'customer',
     bookableOnline: true,
     variants: [
       {
@@ -102,7 +96,6 @@ export const spaServices: Service[] = [
         name: 'Tiêu chuẩn',
         shortName: 'Chăm sóc da',
         priceVnd: 400_000n,
-        match: {},
         segments: [
           {
             startMinute: 0,
@@ -136,7 +129,6 @@ export const spaServices: Service[] = [
     name: 'Gội dưỡng sinh',
     group: 'Gội',
     description: 'Gội thảo dược, bấm huyệt đầu và vai gáy.',
-    variantSelection: 'customer',
     bookableOnline: true,
     variants: [
       {
@@ -144,7 +136,6 @@ export const spaServices: Service[] = [
         name: 'Tiêu chuẩn',
         shortName: 'Gội dưỡng sinh',
         priceVnd: 200_000n,
-        match: {},
         segments: bedSegments('Gội, bấm huyệt', 45),
         cleanupMinutes: {},
       },

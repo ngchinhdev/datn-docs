@@ -34,7 +34,6 @@ export function ServicePhone({ ed }: { ed: ServiceEditor }) {
   const { variant, draft, fixture } = ed;
   const [sheetAt, setSheetAt] = useState<number | null>(null);
   const [priceOpen, setPriceOpen] = useState(false);
-  const noun = fixture.template.vocabulary.subject;
   const timeline = timelineOf(variant, fixture.resourceTypes);
   const { segments } = timeline;
   // The label column is 44px on a phone: no room for the second line.
@@ -56,7 +55,7 @@ export function ServicePhone({ ed }: { ed: ServiceEditor }) {
 
       <section className="sp-panel" aria-labelledby="m-tl">
         <h2 className="sp-panel__title" id="m-tl">
-          Thời gian{noun ? '' : ` · ví dụ hẹn ${PREVIEW_START}`}
+          Thời gian · ví dụ hẹn {PREVIEW_START}
         </h2>
         <SegmentTimeline
           mini
@@ -64,7 +63,7 @@ export function ServicePhone({ ed }: { ed: ServiceEditor }) {
           types={types}
           cleanup={variant.cleanupMinutes}
           visible={visibleRange(variant)}
-          {...(noun ? {} : { exampleStart: PREVIEW_START })}
+          exampleStart={PREVIEW_START}
           labelWidth={44}
           label={`Trục thời gian thu nhỏ, biến thể ${variant.name}`}
         />

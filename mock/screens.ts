@@ -149,7 +149,6 @@ const built: Record<string, ScreenLink[]> = {
       href: (slug) => site('/me/appointments/' + customerAppointmentId(slug))(slug),
     },
   ],
-  'MH-19': [{ label: 'Bé của tôi', href: site('/me/subjects') }],
   'MH-20': [{ label: 'Gói và ví', href: site('/me/wallet') }],
   'MH-21': [{ label: 'Thông tin', href: site('/me/profile') }],
   'MH-22': [
@@ -241,18 +240,6 @@ const built: Record<string, ScreenLink[]> = {
     { label: 'Chi tiết Salon Tóc Mây', href: () => '/mock/admin/tenants/may', platform: true },
     { label: 'Nail Hạ Vy (hết hạn)', href: () => '/mock/admin/tenants/havy', platform: true },
     { label: 'Nhật ký nền tảng', href: () => '/mock/admin/audit-log', platform: true },
-  ],
-  'MH-59': [
-    {
-      label: 'Gói cấu hình ngành (sẽ bỏ, D-16)',
-      href: () => '/mock/admin/templates',
-      platform: true,
-    },
-    {
-      label: 'Spa, bản nháp (sẽ bỏ, D-16)',
-      href: () => '/mock/admin/templates/beauty_spa',
-      platform: true,
-    },
   ],
   'MH-60': [{ label: 'Tổng quan nền tảng', href: () => '/mock/admin', platform: true }],
   'MH-63': [{ label: 'Đăng nhập quản trị', href: () => '/mock/admin/login', platform: true }],
@@ -451,16 +438,6 @@ const rows: Row[] = [
     level: 'Vẽ',
     routes: ['/[tenant]/me/appointments/[id]'],
     note: 'Đổi giờ (BR-08: trước X giờ, tối đa N lần), hủy kèm mức hoàn cọc (BR-23); hết hạn tự đổi thì hiện số điện thoại cơ sở',
-  },
-  {
-    code: 'MH-19',
-    title: 'Đối tượng được phục vụ',
-    zone: 'C',
-    roles: ['customer'],
-    wave: 1,
-    level: 'Form',
-    routes: ['/[tenant]/me/subjects'],
-    note: 'Thuộc tính theo schema của ngành (BR-71). Ngành không có đối tượng khác thì không hiện mục này',
   },
   {
     code: 'MH-20',
@@ -851,16 +828,6 @@ const rows: Row[] = [
     level: 'DS',
     routes: ['/admin/tenants', '/admin/tenants/[id]'],
     note: 'Khóa, mở khóa, gia hạn thủ công; chi tiết chỉ có số liệu tổng (số chi nhánh, số lịch tháng), không xem dữ liệu khách của cơ sở',
-  },
-  {
-    code: 'MH-59',
-    title: 'Gói cấu hình ngành',
-    zone: 'H',
-    roles: ['admin'],
-    wave: 1,
-    level: 'Vẽ',
-    routes: ['/admin/templates', '/admin/templates/[id]'],
-    note: 'Sẽ bỏ (D-16), menu đã không còn mục này. Màn chứng minh BT8. Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70)',
   },
   {
     code: 'MH-60',

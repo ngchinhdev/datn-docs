@@ -80,7 +80,6 @@ export function makeHold(req: HoldRequest): Hold | null {
       id: req.appointmentId,
       customerId: null,
       refs: [ref],
-      subjectIds: [''],
       slot: found,
       status: 'held',
       holdExpiresAt: expiresAt,

@@ -89,7 +89,6 @@ export function moveAppointment(input: MoveInput): MoveResult {
     if (!found) return { ok: false, reason: 'Không tìm thấy dịch vụ của lịch hẹn.' };
     const own = appt.bookings.filter((b) => b.itemIndex === index);
     const minute = minutesOf(itemArrival(appt, index)) + delta - localMinutes(date, '00:00');
-    const subject = fixture.servedSubjects.find((s) => s.id === item.servedSubjectId);
     const result = placeItem({
       fixture: dayState(fixture, appt, date, taken),
       service: found.service,
@@ -97,7 +96,7 @@ export function moveAppointment(input: MoveInput): MoveResult {
       date,
       minute,
       staffResourceId: input.staffResourceId ?? item.staffResourceId,
-      ...(subject?.kind === 'other' ? { subjectName: subject.name } : {}),
+      ...(item.guestName ? { guestName: item.guestName } : {}),
       prefer: new Set(own.map((b) => b.resourceId)),
       now,
     });

@@ -258,7 +258,7 @@ export const platformTenants: PlatformTenant[] = [
   salonTocMay,
   paid(
     {
-      id: 'sen',
+      id: 'la-sen',
       slug: 'la-sen',
       name: 'Spa Lá Sen',
       industry: 'beauty_spa',

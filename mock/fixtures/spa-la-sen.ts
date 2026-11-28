@@ -10,7 +10,6 @@ import type {
   Branch,
   BusinessHours,
   Customer,
-  ServedSubject,
   Shift,
   Staff,
   StaffTimeOff,
@@ -18,7 +17,7 @@ import type {
   Weekday,
 } from './types.ts';
 
-const tenantId = 'sen';
+const tenantId = 'la-sen';
 const branchId = 'sen-q7';
 
 const mondayToSaturday = (
@@ -98,17 +97,8 @@ const regulars: Customer[] = [
   { id: 'sen-c-duc', tenantId, name: 'Võ Minh Đức', callName: 'Anh Đức', phone: '+84938333444' },
 ];
 
-const self = (key: string, name: string): ServedSubject => ({
-  id: `sen-s-${key}`,
-  tenantId,
-  customerId: `sen-c-${key}`,
-  kind: 'self',
-  name,
-  attributes: {},
-});
-
 // Customers who appear on the rest of the week. [key, name, call name]
-const others = (
+const others: Customer[] = (
   [
     ['hoa', 'Nguyễn Thị Hoa', 'Chị Hoa'],
     ['nam', 'Trần Hoài Nam', 'Anh Nam'],
@@ -119,59 +109,30 @@ const others = (
     ['uyen', 'Huỳnh Tú Uyên', 'Chị Uyên'],
   ] as const
 ).map(([key, name, callName], i) => ({
-  customer: {
-    id: `sen-c-${key}`,
-    tenantId,
-    name,
-    callName,
-    phone: `+8490500${1000 + i}`,
-    visitCount: 1 + (i % 4),
-  } satisfies Customer,
-  subject: self(key, name),
+  id: `sen-c-${key}`,
+  tenantId,
+  name,
+  callName,
+  phone: `+8490500${1000 + i}`,
+  visitCount: 1 + (i % 4),
 }));
 
 // The week 02/11–08/11 books only the customers above; the rest come in earlier and later weeks.
-const weekSubjects = [
-  self('linh', 'Phạm Khánh Linh'),
-  self('duc', 'Võ Minh Đức'),
-  ...others.map((o) => o.subject),
-];
+const weekCustomers = [...regulars, ...others];
 const people = generatePeople({
   seed: 20261103,
   prefix: 'sen',
   tenantId,
   count: 51,
-  existing: [...regulars, ...others.map((o) => o.customer)],
+  existing: weekCustomers,
   notes: [
     'Da nhạy cảm, dùng tinh dầu nhẹ.',
     'Đau vai gáy, massage lực vừa.',
     'Không dùng tinh dầu sả, dị ứng mùi.',
     'Hay đến sớm 10 phút, mời trà trước.',
   ],
-  subjects: (_rand, customer, n) => [
-    {
-      id: `sen-s-g${n}`,
-      tenantId,
-      customerId: customer.id,
-      kind: 'self',
-      name: customer.name,
-      attributes: {},
-    },
-  ],
 });
-const everyone = [...regulars, ...others.map((o) => o.customer), ...people.customers];
-const servedSubjects = [
-  ...weekSubjects,
-  {
-    id: 'sen-s-quynh-2',
-    tenantId,
-    customerId: 'sen-c-quynh',
-    kind: 'other',
-    name: 'Thu Hằng',
-    attributes: {},
-  } satisfies ServedSubject,
-  ...people.subjects,
-];
+const everyone = [...weekCustomers, ...people];
 
 const at = (hhmm: string) => new Date(`2026-11-07T${hhmm}:00+07:00`).toISOString();
 
@@ -187,12 +148,11 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'sen-massage-60',
-        subjectId: 'sen-s-quynh',
         resourceIds: ['sen-thao', 'sen-bed-1'],
       },
       {
         variantId: 'sen-massage-60',
-        subjectId: 'sen-s-quynh-2',
+        guestName: 'Thu Hằng',
         resourceIds: ['sen-ngan', 'sen-bed-2'],
         startAt: at('08:00'),
       },
@@ -207,7 +167,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'sen-mud-std',
-        subjectId: 'sen-s-linh',
         resourceIds: ['sen-thao', 'sen-tub-1', 'sen-steam-1'],
       },
     ],
@@ -227,7 +186,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'sen-mud-std',
-        subjectId: 'sen-s-hoa',
         resourceIds: ['sen-ngan', 'sen-tub-2', 'sen-steam-2'],
       },
     ],
@@ -241,7 +199,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'sen-mud-std',
-        subjectId: 'sen-s-duc',
         resourceIds: ['sen-thao', 'sen-tub-1', 'sen-steam-1'],
       },
     ],
@@ -255,7 +212,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'sen-mud-std',
-        subjectId: 'sen-s-nam',
         resourceIds: ['sen-ngan', 'sen-tub-2', 'sen-steam-2'],
       },
     ],
@@ -269,7 +225,6 @@ const saturday: Appointment[] = [
     [
       {
         variantId: 'sen-facial-std',
-        subjectId: 'sen-s-tri',
         resourceIds: ['sen-thao', 'sen-bed-1'],
         staffChoice: 'chosen',
       },
@@ -279,14 +234,12 @@ const saturday: Appointment[] = [
   appointment('sen-a-yen', 'sen-c-yen', at('14:30'), 'confirmed', [
     {
       variantId: 'sen-massage-90',
-      subjectId: 'sen-s-yen',
       resourceIds: ['sen-ngan', 'sen-bed-2'],
     },
   ]),
   appointment('sen-a-phat', 'sen-c-phat', at('15:30'), 'confirmed', [
     {
       variantId: 'sen-hairwash-std',
-      subjectId: 'sen-s-phat',
       resourceIds: ['sen-thao', 'sen-bed-1'],
     },
   ]),
@@ -332,7 +285,6 @@ const ahead: Appointment[] = [
     [
       {
         variantId: 'sen-mud-std',
-        subjectId: 'sen-s-phat',
         resourceIds: ['sen-ngan', 'sen-tub-1', 'sen-steam-1'],
       },
     ],
@@ -341,7 +293,6 @@ const ahead: Appointment[] = [
   appointment('sen-a-lv-2', 'sen-c-yen', atDay('2026-11-12', '11:00'), 'confirmed', [
     {
       variantId: 'sen-massage-60',
-      subjectId: 'sen-s-yen',
       resourceIds: ['sen-ngan', 'sen-bed-1'],
       staffChoice: 'chosen',
     },
@@ -350,7 +301,6 @@ const ahead: Appointment[] = [
   appointment('sen-a-linh-14', 'sen-c-linh', atDay('2026-11-14', '10:00'), 'confirmed', [
     {
       variantId: 'sen-massage-90',
-      subjectId: 'sen-s-linh',
       resourceIds: ['sen-thao', 'sen-bed-1'],
     },
   ]),
@@ -378,7 +328,7 @@ const week = generateWeek({
   resources,
   staff: staffList,
   staffTypeId: 'sen-rt-tech',
-  subjects: weekSubjects,
+  customers: weekCustomers,
   timeOff: staffTimeOff,
   shifts,
   build: appointment,
@@ -394,7 +344,7 @@ const longRun = {
   resources,
   staff: staffList,
   staffTypeId: 'sen-rt-tech',
-  subjects: servedSubjects,
+  customers: everyone,
   timeOff: staffTimeOff,
   shifts,
   build: appointment,
@@ -460,7 +410,6 @@ export const spaLaSen: TenantFixture = {
   staffSeesCustomerPhone: false,
   services,
   customers: withVisitCounts(everyone, appointments),
-  servedSubjects,
   appointments,
   policies: beautySpaTemplate.defaultPolicies,
   packageCatalog: [

@@ -6,11 +6,9 @@ import { useMemo } from 'react';
 import { useAccountStore } from '@/components/mock/account-store';
 import { usePlatform, useTenantViews } from '@/components/mock/platform-store';
 import { StatRow, StatTile } from '@/components/mock/stat-tile';
-import { useTemplateStore } from '@/components/mock/template-store';
 import { PageHeader } from '@/components/sapio/page-header';
 import { formatVnd } from '@/mock/format';
 import {
-  INDUSTRY_LABEL,
   STATE_BADGE,
   expiryBadge,
   expiryNote,
@@ -22,21 +20,17 @@ import {
 import { formatFullDate, formatTime, localDate } from '@/mock/time';
 
 const detailHref = (v: TenantView) => `/mock/admin/tenants/${v.tenant.id}`;
-const num = new Intl.NumberFormat('vi-VN');
 
 /** Tổng quan nền tảng (MH-60): totals only, never a customer of a tenant (BR-89). */
 export function OverviewScreen() {
   const views = useTenantViews();
   const { catalog, payments } = usePlatform();
   const { now } = useAccountStore();
-  const { templates } = useTemplateStore();
   const data = useMemo(
     () => overview(views, Object.values(payments).flat(), now),
     [views, payments, now],
   );
   const revenue = data.revenue;
-  const versionOf = (industry: string) =>
-    templates.find((t) => t.id === industry)?.publishedVersion?.number;
 
   return (
     <div className="sp-shell__content sp-shell__content--wide">
@@ -79,86 +73,6 @@ export function OverviewScreen() {
       </StatRow>
       <div className="flex flex-wrap items-stretch gap-(--space-4)">
         <div className="flex min-w-0 flex-[2_1_0] flex-col gap-(--space-4)">
-          <section className="sp-panel" aria-labelledby="ov-ind">
-            <h2 className="sp-panel__title" id="ov-ind">
-              Cơ sở theo ngành
-            </h2>
-            <div
-              className="sp-table-wrap"
-              tabIndex={0}
-              role="region"
-              aria-label="Cơ sở theo ngành, cuộn được"
-            >
-              <table className="sp-table">
-                <caption className="sp-sr-only">Cơ sở theo ngành</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Ngành</th>
-                    <th scope="col" className="sp-table__num">
-                      Cơ sở
-                    </th>
-                    <th scope="col" className="sp-table__num">
-                      Trả phí
-                    </th>
-                    <th scope="col" className="sp-table__num">
-                      Dùng thử
-                    </th>
-                    <th scope="col" className="sp-table__num">
-                      Hết hạn
-                    </th>
-                    <th scope="col" className="sp-table__num">
-                      Lịch hẹn tháng {revenue.month}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.industries.map((r) => (
-                    <tr key={r.industry}>
-                      <td>
-                        <Link href={`/mock/admin/tenants?industry=${r.industry}`}>
-                          {INDUSTRY_LABEL[r.industry]}
-                        </Link>
-                        {versionOf(r.industry) !== undefined && (
-                          <span className="text-[13px] text-(--ink-muted)">
-                            {' '}
-                            · gói ngành bản {versionOf(r.industry)}
-                          </span>
-                        )}
-                      </td>
-                      <td className="sp-table__num sp-num">{r.tenants}</td>
-                      <td className="sp-table__num sp-num">{r.paid}</td>
-                      <td className="sp-table__num sp-num">{r.trial}</td>
-                      <td className="sp-table__num sp-num">{r.expired}</td>
-                      <td className="sp-table__num sp-num">{num.format(r.appointmentsMonth)}</td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td>
-                      <strong>Tổng</strong>
-                    </td>
-                    <td className="sp-table__num sp-num">
-                      <strong>{data.industriesTotal.tenants}</strong>
-                    </td>
-                    <td className="sp-table__num sp-num">
-                      <strong>{data.industriesTotal.paid}</strong>
-                    </td>
-                    <td className="sp-table__num sp-num">
-                      <strong>{data.industriesTotal.trial}</strong>
-                    </td>
-                    <td className="sp-table__num sp-num">
-                      <strong>{data.industriesTotal.expired}</strong>
-                    </td>
-                    <td className="sp-table__num sp-num">
-                      <strong>{num.format(data.industriesTotal.appointmentsMonth)}</strong>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p className="sp-panel__note">
-              Lịch hẹn tính theo ngày hẹn trong tháng, mọi trạng thái trừ đã hủy.
-            </p>
-          </section>
           <section className="sp-panel" aria-labelledby="ov-new">
             <div className="flex items-center gap-2">
               <h2 className="sp-panel__title" id="ov-new">
@@ -185,7 +99,6 @@ export function OverviewScreen() {
                 <thead>
                   <tr>
                     <th scope="col">Cơ sở</th>
-                    <th scope="col">Ngành</th>
                     <th scope="col">Tạo ngày</th>
                     <th scope="col">Trạng thái</th>
                   </tr>
@@ -201,7 +114,6 @@ export function OverviewScreen() {
                           </span>
                         </div>
                       </td>
-                      <td>{INDUSTRY_LABEL[v.tenant.industry]}</td>
                       <td>
                         <span className="sp-num">{formatFullDate(v.tenant.createdOn)}</span>
                       </td>

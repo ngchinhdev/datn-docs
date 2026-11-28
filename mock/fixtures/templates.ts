@@ -27,12 +27,7 @@ export const hairSalonTemplate: IndustryTemplate = {
   updatedAt: '2026-11-05',
   vocabulary: {
     staff: 'Thợ',
-    subject: null,
-    subjectQuestion: null,
-    addSubject: null,
-    subjectExample: null,
   },
-  subjectSchema: [],
   resourceTypes: [
     { name: 'Thợ', isStaff: true, hint: 'Tạo cùng tài khoản chủ cơ sở', defaultCount: 1 },
     {
@@ -100,7 +95,6 @@ export const hairSalonTemplate: IndustryTemplate = {
       ],
     },
   ],
-  bookingFor: 'chính mình',
   previewNote:
     'Nhuộm tóc có 45 phút chờ lên màu: thợ rảnh để nhận khách khác, ghế vẫn bận. Giá, thời lượng và tên đều sửa được sau khi tạo.',
 };
@@ -116,12 +110,7 @@ export const nailSalonTemplate: IndustryTemplate = {
   updatedAt: '2026-11-02',
   vocabulary: {
     staff: 'Thợ nail',
-    subject: null,
-    subjectQuestion: null,
-    addSubject: null,
-    subjectExample: null,
   },
-  subjectSchema: [],
   resourceTypes: [
     { name: 'Thợ nail', isStaff: true, hint: 'Tạo cùng tài khoản chủ cơ sở', defaultCount: 1 },
     { name: 'Bàn nail', isStaff: false, hint: 'Mỗi bàn một khách một lúc', defaultCount: 2 },
@@ -140,7 +129,6 @@ export const nailSalonTemplate: IndustryTemplate = {
       ],
     },
   ],
-  bookingFor: 'chính mình',
   previewNote: 'Giá, thời lượng và tên đều sửa được sau khi tạo.',
 };
 
@@ -155,12 +143,7 @@ export const beautySpaTemplate: IndustryTemplate = {
   updatedAt: '2026-11-01',
   vocabulary: {
     staff: 'Kỹ thuật viên',
-    subject: null,
-    subjectQuestion: null,
-    addSubject: null,
-    subjectExample: null,
   },
-  subjectSchema: [],
   resourceTypes: [
     { name: 'Kỹ thuật viên', isStaff: true, hint: 'Tạo cùng tài khoản chủ cơ sở', defaultCount: 1 },
     { name: 'Giường', isStaff: false, hint: 'Mỗi giường một khách một lúc', defaultCount: 2 },
@@ -200,7 +183,6 @@ export const beautySpaTemplate: IndustryTemplate = {
       ],
     },
   ],
-  bookingFor: 'chính mình',
   previewNote:
     'Ngâm bùn có 45 phút xông hơi: kỹ thuật viên rảnh để nhận khách khác, phòng xông vẫn bận. Giá, thời lượng và tên đều sửa được sau khi tạo.',
 };

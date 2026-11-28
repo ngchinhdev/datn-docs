@@ -3,7 +3,7 @@
  * given names; the same seed gives the same people on every run.
  */
 import { seeded } from './generate.ts';
-import type { Appointment, Customer, ServedSubject } from './types.ts';
+import type { Appointment, Customer } from './types.ts';
 
 const FAMILY = [
   'Nguyễn',
@@ -112,20 +112,14 @@ export interface PeopleConfig {
   existing: Customer[];
   /** Internal notes (BR-62) given to about one customer in ten. */
   notes: string[];
-  /** Builds the served subjects of one customer. */
-  subjects: (rand: () => number, customer: Customer, n: number) => ServedSubject[];
 }
 
-export function generatePeople(cfg: PeopleConfig): {
-  customers: Customer[];
-  subjects: ServedSubject[];
-} {
+export function generatePeople(cfg: PeopleConfig): Customer[] {
   const rand = seeded(cfg.seed);
   const pick = <T>(xs: readonly T[]) => xs[Math.floor(rand() * xs.length)]!;
   const names = new Set(cfg.existing.map((c) => c.name));
   const phones = new Set(cfg.existing.map((c) => c.phone));
   const customers: Customer[] = [];
-  const subjects: ServedSubject[] = [];
 
   for (let n = 1; customers.length < cfg.count; n++) {
     const gender = rand() < 0.62 ? FEMALE : MALE;
@@ -147,9 +141,8 @@ export function generatePeople(cfg: PeopleConfig): {
       ...(rand() < 0.1 ? { note: pick(cfg.notes) } : {}),
     };
     customers.push(customer);
-    subjects.push(...cfg.subjects(rand, customer, n));
   }
-  return { customers, subjects };
+  return customers;
 }
 
 /** Sets `visitCount` from the appointments: those that were checked in or completed. */

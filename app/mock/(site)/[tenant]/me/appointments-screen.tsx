@@ -22,7 +22,6 @@ export function AppointmentsScreen({ tenantSlug }: { tenantSlug: string }) {
   const router = useRouter();
   const { setSeed } = useBookingDraft();
   const { customer, customerId } = useCustomerSession();
-  const asksSubject = fixture.template.vocabulary.subject !== null;
 
   const mine = store.appointments.filter((a) => customerId !== null && a.customerId === customerId);
   const upcoming = mine
@@ -35,8 +34,7 @@ export function AppointmentsScreen({ tenantSlug }: { tenantSlug: string }) {
   const nameOf = (id: string) => fixture.resources.find((r) => r.id === id)?.name ?? '';
 
   function row(appt: Appointment, kind: 'upcoming' | 'past') {
-    const named = asksSubject || modeOf(appt) === 'group';
-    const items = heldItems(fixture, appt, store.servedSubjects, named);
+    const items = heldItems(fixture, appt, modeOf(appt) === 'group');
     const last = appt.bookings.reduce(
       (m, b) => (b.endAt > m && b.kind !== 'cleanup' ? b.endAt : m),
       appt.startAt,
@@ -102,8 +100,7 @@ export function AppointmentsScreen({ tenantSlug }: { tenantSlug: string }) {
               setSeed({
                 tenantSlug,
                 state: {
-                  ...rebookChoice(fixture, appt, store.servedSubjects),
-                  drafts: [],
+                  ...rebookChoice(fixture, appt),
                   date: localDate(MOCK_NOW),
                   name: customer?.name ?? '',
                   phone: customer?.phone ? formatPhone(customer.phone) : '',
