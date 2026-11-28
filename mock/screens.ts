@@ -290,7 +290,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/signup'],
-    note: 'Tài khoản → mã xác thực email → chọn ngành → tên, slug, chi nhánh đầu tiên, giờ mở cửa → xem trước dịch vụ mẫu từ gói ngành rồi tạo. BR-70',
+    note: 'Tài khoản → mã 6 số qua email → tên, slug, chi nhánh đầu, giờ mở cửa, số Ghế, Giường, Phòng → đã tạo, dùng thử 7 ngày. BR-72, BR-74, BR-80',
   },
   {
     code: 'MH-03',
@@ -904,12 +904,15 @@ const rows: Row[] = [
   },
 ];
 
-/** Screens to agree on with the supervisor. Set `approved` here once one is signed off. */
+/** Screens that are signed off; every other screen with links is in progress. */
+const APPROVED = new Set(['MH-02']);
+
+/** Screens to agree on with the supervisor. */
 export const mockScreens: (MockScreen & { status: ScreenStatus; links: ScreenLink[] })[] = (
   rows as MockScreen[]
 ).map((row) => ({
   ...row,
-  status: built[row.code] ? 'in_progress' : 'todo',
+  status: APPROVED.has(row.code) ? 'approved' : built[row.code] ? 'in_progress' : 'todo',
   links: built[row.code] ?? [],
 }));
 
