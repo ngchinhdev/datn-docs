@@ -22,7 +22,6 @@ export interface Tenant {
   id: string;
   slug: string;
   name: string;
-  industry: string;
   /** Letter on the tenant's mark in the app shell; not the first letter of the full name. */
   monogram: string;
 }
@@ -104,9 +103,6 @@ export interface ServiceSegment {
   resourceTypeIds: string[];
 }
 
-/** An exact value, or a number range: `min` included, `max` not (`{ max: 10 }` is "under 10"). */
-export type MatchValue = string | { min?: number; max?: number };
-
 export interface ServiceVariant {
   id: string;
   name: string;
@@ -116,8 +112,6 @@ export interface ServiceVariant {
   priceVnd: bigint;
   /** Integer VND paid online to confirm; absent = no deposit. */
   depositVnd?: bigint;
-  /** Served-subject attributes that select this variant (BR-13). */
-  match: Record<string, MatchValue>;
   segments: ServiceSegment[];
   /**
    * Minutes to clean each resource type after its last segment ends (BR-52); a missing type
@@ -128,18 +122,14 @@ export interface ServiceVariant {
   pricesByLevel?: bigint[];
 }
 
-/** Who picks the variant: the customer, or the attributes of the served subject (BR-55). */
-export type VariantSelection = 'customer' | 'subject';
-
 export interface Service {
   id: string;
   tenantId: string;
   name: string;
-  /** One of `IndustryTemplate.serviceGroups`. */
+  /** The heading the service is listed under, e.g. "Massage". */
   group: string;
   /** Shown to the customer under the name. */
   description?: string;
-  variantSelection: VariantSelection;
   /** Off hides the service on the customer page. */
   bookableOnline: boolean;
   variants: ServiceVariant[];
@@ -202,18 +192,6 @@ export interface Customer {
   depositOverride?: { on: boolean; reason: string; by: string; at: string };
 }
 
-export interface ServedSubject {
-  id: string;
-  tenantId: string;
-  customerId: string;
-  /** The customer themself, or someone/something else they book for; details live in `attributes`. */
-  kind: 'self' | 'other';
-  name: string;
-  attributes: Record<string, string>;
-  /** A line for the staff written by the customer, e.g. "Sợ máy sấy to, cần dỗ." */
-  note?: string;
-}
-
 export type AppointmentStatus =
   'held' | 'confirmed' | 'checked_in' | 'completed' | 'cancelled' | 'no_show';
 
@@ -222,7 +200,8 @@ export type StaffChoice = 'any' | 'chosen';
 
 export interface AppointmentItem {
   serviceVariantId: string;
-  servedSubjectId: string;
+  /** The companion this item is for in a group booking (BR-19); absent for the person who booked. */
+  guestName?: string;
   staffResourceId: string;
   /** `chosen`: changing the person needs the customer's consent (BR-32, BR-34). */
   staffChoice: StaffChoice;
@@ -358,36 +337,8 @@ export interface Requeue {
   title?: string;
 }
 
-/** One field a customer fills in for the person or thing being served (BR-71). */
-export type SubjectField =
-  | {
-      key: string;
-      label: string;
-      type: 'enum';
-      options: { value: string; label: string }[];
-      required: boolean;
-    }
-  | {
-      key: string;
-      label: string;
-      type: 'number';
-      unit?: string;
-      /** Placeholder, e.g. "6". */
-      example?: string;
-      /** `true`, `false`, or the values of other fields that make it required. */
-      required: boolean | Record<string, string>;
-    }
-  | { key: string; label: string; type: 'text'; example?: string; required: boolean };
-
-/**
- * What differs between industries, as data: the words shown to people and the fields of the
- * served subject. Copied into a tenant when it is created (BR-70).
- */
-/** `open`: a tenant can pick it at sign-up; `soon`: the card shows but cannot be picked; `hidden`: no card. */
-export type TemplateStatus = 'open' | 'soon' | 'hidden';
-
-/** Starting values of a new tenant's booking policies (BR-06, BR-08, BR-09, BR-10). */
-export interface TemplatePolicies {
+/** The booking policies of a tenant (BR-06, BR-08, BR-09, BR-10). */
+export interface BookingPolicies {
   /** Earliest booking, hours from now. */
   minNoticeHours: number;
   /** Latest booking, days from now. */
@@ -402,96 +353,8 @@ export interface TemplatePolicies {
   depositAfterNoShows: number;
 }
 
-/** The part of a template an administrator edits; a draft remembers it as it was when it began. */
-export interface TemplateContent {
-  name: string;
-  status: TemplateStatus;
-  cardDescription: string;
-  previewNote: string;
-  vocabulary: IndustryTemplate['vocabulary'];
-  defaultPolicies: TemplatePolicies;
-  sampleServices: SampleService[];
-}
-
-/** An industry template (BR-70): published versions are copied into a tenant when it is created. */
-export interface IndustryTemplate {
-  /** The code, e.g. `hair_salon`. */
-  id: string;
-  name: string;
-  status: TemplateStatus;
-  /** Text on the industry card at sign-up. */
-  cardDescription: string;
-  /** The version new tenants receive; `null` before the first publication. */
-  publishedVersion: { number: number; publishedAt: string; tenantsCreated: number } | null;
-  /** Changes waiting to be published; `base` is the content they started from. */
-  draft: { number: number; changes: string[]; base: Partial<TemplateContent> } | null;
-  defaultPolicies: TemplatePolicies;
-  /** Local date of the last edit, `YYYY-MM-DD`. */
-  updatedAt: string;
-  vocabulary: {
-    /** Plural-free noun for staff in this industry. */
-    staff: string;
-    /** The thing served when it is not the customer themself; `null` when it is. */
-    subject: string | null;
-    /** Booking step title asking which subject. */
-    subjectQuestion: string | null;
-    /** Button that adds one. */
-    addSubject: string | null;
-    /** Placeholder for the subject's name: "Mochi". */
-    subjectExample: string | null;
-  };
-  /** Empty when the customer is the only subject. */
-  subjectSchema: SubjectField[];
-  /** Resources other than staff that a new tenant starts with. */
-  resourceTypes: TemplateResourceType[];
-  /** Groups a service can belong to. */
-  serviceGroups: string[];
-  /** Services created with the tenant; the sign-up preview lists them. */
-  sampleServices: SampleService[];
-  /** Who the customer books for, in the sign-up preview: "chính mình", "thú cưng". */
-  bookingFor: string;
-  /** One sentence under the preview about what is special in this industry. */
-  previewNote: string;
-}
-
-export interface TemplateResourceType {
-  name: string;
-  /** The staff type: made with the owner's account, not counted at sign-up. */
-  isStaff: boolean;
-  /** One line under the name when the owner sets the count. */
-  hint: string;
-  /** Count suggested for the first branch. */
-  defaultCount: number;
-}
-
-/** One segment of a sample service; `types` are names from `IndustryTemplate.resourceTypes`. */
-export interface SampleSegment {
-  name: string;
-  kind: SegmentKind;
-  minutes: number;
-  types: string[];
-}
-
-export interface SampleServiceVariant {
-  name: string;
-  /** Integer VND. */
-  priceVnd: bigint;
-  /** In order; a `wait` segment frees the staff and keeps the other resources (BR-05). */
-  segments: SampleSegment[];
-  /** Minutes to clean each resource type after use, by type name (BR-52). */
-  cleanup?: Record<string, number>;
-}
-
-export interface SampleService {
-  name: string;
-  variants: SampleServiceVariant[];
-  /** Price depends on the served subject: the preview shows one line "từ <lowest price>". */
-  priceBySubject?: boolean;
-}
-
 export interface TenantFixture {
   tenant: Tenant;
-  template: IndustryTemplate;
   branches: Branch[];
   resourceTypes: ResourceType[];
   resources: Resource[];
@@ -507,10 +370,9 @@ export interface TenantFixture {
   staffSeesCustomerPhone: boolean;
   services: Service[];
   customers: Customer[];
-  servedSubjects: ServedSubject[];
   appointments: Appointment[];
-  /** The tenant's booking policies, copied from the template when it was created (BR-70). */
-  policies: TemplatePolicies;
+  /** The tenant's booking policies. */
+  policies: BookingPolicies;
   /** Packages on sale (BR-26). */
   packageCatalog: PackageProduct[];
   /** Top-up bonus tiers of the payment settings (BR-25), highest `minVnd` last. */

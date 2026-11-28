@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { usePersistedState } from './use-persisted-state';
 import { useScheduleStore } from './schedule-store';
-import type { Customer, CustomerPackage, CustomerWallet, ServedSubject } from '@/mock/fixtures';
+import type { Customer, CustomerPackage, CustomerWallet } from '@/mock/fixtures';
 import { walletView } from '@/mock/wallet-view';
 
 export interface CustomerSessionValue {
@@ -14,7 +14,6 @@ export interface CustomerSessionValue {
   hydrated: boolean;
   /** The email they logged in with; a customer record may not exist yet (BR-16). */
   email: string | null;
-  subjects: ServedSubject[];
   packages: CustomerPackage[];
   wallet: CustomerWallet;
   login: (email: string) => { ok: boolean; customerId?: string; isNew?: boolean };
@@ -36,15 +35,15 @@ export function CustomerSessionProvider({
   tenantSlug: string;
   children: ReactNode;
 }) {
-  const { customers, replaceCustomer, servedSubjects, money } = useScheduleStore();
+  const { customers, replaceCustomer, money } = useScheduleStore();
 
-  // Default customer for mock: Chị Quyên for toc-may, Chị Linh for pawpaw
+  // Default customer for mock: Chị Quyên for toc-may, Chị Linh for la-sen
   const defaultCustomerId = useMemo(() => {
     if (tenantSlug === 'toc-may') {
       return customers.find((c) => c.id === 'may-c-quyen')?.id ?? customers[0]?.id ?? null;
     }
-    if (tenantSlug === 'pawpaw') {
-      return customers.find((c) => c.id === 'paw-c-linh')?.id ?? customers[0]?.id ?? null;
+    if (tenantSlug === 'la-sen') {
+      return customers.find((c) => c.id === 'sen-c-linh')?.id ?? customers[0]?.id ?? null;
     }
     return customers[0]?.id ?? null;
   }, [tenantSlug, customers]);
@@ -65,11 +64,6 @@ export function CustomerSessionProvider({
     if (!currentId) return null;
     return customers.find((c) => c.id === currentId) ?? null;
   }, [currentId, customers]);
-
-  const subjects = useMemo(() => {
-    if (!currentId) return [];
-    return servedSubjects.filter((s) => s.customerId === currentId);
-  }, [currentId, servedSubjects]);
 
   const packages = useMemo(() => {
     return customer?.packages ?? [];
@@ -128,7 +122,6 @@ export function CustomerSessionProvider({
       isLoggedIn: !!customer || guestEmail !== null,
       hydrated,
       email: customer?.email ?? guestEmail,
-      subjects,
       packages,
       wallet,
       login,
@@ -142,7 +135,6 @@ export function CustomerSessionProvider({
       currentId,
       guestEmail,
       hydrated,
-      subjects,
       packages,
       wallet,
       login,

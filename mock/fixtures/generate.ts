@@ -9,17 +9,17 @@
  * - Tóc Mây, Thứ Tư 04/11: near-empty day, 2 appointments.
  * - Tóc Mây, Thứ Năm 05/11: one appointment with gội, cắt, nhuộm back to back, with a wait.
  * - Tóc Mây, Thứ Sáu 06/11: a cancelled appointment, a customer name over 30 characters, a long note.
- * - Pawpaw, Thứ Bảy 07/11: two pets booked together, a dog over 10 kg, dryers busy during the groomer's wait.
+ * - Lá Sen, Thứ Bảy 07/11: two friends booked together, both steam rooms busy at 11:30 while the technician is free.
  */
 import { occupation, prepMinutes, resourceTypesOf, visibleMinutes } from '../occupation.ts';
-import { bookVariant, findVariant, matchesAttributes, type ItemSpec } from './bookings.ts';
+import { bookVariant, findVariant, type ItemSpec } from './bookings.ts';
 import type {
   Appointment,
   AppointmentStatus,
   Branch,
+  Customer,
   Resource,
   ResourceBooking,
-  ServedSubject,
   Service,
   Shift,
   Staff,
@@ -57,7 +57,7 @@ export interface WeekConfig {
   resources: Resource[];
   staff: Staff[];
   staffTypeId: string;
-  subjects: ServedSubject[];
+  customers: Customer[];
   timeOff: StaffTimeOff[];
   /** Working blocks; a date that has none means everyone works the opening hours. */
   shifts?: Shift[];
@@ -179,14 +179,10 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
     let placed = already;
 
     for (let attempt = 0; placed < target && attempt < 400; attempt++) {
-      const subject = pick(cfg.subjects);
+      const customer = pick(cfg.customers);
       const service = pick(cfg.services);
-      // BR-55: the customer picks the variant, or it follows the served subject (BR-13).
-      const variant =
-        service.variantSelection === 'customer'
-          ? pick(service.variants)
-          : service.variants.find((v) => matchesAttributes(v.match, subject.attributes));
-      if (!variant) continue;
+      // BR-13: the customer picks the variant.
+      const variant = pick(service.variants);
       // BR-03: only staff with the skill.
       const staff = cfg.staff.filter(
         (s) => s.skillServiceIds.includes(service.id) && !off.has(s.resourceId),
@@ -219,10 +215,10 @@ export function generateWeek(cfg: WeekConfig): Appointment[] {
       const staffChoice = ++n % 3 === 0 ? 'chosen' : 'any';
       const appt = cfg.build(
         `${cfg.idPrefix}-g${n}`,
-        subject.customerId,
+        customer.id,
         start,
         status,
-        [{ variantId: variant.id, subjectId: subject.id, resourceIds: ids, staffChoice }],
+        [{ variantId: variant.id, resourceIds: ids, staffChoice }],
         status === 'completed' ? { settled: true } : {},
       );
       occ.add(appt.bookings);

@@ -12,6 +12,7 @@ import { heldItems, modeOf, openQuestion, rebookChoice } from '@/mock/reschedule
 import { fixtureBySlug } from '@/mock/selection';
 import type { Appointment } from '@/mock/fixtures';
 import { formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
+import { staffNounOf } from '@/mock/staff-noun';
 
 const UPCOMING: Appointment['status'][] = ['confirmed', 'checked_in'];
 
@@ -22,7 +23,6 @@ export function AppointmentsScreen({ tenantSlug }: { tenantSlug: string }) {
   const router = useRouter();
   const { setSeed } = useBookingDraft();
   const { customer, customerId } = useCustomerSession();
-  const asksSubject = fixture.template.vocabulary.subject !== null;
 
   const mine = store.appointments.filter((a) => customerId !== null && a.customerId === customerId);
   const upcoming = mine
@@ -35,8 +35,7 @@ export function AppointmentsScreen({ tenantSlug }: { tenantSlug: string }) {
   const nameOf = (id: string) => fixture.resources.find((r) => r.id === id)?.name ?? '';
 
   function row(appt: Appointment, kind: 'upcoming' | 'past') {
-    const named = asksSubject || modeOf(appt) === 'group';
-    const items = heldItems(fixture, appt, store.servedSubjects, named);
+    const items = heldItems(fixture, appt, modeOf(appt) === 'group');
     const last = appt.bookings.reduce(
       (m, b) => (b.endAt > m && b.kind !== 'cleanup' ? b.endAt : m),
       appt.startAt,
@@ -90,7 +89,7 @@ export function AppointmentsScreen({ tenantSlug }: { tenantSlug: string }) {
             href={`/mock/${tenantSlug}/me/appointments/${appt.id}`}
             className="sp-btn sp-btn--accent no-underline"
           >
-            Xem đề nghị đổi {fixture.template.vocabulary.staff.toLowerCase()}
+            Xem đề nghị đổi {staffNounOf(fixture).toLowerCase()}
           </Link>
         )}
         {kind === 'past' && appt.status === 'completed' && (
@@ -102,8 +101,7 @@ export function AppointmentsScreen({ tenantSlug }: { tenantSlug: string }) {
               setSeed({
                 tenantSlug,
                 state: {
-                  ...rebookChoice(fixture, appt, store.servedSubjects),
-                  drafts: [],
+                  ...rebookChoice(fixture, appt),
                   date: localDate(MOCK_NOW),
                   name: customer?.name ?? '',
                   phone: customer?.phone ? formatPhone(customer.phone) : '',

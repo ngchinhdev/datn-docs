@@ -45,7 +45,7 @@ function Gate({ tenantSlug, children }: { tenantSlug: string; children: ReactNod
 export function SiteSuspended({ tenantSlug }: { tenantSlug: string }) {
   const fixture = useLiveFixture(tenantSlug);
   const phone = branchPhone(tenantSlug, fixture.branches[0]?.phone);
-  const tone = fixture.tenant.slug === 'toc-may' ? 'may' : 'pawpaw';
+  const tone = fixture.tenant.slug === 'toc-may' ? 'may' : 'la-sen';
   return (
     <div className={`sp-tenant-${tone} mx-auto flex w-full max-w-[560px] flex-col text-(--ink)`}>
       <div className="h-[120px] rounded-(--radius-lg) bg-(--accent-soft)" />

@@ -29,7 +29,7 @@ Sapio có hai mật độ, dùng chung một bộ token:
 
 ### Màu của từng cơ sở
 
-Trang khách đặt một lớp phạm vi lên phần tử gốc: `.sp-tenant-may` hoặc `.sp-tenant-pawpaw`. Lớp này gán `--accent`, `--accent-soft`, `--on-accent` từ `tenant-may*` hoặc `tenant-pawpaw*`. Component trang khách chỉ đọc `--accent*`, không đọc thẳng màu của một cơ sở. Cơ sở mới thêm ba token cùng dạng (`tenant-<slug>`, `tenant-<slug>-soft`, `on-tenant-<slug>`), mỗi cặp chữ trên nền đạt 4.5:1 ở cả hai theme.
+Trang khách đặt một lớp phạm vi lên phần tử gốc: `.sp-tenant-may` hoặc `.sp-tenant-la-sen`. Lớp này gán `--accent`, `--accent-soft`, `--on-accent` từ `tenant-may*` hoặc `tenant-la-sen*`. Component trang khách chỉ đọc `--accent*`, không đọc thẳng màu của một cơ sở. Cơ sở mới thêm ba token cùng dạng (`tenant-<slug>`, `tenant-<slug>-soft`, `on-tenant-<slug>`), mỗi cặp chữ trên nền đạt 4.5:1 ở cả hai theme.
 
 ## Chữ
 

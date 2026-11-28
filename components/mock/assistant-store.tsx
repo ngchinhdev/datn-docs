@@ -203,7 +203,6 @@ export function AssistantProvider({
 
       const service = fixture.services.find((s) => s.id === target.serviceId)!;
       const variant = service.variants.find((v) => v.id === target.variantId)!;
-      const asksSubject = fixture.template.vocabulary.subject !== null;
       const placed = hold.bookingSlot;
       const day = formatDay(localDate(placed.startAt));
       const draft: BookingDraft = {
@@ -212,14 +211,8 @@ export function AssistantProvider({
         newCustomer: true,
         source: 'assistant',
         state: {
-          picks: asksSubject ? [] : [{ serviceId: service.id, variantId: variant.id }],
+          picks: [{ serviceId: service.id, variantId: variant.id }],
           people: null,
-          chosenIds: asksSubject ? ['new-1'] : [],
-          drafts: asksSubject
-            ? [{ id: 'new-1', name: '', values: state.context.attrs, touched: [] }]
-            : [],
-          serviceFor: asksSubject ? { 'new-1': service.id } : {},
-          petChain: asksSubject ? [service.id] : null,
           staffByKey: { [service.id]: target.staffChoice },
           date: localDate(placed.startAt),
           name: '',

@@ -16,7 +16,6 @@ import type {
   Appointment,
   AppointmentItem,
   BookingTerms,
-  ServedSubject,
   Service,
   ServiceVariant,
   TenantFixture,
@@ -28,23 +27,21 @@ import { addDays, localDate } from './time.ts';
 /** A slot of a chain or a group; `staggered` marks a group combination that starts apart (BR-19). */
 export type BookingSlot = FreeChainSlot & { staggered?: true };
 
-/** `chain`: one subject, services one after the other (BR-18); `group`: one service each (BR-19). */
+/** `chain`: one person, services one after the other (BR-18); `group`: one service each (BR-19). */
 export type BookingMode = 'single' | 'chain' | 'group';
 
 /** One item of a booking, small enough to keep while the customer pays. */
 export interface BookingItemRef {
-  /** Service id in a chain; subject or person id in a group. */
+  /** Service id in a chain; person id in a group. */
   key: string;
-  /** Name of the subject or person in a group. */
+  /** Name of the person in a group. */
   label?: string;
-  /** The pet or other subject the item is for, saved or typed in (`newSubject`). */
-  subjectId?: string;
+  /** The companion this item is for in a group (BR-19); absent for the person who books. */
+  guestName?: string;
   serviceId: string;
   variantId: string;
   /** `ANY_STAFF` or a staff resource id: who the customer asked for (BR-31). */
   staffChoice: string;
-  /** A subject typed in during the booking, not saved yet (BR-71). */
-  newSubject?: ServedSubject;
 }
 
 export const slotKey = (s: BookingSlot) =>
@@ -150,8 +147,6 @@ export interface AppointmentInput {
   id: string;
   customerId: string | null;
   refs: readonly BookingItemRef[];
-  /** Subject id per item, in the order of `refs`. */
-  subjectIds: readonly string[];
   slot: BookingSlot;
   status: 'held' | 'confirmed';
   holdExpiresAt?: string;
@@ -170,7 +165,7 @@ export function buildAppointment(input: AppointmentInput): Appointment {
       .map((m) => ({ resourceId: m.resourceId, level: m.level }));
     return {
       serviceVariantId: variant.id,
-      servedSubjectId: input.subjectIds[i] ?? '',
+      ...(ref.guestName ? { guestName: ref.guestName } : {}),
       staffResourceId: slot.items[i]!.staffResourceId,
       staffChoice: ref.staffChoice === ANY_STAFF ? 'any' : 'chosen',
       priceVnd: priceFor(variant, ref.staffChoice, staff),

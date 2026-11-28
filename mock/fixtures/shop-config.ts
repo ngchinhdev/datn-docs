@@ -44,14 +44,14 @@ export const salonConfig: ShopConfig = {
   },
 };
 
-export const pawpawConfig: ShopConfig = {
+export const laSenConfig: ShopConfig = {
   ...base,
-  branding: { accent: '#C2410C', slug: 'pawpaw' },
+  branding: { accent: '#2A7050', slug: 'la-sen' },
   gateway: { keyTail: '8c21', keyVersion: 1, events: [] },
   chatbot: {
     enabled: true,
     greeting:
-      'Chào bạn, mình là trợ lý của Spa thú cưng Pawpaw. Mình xem giá, giờ trống và giữ chỗ cho bé giúp bạn.',
+      'Chào bạn, mình là trợ lý của Spa Lá Sen. Mình xem giá, giờ trống và giữ chỗ giúp bạn.',
     perCustomerPerDay: 20,
     perShopPerMonth: 3000,
     usedThisMonth: 96,

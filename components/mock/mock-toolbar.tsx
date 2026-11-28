@@ -101,7 +101,7 @@ export function MockToolbar() {
           { value: ADMIN, label: 'Quản trị nền tảng' },
         ]}
         selected={role}
-        hrefFor={(value) => (value === ADMIN ? '/mock/admin/templates' : roleHref(value as Role))}
+        hrefFor={(value) => (value === ADMIN ? '/mock/admin' : roleHref(value as Role))}
       />
       <Picker
         label="Gói"

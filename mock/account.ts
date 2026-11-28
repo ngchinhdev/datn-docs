@@ -642,6 +642,13 @@ export function afterLogin(
   return { kind: 'choose' };
 }
 
+/**
+ * The session's `canCreateTrial` (BR-74.19): an account that owns a tenant has made its trial
+ * tenant, so Chọn cơ sở no longer offers to sign one up.
+ */
+export const canCreateTrial = (accountId: string, members: readonly Member[]): boolean =>
+  !members.some((m) => m.accountId === accountId && m.role === 'owner');
+
 /** The tenants of an account as doors; `overrides` replaces the stored status of a tenant. */
 export function doorsOf(
   accountId: string,

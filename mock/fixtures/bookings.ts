@@ -1,6 +1,5 @@
 import {
   ANY_STAFF,
-  matchesAttributes,
   occupation,
   prepMinutes,
   priceFor,
@@ -18,8 +17,6 @@ import type {
   Staff,
   StaffChoice,
 } from './types.ts';
-
-export { matchesAttributes };
 
 export function findVariant(services: Service[], variantId: string): ServiceVariant {
   for (const service of services) {
@@ -86,8 +83,8 @@ export const variantEnd = (startAt: string, variant: ServiceVariant) =>
 
 export interface ItemSpec {
   variantId: string;
-  /** `null` for a hold that has no contact yet. */
-  subjectId: string | null;
+  /** The companion this item is for in a group booking (BR-19); absent for the person who books. */
+  guestName?: string;
   /** One resource per resource type of the variant, staff first. */
   resourceIds: string[];
   /** Default `any`: the system picked the person (BR-31). */
@@ -137,7 +134,7 @@ export function appointmentBuilder(ctx: {
       const staffChoice = item.staffChoice ?? 'any';
       return {
         serviceVariantId: variant.id,
-        servedSubjectId: item.subjectId ?? '',
+        ...(item.guestName ? { guestName: item.guestName } : {}),
         staffResourceId,
         staffChoice,
         // BR-56: a named person charges their level; "Bất kỳ ai" charges the lowest.

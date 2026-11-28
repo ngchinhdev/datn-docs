@@ -10,12 +10,12 @@ import { Field, Form, SaveBar } from '@/components/sapio/form';
 import { PageHeader } from '@/components/sapio/page-header';
 import { useToast } from '@/components/sapio/toast';
 import { useUnsavedGuard } from '@/components/sapio/use-unsaved-guard';
-import type { RefundTiers, TemplatePolicies } from '@/mock/fixtures';
+import type { RefundTiers, BookingPolicies } from '@/mock/fixtures';
 import { formatVnd } from '@/mock/format';
 import { earliestBooking, noShowFrom, refundVnd, selfChangeUntil } from '@/mock/policy';
 import { addDays, formatTime, localDate, MOCK_NOW } from '@/mock/time';
 
-type PolicyKey = keyof TemplatePolicies;
+type PolicyKey = keyof BookingPolicies;
 type TierKey = keyof RefundTiers;
 
 /** An hour on the sample day, 14:00 of today, for the examples that need an appointment. */
@@ -159,7 +159,7 @@ export function PoliciesScreen({ tenantSlug }: { tenantSlug: string }) {
       {
         policies: Object.fromEntries(
           POLICY_ROWS.map((r) => [r.key, Number(form.policies[r.key])]),
-        ) as unknown as TemplatePolicies,
+        ) as unknown as BookingPolicies,
         config: {
           refundTiers: Object.fromEntries(
             TIER_ROWS.map((r) => [r.key, Number(form.tiers[r.key])]),

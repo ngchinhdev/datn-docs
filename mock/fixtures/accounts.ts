@@ -31,7 +31,7 @@ export interface Workspace {
   name: string;
   monogram: string;
   /** Which accent of the Sapio design system the mark wears. */
-  tone: 'may' | 'pawpaw';
+  tone: 'may' | 'la-sen';
   /** `false`: only data of the account, there is no app behind it. */
   built: boolean;
   /** Where the plan stands; a locked tenant is the platform's doing (BR-75). */
@@ -88,11 +88,11 @@ export const workspaces: Workspace[] = [
     status: 'active',
   },
   {
-    id: 'pawpaw',
-    slug: 'pawpaw',
-    name: 'Spa thú cưng Pawpaw',
-    monogram: 'P',
-    tone: 'pawpaw',
+    id: 'la-sen',
+    slug: 'la-sen',
+    name: 'Spa Lá Sen',
+    monogram: 'L',
+    tone: 'la-sen',
     built: true,
     status: 'active',
   },
@@ -110,7 +110,7 @@ export const workspaces: Workspace[] = [
     slug: 'tiem-goi-bong',
     name: 'Tiệm gội Bống',
     monogram: 'B',
-    tone: 'pawpaw',
+    tone: 'la-sen',
     built: false,
     status: 'active',
   },
@@ -139,14 +139,25 @@ export const accounts: Account[] = [
     fullName: 'Phạm Khánh Linh',
     password: SAMPLE_PASSWORD,
   },
-  { id: 'acc-ha', email: 'ha.le@pawpaw.vn', fullName: 'Lê Thu Hà', password: SAMPLE_PASSWORD },
+  { id: 'acc-ha', email: 'ha.le@lasen.vn', fullName: 'Lê Thu Hà', password: SAMPLE_PASSWORD },
   {
     id: 'acc-khoa',
-    email: 'khoa@pawpaw.vn',
+    email: 'khoa@lasen.vn',
     fullName: 'Nguyễn Đăng Khoa',
     password: SAMPLE_PASSWORD,
   },
-  { id: 'acc-vy', email: 'vy@pawpaw.vn', fullName: 'Trịnh Hải Vy', password: SAMPLE_PASSWORD },
+  {
+    id: 'acc-thao',
+    email: 'thao@lasen.vn',
+    fullName: 'Phạm Thanh Thảo',
+    password: SAMPLE_PASSWORD,
+  },
+  {
+    id: 'acc-ngan',
+    email: 'ngan@lasen.vn',
+    fullName: 'Đặng Bảo Ngân',
+    password: SAMPLE_PASSWORD,
+  },
   {
     id: 'acc-nam',
     email: 'nam.tran@email.vn',
@@ -179,22 +190,23 @@ export const members: Member[] = [
     staffResourceId: 'may-hung',
   },
   { workspaceId: 'may', accountId: 'acc-linh', role: 'receptionist', branchId: 'may-q3' },
-  { workspaceId: 'pawpaw', accountId: 'acc-ha', role: 'owner', branchId: null },
+  { workspaceId: 'la-sen', accountId: 'acc-ha', role: 'owner', branchId: null },
+  { workspaceId: 'la-sen', accountId: 'acc-khoa', role: 'manager', branchId: 'sen-q7' },
   {
-    workspaceId: 'pawpaw',
-    accountId: 'acc-khoa',
-    role: 'manager',
-    branchId: 'pawpaw-td',
-    staffResourceId: 'paw-khoa',
-  },
-  {
-    workspaceId: 'pawpaw',
-    accountId: 'acc-vy',
+    workspaceId: 'la-sen',
+    accountId: 'acc-thao',
     role: 'technician',
-    branchId: 'pawpaw-td',
-    staffResourceId: 'paw-vy',
+    branchId: 'sen-q7',
+    staffResourceId: 'sen-thao',
   },
-  { workspaceId: 'pawpaw', accountId: 'acc-linh', role: 'receptionist', branchId: 'pawpaw-td' },
+  {
+    workspaceId: 'la-sen',
+    accountId: 'acc-ngan',
+    role: 'technician',
+    branchId: 'sen-q7',
+    staffResourceId: 'sen-ngan',
+  },
+  { workspaceId: 'la-sen', accountId: 'acc-linh', role: 'receptionist', branchId: 'sen-q7' },
   { workspaceId: 'havy', accountId: 'acc-linh', role: 'receptionist', branchId: null },
   { workspaceId: 'havy', accountId: 'acc-nam', role: 'technician', branchId: null },
 ];
@@ -237,10 +249,10 @@ export const invitations: Invitation[] = [
   },
   {
     id: 'inv-nam',
-    workspaceId: 'pawpaw',
+    workspaceId: 'la-sen',
     email: 'nam.tran@email.vn',
     role: 'receptionist',
-    branchId: 'pawpaw-td',
+    branchId: 'sen-q7',
     takesBookings: false,
     token: 'moi-nam',
     oldTokens: [],
@@ -266,13 +278,13 @@ export const invitations: Invitation[] = [
     decidedAt: '2026-11-06T04:00:00Z',
   },
   {
-    id: 'inv-linh-paw',
-    workspaceId: 'pawpaw',
+    id: 'inv-linh-sen',
+    workspaceId: 'la-sen',
     email: 'linh.pham@email.vn',
     role: 'receptionist',
-    branchId: 'pawpaw-td',
+    branchId: 'sen-q7',
     takesBookings: false,
-    token: 'moi-linh-pawpaw',
+    token: 'moi-linh-sen',
     oldTokens: [],
     invitedBy: 'Lê Thu Hà, chủ cơ sở',
     invitedByAccountId: 'acc-ha',

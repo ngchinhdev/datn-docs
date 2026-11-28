@@ -1,11 +1,10 @@
 'use client';
 
-import { Check, CreditCard, PawPrint, CalendarCheck, Layers, Minus, Scissors } from 'lucide-react';
+import { Check, CreditCard, CalendarCheck, Layers, Minus } from 'lucide-react';
 import Link from 'next/link';
 import { usePlatform } from '@/components/mock/platform-store';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
 import { tenantFixtures } from '@/mock/fixtures';
-import { industryTemplates } from '@/mock/fixtures/templates';
 import { dayHours } from '@/mock/hours';
 import { discountLine, pricingCards, trialNote, TRIAL_LABEL } from '@/mock/landing';
 import { staffColumns } from '@/mock/reception';
@@ -14,13 +13,12 @@ import { formatDay, MOCK_NOW, MOCK_TODAY } from '@/mock/time';
 
 const noop = () => {};
 
-/** MH-01: what Sapio is, the calendar of the sample tenant, the industries and the plans. */
+/** MH-01: what Sapio is, the calendar of the sample tenant and the plans. */
 export function LandingScreen() {
   const { catalog } = usePlatform();
   const salon = tenantFixtures.find((f) => f.tenant.slug === 'toc-may')!;
   const hours = dayHours(salon, MOCK_TODAY);
   const columns = staffColumns(salon, salon.appointments, MOCK_NOW, null, noop, MOCK_TODAY);
-  const industries = industryTemplates.filter((t) => t.status !== 'hidden');
   const host = siteHost(salon.tenant.slug);
 
   const features = [
@@ -54,9 +52,6 @@ export function LandingScreen() {
           <a href="#tinh-nang" className="text-(--ink) no-underline">
             Tính năng
           </a>
-          <a href="#nganh" className="text-(--ink) no-underline">
-            Ngành
-          </a>
           <a href="#gia" className="text-(--ink) no-underline">
             Bảng giá
           </a>
@@ -81,8 +76,8 @@ export function LandingScreen() {
               Sắp lịch cho người, ghế và phòng cùng lúc
             </h1>
             <p className="m-0 text-lg leading-7 text-(--ink-muted)">
-              Sapio giữ lịch hẹn cho tiệm tóc, nail, spa và spa thú cưng. Khách tự đặt trên trang
-              riêng của tiệm; lễ tân thấy cả ngày trên một màn; không ai bị xếp trùng.
+              Sapio giữ lịch hẹn cho salon tóc, tiệm nail và spa. Khách tự đặt trên trang riêng của
+              tiệm; lễ tân thấy cả ngày trên một màn; không ai bị xếp trùng.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -135,37 +130,6 @@ export function LandingScreen() {
                 </span>
                 <h3 className="m-0 text-lg leading-[26px] font-semibold">{title}</h3>
                 <p className="m-0 text-[15px] leading-[22px] text-(--ink-muted)">{text}</p>
-              </section>
-            ))}
-          </div>
-        </section>
-
-        <section id="nganh" className="flex flex-col gap-6" aria-labelledby="lp-n">
-          <h2 id="lp-n" className="m-0 text-[32px] leading-10 font-bold tracking-[-0.01em]">
-            Chọn ngành, tiệm có sẵn dịch vụ mẫu
-          </h2>
-          <div className="flex flex-wrap gap-5">
-            {industries.map((template) => (
-              <section
-                key={template.id}
-                className="sp-panel min-w-[240px] flex-[1_1_0] gap-2.5 p-6!"
-              >
-                <span className="inline-flex size-10 items-center justify-center rounded-(--radius-md) bg-(--brand-soft) text-(--brand)">
-                  {template.id === 'pet_spa' ? (
-                    <PawPrint size={20} aria-hidden="true" />
-                  ) : (
-                    <Scissors size={20} aria-hidden="true" />
-                  )}
-                </span>
-                <h3 className="m-0 text-lg leading-[26px] font-semibold">
-                  {template.name}
-                  {template.status === 'soon' && (
-                    <span className="sp-badge sp-badge--pending ms-2">Sắp có</span>
-                  )}
-                </h3>
-                <p className="m-0 text-[15px] leading-[22px] text-(--ink-muted)">
-                  {template.cardDescription}
-                </p>
               </section>
             ))}
           </div>

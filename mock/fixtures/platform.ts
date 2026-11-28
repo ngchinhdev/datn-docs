@@ -1,7 +1,7 @@
 /*
  * The tenants of the platform as the platform administration sees them (BR-89): who they are, their
  * plan, and totals; never their appointments, customers or invoices. Four of them are the tenants
- * of `accounts.ts` (`may`, `pawpaw`, `havy`, `bong`, same ids); the rest are only data.
+ * of `accounts.ts` (`may`, `sen`, `havy`, `bong`, same ids); the rest are only data.
  */
 import {
   DEFAULT_CATALOG,
@@ -16,8 +16,6 @@ import {
 } from '../subscription.ts';
 import { addDays } from '../time.ts';
 import type { AuditEntry } from './types.ts';
-
-export type IndustryId = 'hair_salon' | 'pet_spa';
 
 export interface PlatformPayment {
   id: string;
@@ -51,9 +49,6 @@ export interface PlatformTenant {
   id: string;
   slug: string;
   name: string;
-  industry: IndustryId;
-  /** Version of the industry template the tenant was created from (BR-70). */
-  templateVersion: number;
   /** Local date. */
   createdOn: string;
   ownerName: string;
@@ -178,8 +173,6 @@ const salonTocMay: PlatformTenant = {
   id: 'may',
   slug: 'toc-may',
   name: 'Salon Tóc Mây',
-  industry: 'hair_salon',
-  templateVersion: 3,
   createdOn: '2026-08-15',
   ownerName: 'Chính Nguyễn',
   ownerEmail: 'chinh@tocmay.vn',
@@ -218,8 +211,6 @@ const tocMocQuan10: PlatformTenant = {
   id: 'toc-moc-q10',
   slug: 'toc-moc-q10',
   name: 'Tóc Mộc Quận 10',
-  industry: 'hair_salon',
-  templateVersion: 3,
   createdOn: '2026-09-12',
   ownerName: 'Lý Thanh Mộc',
   ownerEmail: 'moc.ly@email.vn',
@@ -258,18 +249,16 @@ export const platformTenants: PlatformTenant[] = [
   salonTocMay,
   paid(
     {
-      id: 'pawpaw',
-      slug: 'pawpaw',
-      name: 'Spa thú cưng Pawpaw',
-      industry: 'pet_spa',
-      templateVersion: 1,
+      id: 'la-sen',
+      slug: 'la-sen',
+      name: 'Spa Lá Sen',
       createdOn: '2026-09-20',
       ownerName: 'Lê Thu Hà',
-      ownerEmail: 'ha.le@pawpaw.vn',
+      ownerEmail: 'ha.le@lasen.vn',
       ownerLastLoginAt: '2026-11-07T01:30:00Z',
       totals: {
         branches: 1,
-        members: 4,
+        members: 5,
         takingBookings: 2,
         appointmentsMonth: 96,
         appointments30: 380,
@@ -285,8 +274,6 @@ export const platformTenants: PlatformTenant[] = [
     id: 'barber-pho-co',
     slug: 'barber-pho-co',
     name: 'Barber Phố Cổ',
-    industry: 'hair_salon',
-    templateVersion: 3,
     createdOn: '2026-11-06',
     ownerName: 'Nguyễn Minh Đức',
     ownerEmail: 'duc.barber@email.vn',
@@ -294,14 +281,12 @@ export const platformTenants: PlatformTenant[] = [
     totals: { branches: 1, members: 1, takingBookings: 1, customers: 0 },
   }),
   trialing({
-    id: 'pet-house-q7',
-    slug: 'pethouse-q7',
-    name: 'Pet House Quận 7',
-    industry: 'pet_spa',
-    templateVersion: 2,
+    id: 'hoa-sua-q7',
+    slug: 'hoasua-q7',
+    name: 'Spa Hoa Sữa Quận 7',
     createdOn: '2026-11-06',
     ownerName: 'Trần Hoài An',
-    ownerEmail: 'an.pethouse@email.vn',
+    ownerEmail: 'an.hoasua@email.vn',
     ownerLastLoginAt: '2026-11-06T11:20:00Z',
     totals: { branches: 1, members: 2, takingBookings: 1, customers: 0 },
   }),
@@ -309,8 +294,6 @@ export const platformTenants: PlatformTenant[] = [
     id: 'bong',
     slug: 'tiem-goi-bong',
     name: 'Tiệm gội Bống',
-    industry: 'hair_salon',
-    templateVersion: 3,
     createdOn: '2026-11-05',
     ownerName: 'Bống Trần',
     ownerEmail: 'bong.tran@email.vn',
@@ -321,8 +304,6 @@ export const platformTenants: PlatformTenant[] = [
     id: 'barber-anh-tuan',
     slug: 'barber-anh-tuan',
     name: 'Barber Anh Tuấn',
-    industry: 'hair_salon',
-    templateVersion: 3,
     createdOn: '2026-11-04',
     ownerName: 'Phạm Anh Tuấn',
     ownerEmail: 'tuan.barber@email.vn',
@@ -330,14 +311,12 @@ export const platformTenants: PlatformTenant[] = [
     totals: { branches: 1, members: 2, takingBookings: 2, customers: 0 },
   }),
   trialing({
-    id: 'spa-meo-u',
-    slug: 'spa-meo-u',
-    name: 'Spa Mèo Ú',
-    industry: 'pet_spa',
-    templateVersion: 2,
+    id: 'spa-tra-xanh',
+    slug: 'spa-tra-xanh',
+    name: 'Spa Trà Xanh',
     createdOn: '2026-11-02',
-    ownerName: 'Hoàng Thị Mèo',
-    ownerEmail: 'meou.spa@email.vn',
+    ownerName: 'Hoàng Thị Trà',
+    ownerEmail: 'tra.spa@email.vn',
     ownerLastLoginAt: '2026-11-06T14:30:00Z',
     totals: { branches: 1, members: 2, takingBookings: 1, customers: 0 },
   }),
@@ -346,8 +325,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'tocdep-td',
       slug: 'tocdep-td',
       name: 'Tóc Đẹp Thủ Đức',
-      industry: 'hair_salon',
-      templateVersion: 3,
       createdOn: '2026-08-10',
       ownerName: 'Đỗ Minh Quang',
       ownerEmail: 'quang.tocdep@email.vn',
@@ -371,8 +348,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'xinh',
       slug: 'nailxinh247',
       name: 'Nail Xinh 247',
-      industry: 'hair_salon',
-      templateVersion: 2,
       createdOn: '2026-09-01',
       ownerName: 'Võ Thị Xinh',
       ownerEmail: 'xinh247@email.vn',
@@ -397,8 +372,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'havy',
       slug: 'nail-ha-vy',
       name: 'Nail Hạ Vy',
-      industry: 'hair_salon',
-      templateVersion: 2,
       createdOn: '2026-08-25',
       ownerName: 'Đặng Hạ Vy',
       ownerEmail: 'havy.nail@email.vn',
@@ -422,8 +395,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'toc-xinh-gv',
       slug: 'toc-xinh-gv',
       name: 'Tóc Xinh Gò Vấp',
-      industry: 'hair_salon',
-      templateVersion: 3,
       createdOn: '2026-11-03',
       ownerName: 'Ngô Thị Xinh',
       ownerEmail: 'xinh.gv@email.vn',
@@ -447,8 +418,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'toc-sg-xua',
       slug: 'toc-sg-xua',
       name: 'Salon Tóc Sài Gòn Xưa',
-      industry: 'hair_salon',
-      templateVersion: 2,
       createdOn: '2026-07-20',
       ownerName: 'Vũ Quốc Bảo',
       ownerEmail: 'bao.sgxua@email.vn',
@@ -472,8 +441,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'an-nhien',
       slug: 'an-nhien',
       name: 'Tiệm Cắt Tóc An Nhiên',
-      industry: 'hair_salon',
-      templateVersion: 3,
       createdOn: '2026-08-02',
       ownerName: 'Bùi An Nhiên',
       ownerEmail: 'nhien.an@email.vn',
@@ -497,8 +464,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'hair-lua',
       slug: 'hair-lua',
       name: 'Hair Studio Lụa',
-      industry: 'hair_salon',
-      templateVersion: 3,
       createdOn: '2026-10-28',
       ownerName: 'Trương Thu Lụa',
       ownerEmail: 'lua.studio@email.vn',
@@ -522,8 +487,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'kim-ngan',
       slug: 'kim-ngan',
       name: 'Nail & Hair Kim Ngân',
-      industry: 'hair_salon',
-      templateVersion: 3,
       createdOn: '2026-08-28',
       ownerName: 'Lương Kim Ngân',
       ownerEmail: 'ngan.kim@email.vn',
@@ -548,8 +511,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'barber-hem-25',
       slug: 'barber-hem-25',
       name: 'Barber Hẻm 25',
-      industry: 'hair_salon',
-      templateVersion: 3,
       createdOn: '2026-10-01',
       ownerName: 'Đinh Công Hẻm',
       ownerEmail: 'hem25.barber@email.vn',
@@ -573,8 +534,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'salon-bao-chau',
       slug: 'salon-bao-chau',
       name: 'Salon Bảo Châu',
-      industry: 'hair_salon',
-      templateVersion: 3,
       createdOn: '2026-09-30',
       ownerName: 'Phan Bảo Châu',
       ownerEmail: 'chau.salon@email.vn',
@@ -598,8 +557,6 @@ export const platformTenants: PlatformTenant[] = [
       id: 'toc-nha-minh',
       slug: 'toc-nha-minh',
       name: 'Tóc Nhà Mình',
-      industry: 'hair_salon',
-      templateVersion: 2,
       createdOn: '2026-08-30',
       ownerName: 'Cao Nhật Minh',
       ownerEmail: 'minh.nhatoc@email.vn',
@@ -619,14 +576,12 @@ export const platformTenants: PlatformTenant[] = [
   ),
   paid(
     {
-      id: 'thu-cung-bong-bong',
-      slug: 'bong-bong',
-      name: 'Thú Cưng Bông Bông',
-      industry: 'pet_spa',
-      templateVersion: 2,
+      id: 'spa-bong-sen',
+      slug: 'bong-sen',
+      name: 'Spa Bông Sen',
       createdOn: '2026-09-02',
-      ownerName: 'Lâm Bông',
-      ownerEmail: 'bong.pet@email.vn',
+      ownerName: 'Lâm Sen',
+      ownerEmail: 'sen.spa@email.vn',
       ownerLastLoginAt: '2026-11-07T00:40:00Z',
       totals: {
         branches: 2,
@@ -644,14 +599,12 @@ export const platformTenants: PlatformTenant[] = [
   ),
   paid(
     {
-      id: 'happy-paws',
-      slug: 'happy-paws',
-      name: 'Spa Chó Mèo Happy Paws',
-      industry: 'pet_spa',
-      templateVersion: 2,
+      id: 'happy-spa',
+      slug: 'happy-spa',
+      name: 'Happy Spa',
       createdOn: '2026-09-14',
       ownerName: 'Mai Hạnh Phúc',
-      ownerEmail: 'phuc.paws@email.vn',
+      ownerEmail: 'phuc.happy@email.vn',
       ownerLastLoginAt: '2026-11-06T12:10:00Z',
       totals: {
         branches: 1,
@@ -669,14 +622,12 @@ export const platformTenants: PlatformTenant[] = [
   ),
   paid(
     {
-      id: 'pet-spa-go-vap',
-      slug: 'pet-spa-gv',
-      name: 'Pet Spa Gò Vấp',
-      industry: 'pet_spa',
-      templateVersion: 1,
+      id: 'spa-go-vap',
+      slug: 'spa-gv',
+      name: 'Spa Thư Giãn Gò Vấp',
       createdOn: '2026-09-29',
       ownerName: 'Tạ Gia Huy',
-      ownerEmail: 'huy.petgv@email.vn',
+      ownerEmail: 'huy.spagv@email.vn',
       ownerLastLoginAt: '2026-11-07T01:00:00Z',
       totals: {
         branches: 1,
@@ -694,14 +645,12 @@ export const platformTenants: PlatformTenant[] = [
   ),
   paid(
     {
-      id: 'spa-thu-cung-mimi',
-      slug: 'mimi-pet',
-      name: 'Spa Thú Cưng Mimi',
-      industry: 'pet_spa',
-      templateVersion: 1,
+      id: 'spa-mimi',
+      slug: 'mimi-spa',
+      name: 'Spa Mimi',
       createdOn: '2026-09-18',
       ownerName: 'Dương Mi Mi',
-      ownerEmail: 'mimi.pet@email.vn',
+      ownerEmail: 'mimi.spa@email.vn',
       ownerLastLoginAt: '2026-10-30T08:30:00Z',
       totals: {
         branches: 1,

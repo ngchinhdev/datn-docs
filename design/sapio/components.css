@@ -31,7 +31,7 @@ body {
 
 /* Tenant accent scopes: the customer pages set one of these on their root. */
 .sp-tenant-may { --accent: var(--tenant-may); --accent-soft: var(--tenant-may-soft); --on-accent: var(--on-tenant-may); }
-.sp-tenant-pawpaw { --accent: var(--tenant-pawpaw); --accent-soft: var(--tenant-pawpaw-soft); --on-accent: var(--on-tenant-pawpaw); }
+.sp-tenant-la-sen { --accent: var(--tenant-la-sen); --accent-soft: var(--tenant-la-sen-soft); --on-accent: var(--on-tenant-la-sen); }
 
 /* ---------- Button ---------- */
 .sp-btn {
@@ -1428,7 +1428,7 @@ button.sp-timeline__bar { cursor: pointer; }
    date, variant or slot is brand, and the tenant color stays only on the tenant mark in the switcher. */
 .sp-shell, .sp-admin { --accent: var(--brand); --accent-soft: var(--brand-soft); --on-accent: var(--on-primary); }
 .sp-shell .sp-switcher__mark.sp-tenant-may, .sp-admin .sp-switcher__mark.sp-tenant-may { --accent: var(--tenant-may); --accent-soft: var(--tenant-may-soft); }
-.sp-shell .sp-switcher__mark.sp-tenant-pawpaw, .sp-admin .sp-switcher__mark.sp-tenant-pawpaw { --accent: var(--tenant-pawpaw); --accent-soft: var(--tenant-pawpaw-soft); }
+.sp-shell .sp-switcher__mark.sp-tenant-la-sen, .sp-admin .sp-switcher__mark.sp-tenant-la-sen { --accent: var(--tenant-la-sen); --accent-soft: var(--tenant-la-sen-soft); }
 
 /* ---------- Scrollbars: thin, rounded, toned to the theme ---------- */
 /* Standard properties (Chrome 121+, Edge, Firefox). The thumb darkens while the pointer is over the scroll area. */

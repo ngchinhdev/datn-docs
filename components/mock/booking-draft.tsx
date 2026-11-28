@@ -5,20 +5,11 @@ import { usePersistedState } from '@/components/mock/use-persisted-state';
 import type { PlanItem } from '@/components/sapio/chain-plan';
 import type { BookingItemRef, BookingMode, BookingSlot } from '@/mock/booking';
 import { readSlice, writeSlice } from '@/mock/persist';
-import type { SubjectValues } from '@/mock/subject-schema';
 
 /** A service picked in a chain (BR-18). */
 export interface ChainPick {
   serviceId: string;
   variantId: string;
-}
-
-/** A subject being typed in: valid once its values follow the industry schema (BR-71). */
-export interface SubjectDraft {
-  id: string;
-  name: string;
-  values: SubjectValues;
-  touched: string[];
 }
 
 /** A person of a group at a salon: the booker, then companions with a name only (BR-19). */
@@ -32,11 +23,6 @@ export interface Person {
 export interface BookingState {
   picks: ChainPick[];
   people: Person[] | null;
-  chosenIds: string[];
-  drafts: SubjectDraft[];
-  serviceFor: Record<string, string>;
-  /** The services of the only subject, in order (BR-18); `null` until they are picked. */
-  petChain: string[] | null;
   staffByKey: Record<string, string>;
   date: string;
   name: string;

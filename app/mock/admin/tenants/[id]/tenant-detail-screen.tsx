@@ -11,7 +11,7 @@ import { PageHeader } from '@/components/sapio/page-header';
 import { useToast } from '@/components/sapio/toast';
 import { tenantFixtures } from '@/mock/fixtures';
 import { formatVnd } from '@/mock/format';
-import { INDUSTRY_LABEL, STATE_BADGE, stateLabel, type TenantView } from '@/mock/platform';
+import { STATE_BADGE, stateLabel, type TenantView } from '@/mock/platform';
 import { formatDateTime, formatFullDate, formatTime, localDate } from '@/mock/time';
 import { ExtendDialog, LockDialog, UnlockDialog } from './tenant-dialogs';
 
@@ -136,10 +136,6 @@ export function TenantDetailScreen({ tenantId }: { tenantId: string }) {
               Thông tin
             </h2>
             <dl className="sp-kv m-0">
-              <dt>Ngành</dt>
-              <dd className="sp-num">
-                {INDUSTRY_LABEL[tenant.industry]} · gói ngành bản {tenant.templateVersion}
-              </dd>
               <dt>Chủ cơ sở</dt>
               <dd className="sp-num">
                 {tenant.ownerName} · {tenant.ownerEmail}

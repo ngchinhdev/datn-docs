@@ -17,9 +17,9 @@ import { formatPhone, formatVnd } from '@/mock/format';
 import { walletBalance } from '@/mock/money';
 import { withdrawReal } from '@/mock/money-ops';
 import { lookups } from '@/mock/reception';
-import { describeSubject } from '@/mock/subject-schema';
 import { formatDateTime, formatFullDate, localDate, MOCK_NOW } from '@/mock/time';
 import { dayMonth, entryAmountText, ledgerOf, signedVnd } from '@/mock/wallet-view';
+import { staffNounOf } from '@/mock/staff-noun';
 
 const HISTORY_SHORT = 4;
 
@@ -75,10 +75,6 @@ export function CustomerProfile({ tenantSlug, id }: { tenantSlug: string; id: st
   const balance = walletBalance(world.money.walletEntries, customer.id);
   const since = customer.consentAt ?? appts.at(-1)?.startAt;
   const k = fixture.policies.depositAfterNoShows;
-  const subject = fixture.template.vocabulary.subject;
-  const pets = fixture.servedSubjects.filter(
-    (s) => s.customerId === customer.id && s.kind === 'other',
-  );
   const invoiceOf = (apptId: string) =>
     world.money.invoices.find((i) => i.appointmentId === apptId);
 
@@ -174,7 +170,7 @@ export function CustomerProfile({ tenantSlug, id }: { tenantSlug: string; id: st
                     <tr>
                       <th scope="col">Giờ</th>
                       <th scope="col">Dịch vụ</th>
-                      <th scope="col">{fixture.template.vocabulary.staff}</th>
+                      <th scope="col">{staffNounOf(fixture)}</th>
                       <th scope="col">Trạng thái</th>
                       <th scope="col">Hóa đơn</th>
                     </tr>
@@ -269,30 +265,6 @@ export function CustomerProfile({ tenantSlug, id }: { tenantSlug: string; id: st
               Mỗi dòng là một bút toán; muốn sửa thì ghi bút toán đảo (BR-20).
             </p>
           </section>
-
-          {subject && (
-            <section className="sp-panel" aria-labelledby="cu-pets">
-              <h2 className="sp-panel__title" id="cu-pets">
-                {subject.charAt(0).toUpperCase() + subject.slice(1)}
-              </h2>
-              {pets.length === 0 ? (
-                <p className="sp-empty m-0">Chưa có {subject} nào.</p>
-              ) : (
-                <ul className="m-0 flex list-none flex-col gap-2 p-0 text-sm leading-5">
-                  {pets.map((p) => (
-                    <li key={p.id}>
-                      <span className="font-medium">{p.name}</span>
-                      <span className="text-(--ink-muted)">
-                        {' '}
-                        · {describeSubject(fixture.template.subjectSchema, p)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <p className="sp-panel__note">Chỉ xem; khách tự sửa ở trang của họ (BR-17).</p>
-            </section>
-          )}
         </div>
 
         <aside

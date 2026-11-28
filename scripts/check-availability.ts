@@ -17,7 +17,7 @@ import {
   type FindSlotsInput,
 } from '../mock/availability.ts';
 import { tenantFixtures } from '../mock/fixtures/index.ts';
-import { petServices } from '../mock/fixtures/pawpaw-services.ts';
+import { spaServices } from '../mock/fixtures/la-sen-services.ts';
 import { salonServices } from '../mock/fixtures/salon-services.ts';
 import type { Appointment, ServiceVariant, TenantFixture } from '../mock/fixtures/types.ts';
 import { contains, length, normalize, subtract, type Interval } from '../mock/intervals.ts';
@@ -83,7 +83,7 @@ const grid = (from: string, to: string) => {
   return out;
 };
 
-// ---- Contexts A (Tóc Mây) and B (Pawpaw) ----
+// ---- Contexts A (Tóc Mây) and B (Lá Sen) ----
 
 const variantOf = (services: typeof salonServices, id: string): ServiceVariant => {
   for (const service of services) {
@@ -94,7 +94,7 @@ const variantOf = (services: typeof salonServices, id: string): ServiceVariant =
 };
 const cutShort = variantOf(salonServices, 'may-cut-short');
 const dyeShort = variantOf(salonServices, 'may-dye-short');
-const bathLarge = variantOf(petServices, 'paw-bath-large');
+const mud = variantOf(spaServices, 'sen-mud-std');
 
 const STYLIST = 'may-rt-stylist';
 const CHAIR = 'may-rt-chair';
@@ -114,7 +114,7 @@ const resource = (spec: Spec): CoreResource => {
   return {
     id: spec.id,
     typeId: spec.typeId,
-    isStaff: spec.typeId === STYLIST || spec.typeId === 'paw-rt-groomer',
+    isStaff: spec.typeId === STYLIST || spec.typeId === 'sen-rt-tech',
     level: spec.level ?? 1,
     free: subtract(normalize(spec.avail), busy),
     busyToday: length(busy),
@@ -257,26 +257,26 @@ example(
   ['08:15', '08:30', '09:15', '09:30', '09:45', '10:00', ...grid('13:30', '15:15')],
 );
 
-// VD7 and VD8: Pawpaw, open 08:00–18:00.
+// VD7 and VD8: Lá Sen, open 08:00–18:00.
 const OPEN_B: Interval[] = [span('08:00', '18:00')];
-const groomer = (id: string, busy: Interval[] = []) =>
-  resource({ id, typeId: 'paw-rt-groomer', avail: OPEN_B, busy });
-const bathtub = (n: number, busy: Interval[] = []) =>
-  resource({ id: `Bồn ${n}`, typeId: 'paw-rt-bath', avail: OPEN_B, busy });
-const cage = (n: number, busy: Interval[] = []) =>
-  resource({ id: `Lồng ${n}`, typeId: 'paw-rt-dryer', avail: OPEN_B, busy });
+const technician = (id: string, busy: Interval[] = []) =>
+  resource({ id, typeId: 'sen-rt-tech', avail: OPEN_B, busy });
+const tub = (n: number, busy: Interval[] = []) =>
+  resource({ id: `Bồn ${n}`, typeId: 'sen-rt-tub', avail: OPEN_B, busy });
+const steamRoom = (n: number, busy: Interval[] = []) =>
+  resource({ id: `Phòng xông ${n}`, typeId: 'sen-rt-steam', avail: OPEN_B, busy });
 
 example(
-  'VD7 Tắm sấy chó từ 10 kg, lồng sấy là nút thắt',
+  'VD7 Ngâm bùn, xông hơi, phòng xông là nút thắt',
   input(
-    bathLarge,
+    mud,
     [
-      groomer('Khoa'),
-      groomer('Vy'),
-      bathtub(1),
-      bathtub(2),
-      cage(1, [span('09:30', '10:30')]),
-      cage(2, [span('10:00', '11:00')]),
+      technician('Thảo'),
+      technician('Ngân'),
+      tub(1),
+      tub(2),
+      steamRoom(1, [span('09:30', '10:30')]),
+      steamRoom(2, [span('10:00', '11:00')]),
     ],
     OPEN_B,
   ),
@@ -284,15 +284,15 @@ example(
 );
 
 example(
-  'VD8 Rửa bồn song song với lúc sấy',
+  'VD8 Rửa bồn song song với lúc xông',
   input(
-    bathLarge,
+    mud,
     [
-      groomer('Khoa', [span('09:00', '09:30'), span('10:15', '10:30')]),
-      groomer('Vy'),
-      bathtub(1, [span('09:00', '09:40')]),
-      cage(1, [span('09:30', '10:20')]),
-      cage(2),
+      technician('Thảo', [span('09:00', '09:30'), span('10:15', '10:30')]),
+      technician('Ngân'),
+      tub(1, [span('09:00', '09:40')]),
+      steamRoom(1, [span('09:30', '10:20')]),
+      steamRoom(2),
     ],
     OPEN_B,
   ),
@@ -462,19 +462,20 @@ report(
   startsOf(may, 'may-cut-short', 'may-lan', '14:05').length === 1,
   'Tóc Mây 07/11: giờ lệch lưới 14:05 vẫn đặt được (BR-58)',
 );
-const paw = sample('pawpaw');
+const sen = sample('la-sen');
 report(
-  startsOf(paw, 'paw-bath-large', 'paw-vy', '11:00').length === 0,
-  'Pawpaw 07/11: Tắm sấy chó từ 10 kg lúc 11:00 với Vy không đặt được',
+  startsOf(sen, 'sen-mud-std', 'sen-thao', '11:00').length === 0 &&
+    startsOf(sen, 'sen-mud-std', 'sen-ngan', '11:00').length === 0,
+  'Lá Sen 07/11: Ngâm bùn, xông hơi lúc 11:00 không đặt được, hai phòng xông cùng bận',
 );
-const lucky = startsOf(paw, 'paw-bath-large', ANY_STAFF)
+const nearest = startsOf(sen, 'sen-mud-std', ANY_STAFF)
   .slice(0, 3)
-  .map((x) => `${local(x.startAt)} ${x.staffResourceId.replace('paw-', '')}`)
+  .map((x) => `${local(x.startAt)} ${x.staffResourceId.replace('sen-', '')}`)
   .join(', ');
 report(
-  lucky === '10:00 vy, 12:00 khoa, 12:30 vy',
-  'Pawpaw 07/11: ba giờ đầu còn trống là 10:00 Vy, 12:00 Khoa, 12:30 Vy',
-  lucky,
+  nearest === '11:30 ngan, 11:45 ngan, 12:00 thao',
+  'Lá Sen 07/11: ba giờ đầu còn trống là 11:30 Ngân, 11:45 Ngân, 12:00 Thảo',
+  nearest,
 );
 
 // ---- Chain of services (BR-18) ----
@@ -674,12 +675,11 @@ report(
   );
 }
 
-// ---- Group of several subjects (BR-19) ----
+// ---- Group of several people (BR-19) ----
 
-const bathSmall = variantOf(petServices, 'paw-bath-small');
 const groupInput = (
   resources: CoreResource[],
-  variants: ServiceVariant[] = [bathSmall, bathLarge],
+  variants: ServiceVariant[] = [mud, mud],
 ): FindGroupInput => ({
   items: variants.map((variant) => ({ variant, resources })),
   open: OPEN_B,
@@ -766,36 +766,36 @@ const groupExample = (name: string, i: FindGroupInput) => {
   return got;
 };
 
-const twoCages = groupExample(
-  'BR-19 Mochi và Lucky, hai lồng sấy rảnh',
-  groupInput([groomer('Khoa'), groomer('Vy'), bathtub(1), bathtub(2), cage(1), cage(2)]),
+const twoSteamRooms = groupExample(
+  'BR-19 hai người ngâm bùn, hai phòng xông rảnh',
+  groupInput([technician('Thảo'), technician('Ngân'), tub(1), tub(2), steamRoom(1), steamRoom(2)]),
 );
 report(
-  startsKey(groupStarts(twoCages.together[0]!)) === '08:00/08:00',
-  'BR-19: hai bé cùng giờ sớm nhất 08:00',
+  startsKey(groupStarts(twoSteamRooms.together[0]!)) === '08:00/08:00',
+  'BR-19: hai người cùng giờ sớm nhất 08:00',
 );
 report(
-  twoCages.together.every(
-    (s) => new Set(s.items.map((x) => x.assignment['paw-rt-groomer'])).size === s.items.length,
+  twoSteamRooms.together.every(
+    (s) => new Set(s.items.map((x) => x.assignment['sen-rt-tech'])).size === s.items.length,
   ),
-  'BR-19: mỗi bé một nhân viên khác nhau',
+  'BR-19: mỗi người một kỹ thuật viên khác nhau',
 );
 
-const oneCage = groupExample(
-  'BR-19 Mochi và Lucky, chỉ còn một lồng sấy rảnh',
-  groupInput([groomer('Khoa'), groomer('Vy'), bathtub(1), bathtub(2), cage(1)]),
+const oneSteamRoom = groupExample(
+  'BR-19 hai người ngâm bùn, chỉ còn một phòng xông rảnh',
+  groupInput([technician('Thảo'), technician('Ngân'), tub(1), tub(2), steamRoom(1)]),
 );
-report(oneCage.together.length === 0, 'BR-19: một lồng sấy thì không có giờ cùng lúc');
-report(oneCage.staggered.length > 0, 'BR-19: một lồng sấy thì có giờ lệch nhau');
+report(oneSteamRoom.together.length === 0, 'BR-19: một phòng xông thì không có giờ cùng lúc');
+report(oneSteamRoom.staggered.length > 0, 'BR-19: một phòng xông thì có giờ lệch nhau');
 report(
-  oneCage.staggered.every((s) => {
+  oneSteamRoom.staggered.every((s) => {
     const starts = groupStarts(s);
     return Math.max(...starts) - Math.min(...starts) <= 60;
   }),
   'BR-19: giờ lệch nhau cách nhau không quá 60 phút',
 );
 report(
-  oneCage.staggered.every((s, k, all) => k === 0 || all[k - 1]!.end <= s.end),
+  oneSteamRoom.staggered.every((s, k, all) => k === 0 || all[k - 1]!.end <= s.end),
   'BR-19: giờ lệch nhau xếp theo giờ xong sớm nhất',
 );
 
@@ -807,14 +807,14 @@ const sampleGroup = (slug: string, ids: string[]) => {
     items: ids.map((id) => ({ ...sampleVariant(fixture, id), staffResourceId: ANY_STAFF })),
   });
 };
-const pawGroup = sampleGroup('pawpaw', ['paw-bath-small', 'paw-bath-large']);
+const senGroup = sampleGroup('la-sen', ['sen-massage-60', 'sen-massage-90']);
 report(
-  pawGroup.together.length + pawGroup.staggered.length > 0 &&
-    pawGroup.staggered.every(
+  senGroup.together.length + senGroup.staggered.length > 0 &&
+    senGroup.staggered.every(
       (s) => Date.parse(s.items[1]!.startAt) - Date.parse(s.items[0]!.startAt) !== 0,
     ),
-  'Pawpaw 07/11: Mochi và Lucky Tắm sấy có giờ cùng lúc hoặc lệch nhau',
-  `${pawGroup.together.length} cùng giờ, ${pawGroup.staggered.length} lệch`,
+  'Lá Sen 07/11: hai người Massage 60′ và 90′ có giờ cùng lúc hoặc lệch nhau',
+  `${senGroup.together.length} cùng giờ, ${senGroup.staggered.length} lệch`,
 );
 const mayGroup = sampleGroup('toc-may', ['may-cut-long', 'may-cut-short']);
 report(
@@ -849,7 +849,6 @@ report(
     id: 'other',
     customerId: null,
     refs,
-    subjectIds: [''],
     slot: first,
     status: 'confirmed',
   });
@@ -885,7 +884,6 @@ report(
     id: 'mine',
     customerId: 'c',
     refs,
-    subjectIds: ['s'],
     slot: first,
     status: 'confirmed',
     depositVnd: 100_000n,
@@ -899,45 +897,44 @@ report(
   );
 }
 
-// ---- BR-18 for a subject: one pet, several services in order ----
+// ---- BR-18 for one person: several services in order ----
 
 {
-  const paw = sample('pawpaw');
+  const sen = sample('la-sen');
   const now = '2026-11-07T03:20:00Z';
   const refs: BookingItemRef[] = [
     {
-      key: 'paw-bath',
-      subjectId: 'paw-s-mochi',
-      serviceId: 'paw-bath',
-      variantId: 'paw-bath-small',
+      key: 'sen-massage',
+      serviceId: 'sen-massage',
+      variantId: 'sen-massage-60',
       staffChoice: ANY_STAFF,
     },
     {
-      key: 'paw-groom',
-      subjectId: 'paw-s-mochi',
-      serviceId: 'paw-groom',
-      variantId: 'paw-groom-small',
+      key: 'sen-facial',
+      serviceId: 'sen-facial',
+      variantId: 'sen-facial-std',
       staffChoice: ANY_STAFF,
     },
   ];
-  const slots = bookingSlots(paw, refs, 'chain', '2026-11-12', now).main;
+  const slots = bookingSlots(sen, refs, 'chain', '2026-11-12', now).main;
   report(
     slots.length > 0 && slots.every((s) => s.items[1]!.startAt === s.items[0]!.endAt),
-    'BR-18: Mochi Tắm sấy rồi Cắt tỉa, mục sau bắt đầu khi mục trước xong',
+    'BR-18: Massage 60′ rồi Chăm sóc da mặt, mục sau bắt đầu khi mục trước xong',
     `${slots.length} giờ`,
   );
-  const mochi = paw.servedSubjects.find((x) => x.id === 'paw-s-mochi')!;
   const same = {
-    ...paw.appointments[0]!,
+    ...sen.appointments[0]!,
     items: refs.map((r) => ({
       serviceVariantId: r.variantId,
-      servedSubjectId: mochi.id,
-      staffResourceId: 'paw-khoa',
+      staffResourceId: 'sen-thao',
       staffChoice: 'any' as const,
       priceVnd: 0n,
     })),
   };
-  report(modeOf(same) === 'chain', 'BR-18, BR-19: một bé nhiều dịch vụ là chuỗi, nhiều bé là nhóm');
+  report(
+    modeOf(same) === 'chain',
+    'BR-18, BR-19: một người nhiều dịch vụ là chuỗi, nhiều người là nhóm',
+  );
 }
 
 // ---- BR-06 for the customer, none for the receptionist (BR-30) ----
@@ -970,12 +967,12 @@ report(
     'BR-30: lễ tân đặt được giờ sớm hơn mức đặt trước của khách',
     desk[0] ? local(desk[0].startAt) : '',
   );
-  const paw = sample('pawpaw');
-  const pawRefs = refsOf('paw-bath', 'paw-bath-small');
-  const at = (date: string) => bookingSlots(paw, pawRefs, 'single', date, now).main.length;
+  const sen = sample('la-sen');
+  const senRefs = refsOf('sen-massage', 'sen-massage-60');
+  const at = (date: string) => bookingSlots(sen, senRefs, 'single', date, now).main.length;
   report(
     at('2026-12-05') > 0 && at('2026-12-08') === 0,
-    'BR-06: Pawpaw nhận đặt xa nhất 30 ngày, ngày 08/12 chưa mở',
+    'BR-06: Lá Sen nhận đặt xa nhất 30 ngày, ngày 08/12 chưa mở',
     `05/12: ${at('2026-12-05')} giờ, 08/12: ${at('2026-12-08')} giờ`,
   );
   report(
@@ -1004,7 +1001,6 @@ report(
       heldItems(
         fixture,
         fixture.appointments.find((a) => a.id === 'may-a-quyen-upcoming')!,
-        fixture.servedSubjects,
         false,
       ),
     ),
@@ -1091,7 +1087,7 @@ report(
       openQuestion('may-a-hang', fixture.staffTimeOff, []) === null,
     'Lịch 10/11 của Chị Quyên đang chờ trả lời đổi sang Mai; lịch "Bất kỳ ai" thì không có câu hỏi',
   );
-  const items = heldItems(fixture, appt, fixture.servedSubjects, false);
+  const items = heldItems(fixture, appt, false);
   const refs = refsOfItems(items);
   const NOW_Q = '2026-11-07T03:20:00Z';
   const lanOff = bookingSlots(fixture, refs, modeOf(appt), '2026-11-10', NOW_Q, {
@@ -1102,7 +1098,7 @@ report(
     'Đổi giờ lịch đích danh: Lan có đơn nghỉ chờ duyệt ngày 10/11 nên ngày đó không có giờ (BR-11)',
   );
   const next = fixture.appointments.find((a) => a.id === 'may-a-quyen-upcoming')!;
-  const nextRefs = refsOfItems(heldItems(fixture, next, fixture.servedSubjects, false));
+  const nextRefs = refsOfItems(heldItems(fixture, next, false));
   const mine = bookingSlots(fixture, nextRefs, 'single', '2026-11-21', NOW_Q, {
     appointments: fixture.appointments.filter((a) => a.id !== next.id),
   }).main;
@@ -1197,8 +1193,8 @@ report(
       true,
     'Email đã hoàn cọc: 100% khi còn hơn 24 giờ (BR-23)',
   );
-  const paw = buildEmails(sample('pawpaw'), '2026-11-07T03:20:00Z');
-  report(paw.length >= 7, 'Email Pawpaw: dựng được từ lịch mẫu của Chị Linh', `${paw.length} mẫu`);
+  const sen = buildEmails(sample('la-sen'), '2026-11-07T03:20:00Z');
+  report(sen.length >= 7, 'Email Lá Sen: dựng được từ lịch mẫu của Chị Linh', `${sen.length} mẫu`);
 }
 
 // ---- Moving by drag (MH-27) on the same day ----

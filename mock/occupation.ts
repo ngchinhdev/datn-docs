@@ -1,36 +1,12 @@
 /*
  * Pure functions over one service variant: what it occupies, what the customer sees, what it
- * costs, whether its conditions cover every subject. Sample for `packages/scheduling-core`.
- * Imports only types, so Node can run it directly (scripts/check-availability.ts).
+ * costs. Sample for `packages/scheduling-core`.
  */
 import { length, normalize, type Interval } from './intervals.ts';
-import { isRequired } from './subject-schema.ts';
-import type {
-  MatchValue,
-  Service,
-  ServiceSegment,
-  ServiceVariant,
-  SubjectField,
-} from './fixtures/types.ts';
+import type { ServiceSegment, ServiceVariant } from './fixtures/types.ts';
 
 /** Value of the staff choice that lets the system assign the person (BR-14). */
 export const ANY_STAFF = 'any';
-
-/** BR-13: does a served subject's attributes select a variant? Ranges compare as numbers. */
-export function matchesAttributes(
-  match: Record<string, MatchValue>,
-  attributes: Record<string, string>,
-): boolean {
-  return Object.entries(match).every(([key, wanted]) => {
-    const actual = attributes[key];
-    if (typeof wanted === 'string') return actual === wanted;
-    const n = Number(actual);
-    if (actual === undefined || Number.isNaN(n)) return false;
-    return (
-      (wanted.min === undefined || n >= wanted.min) && (wanted.max === undefined || n < wanted.max)
-    );
-  });
-}
 
 /** Resource types a variant uses, in order of first use. */
 export function resourceTypesOf(variant: Pick<ServiceVariant, 'segments'>): string[] {
@@ -143,134 +119,4 @@ export function priceRange(
   const prices = staff.map((s) => priceFor(variant, s.resourceId, staff));
   if (prices.length === 0) return [variant.priceVnd, variant.priceVnd];
   return [prices.reduce((a, b) => (b < a ? b : a)), prices.reduce((a, b) => (b > a ? b : a))];
-}
-
-const ABSENT = Symbol('absent');
-type Choice = string | typeof ABSENT;
-
-const numberText = (n: number) => String(Number(n.toFixed(2))).replace('.', ',');
-
-interface Combo {
-  values: Record<string, Choice>;
-  /** Representative number per number field, and where its run of equal results ends. */
-  ends: Record<string, number>;
-}
-
-/**
- * BR-55: with variants chosen by the subject's attributes, every valid subject must match exactly
- * one variant. Tries each option of a choice field and, for a number field, one value in every
- * stretch between the limits the variants use. Returns readable errors; empty when the
- * conditions are sound.
- */
-export function checkVariantCoverage(
-  service: Pick<Service, 'variantSelection' | 'variants'>,
-  schema: readonly SubjectField[],
-): string[] {
-  if (service.variantSelection === 'customer') return [];
-  if (service.variants.length === 0) return ['Chưa có biến thể nào.'];
-
-  const fields = schema.filter((f) => f.type !== 'text');
-  const limits = (key: string) => {
-    const set = new Set<number>([0]);
-    for (const v of service.variants) {
-      const m = v.match[key];
-      if (m && typeof m !== 'string') {
-        for (const n of [m.min, m.max]) if (n !== undefined && n > 0) set.add(n);
-      }
-    }
-    return [...set].sort((a, b) => a - b);
-  };
-
-  const combos: Combo[] = [];
-  const walk = (i: number, values: Record<string, Choice>, ends: Record<string, number>) => {
-    const field = fields[i];
-    if (!field) {
-      combos.push({ values: { ...values }, ends: { ...ends } });
-      return;
-    }
-    const known = Object.fromEntries(
-      Object.entries(values).flatMap(([k, v]) => (v === ABSENT ? [] : [[k, v]])),
-    );
-    if (field.type === 'enum') {
-      const options: Choice[] = field.options.map((o) => o.value);
-      if (field.required !== true) options.push(ABSENT);
-      for (const option of options) walk(i + 1, { ...values, [field.key]: option }, ends);
-      return;
-    }
-    const starts = limits(field.key);
-    const choices: { value: Choice; end: number }[] = starts.map((start, j) => ({
-      value: String(start),
-      end: starts[j + 1] ?? Infinity,
-    }));
-    if (!isRequired(field, known)) choices.unshift({ value: ABSENT, end: 0 });
-    for (const { value, end } of choices) {
-      walk(i + 1, { ...values, [field.key]: value }, { ...ends, [field.key]: end });
-    }
-  };
-  walk(0, {}, {});
-
-  const numberFields = fields.filter((f) => f.type === 'number');
-  const phrase = (combo: Combo, merged: Map<Combo, number>) => {
-    const parts: string[] = [];
-    for (const field of fields) {
-      const value = combo.values[field.key];
-      if (value === undefined || value === ABSENT) continue;
-      if (field.type === 'enum') {
-        parts.push(field.options.find((o) => o.value === value)?.label ?? value);
-      } else if (field.type === 'number') {
-        const unit = field.unit ? ` ${field.unit}` : '';
-        const from = Number(value);
-        const to = merged.get(combo) ?? combo.ends[field.key] ?? Infinity;
-        if (merged.has(combo)) {
-          if (from > 0 && to === Infinity) parts.push(`từ ${numberText(from)}${unit}`);
-          else if (from > 0) parts.push(`từ ${numberText(from)} đến dưới ${numberText(to)}${unit}`);
-          else if (to !== Infinity) parts.push(`dưới ${numberText(to)}${unit}`);
-        } else if (from > 0) parts.push(`${numberText(from)}${unit}`);
-        else if (to !== Infinity) parts.push(`dưới ${numberText(to)}${unit}`);
-      }
-    }
-    return parts.join(' ');
-  };
-
-  const errors: string[] = [];
-  const gaps: Combo[] = [];
-  const seenOverlap = new Set<string>();
-  for (const combo of combos) {
-    const attributes = Object.fromEntries(
-      Object.entries(combo.values).flatMap(([k, v]) => (v === ABSENT ? [] : [[k, v]])),
-    );
-    const hit = service.variants.filter((v) => matchesAttributes(v.match, attributes));
-    if (hit.length === 0) gaps.push(combo);
-    else if (hit.length > 1) {
-      const names = hit.map((v) => v.name).join(', ');
-      const key = `${hit.map((v) => v.id).join('|')}|${phrase(combo, new Map())}`;
-      if (!seenOverlap.has(key)) {
-        seenOverlap.add(key);
-        errors.push(`${phrase(combo, new Map())} khớp ${hit.length} biến thể: ${names}.`);
-      }
-    }
-  }
-
-  // A run of neighbouring stretches with the same other values reads as one range.
-  const single = numberFields.length === 1 ? numberFields[0] : undefined;
-  const merged = new Map<Combo, number>();
-  const used = new Set<Combo>();
-  for (const [i, gap] of gaps.entries()) {
-    if (used.has(gap)) continue;
-    let end = single ? (gap.ends[single.key] ?? Infinity) : 0;
-    if (single && gap.values[single.key] !== ABSENT) {
-      for (const next of gaps.slice(i + 1)) {
-        const sameRest = fields.every(
-          (f) => f.key === single.key || next.values[f.key] === gap.values[f.key],
-        );
-        if (sameRest && next.values[single.key] === String(end)) {
-          used.add(next);
-          end = next.ends[single.key] ?? Infinity;
-        }
-      }
-      merged.set(gap, end);
-    }
-    errors.push(`${phrase(gap, merged)} chưa khớp biến thể nào.`);
-  }
-  return errors;
 }

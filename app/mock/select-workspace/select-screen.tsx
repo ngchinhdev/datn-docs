@@ -13,6 +13,7 @@ import { AuthPage } from '@/components/sapio/signup-layout';
 import { useToast } from '@/components/sapio/toast';
 import {
   branchLabel,
+  canCreateTrial,
   doorEntry,
   doorsOf,
   entryHref,
@@ -193,10 +194,14 @@ export function SelectScreen() {
           </section>
         )}
         <p className="m-0 text-center text-sm text-(--ink-muted)">
-          <Link href="/mock/signup" className="sp-link">
-            {t.select.own}
-          </Link>{' '}
-          ·{' '}
+          {canCreateTrial(signedIn.id, members) && (
+            <>
+              <Link href="/mock/signup?step=business" className="sp-link">
+                {t.select.own}
+              </Link>{' '}
+              ·{' '}
+            </>
+          )}
           <Link
             href="/mock/login"
             className="sp-link"

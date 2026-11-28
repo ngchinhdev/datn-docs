@@ -11,7 +11,6 @@ import {
   platformTenants,
   type PlatformTenant,
 } from '../mock/fixtures/platform.ts';
-import { industryTemplates } from '../mock/fixtures/templates.ts';
 import {
   EXTEND_MAX_DAYS,
   addPlatformLog,
@@ -61,7 +60,7 @@ const viewsAt = (now: string, locks: typeof SEED_LOCKS = SEED_LOCKS): TenantView
   platformTenants.map((t) => tenantView(t, t.subscription, locks[t.id] ?? null, now));
 const views = viewsAt(MOCK_NOW);
 const viewOf = (id: string) => views.find((v) => v.tenant.id === id)!;
-const none: TenantFilter = { q: '', state: '', plan: '', industry: '', lockedOnly: false };
+const none: TenantFilter = { q: '', state: '', plan: '', lockedOnly: false };
 const names = (list: TenantView[]) => list.map((v) => v.tenant.name);
 
 // ---- The sample tenants ----
@@ -81,10 +80,10 @@ report(
 );
 report(
   tenant('may').subscription.periodEndsOn === DEFAULT_PERIOD_END &&
-    tenant('pawpaw').subscription.periodEndsOn === DEFAULT_PERIOD_END &&
+    tenant('la-sen').subscription.periodEndsOn === DEFAULT_PERIOD_END &&
     tenant('may').subscription.planCode === 'pro' &&
-    tenant('pawpaw').subscription.planCode === 'basic',
-  'BR-83: Tóc Mây Chuyên nghiệp, Pawpaw Cơ bản, cùng hết 28/11/2026',
+    tenant('la-sen').subscription.planCode === 'basic',
+  'BR-83: Tóc Mây Chuyên nghiệp, Lá Sen Cơ bản, cùng hết 28/11/2026',
 );
 report(
   workspaces.every((w) => {
@@ -97,7 +96,7 @@ report(
         own.filter((m) => m.staffResourceId).length === t.totals.takingBookings)
     );
   }),
-  'BR-89: số thành viên và số người nhận khách của Tóc Mây, Pawpaw khớp danh sách thành viên',
+  'BR-89: số thành viên và số người nhận khách của Tóc Mây, Lá Sen khớp danh sách thành viên',
 );
 {
   const bad = platformTenants.filter((t) => {
@@ -123,18 +122,6 @@ report(
     ),
   'BR-80, BR-81: dùng thử 7 ngày tính cả ngày tạo, chưa có thanh toán và chưa có lịch hẹn',
 );
-{
-  const created = (id: string, version: number) =>
-    platformTenants.filter((t) => t.industry === id && t.templateVersion === version).length;
-  report(
-    industryTemplates.every(
-      (tpl) =>
-        tpl.publishedVersion === null ||
-        created(tpl.id, tpl.publishedVersion.number) === tpl.publishedVersion.tenantsCreated,
-    ),
-    'BR-70: số cơ sở tạo từ bản đang xuất bản của mỗi ngành khớp trang Gói cấu hình ngành',
-  );
-}
 
 // ---- BR-89: state of the plan, lock apart ----
 
@@ -156,9 +143,9 @@ report(
   'BR-89: Nail Xinh 247 bị khóa vẫn là "Đang dùng", còn 39 ngày: khóa là cờ riêng, không phải trạng thái gói',
 );
 report(
-  sevenDaysOn.find((v) => v.tenant.id === 'spa-meo-u')?.state === 'expired' &&
+  sevenDaysOn.find((v) => v.tenant.id === 'spa-tra-xanh')?.state === 'expired' &&
     sevenDaysOn.find((v) => v.tenant.id === 'may')?.state === 'active',
-  'BR-80: sau 23:59 ngày 08/11 Spa Mèo Ú hết dùng thử, đồng hồ quyết định chứ không có job đổi trạng thái',
+  'BR-80: sau 23:59 ngày 08/11 Spa Trà Xanh hết dùng thử, đồng hồ quyết định chứ không có job đổi trạng thái',
 );
 
 // ---- BR-91: extending by hand ----
@@ -189,9 +176,9 @@ report(
   );
 }
 {
-  const meoU = tenant('spa-meo-u').subscription;
+  const traXanh = tenant('spa-tra-xanh').subscription;
   const late = '2026-11-12T03:20:00Z';
-  const e = extension(meoU, 7, late);
+  const e = extension(traXanh, 7, late);
   report(
     e.mode === 'expired' && e.field === 'trial' && e.newEnd === '2026-11-18',
     'BR-91: dùng thử đã hết thì tính từ hôm nay và vẫn là dùng thử',
@@ -383,14 +370,6 @@ report(
   `${ov.total} = ${ov.paid} + ${ov.trial} + ${ov.expired}`,
 );
 report(
-  ov.industriesTotal.tenants === filterTenants(views, none).length &&
-    ov.industries.reduce((s, r) => s + r.tenants, 0) === 23 &&
-    ov.industriesTotal.appointmentsMonth ===
-      platformTenants.reduce((s, t) => s + t.totals.appointmentsMonth, 0) &&
-    ov.industries.every((r) => r.paid + r.trial + r.expired === r.tenants),
-  'BR-89: bảng cơ sở theo ngành cộng khớp với danh sách 23 cơ sở',
-);
-report(
   ov.createdSince === 6 &&
     ov.since === '2026-11-01' &&
     ov.trialEndingSoon === 1 &&
@@ -428,10 +407,10 @@ report(
 }
 report(
   ov.expiring.length > 0 &&
-    ov.expiring[0]?.tenant.name === 'Spa Mèo Ú' &&
+    ov.expiring[0]?.tenant.name === 'Spa Trà Xanh' &&
     names(ov.expiring).includes('Tóc Đẹp Thủ Đức') &&
     names(ov.expiring).includes('Nail Hạ Vy'),
-  'BR-86: "Sắp hết hạn, đã hết hạn" có Spa Mèo Ú (còn 2 ngày), Tóc Đẹp Thủ Đức (còn 3 ngày) và Nail Hạ Vy',
+  'BR-86: "Sắp hết hạn, đã hết hạn" có Spa Trà Xanh (còn 2 ngày), Tóc Đẹp Thủ Đức (còn 3 ngày) và Nail Hạ Vy',
   names(ov.expiring).join(', '),
 );
 
@@ -444,8 +423,7 @@ report(
 report(
   names(filterTenants(views, { ...none, q: 'tocmay' })).join('|') === 'Salon Tóc Mây' &&
     names(filterTenants(views, { ...none, q: 'TOC MAY' })).includes('Salon Tóc Mây') &&
-    names(filterTenants(views, { ...none, q: 'ha.le@pawpaw' })).join('|') ===
-      'Spa thú cưng Pawpaw' &&
+    names(filterTenants(views, { ...none, q: 'ha.le@lasen' })).join('|') === 'Spa Lá Sen' &&
     names(filterTenants(views, { ...none, q: 'toc-xinh-gv' })).join('|') === 'Tóc Xinh Gò Vấp' &&
     filterTenants(views, { ...none, q: 'không có cơ sở này' }).length === 0,
   'BR-89: tìm theo tên (không dấu, không phân biệt hoa thường), địa chỉ trang và email chủ cơ sở',
@@ -454,10 +432,8 @@ report(
   filterTenants(views, { ...none, state: 'expired' }).length === 3 &&
     filterTenants(views, { ...none, state: 'trial' }).length === 5 &&
     filterTenants(views, { ...none, plan: 'basic' }).length === 12 &&
-    filterTenants(views, { ...none, plan: 'pro' }).length === 11 &&
-    filterTenants(views, { ...none, industry: 'pet_spa' }).length === 7 &&
-    filterTenants(views, { ...none, industry: 'pet_spa', state: 'expired' }).length === 1,
-  'BR-89: lọc theo trạng thái, gói và ngành',
+    filterTenants(views, { ...none, plan: 'pro' }).length === 11,
+  'BR-89: lọc theo trạng thái và gói',
 );
 {
   const all = filterTenants(views, none);

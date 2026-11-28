@@ -21,7 +21,6 @@ export function useLiveFixture(tenantSlug: string): TenantFixture {
   const {
     appointments,
     customers,
-    servedSubjects,
     shifts,
     leaves,
     staffSeesCustomerPhone,
@@ -40,7 +39,6 @@ export function useLiveFixture(tenantSlug: string): TenantFixture {
       services: applyBranchPrices(services, branch.prices),
       appointments,
       customers,
-      servedSubjects,
       shifts,
       staffTimeOff: leaves,
       staffSeesCustomerPhone,
@@ -57,7 +55,6 @@ export function useLiveFixture(tenantSlug: string): TenantFixture {
       services,
       appointments,
       customers,
-      servedSubjects,
       shifts,
       leaves,
       staffSeesCustomerPhone,

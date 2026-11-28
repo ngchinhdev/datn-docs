@@ -53,7 +53,7 @@ export interface ShellWorkspace {
   name: string;
   /** Letter on the colored mark. */
   initial: string;
-  /** `sp-tenant-may`, `sp-tenant-pawpaw`: scopes `--accent*` to the tenant. */
+  /** `sp-tenant-may`, `sp-tenant-la-sen`: scopes `--accent*` to the tenant. */
   accentClass: string;
 }
 

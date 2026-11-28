@@ -374,9 +374,7 @@ export function BrandingScreen({ tenantSlug }: { tenantSlug: string }) {
             </div>
             <div className="flex flex-col gap-[6px] px-[14px] py-3">
               <strong className="text-lg">{fixture.tenant.name}</strong>
-              <span className="text-[13px] text-(--ink-muted)">
-                {fixture.template.cardDescription}
-              </span>
+              <span className="text-[13px] text-(--ink-muted)">{fixture.branches[0]?.address}</span>
               <div className="sp-slots mt-[6px] grid-cols-3">
                 {['14:00', '14:15', '15:00'].map((t, i) => (
                   <button

@@ -1,15 +1,6 @@
 // Editing a service in the settings pages: segment list operations, checks and change count.
 // Pure functions over fixtures; no React.
-import type {
-  MatchValue,
-  Service,
-  ServiceSegment,
-  ServiceVariant,
-  SegmentKind,
-  Staff,
-  SubjectField,
-} from './fixtures';
-import { checkVariantCoverage } from './occupation';
+import type { Service, ServiceSegment, ServiceVariant, SegmentKind, Staff } from './fixtures';
 
 export const MIN_MINUTES = 5;
 export const MAX_MINUTES = 480;
@@ -154,70 +145,34 @@ export const fromDraft = (draft: DraftService): Service => ({
   })),
 });
 
+const nameKey = (name: string) => name.trim().replace(/\s+/g, ' ').toLocaleLowerCase('vi');
+
+/** BR-55: variant names of one service are all different. Each repeated name is reported once. */
+export function duplicateVariantNames(variants: readonly Pick<ServiceVariant, 'name'>[]): string[] {
+  const seen = new Set<string>();
+  const repeated = new Map<string, string>();
+  for (const { name } of variants) {
+    const key = nameKey(name);
+    if (!key) continue;
+    if (seen.has(key)) repeated.set(key, name.trim());
+    seen.add(key);
+  }
+  return [...repeated.values()];
+}
+
 /** Everything the page checks before it lets the owner save. */
-export function allProblems(draft: DraftService, schema: readonly SubjectField[]) {
-  const coverage = checkVariantCoverage(fromDraft(draft), schema);
+export function allProblems(draft: DraftService) {
+  const duplicates = duplicateVariantNames(draft.variants);
   const rows = draft.variants.some((v) => Object.keys(segmentErrors(v.segments)).length > 0);
   const variants = draft.variants.flatMap(variantProblems);
   const nameMissing = draft.variants.some((v) => !v.name.trim());
   return {
-    coverage,
+    duplicates,
     rows,
     variants,
     nameMissing,
-    any: coverage.length > 0 || rows || variants.length > 0 || nameMissing || !draft.name.trim(),
+    any: duplicates.length > 0 || rows || variants.length > 0 || nameMissing || !draft.name.trim(),
   };
-}
-
-// ---- Match conditions (BR-13) ----
-
-export function setMatchEnum(variant: DraftVariant, key: string, value: string): DraftVariant {
-  const match = { ...variant.match };
-  if (value) match[key] = value;
-  else delete match[key];
-  return { ...variant, match };
-}
-
-export function setMatchRange(
-  variant: DraftVariant,
-  key: string,
-  range: { min?: number | undefined; max?: number | undefined },
-): DraftVariant {
-  const match = { ...variant.match };
-  const next: { min?: number; max?: number } = {};
-  if (range.min !== undefined) next.min = range.min;
-  if (range.max !== undefined) next.max = range.max;
-  if (next.min === undefined && next.max === undefined) delete match[key];
-  else match[key] = next;
-  return { ...variant, match };
-}
-
-export const matchRange = (match: MatchValue | undefined) =>
-  match && typeof match !== 'string' ? match : {};
-
-/** "Loài: Chó", "Cân nặng từ 10 kg": the chips under "Áp dụng khi". */
-export function describeMatch(
-  match: Record<string, MatchValue>,
-  schema: readonly SubjectField[],
-): string[] {
-  return schema.flatMap((field) => {
-    const value = match[field.key];
-    if (value === undefined) return [];
-    if (field.type === 'enum' && typeof value === 'string') {
-      return [`${field.label}: ${field.options.find((o) => o.value === value)?.label ?? value}`];
-    }
-    if (field.type === 'number' && typeof value !== 'string') {
-      const unit = field.unit ? ` ${field.unit}` : '';
-      const text =
-        value.min !== undefined && value.max !== undefined
-          ? `từ ${value.min} đến dưới ${value.max}${unit}`
-          : value.min !== undefined
-            ? `từ ${value.min}${unit}`
-            : `dưới ${value.max}${unit}`;
-      return [`${field.label} ${text}`];
-    }
-    return [];
-  });
 }
 
 // ---- Change count ----
@@ -241,13 +196,7 @@ export function countChanges(
   savedSkills: readonly string[],
 ): number {
   let n = 0;
-  const base: (keyof Service)[] = [
-    'name',
-    'group',
-    'description',
-    'variantSelection',
-    'bookableOnline',
-  ];
+  const base: (keyof Service)[] = ['name', 'group', 'description', 'bookableOnline'];
   for (const key of base) if (!same(draft[key], saved[key])) n++;
   if (!same(depositOf(draft), depositOf(saved))) n++;
 
@@ -260,7 +209,6 @@ export function countChanges(
     if (!old) continue;
     if (v.name !== old.name) n++;
     if (v.shortName !== old.shortName) n++;
-    if (!same(v.match, old.match)) n++;
     if (v.priceVnd !== old.priceVnd) n++;
     if (!same(v.pricesByLevel ?? null, old.pricesByLevel ?? null)) n++;
     const keys = Object.keys({ ...v.cleanupMinutes, ...old.cleanupMinutes });

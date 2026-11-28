@@ -13,6 +13,7 @@ import { formatPhone } from '@/mock/format';
 import { lookups } from '@/mock/reception';
 import { PLAN_OVERRIDES, planOverrideOf } from '@/mock/subscription';
 import { formatFullDate, formatTime, localDate } from '@/mock/time';
+import { staffNounOf } from '@/mock/staff-noun';
 
 const LIST_LIMIT = 10;
 
@@ -123,17 +124,13 @@ export function ExpiredScreen({ fixture }: { fixture: TenantFixture }) {
           <table className="sp-table table-fixed">
             <thead>
               <tr>
-                {[
-                  'Giờ hẹn',
-                  'Khách',
-                  'Số điện thoại',
-                  'Dịch vụ',
-                  fixture.template.vocabulary.staff,
-                ].map((label) => (
-                  <th key={label} scope="col" className="uppercase">
-                    {label}
-                  </th>
-                ))}
+                {['Giờ hẹn', 'Khách', 'Số điện thoại', 'Dịch vụ', staffNounOf(fixture)].map(
+                  (label) => (
+                    <th key={label} scope="col" className="uppercase">
+                      {label}
+                    </th>
+                  ),
+                )}
               </tr>
             </thead>
             <tbody>

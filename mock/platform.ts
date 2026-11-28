@@ -5,12 +5,7 @@
  * here touches React.
  */
 import { formatVnd } from './format.ts';
-import type {
-  IndustryId,
-  PlatformLogEntry,
-  PlatformPayment,
-  PlatformTenant,
-} from './fixtures/platform.ts';
+import type { PlatformLogEntry, PlatformPayment, PlatformTenant } from './fixtures/platform.ts';
 import {
   PERIOD_MONTHS,
   PLAN_CODES,
@@ -23,13 +18,6 @@ import {
   type Subscription,
 } from './subscription.ts';
 import { addDays, formatDateTime, localDate } from './time.ts';
-
-export const INDUSTRY_LABEL: Record<IndustryId, string> = {
-  hair_salon: 'Salon tóc',
-  pet_spa: 'Spa thú cưng',
-};
-
-export const INDUSTRY_IDS = Object.keys(INDUSTRY_LABEL) as IndustryId[];
 
 export type PlatformState = 'trial' | 'active' | 'expired';
 
@@ -110,15 +98,6 @@ export const STATE_BADGE: Record<PlatformState, string> = {
 // ---------------------------------------------------------------------------------------------
 // Overview (MH-60)
 
-export interface IndustryRow {
-  industry: IndustryId;
-  tenants: number;
-  paid: number;
-  trial: number;
-  expired: number;
-  appointmentsMonth: number;
-}
-
 export interface Overview {
   total: number;
   /** First day of the month of `now`: the new tenants count from there. */
@@ -131,8 +110,6 @@ export interface Overview {
   expired: number;
   locked: { count: number; first: TenantView | null };
   revenue: { amountVnd: bigint; count: number; month: number; upTo: string };
-  industries: IndustryRow[];
-  industriesTotal: Omit<IndustryRow, 'industry'>;
   newest: TenantView[];
   expiring: TenantView[];
 }
@@ -159,18 +136,6 @@ export function overview(views: TenantView[], payments: PlatformPayment[], now: 
 
   // The month so far: gateway payments dated this month, up to today. A manual extension takes no money (BR-91).
   const month = payments.filter((p) => p.amountVnd > 0n && p.date >= since && p.date <= today);
-
-  const industries = INDUSTRY_IDS.map((industry): IndustryRow => {
-    const own = views.filter((v) => v.tenant.industry === industry);
-    return {
-      industry,
-      tenants: own.length,
-      paid: own.filter((v) => v.state === 'active').length,
-      trial: own.filter((v) => v.state === 'trial').length,
-      expired: own.filter((v) => v.state === 'expired').length,
-      appointmentsMonth: own.reduce((sum, v) => sum + v.tenant.totals.appointmentsMonth, 0),
-    };
-  });
 
   const soon = views
     .filter((v) => v.state !== 'expired' && v.daysLeft !== null && v.daysLeft <= SOON_DAYS)
@@ -201,14 +166,6 @@ export function overview(views: TenantView[], payments: PlatformPayment[], now: 
       count: month.length,
       month: Number(today.slice(5, 7)),
       upTo: today,
-    },
-    industries,
-    industriesTotal: {
-      tenants: views.length,
-      paid: industries.reduce((s, r) => s + r.paid, 0),
-      trial: industries.reduce((s, r) => s + r.trial, 0),
-      expired: industries.reduce((s, r) => s + r.expired, 0),
-      appointmentsMonth: industries.reduce((s, r) => s + r.appointmentsMonth, 0),
     },
     newest: [...views].sort(byNewest).slice(0, NEWEST_SHOWN),
     expiring: [...soon, ...lapsed].slice(0, EXPIRING_SHOWN),
@@ -255,7 +212,6 @@ export interface TenantFilter {
   q: string;
   state: '' | PlatformState;
   plan: '' | PlanCode;
-  industry: '' | IndustryId;
   lockedOnly: boolean;
 }
 
@@ -266,7 +222,6 @@ export function filterTenants(views: TenantView[], filter: TenantFilter): Tenant
     .filter((v) => {
       if (filter.state && v.state !== filter.state) return false;
       if (filter.plan && v.subscription.planCode !== filter.plan) return false;
-      if (filter.industry && v.tenant.industry !== filter.industry) return false;
       if (filter.lockedOnly && !v.lock) return false;
       if (!text) return true;
       const t = v.tenant;

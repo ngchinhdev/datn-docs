@@ -1,6 +1,6 @@
 'use client';
 
-import type { Appointment, Customer, ServedSubject } from '@/mock/fixtures';
+import type { Appointment, Customer } from '@/mock/fixtures';
 import { buildAppointment, type BookingSlot } from '@/mock/booking';
 import { termsFrom } from '@/mock/policy';
 import type { BookingDraft } from './booking-draft';
@@ -10,7 +10,7 @@ import { useLiveFixture } from './use-live-fixture';
 /**
  * Puts an online booking on the calendar of the tenant, where the receptionist sees it: first as a
  * hold while the customer pays, then confirmed (BR-07, BR-29). The customer is matched by the
- * email they confirmed (BR-16), else made; a new subject is saved with them (BR-17).
+ * email they confirmed (BR-16), else made.
  */
 export function useBookingCommit(tenantSlug: string) {
   const store = useScheduleStore();
@@ -41,52 +41,11 @@ export function useBookingCommit(tenantSlug: string) {
       store.addCustomer(customer);
     }
 
-    const saveSubject = (id: string, subject: ServedSubject) => {
-      if (!store.servedSubjects.some((x) => x.id === id)) {
-        store.addSubject({ ...subject, id, customerId });
-      }
-      return id;
-    };
-    let bookerId: string | undefined;
-    const booker = () =>
-      (bookerId ??=
-        store.servedSubjects.find((x) => x.customerId === customerId && x.kind === 'self')?.id ??
-        saveSubject(`${tenantId}-s-web${draft.id}-self`, {
-          id: '',
-          tenantId,
-          customerId,
-          kind: 'self',
-          name: contact.name.trim(),
-          attributes: {},
-        }));
-    const subjectIds = draft.refs.map((ref, i) => {
-      // A pet typed in during the booking, or one the customer already has (BR-17).
-      // One id per subject, so the items of a chain share it.
-      if (ref.newSubject) {
-        return saveSubject(`${tenantId}-s-web${draft.id}-${ref.newSubject.id}`, ref.newSubject);
-      }
-      const known = ref.subjectId ?? ref.key;
-      if (store.servedSubjects.some((x) => x.id === known)) return known;
-      // A companion is known by name only (BR-19); the booker, and a chain, are the booker.
-      if (draft.mode === 'group' && ref.key !== 'p1') {
-        return saveSubject(`${tenantId}-s-web${draft.id}-${ref.key}`, {
-          id: '',
-          tenantId,
-          customerId,
-          kind: 'other',
-          name: ref.label ?? '',
-          attributes: {},
-        });
-      }
-      return booker();
-    });
-
     const appt = buildAppointment({
       fixture,
       id: `${tenantId}-a-web${draft.id}`,
       customerId,
       refs: draft.refs,
-      subjectIds,
       slot,
       status,
       ...(status === 'held' ? { holdExpiresAt: draft.holdExpiresAt } : {}),
@@ -115,7 +74,6 @@ export function useBookingCommit(tenantSlug: string) {
       id: `${tenantId}-a-rival${draft.id}`,
       customerId: null,
       refs: draft.refs,
-      subjectIds: draft.refs.map(() => ''),
       slot: draft.slot,
       status: 'confirmed',
     });

@@ -25,6 +25,7 @@ import {
   memberEmails,
   memberForRole,
   memberRows,
+  canCreateTrial,
   pendingInvitationsFor,
   requestReset,
   resendInvitation,
@@ -427,17 +428,17 @@ report(
 );
 const otherTenant = sendInvitation(
   invitations,
-  memberEmails(accounts, members, 'pawpaw'),
+  memberEmails(accounts, members, 'la-sen'),
   {
-    workspaceId: 'pawpaw',
+    workspaceId: 'la-sen',
     email: 'thao.nguyen@email.vn',
     role: 'receptionist',
-    branchId: 'pawpaw-td',
+    branchId: 'sen-q7',
     takesBookings: false,
     inviter: { accountId: 'acc-ha', label: 'Lê Thu Hà, chủ cơ sở', role: 'owner' },
   },
   MOCK_NOW,
-  'moi-paw',
+  'moi-sen',
 );
 report(otherTenant.ok, 'BR-78: lời mời chờ nhận ở cơ sở khác không cản việc mời ở cơ sở này');
 
@@ -458,7 +459,7 @@ report(
   [
     ['moi-khoa', 'expired'],
     ['moi-ngoc', 'revoked'],
-    ['moi-linh-pawpaw', 'accepted'],
+    ['moi-linh-sen', 'accepted'],
     ['khong-co', 'unknown'],
   ].every(([token, reason]) => {
     const v = view(token!);
@@ -602,8 +603,8 @@ report(
     .filter((m) => m.accountId === linhId && m.role === 'receptionist')
     .map((m) => m.workspaceId)
     .sort()
-    .join() === 'havy,may,pawpaw',
-  'BR-78: Linh là Lễ tân ở Tóc Mây, Pawpaw và Nail Hạ Vy',
+    .join() === 'havy,la-sen,may',
+  'BR-78: Linh là Lễ tân ở Tóc Mây, Lá Sen và Nail Hạ Vy',
 );
 report(
   members.filter((m) => m.accountId === linhId && m.staffResourceId !== undefined).length === 0,
@@ -649,11 +650,11 @@ report(
 const hung = memberForRole(members, 'may', 'manager');
 report(
   hung?.staffResourceId === 'may-hung' &&
-    memberForRole(members, 'pawpaw', 'manager')?.staffResourceId === 'paw-khoa' &&
+    memberForRole(members, 'la-sen', 'manager')?.accountId === 'acc-khoa' &&
     memberForRole(members, 'may', 'receptionist')?.accountId === linhId &&
     memberForRole(members, 'may', 'technician', 'may-lan')?.staffResourceId === 'may-lan' &&
     memberForRole(members, 'may', 'technician')?.staffResourceId === 'may-mai',
-  'Bộ chọn vai trò: Lễ tân là Linh, Quản lý là Hùng (Pawpaw là Khoa), Kỹ thuật viên theo người chọn',
+  'Bộ chọn vai trò: Lễ tân là Linh, Quản lý là Hùng (Lá Sen là Khoa), Kỹ thuật viên theo người chọn',
 );
 report(
   hasOwnCommission(hung) &&
@@ -788,7 +789,7 @@ report(
     ),
   ) === dest({ kind: 'enter', workspaceId: 'may', entry: 'locked' }) &&
     doorsWithLocks(accounts.find((a) => a.email === LINH)!.id, members, workspaces, lockedMay).find(
-      (d) => d.workspaceId === 'pawpaw',
+      (d) => d.workspaceId === 'la-sen',
     )?.status === 'active',
   'BR-75: khóa một cơ sở thì chỉ cơ sở đó dừng; cơ sở khác của tài khoản vẫn mở',
 );
@@ -835,12 +836,20 @@ report(
   'T-18: quản trị nền tảng không tự đặt lại mật khẩu, không cấp link',
 );
 
-// ---- D-16: sign-up has no industry step ----
+// ---- MH-06 item 11: the link to sign up shows only while the account has no trial tenant ----
+report(
+  canCreateTrial(linhId, members) &&
+    !canCreateTrial(accounts.find((a) => a.email === 'chinh@tocmay.vn')!.id, members) &&
+    !canCreateTrial(accounts.find((a) => a.email === 'ha.le@lasen.vn')!.id, members),
+  'BR-74.19: Linh chưa tạo cơ sở dùng thử nên còn nút đăng ký; chủ Tóc Mây và chủ Lá Sen thì không',
+);
+
+// ---- D-16: sign-up has four steps ----
 const stepsSource = readFileSync(new URL('../mock/signup.ts', import.meta.url), 'utf8');
 const stepsList = /export const STEPS = \[([^\]]*)\]/.exec(stepsSource)?.[1] ?? '';
 report(
-  stepsList.includes('business') && !stepsList.includes('industry'),
-  'D-16: các bước đăng ký không còn chọn ngành',
+  stepsList.replace(/[\s']/g, '') === 'account,verify,business,done',
+  'D-16: đăng ký có bốn bước: tài khoản, mã, cơ sở, xong',
   stepsList,
 );
 

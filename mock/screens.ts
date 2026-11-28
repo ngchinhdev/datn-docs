@@ -75,7 +75,7 @@ const firstInvoiceId = (slug: string) =>
 const pendingLeaveId = (slug: string) =>
   fixtureBySlug(slug)?.staffTimeOff.find((l) => l.status === 'pending')?.id ?? '';
 
-/** The service with a waiting segment: Nhuộm tóc at Tóc Mây, Tắm sấy at Pawpaw. */
+/** The service with a waiting segment: Nhuộm tóc at Tóc Mây, Ngâm bùn, xông hơi at Lá Sen. */
 const waitingServiceId = (slug: string) =>
   fixtureBySlug(slug)?.services.find((s) =>
     s.variants.some((v) => v.segments.some((segment) => segment.kind === 'wait')),
@@ -87,7 +87,7 @@ const customerAppointmentId = (slug: string) => {
   const asked = fixture?.appointments.find((a) =>
     fixture.staffTimeOff.some((l) => l.handling?.[a.id]?.kind === 'asked'),
   );
-  const customerId = slug === 'pawpaw' ? 'paw-c-linh' : 'may-c-quyen';
+  const customerId = slug === 'la-sen' ? 'sen-c-linh' : 'may-c-quyen';
   return (
     asked?.id ??
     fixture?.appointments.find((a) => a.customerId === customerId && a.status === 'confirmed')
@@ -149,14 +149,13 @@ const built: Record<string, ScreenLink[]> = {
       href: (slug) => site('/me/appointments/' + customerAppointmentId(slug))(slug),
     },
   ],
-  'MH-19': [{ label: 'Bé của tôi', href: site('/me/subjects') }],
   'MH-20': [{ label: 'Gói và ví', href: site('/me/wallet') }],
   'MH-21': [{ label: 'Thông tin', href: site('/me/profile') }],
   'MH-22': [
     {
       label: 'Khung chat',
       href: (slug) =>
-        slug === 'pawpaw' ? '/mock/pawpaw?plan=trial&chat=1' : `/mock/${slug}?chat=1`,
+        slug === 'la-sen' ? '/mock/la-sen?plan=trial&chat=1' : `/mock/${slug}?chat=1`,
     },
   ],
   'MH-23': [{ label: 'Các mẫu email', href: site('/emails') }],
@@ -186,7 +185,7 @@ const built: Record<string, ScreenLink[]> = {
   'MH-33': [
     {
       label: 'Hồ sơ khách',
-      href: (slug) => app(`customers/${slug === 'pawpaw' ? 'paw-c-linh' : 'may-c-ha'}`)(slug),
+      href: (slug) => app(`customers/${slug === 'la-sen' ? 'sen-c-linh' : 'may-c-ha'}`)(slug),
     },
   ],
   'MH-34': [{ label: 'Hoàn tiền', href: app('refunds?role=manager') }],
@@ -241,18 +240,6 @@ const built: Record<string, ScreenLink[]> = {
     { label: 'Chi tiết Salon Tóc Mây', href: () => '/mock/admin/tenants/may', platform: true },
     { label: 'Nail Hạ Vy (hết hạn)', href: () => '/mock/admin/tenants/havy', platform: true },
     { label: 'Nhật ký nền tảng', href: () => '/mock/admin/audit-log', platform: true },
-  ],
-  'MH-59': [
-    {
-      label: 'Gói cấu hình ngành (sẽ bỏ, D-16)',
-      href: () => '/mock/admin/templates',
-      platform: true,
-    },
-    {
-      label: 'Spa thú cưng, bản nháp (sẽ bỏ, D-16)',
-      href: () => '/mock/admin/templates/pet_spa',
-      platform: true,
-    },
   ],
   'MH-60': [{ label: 'Tổng quan nền tảng', href: () => '/mock/admin', platform: true }],
   'MH-63': [{ label: 'Đăng nhập quản trị', href: () => '/mock/admin/login', platform: true }],
@@ -410,7 +397,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/[tenant]/book'],
-    note: 'Nhiều người hoặc nhiều bé cùng giờ, mỗi đối tượng một dịch vụ; không đủ chỗ thì gợi ý giờ lệch nhau',
+    note: 'Người đặt cùng tối đa 3 người đi cùng, mỗi người một dịch vụ; không đủ chỗ thì gợi ý giờ lệch nhau',
   },
   {
     code: 'MH-15',
@@ -451,16 +438,6 @@ const rows: Row[] = [
     level: 'Vẽ',
     routes: ['/[tenant]/me/appointments/[id]'],
     note: 'Đổi giờ (BR-08: trước X giờ, tối đa N lần), hủy kèm mức hoàn cọc (BR-23); hết hạn tự đổi thì hiện số điện thoại cơ sở',
-  },
-  {
-    code: 'MH-19',
-    title: 'Đối tượng được phục vụ',
-    zone: 'C',
-    roles: ['customer'],
-    wave: 1,
-    level: 'Form',
-    routes: ['/[tenant]/me/subjects'],
-    note: 'Thuộc tính theo schema của ngành (BR-71). Ngành không có đối tượng khác thì không hiện mục này',
   },
   {
     code: 'MH-20',
@@ -600,7 +577,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/app/[tenant]/customers/[id]'],
-    note: 'Lịch sử, ghi chú nội bộ (BR-62), đối tượng được phục vụ, gói, ví, bắt buộc cọc (BR-10)',
+    note: 'Lịch sử, ghi chú nội bộ (BR-62), gói, ví, bắt buộc cọc (BR-10)',
   },
   {
     code: 'MH-34',
@@ -720,7 +697,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/app/[tenant]/settings/services/[id]'],
-    note: 'Màn đặc trưng thứ hai. Biến thể theo thuộc tính đối tượng (BR-13); các đoạn chiếm dụng vẽ trên trục thời gian, mỗi đoạn chọn loại tài nguyên (BR-04, BR-05); kỹ năng (BR-03); giá theo cấp nhân viên; xem trước khối lịch hẹn như trên lịch lễ tân',
+    note: 'Màn đặc trưng thứ hai. Biến thể khách tự chọn, tên không trùng (BR-13, BR-55); các đoạn chiếm dụng vẽ trên trục thời gian, mỗi đoạn chọn loại tài nguyên (BR-04, BR-05); kỹ năng (BR-03); giá theo cấp nhân viên; xem trước khối lịch hẹn như trên lịch lễ tân',
   },
   {
     code: 'MH-46',
@@ -730,7 +707,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'DS',
     routes: ['/app/[tenant]/settings/resources'],
-    note: 'Nhóm theo loại (từ gói ngành), chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng',
+    note: 'Nhóm theo loại, chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng',
   },
   {
     code: 'MH-47',
@@ -853,16 +830,6 @@ const rows: Row[] = [
     note: 'Khóa, mở khóa, gia hạn thủ công; chi tiết chỉ có số liệu tổng (số chi nhánh, số lịch tháng), không xem dữ liệu khách của cơ sở',
   },
   {
-    code: 'MH-59',
-    title: 'Gói cấu hình ngành',
-    zone: 'H',
-    roles: ['admin'],
-    wave: 1,
-    level: 'Vẽ',
-    routes: ['/admin/templates', '/admin/templates/[id]'],
-    note: 'Sẽ bỏ (D-16), menu đã không còn mục này. Màn chứng minh BT8. Loại tài nguyên, dịch vụ mẫu có đoạn chiếm dụng, từ ngữ hiển thị (thợ/groomer, khách/bé), schema đối tượng được phục vụ, chính sách mặc định; sửa gói không ảnh hưởng cơ sở đã tạo (BR-70)',
-  },
-  {
     code: 'MH-60',
     title: 'Tổng quan nền tảng',
     zone: 'H',
@@ -870,7 +837,7 @@ const rows: Row[] = [
     wave: 3,
     level: 'Nhẹ',
     routes: ['/admin'],
-    note: 'Số cơ sở theo ngành, số lịch đặt, cơ sở mới',
+    note: 'Số cơ sở theo trạng thái, doanh thu tháng, cơ sở mới',
   },
   {
     code: 'MH-61',

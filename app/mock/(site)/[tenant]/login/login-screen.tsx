@@ -151,9 +151,8 @@ export function LoginScreen({ tenantSlug }: { tenantSlug: string }) {
             Email {email.trim()} chưa từng đặt lịch ở {tenant.name}.
           </p>
           <p className="body-sm m-0 text-(--ink-muted)">
-            Bạn vẫn đăng nhập được để đặt lịch nhanh hơn lần sau. Thông tin và{' '}
-            {fixture.template.vocabulary.subject ?? 'người đi cùng'} đã lưu chỉ hiện sau khi bạn đặt
-            lịch đầu tiên.
+            Bạn vẫn đăng nhập được để đặt lịch nhanh hơn lần sau. Thông tin đã lưu chỉ hiện sau khi
+            bạn đặt lịch đầu tiên.
           </p>
           <Link
             href={`/mock/${tenantSlug}/book`}

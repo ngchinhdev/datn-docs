@@ -26,6 +26,7 @@ import { branchPhone } from '@/mock/site';
 import { termsOfAppointment } from '@/mock/terms';
 import { formatDay, formatTime, localDate } from '@/mock/time';
 import type { LeaveHandling } from '@/mock/fixtures';
+import { staffNounOf } from '@/mock/staff-noun';
 
 const REASONS = ['Bận việc đột xuất', 'Đặt nhầm giờ', 'Khác'];
 
@@ -54,9 +55,8 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
     );
   }
 
-  const asksSubject = fixture.template.vocabulary.subject !== null;
   const mode = modeOf(appt);
-  const items = heldItems(fixture, appt, store.servedSubjects, asksSubject || mode === 'group');
+  const items = heldItems(fixture, appt, mode === 'group');
   const nameOf = (rid: string) => resources.find((r) => r.id === rid)?.name ?? '';
   const titleOf = (rid: string) => staff.find((s) => s.resourceId === rid)?.profile.title ?? '';
   const phone = branchPhone(tenantSlug, fixture.branches[0]?.phone);
@@ -152,7 +152,7 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
         )
         .join('\n'),
     ],
-    [fixture.template.vocabulary.staff, peopleLine],
+    [staffNounOf(fixture), peopleLine],
     ['Giá', formatVnd(price)],
     ...(deposit > 0n ? [['Đã cọc', formatVnd(deposit)] as [string, string]] : []),
     ['Mã lịch', bookingCode(fixture, appt)],
@@ -194,7 +194,7 @@ export function AppointmentDetail({ tenantSlug, id }: { tenantSlug: string; id: 
           className="flex flex-col gap-(--space-3) rounded-(--radius-lg) bg-(--accent-soft) p-(--space-4)"
         >
           <h2 id="ask-title" className="heading m-0">
-            {tenant.name} đề nghị đổi {fixture.template.vocabulary.staff.toLowerCase()}
+            {tenant.name} đề nghị đổi {staffNounOf(fixture).toLowerCase()}
           </h2>
           <p className="body m-0">
             {question.source === 'leave'

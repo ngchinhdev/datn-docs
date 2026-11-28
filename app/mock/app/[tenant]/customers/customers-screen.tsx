@@ -39,6 +39,7 @@ import { formatPhone } from '@/mock/format';
 import { formatWhen, formatWhenInline, initialsOfName } from '@/mock/people-format';
 import { MOCK_NOW } from '@/mock/time';
 import { FilterSheet, VISIT_LABEL } from './filter-sheet';
+import { staffNounOf } from '@/mock/staff-noun';
 
 /** First click on a column: names and phones read A to Z, dates and counts start from the top. */
 const FIRST_DIR: Record<SortKey, 'asc' | 'desc'> = {
@@ -69,7 +70,7 @@ export function CustomersScreen({ tenantSlug }: { tenantSlug: string }) {
   // A table fills the screen from tablet up; on phones the page scrolls as a whole.
   const fill = useMediaQuery('(min-width: 768px)');
 
-  const staffNoun = fixture.template.vocabulary.staff;
+  const staffNoun = staffNounOf(fixture);
   const query = useMemo(() => parseCustomerQuery(searchParams), [searchParams]);
   const allRows = useMemo(() => customerRows(fixture, MOCK_NOW), [fixture]);
   const staffName = (id: string) =>

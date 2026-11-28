@@ -2,15 +2,13 @@ import { AUTH_COPY, type AuthLang } from './auth-copy';
 import { fold } from './customers';
 import { accounts } from './fixtures/accounts';
 import { COMMON_PASSWORDS } from './fixtures/common-passwords';
-import type { SampleServiceVariant } from './fixtures/types';
 import { tenantFixtures } from './fixtures';
 
 export const STEPS = ['account', 'verify', 'business', 'done'] as const;
 export type SignupStep = (typeof STEPS)[number];
 
-/** `?step=industry` is a step that no longer exists; it lands on `business`. */
 export const stepOf = (value: string | null | undefined): SignupStep =>
-  STEPS.find((s) => s === (value === 'industry' ? 'business' : value)) ?? 'account';
+  STEPS.find((s) => s === value) ?? 'account';
 
 // ---------------------------------------------------------------------------------------------
 // Password (BR-73)
@@ -133,14 +131,6 @@ export const RESOURCE_KEYS = ['chairs', 'beds', 'rooms'] as const;
 export type ResourceKey = (typeof RESOURCE_KEYS)[number];
 
 export const DEFAULT_COUNTS: Record<ResourceKey, number> = { chairs: 1, beds: 0, rooms: 0 };
-
-/** Minutes the customer is in the shop (the template screen of the platform admin reads it). */
-export function sampleMinutes(variant: SampleServiceVariant): number {
-  const lead = variant.segments.findIndex((segment) => segment.kind !== 'prep');
-  return variant.segments
-    .slice(lead < 0 ? variant.segments.length : lead)
-    .reduce((sum, segment) => sum + segment.minutes, 0);
-}
 
 // ---------------------------------------------------------------------------------------------
 // Business

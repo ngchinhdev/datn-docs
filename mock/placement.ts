@@ -51,8 +51,8 @@ export interface PlaceInput {
   minute: number;
   /** `ANY_STAFF` or a staff resource id. */
   staffResourceId: string;
-  /** What the new item is called in a message, e.g. the pet's name. */
-  subjectName?: string;
+  /** The companion the new item is for, named in a message. */
+  guestName?: string;
   /** Appointments to leave out, e.g. the one being moved. */
   ignore?: ReadonlySet<string>;
   /** Resources to keep when several fit. */
@@ -173,7 +173,7 @@ function partName(variant: ServiceVariant, typeId: string, origin: number, at: I
   return segment ? lowerFirst(segment.name) : 'dọn';
 }
 
-/** Who occupies `resourceId` in `[from, to)`: the other appointment's subject or customer. */
+/** Who occupies `resourceId` in `[from, to)`: the other appointment's companion or customer. */
 function whoIsIn(input: PlaceInput, resourceId: string, at: Interval) {
   const { fixture } = input;
   for (const appt of fixture.appointments) {
@@ -184,12 +184,11 @@ function whoIsIn(input: PlaceInput, resourceId: string, at: Interval) {
       const to = minutesOf(b.endAt);
       if (from >= at[1] || at[0] >= to) continue;
       const item = appt.items[b.itemIndex];
-      const subject = fixture.servedSubjects.find((s) => s.id === item?.servedSubjectId);
       const customer = fixture.customers.find((c) => c.id === appt.customerId);
       const name =
-        subject?.kind === 'other'
-          ? subject.name
-          : (customer?.callName ?? (appt.status === 'held' ? 'khách đang đặt online' : 'khách lẻ'));
+        item?.guestName ??
+        customer?.callName ??
+        (appt.status === 'held' ? 'khách đang đặt online' : 'khách lẻ');
       return { name, from, to };
     }
   }
@@ -294,7 +293,7 @@ function explain(input: PlaceInput): string {
     const checked = candidates.map((r) => ({ resource: r, found: firstProblem(r.id) }));
     if (checked.some((c) => !c.found)) continue;
 
-    const mine = input.subjectName ? ` ${input.subjectName}` : '';
+    const mine = input.guestName ? ` ${input.guestName}` : '';
     const when = (h: Held) =>
       `lúc ${partName(variant, typeId, origin, h.interval)}${mine} (${range(h.interval[0], h.interval[1])})`;
     const only = checked.length === 1 ? checked[0] : undefined;

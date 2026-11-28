@@ -9,7 +9,6 @@ export const salonServices: Service[] = [
     name: 'Cắt tóc',
     group: 'Cắt',
     description: 'Gội nhanh, cắt và tạo kiểu.',
-    variantSelection: 'customer',
     bookableOnline: true,
     variants: [
       {
@@ -17,7 +16,6 @@ export const salonServices: Service[] = [
         name: 'Tóc ngắn',
         shortName: 'Cắt ngắn',
         priceVnd: 150_000n,
-        match: {},
         segments: [
           {
             startMinute: 0,
@@ -34,7 +32,6 @@ export const salonServices: Service[] = [
         name: 'Tóc dài',
         shortName: 'Cắt dài',
         priceVnd: 200_000n,
-        match: {},
         segments: [
           {
             startMinute: 0,
@@ -53,7 +50,6 @@ export const salonServices: Service[] = [
     tenantId,
     name: 'Gội sấy',
     group: 'Gội',
-    variantSelection: 'customer',
     bookableOnline: true,
     variants: [
       {
@@ -61,7 +57,6 @@ export const salonServices: Service[] = [
         name: 'Tiêu chuẩn',
         shortName: 'Gội sấy',
         priceVnd: 80_000n,
-        match: {},
         segments: [
           {
             startMinute: 0,
@@ -83,7 +78,6 @@ export const salonServices: Service[] = [
     name: 'Nhuộm tóc',
     group: 'Nhuộm và uốn',
     description: 'Nhuộm một màu, đã gồm gội và sấy. Thợ tư vấn màu trước khi làm.',
-    variantSelection: 'customer',
     bookableOnline: true,
     variants: [
       {
@@ -93,7 +87,6 @@ export const salonServices: Service[] = [
         priceVnd: 500_000n,
         pricesByLevel: [500_000n, 550_000n, 600_000n],
         depositVnd: 100_000n,
-        match: {},
         segments: [
           {
             startMinute: 0,
@@ -140,7 +133,6 @@ export const salonServices: Service[] = [
         priceVnd: 700_000n,
         pricesByLevel: [700_000n, 770_000n, 840_000n],
         depositVnd: 100_000n,
-        match: {},
         segments: [
           {
             startMinute: 0,
