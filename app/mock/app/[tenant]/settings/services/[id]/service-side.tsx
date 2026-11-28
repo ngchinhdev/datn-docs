@@ -32,7 +32,7 @@ export function ServiceSide({ ed }: { ed: ServiceEditor }) {
     }`,
   ]) as [string, string][];
 
-  const topStaff = capable.find((s) => s.level > 1);
+  const topStaff = current.pricesByLevel ? capable.find((s) => s.level > 1) : undefined;
   const staffWord = staffNounOf(fixture);
 
   return (
