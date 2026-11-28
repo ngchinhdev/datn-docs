@@ -12,6 +12,7 @@ import {
   type PackageProduct,
   type Requeue,
   type Resource,
+  type ResourceType,
   type Shift,
   type ShopConfig,
   type StaffTimeOff,
@@ -23,6 +24,9 @@ import type { World } from '@/mock/money-ops';
 /** What Cài đặt saves in one go; a field left out stays as it is. */
 export interface SettingsPatch {
   branch?: Branch;
+  /** The branches after the first, which is `branch` (BR-93.2: a plan with a higher limit has more). */
+  extraBranches?: Branch[];
+  resourceTypes?: ResourceType[];
   resources?: Resource[];
   policies?: BookingPolicies;
   packageCatalog?: PackageProduct[];
@@ -75,6 +79,8 @@ export interface ScheduleStore {
   applyWorld: (fn: (prev: World) => World) => void;
   /** The branch, its resources, the packages on sale, the bonus tiers and the rest of Cài đặt. */
   branch: Branch;
+  extraBranches: Branch[];
+  resourceTypes: ResourceType[];
   resources: Resource[];
   packageCatalog: PackageProduct[];
   topupBonusTiers: BonusTier[];
@@ -93,6 +99,8 @@ interface TenantScheduleData {
   policies: BookingPolicies;
   money: MoneyState;
   branch: Branch;
+  extraBranches: Branch[];
+  resourceTypes: ResourceType[];
   resources: Resource[];
   packageCatalog: PackageProduct[];
   topupBonusTiers: BonusTier[];
@@ -122,6 +130,8 @@ function initialTenantData(slug: string): TenantScheduleData {
     policies: fixture.policies,
     money: fixture.money,
     branch: fixture.branches[0]!,
+    extraBranches: fixture.branches.slice(1),
+    resourceTypes: fixture.resourceTypes,
     resources: fixture.resources,
     packageCatalog: fixture.packageCatalog,
     topupBonusTiers: fixture.topupBonusTiers,
@@ -349,6 +359,8 @@ export function ScheduleStoreProvider({
       update((prev) => ({
         ...prev,
         ...(patch.branch ? { branch: patch.branch } : {}),
+        ...(patch.extraBranches ? { extraBranches: patch.extraBranches } : {}),
+        ...(patch.resourceTypes ? { resourceTypes: patch.resourceTypes } : {}),
         ...(patch.resources ? { resources: patch.resources } : {}),
         ...(patch.policies ? { policies: patch.policies } : {}),
         ...(patch.packageCatalog ? { packageCatalog: patch.packageCatalog } : {}),
@@ -394,6 +406,9 @@ export function ScheduleStoreProvider({
       setMoney,
       applyWorld,
       branch: data.branch,
+      // Saved sessions from before these two existed do not have them.
+      extraBranches: data.extraBranches ?? [],
+      resourceTypes: data.resourceTypes ?? initialTenantData(tenantSlug).resourceTypes,
       resources: data.resources,
       packageCatalog: data.packageCatalog,
       topupBonusTiers: data.topupBonusTiers,
@@ -402,6 +417,7 @@ export function ScheduleStoreProvider({
     }),
     [
       data,
+      tenantSlug,
       replaceAppointment,
       addAppointment,
       removeAppointment,

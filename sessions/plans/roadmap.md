@@ -61,9 +61,9 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 
 - [x] Đăng ký khách thuê, xác thực email, slug (MH-02; 28/11, [kế hoạch](./signup.md))
 - [x] Đăng nhập bằng session token trong cookie httpOnly ([T-08](../../content/docs/decisions/t08-staff-session-cookie.md)), `memberships`, chọn cơ sở (24/11 đến 26/11, A1 đến A4 của [kế hoạch](./auth.md))
-- [ ] Guard theo (tenant, role)
+- [ ] Guard theo (tenant, role) (cùng [kế hoạch chi nhánh và tài nguyên](./branch-settings.md))
 - [ ] **RLS** trên mọi bảng nghiệp vụ + bộ test truy cập chéo tenant (BT6)
-- [ ] CRUD chi nhánh, giờ mở cửa, ngày đặc biệt, loại tài nguyên, tài nguyên, dịch vụ (biến thể, đoạn, yêu cầu tài nguyên), nhân sự, kỹ năng, ca làm
+- [ ] CRUD chi nhánh, giờ mở cửa, ngày đặc biệt, loại tài nguyên, tài nguyên ([kế hoạch](./branch-settings.md)), dịch vụ (biến thể, đoạn, yêu cầu tài nguyên), nhân sự, kỹ năng, ca làm
 - [ ] Nhật ký thao tác nhạy cảm
 
 **Tiêu chí:** một tenant salon tóc (Tóc Mây) và một tenant spa (Spa Lá Sen) seed chạy song song; test cô lập xanh 100%.
@@ -72,13 +72,13 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 
 - [ ] Thuật toán tính giờ trống (BT1) viết theo TDD; thuật toán vét cạn làm đối chứng; property-based test
 - [ ] `resource_bookings` + exclusion constraint + giữ chỗ 10 phút + job dọn (BT2); test 100 request đồng thời
-- [ ] Trang đặt lịch công khai: chọn chi nhánh, đối tượng (nếu ngành yêu cầu), dịch vụ, nhân viên/"bất kỳ ai", giờ; OTP qua email
+- [ ] Trang đặt lịch công khai: chọn chi nhánh, dịch vụ, nhân viên/"bất kỳ ai", giờ; OTP qua email
 - [ ] Phân công "bất kỳ ai" theo quy tắc cấu hình
-- [ ] Chuỗi dịch vụ nối tiếp; đặt theo nhóm (nhiều người hoặc nhiều thú cưng)
+- [ ] Chuỗi dịch vụ nối tiếp; đặt theo nhóm (nhiều người)
 - [ ] Lịch lễ tân realtime: xem theo nhân viên/tài nguyên, kéo thả có kiểm tra ràng buộc, khách vãng lai, check-in
 - [ ] Đổi/hủy theo chính sách; đánh dấu không đến; nghỉ phép kèm xử lý lịch bị ảnh hưởng
 
-**Tiêu chí:** demo được cảnh 100 người bấm cùng một giờ; property test 10.000 kịch bản không lỗi, chạy với dịch vụ của cả hai ngành.
+**Tiêu chí:** demo được cảnh 100 người bấm cùng một giờ; property test 10.000 kịch bản không lỗi, chạy với dịch vụ của Salon Tóc Mây và Spa Lá Sen.
 
 ### Đệm Tết Nguyên Đán (Tuần 15–16: 08/02 – 21/02/2027)
 
@@ -104,22 +104,21 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 - [ ] Báo cáo: doanh thu, tiền trả trước vs doanh thu thực hiện, tỉ lệ lấp đầy, tỉ lệ không đến
 - [ ] *(Nâng cao, nếu kịp)* Danh sách chờ
 
-**Mốc quan trọng 11/04:** toàn bộ lõi chạy đầu–cuối cho ngành salon. Nếu trễ, cắt danh sách chờ và báo cáo nâng cao, **không cắt kiểm thử**.
+**Mốc quan trọng 11/04:** toàn bộ lõi chạy đầu–cuối cho cơ sở làm đẹp. Nếu trễ, cắt danh sách chờ và báo cáo nâng cao, **không cắt kiểm thử**.
 
-### Giai đoạn 6 — Chatbot và chứng minh tổng quát (Tuần 24–26: 12/04 – 02/05)
+### Giai đoạn 6 — Chatbot (Tuần 24–26: 12/04 – 02/05)
 
-- [ ] Chatbot: định nghĩa tool, prompt theo tenant và từ ngữ ngành; khung chat trên trang đặt lịch; luồng hỏi → tìm giờ → giữ chỗ → OTP (BT7)
+- [ ] Chatbot: định nghĩa tool, prompt theo cơ sở; khung chat trên trang đặt lịch; luồng hỏi → tìm giờ → giữ chỗ → OTP (BT7)
 - [ ] Guardrail: không tự xác nhận, chuyển lễ tân, giới hạn lượt
-- [ ] Bộ đánh giá 50–100 câu hỏi cho cả hai ngành
-- [ ] **Hoàn thiện gói cấu hình spa thú cưng** và bộ test BT8: tạo tenant từ gói, chạy lại toàn bộ test lõi
+- [ ] Bộ đánh giá 50–100 câu hỏi cho Salon Tóc Mây và Spa Lá Sen
 - [ ] *(Nâng cao)* Gợi ý giờ tránh khoảng trống lẻ
 
 ### Giai đoạn 7 — Hoàn thiện và thực nghiệm (Tuần 27–28: 03/05 – 16/05)
 
-- [ ] Playwright e2e cho 5 luồng chính (chạy trên cả hai ngành)
+- [ ] Playwright e2e cho 5 luồng chính (chạy trên Salon Tóc Mây và Spa Lá Sen)
 - [ ] Load test k6 API tìm giờ trống và đặt lịch
 - [ ] Rà soát bảo mật: rate limit OTP, validation, phân quyền từng endpoint
-- [ ] Seed dữ liệu đẹp: một salon tóc, một spa, một spa thú cưng
+- [ ] Seed dữ liệu đẹp: một salon tóc, một spa
 - [ ] Thử nghiệm độ dễ dùng với 5–8 người (bạn bè đóng vai lễ tân, khách), đo SUS
 - [ ] Triển khai bản demo online
 
@@ -128,7 +127,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 ### Giai đoạn 8 — Báo cáo và bảo vệ (Tuần 29–34: 17/05 – 27/06)
 
 - [ ] Viết báo cáo theo cấu trúc mục 13
-- [ ] Video demo 5–7 phút: 100 request đồng thời, webhook lặp, chatbot, **cùng mã nguồn chạy salon và spa thú cưng**
+- [ ] Video demo 5–7 phút: 100 request đồng thời, webhook lặp, chatbot, **cùng mã nguồn chạy salon tóc và spa**
 - [ ] Slide bảo vệ 15–20 trang
 - [ ] Kịch bản demo cố định + video dự phòng
 - [ ] Luyện trả lời câu hỏi ở mục 15
@@ -143,7 +142,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 | M3 | 07/02/2027 | Lõi đặt lịch chống trùng tuyệt đối |
 | M4 | 21/03/2027 | Tiền: thanh toán, ví, gói |
 | M5 | 11/04/2027 | Lõi hoàn chỉnh đầu–cuối |
-| M6 | 02/05/2027 | Chatbot + chứng minh tổng quát (BT8) |
+| M6 | 02/05/2027 | Chatbot |
 | M7 | 16/05/2027 | Đóng băng tính năng, có số liệu thực nghiệm |
 | M8 | Cuối 6/2027 | Bảo vệ |
 

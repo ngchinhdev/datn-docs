@@ -38,6 +38,8 @@ export interface Branch {
   timeZone: string;
   businessHours: BusinessHours[];
   specialDays: SpecialDay[];
+  /** ISO 8601, UTC. Out of use for good: it takes no booking and cannot be used again (BR-93.9). */
+  archivedAt?: string;
 }
 
 export interface ResourceType {
@@ -53,6 +55,8 @@ export interface Resource {
   branchId: string;
   resourceTypeId: string;
   name: string;
+  /** ISO 8601, UTC. Out of use for good (BR-93.27). */
+  archivedAt?: string;
 }
 
 /** Two layers (BR-15): the customer page reads only the public fields. */

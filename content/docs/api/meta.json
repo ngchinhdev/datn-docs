@@ -4,6 +4,7 @@
     "index",
     "auth",
     "signup",
+    "branch-settings",
     "reference"
   ]
 }

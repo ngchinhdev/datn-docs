@@ -31,7 +31,15 @@ Chốt ngày 08/11/2026 cùng [D-15](./d15-trial-and-two-plans.md).
   - Guard của Nest đặt trên từng route nghiệp vụ, khai báo bằng decorator `@RequiresFeature('chatbot')` và `@RequiresBooking()`.
   - Dịch vụ tạo lịch hẹn và giữ chỗ (lớp application) kiểm lại `canBook`, để không có đường tắt nào tạo được lịch.
   - Giao diện nhận `entitlements` để hiện ổ khóa, dải báo và chuyển hướng về trang gói. Giao diện chỉ để hiển thị, không thay cho kiểm ở API.
-- **Lỗi trả về:** Problem Details. Hết hạn trả `402` `subscription-expired`. Thiếu tính năng trả `403` `plan-feature-required` kèm mã tính năng.
+- **Lỗi trả về:** Problem Details, `code` viết `UPPER_SNAKE_CASE` như mọi lỗi của API ([Quy ước API](../api/index.md#lỗi)).
+
+  | Tình huống | Status | `code` | Trường thêm |
+  |---|---|---|---|
+  | Hết hạn | 402 | `SUBSCRIPTION_EXPIRED` | |
+  | Thiếu tính năng | 403 | `PLAN_FEATURE_REQUIRED` | `feature` |
+  | Vượt giới hạn định lượng (số chi nhánh) | 403 | `PLAN_LIMIT_REACHED` | `limit`, `max` |
+
+  Hai mã đầu do guard trả. `PLAN_LIMIT_REACHED` do dịch vụ ứng dụng trả, trong transaction đã khóa dòng `subscriptions`, vì phải đếm dữ liệu và chống hai yêu cầu cùng lúc (BR-93.2).
 - **Thanh toán:** dùng lại `PaymentProvider` của tiền cọc. Webhook có chữ ký HMAC. Mỗi giao dịch chỉ được kích hoạt hoặc gia hạn một lần (BR-88), bằng ràng buộc unique trên mã giao dịch trong `platform_payments`.
 - **Tính tiền nâng gói:** hàm thuần trong domain theo BR-85, có test thuộc tính (fast-check): kết quả luôn ≥ 0, làm tròn lên tới nghìn đồng, và bằng 0 khi còn 0 ngày.
 - **Mock (`datn-docs`):** đổi trạng thái bằng `?plan=trial|basic|pro|expired` để xem dải báo, ổ khóa và màn hết hạn.

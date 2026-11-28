@@ -1,4 +1,4 @@
 {
   "title": "Màn hình",
-  "pages": ["index", "login", "password-reset", "select-workspace", "signup"]
+  "pages": ["index", "login", "password-reset", "select-workspace", "signup", "branch-settings"]
 }

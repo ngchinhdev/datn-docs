@@ -32,7 +32,7 @@ Trình duyệt chỉ gọi `/api/*` **cùng origin** với trang. Next.js chuy�
   2. Không có `Sec-Fetch-Site`, có `Origin`: nhận khi `Origin` cùng host với request hoặc thuộc danh sách tin cậy; không thì từ chối.
   3. Không có cả hai header: **cho qua**.
   Từ chối trả 403 `ORIGIN_NOT_ALLOWED`. Trình duyệt luôn gửi ít nhất một trong hai header khi trang web gọi tới, nên request thiếu cả hai đến từ client không phải trình duyệt (Server Component, curl, Scalar, test), không phải từ trang của kẻ tấn công.
-- Route của một cơ sở có slug trong đường dẫn (`/v1/tenants/{slug}/...`). Máy chủ kiểm membership rồi mới đặt `app.tenant_id` cho RLS (T-07, T-15).
+- Route của một cơ sở có slug trong đường dẫn (`/v1/tenants/{slug}/...`). Máy chủ kiểm membership rồi mới đặt `app.tenant_id` cho RLS (T-07, T-15). Chi tiết ở mục "Quyền theo cơ sở và vai trò".
 
 ## Lỗi
 
@@ -86,13 +86,37 @@ Lỗi dùng chung:
 |---|---|---|
 | 400 | `VALIDATION_FAILED` | Body hoặc tham số sai schema, hoặc body không đọc được |
 | 401 | `UNAUTHENTICATED` | Không có phiên, hoặc phiên đã hết hạn hay bị thu hồi |
-| 403 | `FORBIDDEN` | Có phiên nhưng không có quyền |
+| 402 | `SUBSCRIPTION_EXPIRED` | Gói của cơ sở đã hết hạn (BR-82); chỉ nhóm Gói Sapio còn dùng được |
+| 403 | `FORBIDDEN` | Có phiên và là thành viên của cơ sở, nhưng vai trò không nằm trong danh sách của route |
 | 403 | `ORIGIN_NOT_ALLOWED` | Header `Origin` không thuộc danh sách tin cậy |
 | 403 | `EMAIL_NOT_VERIFIED` | Phiên của tài khoản chưa xác thực email gọi endpoint ngoài bước xác thực ([Đăng ký cơ sở](./signup.md)) |
-| 404 | `NOT_FOUND` | Không có tài nguyên, hoặc không thuộc cơ sở của phiên |
+| 403 | `TENANT_LOCKED` | Cơ sở bị quản trị nền tảng khóa (BR-75) |
+| 403 | `PLAN_FEATURE_REQUIRED` | Gói của cơ sở không có tính năng của route (BR-87). Trường thêm `feature`: một trong `multi_branch`, `packages_wallet`, `commission`, `full_reports`, `chatbot` |
+| 403 | `PLAN_LIMIT_REACHED` | Việc làm vượt giới hạn của gói, như số chi nhánh. Trường thêm `limit` (tên giới hạn, `branches`) và `max` |
+| 404 | `NOT_FOUND` | Không có tài nguyên, không thuộc cơ sở của phiên, hoặc tài khoản không phải thành viên của cơ sở trong đường dẫn |
 | 410 | `RESET_LINK_INVALID` | Link đặt lại mật khẩu đã dùng, hết hạn, đã bị thay hoặc không có. Câu `detail`: "Link không còn dùng được." |
 | 429 | `RATE_LIMITED` | Gọi quá nhiều lần. Có header `Retry-After` (giây) |
 | 500 | `INTERNAL_ERROR` | Lỗi máy chủ. Thân lỗi không chứa chi tiết nào của lỗi |
+
+## Quyền theo cơ sở và vai trò
+
+Mọi route có `{slug}` (`/v1/tenants/{slug}/...`) đi qua một guard dùng chung, `TenantGuard`. Mỗi route khai báo vai trò được gọi bằng decorator `@Roles('owner')` hay `@Roles('owner', 'manager')`; route có `{slug}` mà thiếu `@Roles` làm API không khởi động, để không route nào quên kiểm vai trò. Guard làm các bước dưới đây theo thứ tự và dừng ở bước đầu tiên không qua:
+
+| Bước | Kiểm | Không qua |
+|---|---|---|
+| 1 | Có phiên cửa `staff` còn hiệu lực | 401 `UNAUTHENTICATED` |
+| 2 | Email của phiên đã xác thực | 403 `EMAIL_NOT_VERIFIED` |
+| 3 | `slug` là slug hiện tại của một cơ sở, và tài khoản có membership ở cơ sở đó | 404 `NOT_FOUND`, giống nhau cho slug không có và slug không thuộc tài khoản, để không lộ slug có tồn tại |
+| 4 | `role` của membership nằm trong `@Roles(...)` của route | 403 `FORBIDDEN` |
+| 5 | Cơ sở không bị khóa (BR-75) | 403 `TENANT_LOCKED` |
+| 6 | Gói còn hạn, tính từ `Clock.now()` (BR-82, T-17) | 402 `SUBSCRIPTION_EXPIRED` |
+| 7 | Route có `@RequiresFeature('...')`: gói có tính năng đó | 403 `PLAN_FEATURE_REQUIRED` |
+
+- Qua bước 4, guard đặt `app.tenant_id` cho RLS (T-07) và đưa `{ user, tenant, role }` vào ngữ cảnh request. Mọi truy vấn nghiệp vụ sau đó đi qua `withTenant()`.
+- Bước 5 và 6 không áp cho nhóm Gói Sapio, vì đó là đường duy nhất còn dùng được khi gói hết hạn (BR-82).
+- Giới hạn định lượng của gói (số chi nhánh) không nằm ở guard: dịch vụ ứng dụng kiểm trong transaction đã khóa `subscriptions`, để hai yêu cầu cùng lúc không vượt giới hạn, và trả 403 `PLAN_LIMIT_REACHED`.
+- Phiên của quản trị nền tảng (cookie `__Host-sapio_admin`) không dùng được ở các route này: guard không thấy phiên cửa `staff` nên dừng ở bước 1 (BR-89).
+- Một tài khoản có đúng một vai trò ở mỗi cơ sở (BR-78), nên bước 4 so một giá trị.
 
 ## Thời gian, tiền, ID
 
@@ -106,3 +130,4 @@ Lỗi dùng chung:
 |---|---|
 | Xác thực nhân sự và quản trị nền tảng | [Xác thực](./auth.md) |
 | Đăng ký cơ sở, xác thực email, tạo cơ sở dùng thử | [Đăng ký cơ sở](./signup.md) |
+| Chi nhánh, giờ mở cửa, ngày đặc biệt, loại tài nguyên, tài nguyên | [Chi nhánh và tài nguyên](./branch-settings.md) |
