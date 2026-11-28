@@ -25,6 +25,7 @@ import {
   memberEmails,
   memberForRole,
   memberRows,
+  canCreateTrial,
   pendingInvitationsFor,
   requestReset,
   resendInvitation,
@@ -833,6 +834,14 @@ const adminReset = requestReset(accounts, [], {}, PLATFORM_ADMIN_EMAIL, MOCK_NOW
 report(
   adminReset.issued === null && adminReset.tokens.length === 0,
   'T-18: quản trị nền tảng không tự đặt lại mật khẩu, không cấp link',
+);
+
+// ---- MH-06 item 11: the link to sign up shows only while the account has no trial tenant ----
+report(
+  canCreateTrial(linhId, members) &&
+    !canCreateTrial(accounts.find((a) => a.email === 'chinh@tocmay.vn')!.id, members) &&
+    !canCreateTrial(accounts.find((a) => a.email === 'ha.le@lasen.vn')!.id, members),
+  'BR-74.19: Linh chưa tạo cơ sở dùng thử nên còn nút đăng ký; chủ Tóc Mây và chủ Lá Sen thì không',
 );
 
 // ---- D-16: sign-up has four steps ----
