@@ -236,7 +236,7 @@ Nội dung: "Tài nguyên không nhận lịch mới và không dùng lại đư
 | Bấm "Thêm loại" | Trống: "Nhập tên loại." Trùng một loại: "Đã có loại tên này." Hết lỗi thì API #7; 201 thì loại mới hiện cuối danh sách và ở bộ lọc Loại |
 | Bấm "Đổi tên" | Tên thành ô nhập với "Lưu" và "Hủy"; lỗi như dòng trên. API #8 |
 | Bấm "Xóa" | Loại còn tài nguyên, kể cả đã ngừng dùng, thì nút khóa, dòng phụ "Còn tài nguyên, không xóa được". Loại trống: hộp "Xóa loại {tên}?" với nút "Xóa" nguy hiểm. API #9 |
-| API trả 409 `RESOURCE_TYPE_IN_USE` | Hộp thông báo "Còn {n} tài nguyên thuộc loại này, kể cả đã ngừng dùng, nên không xóa được." Một dịch vụ chiếm loại này thì thay bằng "Dịch vụ {tên} đang dùng loại này." |
+| API trả 409 `RESOURCE_TYPE_IN_USE` | Hộp thông báo. Phản hồi có `serviceName`: "Dịch vụ {serviceName} đang dùng loại này." Không có: "Còn {n} tài nguyên thuộc loại này, kể cả đã ngừng dùng, nên không xóa được." |
 | API trả 409 `NAME_TAKEN` | Dưới ô nhập: "Đã có loại tên này." |
 
 ### Điện thoại

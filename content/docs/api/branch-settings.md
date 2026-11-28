@@ -56,7 +56,7 @@ Bộ đếm nằm trong bộ nhớ của từng instance API, theo cửa sổ m�
 | 409 | `LAST_BRANCH` | | Ngừng dùng chi nhánh đang dùng cuối cùng |
 | 409 | `BRANCH_HAS_UPCOMING_APPOINTMENTS` | `count` | **Áp dụng khi có lịch hẹn.** Ngừng dùng chi nhánh còn lịch sắp tới |
 | 409 | `RESOURCE_TYPE_PROTECTED` | | Sửa hoặc xóa loại nhân viên |
-| 409 | `RESOURCE_TYPE_IN_USE` | | Xóa loại còn tài nguyên (kể cả đã ngừng dùng), hoặc còn đoạn hay dòng dọn dẹp của dịch vụ chiếm loại đó |
+| 409 | `RESOURCE_TYPE_IN_USE` | `serviceName` (có khi không còn tài nguyên nào) | Xóa loại còn tài nguyên (kể cả đã ngừng dùng), hoặc còn đoạn hay dòng dọn dẹp của dịch vụ chiếm loại đó |
 | 409 | `RESOURCE_ARCHIVED` | | Đổi tên, tạm ngưng hoặc ngừng dùng tài nguyên đã ngừng dùng, kể cả tài nguyên của chi nhánh đã ngừng dùng (BR-93.9) |
 | 409 | `ORDER_MISMATCH` | | Danh sách `ids` không đúng bằng tập tài nguyên đang dùng của nhóm |
 | 409 | `PAUSE_OVERLAP` | | Khoảng tạm ngưng chồng một khoảng khác của cùng tài nguyên |
@@ -250,7 +250,7 @@ Tham chiếu: [Xóa loại tài nguyên](./reference/branch-settings/resourceTyp
 `DELETE /v1/tenants/{slug}/resource-types/{typeId}`
 
 1. Loại nhân viên: **409** `RESOURCE_TYPE_PROTECTED`.
-2. Còn tài nguyên thuộc loại này, kể cả đã ngừng dùng: **409** `RESOURCE_TYPE_IN_USE`. Còn đoạn hay dòng dọn dẹp của biến thể nào chiếm loại này (`segment_resource_types`, `variant_cleanups`), kể cả biến thể đã xóa hay dịch vụ đã ngừng dùng ([BR-94.32](../features/services.md)), cũng trả mã đó.
+2. Còn tài nguyên thuộc loại này, kể cả đã ngừng dùng: **409** `RESOURCE_TYPE_IN_USE`. Còn đoạn hay dòng dọn dẹp của biến thể nào chiếm loại này (`segment_resource_types`, `variant_cleanups`), kể cả biến thể đã xóa hay dịch vụ đã ngừng dùng ([BR-94.32](../features/services.md)), cũng trả mã đó. Khi không còn tài nguyên nào và một dịch vụ chiếm loại này, phản hồi có thêm `serviceName`: tên của một dịch vụ chiếm loại đó, ưu tiên dịch vụ đang dùng rồi đến dịch vụ đã ngừng dùng, trong cùng nhóm thì lấy tên đứng đầu theo thứ tự chữ cái. Còn tài nguyên thì không có `serviceName`, dù dịch vụ cũng chiếm loại đó.
 3. Xóa dòng. Khóa ngoại của `resources` và các bảng dịch vụ là lớp chặn cuối nếu hai yêu cầu chạy cùng lúc; vi phạm khóa ngoại trả `RESOURCE_TYPE_IN_USE`.
 
 Trả về 204.
@@ -259,7 +259,7 @@ Trả về 204.
 |---|---|---|
 | 409 | `NAME_TAKEN` | "Đã có loại tên này." |
 | 409 | `RESOURCE_TYPE_PROTECTED` | Không hiện: giao diện không có nút sửa, xóa cho loại nhân viên |
-| 409 | `RESOURCE_TYPE_IN_USE` | "Còn {n} tài nguyên thuộc loại này, kể cả đã ngừng dùng, nên không xóa được." Khi một dịch vụ chiếm loại này thì thay bằng "Dịch vụ {tên} đang dùng loại này." |
+| 409 | `RESOURCE_TYPE_IN_USE` | Có `serviceName`: "Dịch vụ {serviceName} đang dùng loại này." Không có: "Còn {n} tài nguyên thuộc loại này, kể cả đã ngừng dùng, nên không xóa được." |
 
 ## 10. Danh sách tài nguyên
 

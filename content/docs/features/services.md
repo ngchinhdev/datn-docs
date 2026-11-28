@@ -56,7 +56,7 @@ description: Chủ cơ sở quản lý nhóm dịch vụ, dịch vụ, biến th
 
 | Mã | Quy tắc |
 |---|---|
-| BR-94.3 | Tên nhóm 1 đến 60 ký tự, bỏ khoảng trắng hai đầu và gộp khoảng trắng thừa ở giữa; không trùng tên nhóm khác của cơ sở (không phân biệt hoa thường): 409 `NAME_TAKEN`. Nhóm mới xếp cuối |
+| BR-94.3 | Tên nhóm 1 đến 60 ký tự, bỏ khoảng trắng hai đầu, gộp khoảng trắng thừa ở giữa và viết dấu tiếng Việt ở dạng dựng sẵn (NFC); không trùng tên nhóm khác của cơ sở (không phân biệt hoa thường): 409 `NAME_TAKEN`. Nhóm mới xếp cuối |
 | BR-94.4 | Đổi tên nhóm theo BR-94.3. Dịch vụ tham chiếu nhóm theo id nên không đổi. Giữ nguyên tên và chỉ đổi hoa thường không phải trùng |
 | BR-94.5 | Thứ tự nhóm là thứ tự hiện ở danh sách và ở trang khách. Đổi thứ tự gửi cả danh sách một lần; thiếu, thừa hoặc trùng id: 409 `ORDER_MISMATCH` |
 | BR-94.6 | Chỉ xóa được nhóm không còn dịch vụ đang dùng: còn thì 409 `SERVICE_GROUP_IN_USE` kèm số dịch vụ. Dịch vụ đã ngừng dùng của nhóm bị xóa thành không nhóm. Xóa là xóa dòng. Xóa và gán dịch vụ vào nhóm chạy cùng lúc không làm mất dịch vụ đang dùng khỏi nhóm |
@@ -66,7 +66,7 @@ description: Chủ cơ sở quản lý nhóm dịch vụ, dịch vụ, biến th
 
 | Mã | Quy tắc |
 |---|---|
-| BR-94.8 | Tên dịch vụ 1 đến 80 ký tự, chuẩn hóa như BR-94.3; không trùng tên dịch vụ đang dùng khác của cơ sở (không phân biệt hoa thường): 409 `NAME_TAKEN`. Tên dịch vụ đã ngừng dùng không tính. Mô tả cho khách 0 đến 500 ký tự. Nhóm là một nhóm của cơ sở hoặc rỗng |
+| BR-94.8 | Tên dịch vụ 1 đến 80 ký tự, chuẩn hóa như BR-94.3; không trùng tên dịch vụ đang dùng khác của cơ sở (không phân biệt hoa thường): 409 `NAME_TAKEN`. Tên dịch vụ đã ngừng dùng không tính. Mô tả cho khách 0 đến 500 ký tự, bỏ khoảng trắng hai đầu. Nhóm là một nhóm của cơ sở hoặc rỗng |
 | BR-94.9 | Thêm dịch vụ bằng hộp nhỏ gồm tên, nhóm và một biến thể đầu: tên biến thể, giá, số phút của một đoạn Làm chiếm loại nhân viên. Hệ thống tạo biến thể đó với một đoạn Làm tên "Làm" chiếm loại nhân viên, không dọn dẹp, "Tên trên lịch" bằng tên dịch vụ cắt còn 20 ký tự, không giá chi nhánh. Dịch vụ mới chưa nhận đặt online (BR-94.10) và xếp cuối nhóm. Tạo xong mở trang chi tiết để chỉnh tiếp |
 | BR-94.10 | Nhận đặt online bật hoặc tắt ngay ở danh sách, và ở trang chi tiết. Tắt thì dịch vụ không hiện ở trang khách và chatbot; lễ tân vẫn chọn được (BR-30). Dịch vụ mới tạo ở trạng thái tắt, vì chưa có ai được xếp làm (BR-03) |
 | BR-94.11 | Thứ tự dịch vụ tính trong nhóm (hoặc trong nhóm "Khác"), là thứ tự hiện ở danh sách và trang khách. Đổi thứ tự gửi cả nhóm một lần; `ids` phải đúng bằng tập dịch vụ đang dùng của nhóm: 409 `ORDER_MISMATCH`. Đổi nhóm của một dịch vụ thì dịch vụ xếp cuối nhóm mới |
@@ -125,7 +125,7 @@ description: Chủ cơ sở quản lý nhóm dịch vụ, dịch vụ, biến th
 
 | Mã | Quy tắc |
 |---|---|
-| BR-94.32 | Loại tài nguyên mà một đoạn hoặc một dòng dọn dẹp của biến thể nào chiếm, kể cả biến thể đã xóa hoặc dịch vụ đã ngừng dùng, không xóa được: 409 `RESOURCE_TYPE_IN_USE` (BR-93.19) |
+| BR-94.32 | Loại tài nguyên mà một đoạn hoặc một dòng dọn dẹp của biến thể nào chiếm, kể cả biến thể đã xóa hoặc dịch vụ đã ngừng dùng, không xóa được: 409 `RESOURCE_TYPE_IN_USE` (BR-93.19). Khi không còn tài nguyên nào, phản hồi có `serviceName`, tên của một dịch vụ chiếm loại đó, ưu tiên dịch vụ đang dùng |
 
 ### Đoạn hợp lệ và không hợp lệ
 
@@ -184,7 +184,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 | AC-103 | Chủ `toc-may` | Gọi từng endpoint của nhóm này với dữ liệu hợp lệ | Mỗi endpoint trả mã thành công của nó | BR-94.1 |
 | AC-104 | Phiên của quản lý, lễ tân, kỹ thuật viên của `toc-may` | Gọi từng endpoint của nhóm này | 403 `FORBIDDEN`; không có dữ liệu nào đổi | BR-94.1 |
 | AC-105 | Tài khoản chỉ thuộc `la-sen`; tài khoản chưa đăng nhập; tài khoản chưa xác thực email | Gọi `GET /v1/tenants/toc-may/services` | 404 `NOT_FOUND` (giống với slug `khong-co`); 401 `UNAUTHENTICATED`; 403 `EMAIL_NOT_VERIFIED` | BR-94.1 |
-| AC-106 | Chủ `toc-may` | Đọc, sửa, ngừng dùng, đổi thứ tự bằng id nhóm, dịch vụ, biến thể, loại tài nguyên hoặc chi nhánh của `la-sen`; liệt kê nhóm và dịch vụ | 404 `NOT_FOUND` cho từng id; danh sách chỉ có dòng của `toc-may` | BR-94.1 |
+| AC-106 | Chủ `toc-may` | Đọc, sửa, ngừng dùng bằng id nhóm, dịch vụ, biến thể, loại tài nguyên hoặc chi nhánh của `la-sen`; đổi thứ tự dịch vụ với `groupId` của `la-sen`; liệt kê nhóm và dịch vụ | 404 `NOT_FOUND` cho từng id; danh sách chỉ có dòng của `toc-may` | BR-94.1 |
 | AC-107 | Gói `toc-may` hết hạn theo `Clock` giả; rồi cơ sở bị khóa | Gọi một endpoint của nhóm này | 402 `SUBSCRIPTION_EXPIRED`; sau khi khóa: 403 `TENANT_LOCKED`; dữ liệu không đổi | BR-94.2 |
 | AC-108 | `la-sen` (gói `basic`); `toc-may` đang dùng thử | Mỗi cơ sở thêm 30 dịch vụ, 12 nhóm, mỗi dịch vụ 10 biến thể | Mọi yêu cầu 201 hoặc 200; không có `PLAN_LIMIT_REACHED` | BR-94.2 |
 
@@ -278,7 +278,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 
 | # | Cho | Khi | Thì | Quy tắc |
 |---|---|---|---|---|
-| AC-155 | Loại X không có tài nguyên, chỉ một đoạn của biến thể đã xóa chiếm; loại Y chỉ dịch vụ đã ngừng dùng chiếm; loại W không ai dùng | Xóa X; Y; W | 409 `RESOURCE_TYPE_IN_USE` cho X, Y; 204 cho W | BR-94.32, BR-93.19 |
+| AC-155 | Loại X không có tài nguyên, chỉ một đoạn của biến thể đã xóa chiếm; loại Y chỉ dịch vụ đã ngừng dùng chiếm; loại W không ai dùng | Xóa X; Y; W | 409 `RESOURCE_TYPE_IN_USE` cho X, Y, kèm `serviceName` là tên dịch vụ của biến thể đã xóa và tên dịch vụ đã ngừng dùng; 204 cho W. Loại có cả dịch vụ đang dùng và đã ngừng dùng chiếm: `serviceName` là của dịch vụ đang dùng | BR-94.32, BR-93.19 |
 
 ### Giới hạn
 
