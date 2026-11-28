@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, CreditCard, PawPrint, CalendarCheck, Layers, Minus, Scissors } from 'lucide-react';
+import { Check, CreditCard, Sparkles, CalendarCheck, Layers, Minus, Scissors } from 'lucide-react';
 import Link from 'next/link';
 import { usePlatform } from '@/components/mock/platform-store';
 import { ResourceCalendar } from '@/components/sapio/resource-calendar';
@@ -151,8 +151,8 @@ export function LandingScreen() {
                 className="sp-panel min-w-[240px] flex-[1_1_0] gap-2.5 p-6!"
               >
                 <span className="inline-flex size-10 items-center justify-center rounded-(--radius-md) bg-(--brand-soft) text-(--brand)">
-                  {template.id === 'pet_spa' ? (
-                    <PawPrint size={20} aria-hidden="true" />
+                  {template.id === 'beauty_spa' ? (
+                    <Sparkles size={20} aria-hidden="true" />
                   ) : (
                     <Scissors size={20} aria-hidden="true" />
                   )}

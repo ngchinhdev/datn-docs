@@ -38,13 +38,13 @@ export function CustomerSessionProvider({
 }) {
   const { customers, replaceCustomer, servedSubjects, money } = useScheduleStore();
 
-  // Default customer for mock: Chị Quyên for toc-may, Chị Linh for pawpaw
+  // Default customer for mock: Chị Quyên for toc-may, Chị Linh for la-sen
   const defaultCustomerId = useMemo(() => {
     if (tenantSlug === 'toc-may') {
       return customers.find((c) => c.id === 'may-c-quyen')?.id ?? customers[0]?.id ?? null;
     }
-    if (tenantSlug === 'pawpaw') {
-      return customers.find((c) => c.id === 'paw-c-linh')?.id ?? customers[0]?.id ?? null;
+    if (tenantSlug === 'la-sen') {
+      return customers.find((c) => c.id === 'sen-c-linh')?.id ?? customers[0]?.id ?? null;
     }
     return customers[0]?.id ?? null;
   }, [tenantSlug, customers]);

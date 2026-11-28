@@ -1,4 +1,4 @@
-import type { IndustryTemplate, SampleSegment, SampleService, TemplatePolicies } from './types.ts';
+import type { IndustryTemplate, SampleSegment, TemplatePolicies } from './types.ts';
 
 const policies: TemplatePolicies = {
   minNoticeHours: 2,
@@ -105,129 +105,6 @@ export const hairSalonTemplate: IndustryTemplate = {
     'Nhuộm tóc có 45 phút chờ lên màu: thợ rảnh để nhận khách khác, ghế vẫn bận. Giá, thời lượng và tên đều sửa được sau khi tạo.',
 };
 
-const petBath = (wash: number, dry: number, finish: number) => [
-  work('Tắm', wash, 'Nhân viên chăm sóc', 'Bồn tắm'),
-  { name: 'Sấy lồng', kind: 'wait' as const, minutes: dry, types: ['Lồng sấy'] },
-  work('Chải', finish, 'Nhân viên chăm sóc'),
-];
-
-const petSampleServices: SampleService[] = [
-  {
-    name: 'Tắm sấy',
-    priceBySubject: true,
-    variants: [
-      {
-        name: 'Chó dưới 10 kg',
-        priceVnd: 150_000n,
-        cleanup: { 'Bồn tắm': 10 },
-        segments: petBath(20, 30, 10),
-      },
-      {
-        name: 'Chó từ 10 kg',
-        priceVnd: 250_000n,
-        cleanup: { 'Bồn tắm': 10 },
-        segments: petBath(30, 45, 15),
-      },
-      {
-        name: 'Mèo',
-        priceVnd: 180_000n,
-        cleanup: { 'Bồn tắm': 10 },
-        segments: petBath(25, 30, 5),
-      },
-    ],
-  },
-  {
-    name: 'Cắt tỉa lông',
-    priceBySubject: true,
-    variants: [
-      {
-        name: 'Chó dưới 10 kg',
-        priceVnd: 250_000n,
-        segments: [work('Cắt tỉa', 60, 'Nhân viên chăm sóc', 'Bàn cắt tỉa')],
-      },
-      {
-        name: 'Chó từ 10 kg',
-        priceVnd: 400_000n,
-        segments: [work('Cắt tỉa', 90, 'Nhân viên chăm sóc', 'Bàn cắt tỉa')],
-      },
-    ],
-  },
-];
-
-/** The same services as the published version, before the draft added the bath cleanup. */
-const petPublishedServices: SampleService[] = petSampleServices.map((service) => ({
-  ...service,
-  variants: service.variants.map(({ cleanup: _cleanup, ...variant }) => variant),
-}));
-
-export const petSpaTemplate: IndustryTemplate = {
-  id: 'pet_spa',
-  name: 'Spa thú cưng',
-  status: 'open',
-  cardDescription:
-    'Tắm, cắt tỉa lông chó mèo. Bàn cắt tỉa, bồn tắm, lồng sấy. Giá theo loài và cân nặng.',
-  publishedVersion: { number: 2, publishedAt: '2026-11-01', tenantsCreated: 4 },
-  draft: {
-    number: 3,
-    changes: ['Tắm sấy: thêm rửa bồn 10′ sau khi dùng', 'Chính sách: đặt xa nhất 14 → 30 ngày'],
-    base: {
-      defaultPolicies: { ...policies, maxAdvanceDays: 14 },
-      sampleServices: petPublishedServices,
-    },
-  },
-  defaultPolicies: policies,
-  updatedAt: '2026-11-07',
-  vocabulary: {
-    staff: 'Nhân viên chăm sóc',
-    subject: 'bé',
-    subjectQuestion: 'Cho bé nào?',
-    addSubject: 'Thêm bé',
-    subjectExample: 'Mochi',
-  },
-  subjectSchema: [
-    {
-      key: 'species',
-      label: 'Loài',
-      type: 'enum',
-      options: [
-        { value: 'dog', label: 'Chó' },
-        { value: 'cat', label: 'Mèo' },
-      ],
-      required: true,
-    },
-    { key: 'breed', label: 'Giống', type: 'text', example: 'Poodle', required: false },
-    {
-      key: 'weightKg',
-      label: 'Cân nặng',
-      type: 'number',
-      unit: 'kg',
-      example: '6',
-      required: { species: 'dog' },
-    },
-  ],
-  resourceTypes: [
-    {
-      name: 'Nhân viên chăm sóc',
-      isStaff: true,
-      hint: 'Tạo cùng tài khoản chủ cơ sở',
-      defaultCount: 1,
-    },
-    { name: 'Bồn tắm', isStaff: false, hint: 'Mỗi bồn tắm một bé một lúc', defaultCount: 2 },
-    { name: 'Lồng sấy', isStaff: false, hint: 'Mỗi lồng sấy một bé một lúc', defaultCount: 2 },
-    {
-      name: 'Bàn cắt tỉa',
-      isStaff: false,
-      hint: 'Mỗi bàn phục vụ một bé một lúc',
-      defaultCount: 2,
-    },
-  ],
-  serviceGroups: ['Tắm', 'Cắt tỉa', 'Chăm sóc thêm'],
-  sampleServices: petSampleServices,
-  bookingFor: 'thú cưng',
-  previewNote:
-    'Giá chọn theo loài và cân nặng của bé (chó dưới 10 kg, từ 10 kg, mèo). Giá, thời lượng và tên đều sửa được sau khi tạo.',
-};
-
 export const nailSalonTemplate: IndustryTemplate = {
   id: 'nail_salon',
   name: 'Tiệm nail',
@@ -269,13 +146,13 @@ export const nailSalonTemplate: IndustryTemplate = {
 
 export const beautySpaTemplate: IndustryTemplate = {
   id: 'beauty_spa',
-  name: 'Spa và thẩm mỹ',
-  status: 'soon',
-  cardDescription: 'Massage, chăm sóc da. Phòng, giường spa.',
-  publishedVersion: null,
+  name: 'Spa',
+  status: 'open',
+  cardDescription: 'Massage, ngâm bùn, chăm sóc da. Giường, bồn ngâm, phòng xông.',
+  publishedVersion: { number: 2, publishedAt: '2026-11-01', tenantsCreated: 7 },
   draft: null,
   defaultPolicies: policies,
-  updatedAt: '2026-11-02',
+  updatedAt: '2026-11-01',
   vocabulary: {
     staff: 'Kỹ thuật viên',
     subject: null,
@@ -286,18 +163,51 @@ export const beautySpaTemplate: IndustryTemplate = {
   subjectSchema: [],
   resourceTypes: [
     { name: 'Kỹ thuật viên', isStaff: true, hint: 'Tạo cùng tài khoản chủ cơ sở', defaultCount: 1 },
-    { name: 'Phòng spa', isStaff: false, hint: 'Mỗi phòng một khách một lúc', defaultCount: 2 },
+    { name: 'Giường', isStaff: false, hint: 'Mỗi giường một khách một lúc', defaultCount: 2 },
+    { name: 'Bồn ngâm', isStaff: false, hint: 'Dùng cho ngâm bùn', defaultCount: 1 },
+    { name: 'Phòng xông', isStaff: false, hint: 'Mỗi phòng một khách một lúc', defaultCount: 1 },
   ],
-  serviceGroups: ['Massage', 'Chăm sóc da'],
-  sampleServices: [],
+  serviceGroups: ['Trị liệu', 'Massage', 'Chăm sóc da', 'Gội'],
+  sampleServices: [
+    {
+      name: 'Ngâm bùn, xông hơi',
+      variants: [
+        {
+          name: 'Tiêu chuẩn',
+          priceVnd: 450_000n,
+          cleanup: { 'Bồn ngâm': 10, 'Phòng xông': 5 },
+          segments: [
+            work('Ngâm bùn', 30, 'Kỹ thuật viên', 'Bồn ngâm'),
+            { name: 'Xông hơi', kind: 'wait', minutes: 45, types: ['Phòng xông'] },
+            work('Thoa dưỡng thể', 15, 'Kỹ thuật viên'),
+          ],
+        },
+      ],
+    },
+    {
+      name: 'Massage body',
+      variants: [
+        {
+          name: '60 phút',
+          priceVnd: 350_000n,
+          segments: [work('Massage', 60, 'Kỹ thuật viên', 'Giường')],
+        },
+        {
+          name: '90 phút',
+          priceVnd: 500_000n,
+          segments: [work('Massage', 90, 'Kỹ thuật viên', 'Giường')],
+        },
+      ],
+    },
+  ],
   bookingFor: 'chính mình',
-  previewNote: 'Giá, thời lượng và tên đều sửa được sau khi tạo.',
+  previewNote:
+    'Ngâm bùn có 45 phút xông hơi: kỹ thuật viên rảnh để nhận khách khác, phòng xông vẫn bận. Giá, thời lượng và tên đều sửa được sau khi tạo.',
 };
 
 /** Every template, in the order the administrator lists them. */
 export const industryTemplates: IndustryTemplate[] = [
   hairSalonTemplate,
-  petSpaTemplate,
-  nailSalonTemplate,
   beautySpaTemplate,
+  nailSalonTemplate,
 ];

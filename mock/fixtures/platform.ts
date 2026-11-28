@@ -1,7 +1,7 @@
 /*
  * The tenants of the platform as the platform administration sees them (BR-89): who they are, their
  * plan, and totals; never their appointments, customers or invoices. Four of them are the tenants
- * of `accounts.ts` (`may`, `pawpaw`, `havy`, `bong`, same ids); the rest are only data.
+ * of `accounts.ts` (`may`, `sen`, `havy`, `bong`, same ids); the rest are only data.
  */
 import {
   DEFAULT_CATALOG,
@@ -17,7 +17,7 @@ import {
 import { addDays } from '../time.ts';
 import type { AuditEntry } from './types.ts';
 
-export type IndustryId = 'hair_salon' | 'pet_spa';
+export type IndustryId = 'hair_salon' | 'beauty_spa';
 
 export interface PlatformPayment {
   id: string;
@@ -258,18 +258,18 @@ export const platformTenants: PlatformTenant[] = [
   salonTocMay,
   paid(
     {
-      id: 'pawpaw',
-      slug: 'pawpaw',
-      name: 'Spa thú cưng Pawpaw',
-      industry: 'pet_spa',
-      templateVersion: 1,
+      id: 'sen',
+      slug: 'la-sen',
+      name: 'Spa Lá Sen',
+      industry: 'beauty_spa',
+      templateVersion: 2,
       createdOn: '2026-09-20',
       ownerName: 'Lê Thu Hà',
-      ownerEmail: 'ha.le@pawpaw.vn',
+      ownerEmail: 'ha.le@lasen.vn',
       ownerLastLoginAt: '2026-11-07T01:30:00Z',
       totals: {
         branches: 1,
-        members: 4,
+        members: 5,
         takingBookings: 2,
         appointmentsMonth: 96,
         appointments30: 380,
@@ -294,14 +294,14 @@ export const platformTenants: PlatformTenant[] = [
     totals: { branches: 1, members: 1, takingBookings: 1, customers: 0 },
   }),
   trialing({
-    id: 'pet-house-q7',
-    slug: 'pethouse-q7',
-    name: 'Pet House Quận 7',
-    industry: 'pet_spa',
+    id: 'hoa-sua-q7',
+    slug: 'hoasua-q7',
+    name: 'Spa Hoa Sữa Quận 7',
+    industry: 'beauty_spa',
     templateVersion: 2,
     createdOn: '2026-11-06',
     ownerName: 'Trần Hoài An',
-    ownerEmail: 'an.pethouse@email.vn',
+    ownerEmail: 'an.hoasua@email.vn',
     ownerLastLoginAt: '2026-11-06T11:20:00Z',
     totals: { branches: 1, members: 2, takingBookings: 1, customers: 0 },
   }),
@@ -330,14 +330,14 @@ export const platformTenants: PlatformTenant[] = [
     totals: { branches: 1, members: 2, takingBookings: 2, customers: 0 },
   }),
   trialing({
-    id: 'spa-meo-u',
-    slug: 'spa-meo-u',
-    name: 'Spa Mèo Ú',
-    industry: 'pet_spa',
+    id: 'spa-tra-xanh',
+    slug: 'spa-tra-xanh',
+    name: 'Spa Trà Xanh',
+    industry: 'beauty_spa',
     templateVersion: 2,
     createdOn: '2026-11-02',
-    ownerName: 'Hoàng Thị Mèo',
-    ownerEmail: 'meou.spa@email.vn',
+    ownerName: 'Hoàng Thị Trà',
+    ownerEmail: 'tra.spa@email.vn',
     ownerLastLoginAt: '2026-11-06T14:30:00Z',
     totals: { branches: 1, members: 2, takingBookings: 1, customers: 0 },
   }),
@@ -619,14 +619,14 @@ export const platformTenants: PlatformTenant[] = [
   ),
   paid(
     {
-      id: 'thu-cung-bong-bong',
-      slug: 'bong-bong',
-      name: 'Thú Cưng Bông Bông',
-      industry: 'pet_spa',
+      id: 'spa-bong-sen',
+      slug: 'bong-sen',
+      name: 'Spa Bông Sen',
+      industry: 'beauty_spa',
       templateVersion: 2,
       createdOn: '2026-09-02',
-      ownerName: 'Lâm Bông',
-      ownerEmail: 'bong.pet@email.vn',
+      ownerName: 'Lâm Sen',
+      ownerEmail: 'sen.spa@email.vn',
       ownerLastLoginAt: '2026-11-07T00:40:00Z',
       totals: {
         branches: 2,
@@ -644,14 +644,14 @@ export const platformTenants: PlatformTenant[] = [
   ),
   paid(
     {
-      id: 'happy-paws',
-      slug: 'happy-paws',
-      name: 'Spa Chó Mèo Happy Paws',
-      industry: 'pet_spa',
+      id: 'happy-spa',
+      slug: 'happy-spa',
+      name: 'Happy Spa',
+      industry: 'beauty_spa',
       templateVersion: 2,
       createdOn: '2026-09-14',
       ownerName: 'Mai Hạnh Phúc',
-      ownerEmail: 'phuc.paws@email.vn',
+      ownerEmail: 'phuc.happy@email.vn',
       ownerLastLoginAt: '2026-11-06T12:10:00Z',
       totals: {
         branches: 1,
@@ -669,14 +669,14 @@ export const platformTenants: PlatformTenant[] = [
   ),
   paid(
     {
-      id: 'pet-spa-go-vap',
-      slug: 'pet-spa-gv',
-      name: 'Pet Spa Gò Vấp',
-      industry: 'pet_spa',
-      templateVersion: 1,
+      id: 'spa-go-vap',
+      slug: 'spa-gv',
+      name: 'Spa Thư Giãn Gò Vấp',
+      industry: 'beauty_spa',
+      templateVersion: 2,
       createdOn: '2026-09-29',
       ownerName: 'Tạ Gia Huy',
-      ownerEmail: 'huy.petgv@email.vn',
+      ownerEmail: 'huy.spagv@email.vn',
       ownerLastLoginAt: '2026-11-07T01:00:00Z',
       totals: {
         branches: 1,
@@ -694,14 +694,14 @@ export const platformTenants: PlatformTenant[] = [
   ),
   paid(
     {
-      id: 'spa-thu-cung-mimi',
-      slug: 'mimi-pet',
-      name: 'Spa Thú Cưng Mimi',
-      industry: 'pet_spa',
-      templateVersion: 1,
+      id: 'spa-mimi',
+      slug: 'mimi-spa',
+      name: 'Spa Mimi',
+      industry: 'beauty_spa',
+      templateVersion: 2,
       createdOn: '2026-09-18',
       ownerName: 'Dương Mi Mi',
-      ownerEmail: 'mimi.pet@email.vn',
+      ownerEmail: 'mimi.spa@email.vn',
       ownerLastLoginAt: '2026-10-30T08:30:00Z',
       totals: {
         branches: 1,

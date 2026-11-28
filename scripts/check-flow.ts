@@ -13,7 +13,7 @@ import {
   workspaces,
 } from '../mock/fixtures/accounts.ts';
 import { salonTocMay } from '../mock/fixtures/salon-toc-may.ts';
-import { spaThuCungPawpaw } from '../mock/fixtures/spa-thu-cung-pawpaw.ts';
+import { spaLaSen } from '../mock/fixtures/spa-la-sen.ts';
 import { deserialize, readSlice, serialize, writeSlice } from '../mock/persist.ts';
 
 let failures = 0;
@@ -45,7 +45,7 @@ report(
   !('gone' in (deserialize(serialize({ gone: undefined, kept: 1 })) as object)),
   'trường undefined bị bỏ, như JSON',
 );
-for (const f of [salonTocMay, spaThuCungPawpaw]) {
+for (const f of [salonTocMay, spaLaSen]) {
   report(roundTrips(f.money), `${f.tenant.slug}: state tiền của cơ sở (bigint) khứ hồi đúng`);
   report(roundTrips(f.appointments), `${f.tenant.slug}: lịch hẹn mẫu khứ hồi đúng`);
   report(roundTrips(f.services), `${f.tenant.slug}: dịch vụ mẫu khứ hồi đúng`);

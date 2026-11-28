@@ -26,7 +26,7 @@ import { addDays, formatDateTime, localDate } from './time.ts';
 
 export const INDUSTRY_LABEL: Record<IndustryId, string> = {
   hair_salon: 'Salon tóc',
-  pet_spa: 'Spa thú cưng',
+  beauty_spa: 'Spa',
 };
 
 export const INDUSTRY_IDS = Object.keys(INDUSTRY_LABEL) as IndustryId[];

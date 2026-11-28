@@ -72,7 +72,7 @@ function TenantContent({ tenantSlug }: { tenantSlug: string }) {
   const { customer, isLoggedIn } = useCustomerSession();
 
   const branch = fixture.branches[0]!;
-  const tenantClass = `sp-tenant-${fixture.tenant.slug === 'toc-may' ? 'may' : 'pawpaw'}`;
+  const tenantClass = `sp-tenant-${fixture.tenant.slug === 'toc-may' ? 'may' : 'la-sen'}`;
 
   // Calculate earliest free slot today for each staff member
   const staffSlots = useMemo(() => {
@@ -135,7 +135,7 @@ function TenantContent({ tenantSlug }: { tenantSlug: string }) {
 
   const staffLabel = fixture.template.vocabulary.staff;
 
-  const isPawpaw = fixture.tenant.slug === 'pawpaw';
+  const isLaSen = fixture.tenant.slug === 'la-sen';
   const phone = branchPhone(fixture.tenant.slug, branch.phone);
 
   return (
@@ -214,8 +214,8 @@ function TenantContent({ tenantSlug }: { tenantSlug: string }) {
               {fixture.tenant.name}
             </h1>
             <p className="m-0 text-sm leading-5 text-(--ink-muted) min-[900px]:text-base min-[900px]:leading-6">
-              {isPawpaw
-                ? 'Chăm sóc toàn diện cho chó và mèo. Tắm sấy, cắt tỉa lông tạo kiểu chuyên nghiệp.'
+              {isLaSen
+                ? 'Massage, ngâm bùn xông hơi, chăm sóc da mặt. Không gian yên tĩnh, kỹ thuật viên có tay nghề.'
                 : 'Cắt, gội, nhuộm cho nam và nữ. Chuyên nhuộm màu thời trang.'}
             </p>
             <a
@@ -324,8 +324,8 @@ function TenantContent({ tenantSlug }: { tenantSlug: string }) {
               </section>
             ))}
             <p className="m-0 text-[13px] leading-[18px] text-(--ink-muted)">
-              {isPawpaw
-                ? 'Loài và cân nặng quyết định giá và thời gian của dịch vụ (BR-13).'
+              {isLaSen
+                ? 'Dịch vụ có nhiều biến thể thì bạn chọn thời lượng khi đặt (BR-13).'
                 : 'Giá theo cấp thợ: chọn đích danh Thợ chính thì giá nhuộm cao hơn 10%. Để "Bất kỳ ai" là giá thấp nhất.'}
             </p>
           </section>

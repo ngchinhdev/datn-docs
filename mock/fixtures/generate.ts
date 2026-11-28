@@ -9,7 +9,7 @@
  * - Tóc Mây, Thứ Tư 04/11: near-empty day, 2 appointments.
  * - Tóc Mây, Thứ Năm 05/11: one appointment with gội, cắt, nhuộm back to back, with a wait.
  * - Tóc Mây, Thứ Sáu 06/11: a cancelled appointment, a customer name over 30 characters, a long note.
- * - Pawpaw, Thứ Bảy 07/11: two pets booked together, a dog over 10 kg, dryers busy during the groomer's wait.
+ * - Lá Sen, Thứ Bảy 07/11: two friends booked together, both steam rooms busy at 11:30 while the technician is free.
  */
 import { occupation, prepMinutes, resourceTypesOf, visibleMinutes } from '../occupation.ts';
 import { bookVariant, findVariant, matchesAttributes, type ItemSpec } from './bookings.ts';

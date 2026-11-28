@@ -104,8 +104,8 @@ function AssistantWindow() {
   const [text, setText] = useState('');
   const input = useRef<HTMLInputElement>(null);
   const end = useRef<HTMLDivElement>(null);
-  const tone = fixture.tenant.slug === 'toc-may' ? 'may' : 'pawpaw';
-  const name = `Trợ lý ${fixture.tenant.name.replace(/^(Salon|Spa thú cưng|Spa|Nail)\s+/, '')}`;
+  const tone = fixture.tenant.slug === 'toc-may' ? 'may' : 'la-sen';
+  const name = `Trợ lý ${fixture.tenant.name.replace(/^(Salon|Spa|Nail)\s+/, '')}`;
 
   useEffect(() => input.current?.focus(), []);
   useEffect(() => end.current?.scrollIntoView({ block: 'end' }), [messages, limit]);

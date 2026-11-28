@@ -266,7 +266,7 @@ function ChatbotSettingsForm({ tenantSlug }: { tenantSlug: string }) {
             className={`sp-tenant-${fixture.tenant.id} overflow-hidden rounded-2xl bg-(--surface) text-sm leading-5 shadow-[0_0_0_1px_var(--line),var(--shadow-card)]`}
           >
             <div className="bg-(--surface-raised) px-[14px] py-[10px] font-semibold shadow-[0_1px_0_var(--line)]">
-              Trợ lý {shop.replace(/^(Salon|Spa thú cưng)\s+/, '')}
+              Trợ lý {shop.replace(/^(Salon|Spa)\s+/, '')}
             </div>
             <div className="flex flex-col gap-2 p-[14px]">
               <p className="m-0 max-w-[85%] self-start rounded-[14px] bg-(--fill-tonal) px-3 py-2">

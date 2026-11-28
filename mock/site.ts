@@ -13,7 +13,7 @@ export const siteHost = (slug: string) => `${slug}.${BASE_DOMAIN}`;
  */
 export function branchPhone(slug: string, phone?: string) {
   const fallback =
-    slug === 'pawpaw'
+    slug === 'la-sen'
       ? { tel: '02873005678', display: '028 7300 5678' }
       : { tel: '02839301234', display: '028 3930 1234' };
   const text = phone?.trim();

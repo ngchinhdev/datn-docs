@@ -17,7 +17,7 @@ import {
 import { HOLD_MINUTES, holdState, makeHold, offerAfterExpiry } from '../mock/assistant-hold.ts';
 import { freeSlots } from '../mock/availability.ts';
 import { salonTocMay } from '../mock/fixtures/salon-toc-may.ts';
-import { spaThuCungPawpaw } from '../mock/fixtures/spa-thu-cung-pawpaw.ts';
+import { spaLaSen } from '../mock/fixtures/spa-la-sen.ts';
 import type { TenantFixture } from '../mock/fixtures/types.ts';
 import { formatDuration, formatVnd } from '../mock/format.ts';
 import { bookingWindow } from '../mock/policy.ts';
@@ -55,7 +55,7 @@ const card = <K extends AssistantCard['kind']>(reply: AssistantReply, kind: K) =
   reply.cards.find((c): c is Extract<AssistantCard, { kind: K }> => c.kind === kind);
 
 const may = salonTocMay;
-const paw = spaThuCungPawpaw;
+const sen = spaLaSen;
 
 // ---- Price: the numbers come from the card (BR-92) ----
 {
@@ -169,35 +169,19 @@ const paw = spaThuCungPawpaw;
   report(mid?.staffName === 'Mai', 'BR-14: "Mai" viết hoa giữa câu là tên thợ', mid?.staffName);
 }
 
-// ---- A subject decides the variant (BR-13) ----
+// ---- The customer picks the variant (BR-13) ----
 {
-  const { replies, last } = chat(paw, ['Tắm cho chó bao nhiêu?', 'Poodle, 6 kg']);
-  const first = replies[0]!;
+  const { last } = chat(sen, ['Massage body bao nhiêu tiền?']);
+  const lines = card(last, 'service')?.lines ?? [];
   report(
-    first.intent === 'ask' &&
-      first.cards.length === 0 &&
-      first.suggestions.length === paw.services[0]!.variants.length &&
-      /cân nặng/.test(first.text),
-    'BR-13: Pawpaw "Tắm cho chó bao nhiêu?" hỏi lại cân nặng kèm gợi ý, chưa nói giá',
-    first.text,
+    lines.length === 2 && lines[0]?.priceVnd === 350_000n && lines[1]?.priceVnd === 500_000n,
+    'BR-13: Lá Sen "Massage body bao nhiêu tiền?" ra thẻ có hai biến thể 60 và 90 phút',
+    lines.map((l) => `${l.name} ${formatVnd(l.priceVnd)}`).join(', ') || last.intent,
   );
-  const line = card(last, 'service')?.lines[0];
+  const single = card(chat(sen, ['Ngâm bùn, xông hơi bao nhiêu?']).last, 'service')?.lines;
   report(
-    card(last, 'service')?.lines.length === 1 &&
-      line?.priceVnd === 150_000n &&
-      line.name === 'Chó dưới 10 kg',
-    'BR-13: "Poodle, 6 kg" ra Tắm chó nhỏ 150.000 ₫',
-    line ? `${line.name} ${formatVnd(line.priceVnd)}` : last.intent,
-  );
-  const cat = chat(paw, ['Tắm cho mèo bao nhiêu?']).last;
-  report(
-    card(cat, 'service')?.lines[0]?.priceVnd === 180_000n,
-    'BR-13: "Tắm cho mèo" ra đúng một biến thể, 180.000 ₫',
-  );
-  const large = chat(paw, ['Tắm cho chó bao nhiêu?', 'Bé nặng 12 kg']).last;
-  report(
-    card(large, 'service')?.lines[0]?.priceVnd === 250_000n,
-    'BR-13: chó 12 kg ra Tắm chó lớn 250.000 ₫',
+    single?.length === 1 && single[0]?.priceVnd === 450_000n && single[0].minutes === 90,
+    'BR-13: dịch vụ chỉ có một biến thể thì không hỏi, ra giá 450.000 ₫ và 1 giờ 30 phút',
   );
 }
 
@@ -412,7 +396,7 @@ const paw = spaThuCungPawpaw;
       'Chiều nay còn giờ không?',
       'Đặt giúp mình giờ đầu tiên',
     ]),
-    chat(paw, ['Tắm cho mèo', 'Ngày mai còn giờ không?']),
+    chat(sen, ['Massage body 60 phút', 'Ngày mai còn giờ không?']),
   ];
   const wrote = replies.some((r) =>
     r.replies.some((reply) => reply.cards.some((c) => c.kind === 'booked')),

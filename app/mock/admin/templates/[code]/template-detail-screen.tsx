@@ -189,7 +189,7 @@ export function TemplateDetailScreen({ code }: { code: string }) {
     subjectExample: 'Ví dụ tên',
   };
   const askedSubject = template.vocabulary.subject !== null;
-  const bookingPage = { hair_salon: 'toc-may', pet_spa: 'pawpaw' }[template.id];
+  const bookingPage = { hair_salon: 'toc-may', beauty_spa: 'la-sen' }[template.id];
 
   return (
     <div className="sp-shell__content">

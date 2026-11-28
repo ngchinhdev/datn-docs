@@ -75,7 +75,7 @@ const firstInvoiceId = (slug: string) =>
 const pendingLeaveId = (slug: string) =>
   fixtureBySlug(slug)?.staffTimeOff.find((l) => l.status === 'pending')?.id ?? '';
 
-/** The service with a waiting segment: Nhuộm tóc at Tóc Mây, Tắm sấy at Pawpaw. */
+/** The service with a waiting segment: Nhuộm tóc at Tóc Mây, Ngâm bùn, xông hơi at Lá Sen. */
 const waitingServiceId = (slug: string) =>
   fixtureBySlug(slug)?.services.find((s) =>
     s.variants.some((v) => v.segments.some((segment) => segment.kind === 'wait')),
@@ -87,7 +87,7 @@ const customerAppointmentId = (slug: string) => {
   const asked = fixture?.appointments.find((a) =>
     fixture.staffTimeOff.some((l) => l.handling?.[a.id]?.kind === 'asked'),
   );
-  const customerId = slug === 'pawpaw' ? 'paw-c-linh' : 'may-c-quyen';
+  const customerId = slug === 'la-sen' ? 'sen-c-linh' : 'may-c-quyen';
   return (
     asked?.id ??
     fixture?.appointments.find((a) => a.customerId === customerId && a.status === 'confirmed')
@@ -156,7 +156,7 @@ const built: Record<string, ScreenLink[]> = {
     {
       label: 'Khung chat',
       href: (slug) =>
-        slug === 'pawpaw' ? '/mock/pawpaw?plan=trial&chat=1' : `/mock/${slug}?chat=1`,
+        slug === 'la-sen' ? '/mock/la-sen?plan=trial&chat=1' : `/mock/${slug}?chat=1`,
     },
   ],
   'MH-23': [{ label: 'Các mẫu email', href: site('/emails') }],
@@ -186,7 +186,7 @@ const built: Record<string, ScreenLink[]> = {
   'MH-33': [
     {
       label: 'Hồ sơ khách',
-      href: (slug) => app(`customers/${slug === 'pawpaw' ? 'paw-c-linh' : 'may-c-ha'}`)(slug),
+      href: (slug) => app(`customers/${slug === 'la-sen' ? 'sen-c-linh' : 'may-c-ha'}`)(slug),
     },
   ],
   'MH-34': [{ label: 'Hoàn tiền', href: app('refunds?role=manager') }],
@@ -249,8 +249,8 @@ const built: Record<string, ScreenLink[]> = {
       platform: true,
     },
     {
-      label: 'Spa thú cưng, bản nháp (sẽ bỏ, D-16)',
-      href: () => '/mock/admin/templates/pet_spa',
+      label: 'Spa, bản nháp (sẽ bỏ, D-16)',
+      href: () => '/mock/admin/templates/beauty_spa',
       platform: true,
     },
   ],

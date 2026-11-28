@@ -310,7 +310,7 @@ export function downgradeBlock(target: Plan, activeBranches: number): string | n
 // Sample tenants and the `?plan=` override of the mock
 
 /** Plan of each sample tenant, paid until the same day. */
-const DEFAULT_PLAN: Record<string, PlanCode> = { 'toc-may': 'pro', pawpaw: 'basic' };
+const DEFAULT_PLAN: Record<string, PlanCode> = { 'toc-may': 'pro', 'la-sen': 'basic' };
 
 /** The day the sample tenants' trial ends; they signed up on `MOCK_NOW` and the trial counts that day. */
 export const TRIAL_ENDS_ON = addDays(MOCK_TODAY, TRIAL_DAYS - 1);

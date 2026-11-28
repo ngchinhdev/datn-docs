@@ -1,6 +1,6 @@
 /*
- * Money of Spa thú cưng Pawpaw: what was collected since 01/10, one collected invoice of today and
- * the drafts of the pets being served.
+ * Money of Spa Lá Sen: what was collected since 01/10, one collected invoice of today and
+ * the drafts of the guests being served.
  */
 import { earnEntries } from '../commission.ts';
 import { draftInvoice, invoiceNumber } from '../money.ts';
@@ -17,26 +17,26 @@ import type {
   Staff,
 } from './types.ts';
 
-/** BR-41: every service 10%, retail 5%, and a higher rate for the senior groomer's grooming from 01/12. */
-export const pawpawCommissionRules: CommissionRule[] = [
-  { id: 'paw-rule-1', scope: 'all', percent: 10, effectiveFrom: '2026-10-01' },
-  { id: 'paw-rule-2', scope: 'retail', percent: 5, effectiveFrom: '2026-10-01' },
+/** BR-41: every service 10%, retail 5%, and a higher rate for the senior technician's massage from 01/12. */
+export const laSenCommissionRules: CommissionRule[] = [
+  { id: 'sen-rule-1', scope: 'all', percent: 10, effectiveFrom: '2026-10-01' },
+  { id: 'sen-rule-2', scope: 'retail', percent: 5, effectiveFrom: '2026-10-01' },
   {
-    id: 'paw-rule-3',
+    id: 'sen-rule-3',
     scope: 'service',
-    serviceId: 'paw-groom',
+    serviceId: 'sen-massage',
     level: 2,
     percent: 12,
     effectiveFrom: '2026-12-01',
   },
 ];
 
-export function pawpawMoney(
+export function laSenMoney(
   services: Service[],
   appointments: Appointment[],
   staff: Staff[],
 ): MoneyState {
-  const rules = pawpawCommissionRules;
+  const rules = laSenCommissionRules;
   const invoices: Invoice[] = [];
   const payments: Payment[] = [];
 
@@ -44,7 +44,7 @@ export function pawpawMoney(
   const sales = planSales(
     appointments,
     { fromDate: '2026-10-01', before: MOCK_NOW },
-    new Set(['paw-a-group', 'paw-a-mochi', 'paw-a-milo']),
+    new Set(['sen-a-group', 'sen-a-linh', 'sen-a-hoa']),
   );
   const history = buildHistory(
     sales,
@@ -56,8 +56,8 @@ export function pawpawMoney(
   const commission: CommissionEntry[] = [...history.commission];
   const next = sales.length + 1;
 
-  // The two pets of chị Quỳnh, done and paid at the desk this morning.
-  const group = appointments.find((a) => a.id === 'paw-a-group');
+  // The two friends of chị Quỳnh, done and paid at the desk this morning.
+  const group = appointments.find((a) => a.id === 'sen-a-group');
   if (group) {
     const { invoice } = draftInvoice(group, services, invoiceNumber(next), '2026-11-07T02:00:00Z');
     const amountVnd = invoice.lines.reduce((m, l) => m + BigInt(l.quantity) * l.unitPriceVnd, 0n);
@@ -88,7 +88,7 @@ export function pawpawMoney(
     });
   }
 
-  ['paw-a-mochi', 'paw-a-milo'].forEach((id, i) => {
+  ['sen-a-linh', 'sen-a-hoa'].forEach((id, i) => {
     const appt = appointments.find((a) => a.id === id);
     if (!appt) throw new Error(`Unknown appointment ${id}`);
     const draft = draftInvoice(appt, services, invoiceNumber(next + 1 + i), MOCK_NOW);

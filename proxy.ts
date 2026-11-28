@@ -7,7 +7,7 @@ const MOVED: Record<string, (tenant: string) => string> = {
   '/mock/hom-nay': (t) => `/mock/app/${t}/today`,
 };
 
-const SLUGS = ['toc-may', 'pawpaw'];
+const SLUGS = ['toc-may', 'la-sen'];
 
 /** Mock links from before the tenant moved into the path: 308 to the new route, `tenant` dropped. */
 export function proxy(request: NextRequest) {
