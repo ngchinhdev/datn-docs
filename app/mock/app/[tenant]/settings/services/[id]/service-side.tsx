@@ -32,7 +32,9 @@ export function ServiceSide({ ed }: { ed: ServiceEditor }) {
     }`,
   ]) as [string, string][];
 
-  const topStaff = current.pricesByLevel ? capable.find((s) => s.level > 1) : undefined;
+  // BR-56: a named person charges their level; the sentence shows only when that differs from the base price.
+  const levelPrice = (level: number) => current.pricesByLevel?.[level - 1] ?? current.priceVnd;
+  const topStaff = capable.find((s) => levelPrice(s.level) !== current.priceVnd);
   const staffWord = staffNounOf(fixture);
 
   return (
@@ -66,7 +68,7 @@ export function ServiceSide({ ed }: { ed: ServiceEditor }) {
         note={
           topStaff
             ? `Giá khi khách để “Bất kỳ ai”. Chọn ${topStaff.profile.displayName} thì giá đổi thành ${formatVnd(
-                current.pricesByLevel?.[topStaff.level - 1] ?? current.priceVnd,
+                levelPrice(topStaff.level),
               )} ngay ở bước chọn ${staffWord.toLowerCase()}.`
             : 'Giá khi khách để “Bất kỳ ai”.'
         }
