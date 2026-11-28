@@ -19,9 +19,18 @@ export function durationText(variants: readonly Pick<ServiceVariant, 'segments'>
   return low === high ? formatDuration(low) : `${formatDuration(low)}–${formatDuration(high)}`;
 }
 
-/** `500.000–550.000 ₫`: what the people who can do it charge; one number when they agree. */
-export function priceText(variant: ServiceVariant, capable: readonly Staff[]): string {
-  const [low, high] = priceRange(variant, pricedStaff(capable));
+/**
+ * `500.000–550.000 ₫`: what the people who can do it charge, and what the branches that price it
+ * on their own charge (`branchPrices`); one number when they agree.
+ */
+export function priceText(
+  variant: ServiceVariant,
+  capable: readonly Staff[],
+  branchPrices: readonly bigint[] = [],
+): string {
+  const [base, top] = priceRange(variant, pricedStaff(capable));
+  const low = branchPrices.reduce((a, p) => (p < a ? p : a), base);
+  const high = branchPrices.reduce((a, p) => (p > a ? p : a), top);
   if (low === high) return formatVnd(low);
   return `${formatVnd(low).replace(' ₫', '')}–${formatVnd(high)}`;
 }

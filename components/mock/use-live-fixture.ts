@@ -36,8 +36,12 @@ export function useLiveFixture(tenantSlug: string): TenantFixture {
     () => ({
       ...base,
       staff,
-      // BR-02: the branch may price a variant on its own.
-      services: applyBranchPrices(services, branch.prices),
+      // BR-02: the branch may price a variant on its own. A service out of use stays in the list,
+      // so the appointments already booked keep their names, but no customer page offers it (BR-94.12).
+      services: applyBranchPrices(
+        services.map((s) => (s.archivedAt ? { ...s, bookableOnline: false } : s)),
+        branch.prices,
+      ),
       appointments,
       customers,
       shifts,

@@ -54,12 +54,12 @@ Chi tiết và ví dụ tính tay ở [Thuật toán tính giờ trống](../arc
 
 | Mã | Quy tắc |
 |---|---|
-| BR-50 | Một biến thể dịch vụ là dãy đoạn liên tiếp; mỗi đoạn có loại **Chuẩn bị**, **Làm** hoặc **Chờ**, thời lượng và các loại tài nguyên bị chiếm. Đoạn Chuẩn bị chỉ đứng đầu. Đoạn Chờ không chiếm nhân viên (BR-05) |
+| BR-50 | Một biến thể dịch vụ là dãy đoạn liên tiếp; mỗi đoạn có loại **Chuẩn bị**, **Làm** hoặc **Chờ**, thời lượng và các loại tài nguyên bị chiếm. Đoạn Chuẩn bị chỉ ở vị trí đầu và đoạn liền sau là Làm. Đoạn Chờ chỉ nằm giữa hai đoạn Làm và không chiếm nhân viên (BR-05). Mỗi biến thể có 1 đến 8 đoạn, ít nhất một đoạn Làm, và mọi đoạn Làm chiếm loại nhân viên (BR-53); chi tiết BR-94.22 đến 94.27 |
 | BR-51 | Khách thấy giờ hẹn là đầu đoạn Làm đầu tiên, giờ xong là cuối đoạn Làm cuối cùng; đoạn Chờ ở giữa tính vào. Chuẩn bị nằm trước giờ hẹn, dọn dẹp sau giờ xong, khách không thấy hai phần này nhưng chúng vẫn chiếm tài nguyên (BR-04) |
 | BR-52 | Dọn dẹp khai theo **từng loại tài nguyên** của biến thể ("dọn ghế 10 phút sau khi dùng"); bắt đầu ngay khi đoạn cuối dùng loại đó kết thúc, không chờ cả dịch vụ xong |
 | BR-53 | Một mục lịch hẹn dùng **cùng một tài nguyên** cho mỗi loại từ đầu đến cuối (cùng thợ, cùng ghế) |
 | BR-54 | Phần khách thấy nằm trong giờ mở cửa (BR-02). Tài nguyên không phải nhân viên chỉ dùng trong giờ mở cửa, nên dọn dẹp cũng phải xong trước giờ đóng. Nhân viên dùng được trong ca, nên chuẩn bị được phép trước giờ mở cửa |
-| BR-55 | Mỗi dịch vụ có ít nhất một biến thể; tên biến thể không trùng nhau trong một dịch vụ. Biến thể do khách tự chọn (BR-13) |
+| BR-55 | Mỗi dịch vụ có từ 1 đến 10 biến thể; tên biến thể không trùng nhau trong một dịch vụ (biến thể đã xóa không tính). Biến thể do khách tự chọn (BR-13) |
 | BR-56 | Biến thể có thể đặt **giá theo cấp nhân viên**. Khách chọn đích danh trả giá cấp của người đó; "Bất kỳ ai" trả giá cấp thấp nhất trong số người làm được dịch vụ, hệ thống xếp ai cũng giữ giá đó |
 | BR-57 | Phân công "Bất kỳ ai": nhân viên cấp thấp nhất trước, hòa thì người ít phút bận nhất trong ngày, hòa nữa theo thứ tự danh sách. Tài nguyên khác chọn theo thứ tự (Ghế 1 trước Ghế 2) |
 | BR-58 | Trang khách chỉ hiện giờ trên lưới g phút theo đồng hồ địa phương (mặc định 15, cấu hình theo chi nhánh). Lễ tân xếp được giờ lệch lưới nếu mọi ràng buộc vẫn đúng |
@@ -87,7 +87,7 @@ Chi tiết và ví dụ tính tay ở [Thuật toán tính giờ trống](../arc
 | BR-40 | Hoa hồng tính trên số thực thu của từng dòng hóa đơn sau giảm giá (giảm tay chia cho các dòng theo tỉ lệ giá trị). Dòng dùng buổi gói tính trên doanh thu của buổi đó (BR-26). Dòng bán lẻ tính cho người ghi ở dòng đó lúc thu tiền, mặc định là người làm dịch vụ đầu tiên của hóa đơn, để trống thì không ai có. Bán gói, nạp ví là tiền trả trước, không có hoa hồng |
 | BR-41 | Quy tắc hoa hồng gồm phạm vi (mọi dịch vụ, một dịch vụ, hoặc bán lẻ), cấp nhân viên (một cấp hoặc mọi cấp), tỉ lệ % và ngày hiệu lực (không trước hôm nay). Mỗi dòng dùng quy tắc cụ thể nhất đang hiệu lực vào ngày thu tiền hóa đơn: dịch vụ và cấp > dịch vụ > mọi dịch vụ và cấp > mọi dịch vụ. Quy tắc mới chỉ áp cho hóa đơn thu từ ngày hiệu lực, không tính lại dòng cũ. Thêm, sửa quy tắc ghi nhật ký (BR-63) |
 | BR-42 | Kỳ hoa hồng theo tháng dương lịch, giờ của chi nhánh. Khoản hoa hồng ghi vào kỳ của ngày thu tiền; khoản thu hồi do hoàn tiền ghi vào kỳ của ngày duyệt hoàn, theo đúng tỉ lệ đã tính cho dòng gốc. Chủ cơ sở chốt kỳ bằng tay sau khi tháng kết thúc; hết tháng 7 ngày chưa chốt thì Tổng quan nhắc. Kỳ đã chốt không thay đổi, chốt kỳ ghi nhật ký |
-| BR-43 | (đã bỏ 14/11/2026: mỗi mục lịch chỉ có một người làm, như BT1; dịch vụ cần hai nhân viên nằm trong câu hỏi còn mở của ERD) |
+| BR-43 | (đã bỏ 14/11/2026: mỗi mục lịch chỉ có một người làm, như BT1) |
 | BR-44 | Nhân viên chỉ xem được hoa hồng của chính mình: tạm tính của kỳ đang mở, từng dòng và khoản thu hồi. Tên khách không kèm số điện thoại (BR-36). Quy tắc, các kỳ và hoa hồng của người khác chỉ chủ cơ sở xem (cột hoa hồng tạm tính của báo cáo cho cả quản lý) |
 
 ## Báo cáo
@@ -123,6 +123,7 @@ Số liệu tính theo ngày giờ của chi nhánh, lọc theo chi nhánh và k
 | BR-78 | Lời mời nhân sự: chủ cơ sở mời được Quản lý, Lễ tân, Kỹ thuật viên; quản lý chỉ mời Lễ tân và Kỹ thuật viên. Lời mời gắn một email, một vai trò, một chi nhánh hoặc tất cả; link dùng một lần, hết hạn sau **7 ngày** tính từ lúc gửi. Gửi lại tạo link mới, link cũ hết hiệu lực; thu hồi thì link báo đã thu hồi. Không mời email đã là thành viên của cơ sở. Email đang có lời mời chờ nhận ở cơ sở đó thì không tạo lời mời thứ hai, dùng Gửi lại; lời mời đã hết hạn hoặc đã thu hồi thì mời mới được. Quản lý chỉ gửi lại, thu hồi lời mời của vai mình mời được. Nhận lời mời: email chưa có tài khoản thì tạo tài khoản (mật khẩu BR-73, email coi như đã xác thực); đã có tài khoản thì đăng nhập đúng email đó, đang đăng nhập email khác phải đăng xuất trước. Mỗi tài khoản có **một vai trò** ở mỗi cơ sở. Kỹ thuật viên luôn nhận khách trên lịch; quản lý, lễ tân chọn được. Người mới nhận khách có cột lịch với hồ sơ trống, chưa có kỹ năng nên chưa nhận khách được (BR-03). Gửi, gửi lại, thu hồi, nhận lời mời ghi nhật ký (BR-63) |
 | BR-79 | Vào cơ sở và trang lỗi: tài khoản thuộc một cơ sở thì vào thẳng; thuộc nhiều cơ sở thì qua trang Chọn cơ sở, cơ sở dùng gần nhất có nhãn; mỗi tab mở một cơ sở (đường dẫn có slug). Cơ sở hết hạn gói (BR-82): chủ cơ sở chỉ vào trang Gói Sapio, nhân viên thấy cơ sở ở trạng thái "Tạm dừng", không vào được. Cơ sở bị khóa (BR-75): chủ cơ sở thấy lý do và thời điểm khóa, nhân viên thấy cùng trang nhưng không kèm lý do và thời điểm khóa. Trang khách của cơ sở bị khóa hoặc hết hạn chỉ báo tạm dừng, không nói lý do; khách vẫn xem và hủy được lịch đã đặt. Mở trang ngoài quyền thì báo "Không có quyền" ngay trong khung, API trả 403 Problem Details. Lỗi máy chủ hiện `requestId` của Problem Details làm mã lỗi. Mất kết nối realtime thì hiện dải báo trên lịch; vẫn tạo, sửa được, hệ thống kiểm trùng khi lưu; nối lại thì tải lịch mới |
 | BR-93 | Chi nhánh và tài nguyên, chỉ chủ cơ sở: số chi nhánh đang dùng không vượt giới hạn của gói; giờ mở cửa nhiều khung không chồng nhau và ngày đặc biệt (BR-02); chi nhánh, tài nguyên chỉ ngừng dùng, không xóa và không dùng lại; không ngừng dùng chi nhánh cuối cùng; loại nhân viên không sửa, không xóa; tạm ngưng tài nguyên theo khoảng giờ (BR-37). Chi tiết BR-93.1 đến 93.27 ở [Chi nhánh và tài nguyên](./branch-settings.md#quy-tắc) |
+| BR-94 | Dịch vụ, chỉ chủ cơ sở: nhóm dịch vụ (tên không trùng, chỉ xóa khi không còn dịch vụ đang dùng); dịch vụ chỉ ngừng dùng và dùng lại, không xóa hẳn; 1 đến 10 biến thể, xóa biến thể là ẩn; 1 đến 8 đoạn mỗi biến thể theo thứ tự hợp lệ của Chuẩn bị, Làm, Chờ, mọi đoạn Làm có nhân viên, phần khách thấy tối đa 8 giờ (BR-50, BR-51); dọn dẹp theo loại tài nguyên (BR-52); giá gốc và giá riêng chi nhánh (BR-02); sửa chỉ áp cho lịch đặt sau (BR-59). Chi tiết BR-94.1 đến 94.32 ở [Dịch vụ](./services.md#quy-tắc) |
 
 ---
 
@@ -194,4 +195,4 @@ Quyết định ở [D-15](../decisions/d15-trial-and-two-plans.md). Thanh toán
 
 Ghi các điểm chưa rõ ở đây; chốt xong thì chuyển thành BR.
 
-- Email và số điện thoại trỏ tới hai khách khác nhau; bỏ kỹ năng khi còn lịch sắp tới; dịch vụ cần hai nhân viên. Đề xuất ở [ERD](../architecture/erd.md#13-câu-hỏi-còn-mở).
+- Email và số điện thoại trỏ tới hai khách khác nhau; bỏ kỹ năng khi còn lịch sắp tới. Đề xuất ở [ERD](../architecture/erd.md#13-câu-hỏi-còn-mở).

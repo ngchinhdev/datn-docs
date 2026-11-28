@@ -1,15 +1,15 @@
 'use client';
 
-import { Copy, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Copy, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAppHref } from '@/components/mock/use-app-href';
 import { Button } from '@/components/sapio/button';
 import { CheckRow, Field, FormSection } from '@/components/sapio/form';
 import { SegmentTable } from '@/components/sapio/segment-table';
 import { SegmentTimeline, TimelineLegend } from '@/components/sapio/segment-timeline';
-import { Tip } from '@/components/sapio/tooltip';
-import { cn } from '@/lib/utils';
 import { formatVnd } from '@/mock/format';
+import { LIMITS, missingText } from '@/mock/service-settings';
 import { PREVIEW_START, timelineOf } from '@/mock/service-preview';
 import { visibleRange } from '@/mock/occupation';
 import { anyPrice, durationText, priceText, upcomingCount } from '@/mock/services';
@@ -42,45 +42,63 @@ function StackHead({
   );
 }
 
-const numberText = (n: number | undefined) => (n === undefined ? '' : String(n).replace('.', ','));
+/** A line of red text under a table or a box. */
+function ErrorLine({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="sp-field--error m-0" role="status">
+      <span className="sp-field__help">{children}</span>
+    </p>
+  );
+}
 
 /** "Thông tin chung": name, group, text for the customer, deposit. */
 export function GeneralSection({ ed }: { ed: ServiceEditor }) {
-  const { draft, fixture } = ed;
+  const { draft } = ed;
+  const names = [...new Set([...ed.groups, draft.group].filter((g) => g !== ''))];
+  const length = (draft.description ?? '').length;
   return (
     <FormSection
       id="sv-s1"
       title="Thông tin chung"
       description="Khách thấy tên, nhóm và mô tả ở trang đặt lịch."
     >
-      <Field
-        id="sv-name"
-        label="Tên dịch vụ"
-        error={draft.name.trim() ? undefined : 'Nhập tên dịch vụ.'}
-      >
+      <Field id="sv-name" label="Tên dịch vụ" error={ed.nameError}>
         <input
           id="sv-name"
           type="text"
+          maxLength={LIMITS.serviceName}
           value={draft.name}
-          aria-invalid={draft.name.trim() ? undefined : true}
+          aria-invalid={ed.nameError ? true : undefined}
           onChange={(e) => ed.patchService({ name: e.target.value })}
         />
       </Field>
-      <Field id="sv-group" label="Nhóm">
+      <Field id="sv-group" label="Nhóm" help="Đổi nhóm thì dịch vụ đứng cuối nhóm mới.">
         <select
           id="sv-group"
           value={draft.group}
+          aria-describedby="sv-group-help"
           onChange={(e) => ed.patchService({ group: e.target.value })}
         >
-          {[...new Set([...fixture.services.map((s) => s.group), draft.group])].map((group) => (
-            <option key={group}>{group}</option>
+          <option value="">Không nhóm</option>
+          {names.map((group) => (
+            <option key={group} value={group}>
+              {group}
+            </option>
           ))}
         </select>
       </Field>
-      <Field id="sv-desc" label="Mô tả cho khách" optional full area>
+      <Field
+        id="sv-desc"
+        label="Mô tả cho khách"
+        optional
+        full
+        area
+        help={length >= 450 ? `${length}/${LIMITS.description}` : undefined}
+      >
         <textarea
           id="sv-desc"
           rows={2}
+          maxLength={LIMITS.description}
           value={draft.description ?? ''}
           onChange={(e) => ed.setDescription(e.target.value)}
         />
@@ -104,21 +122,25 @@ export function GeneralSection({ ed }: { ed: ServiceEditor }) {
   );
 }
 
-/** "Biến thể": the table, and the name of the one being edited (BR-13, BR-55). */
+/** "Biến thể": the table, and the name of the one being edited (BR-13, BR-55, BR-94.17 to BR-94.21). */
 export function VariantsSection({ ed }: { ed: ServiceEditor }) {
   const { draft, variant, problems } = ed;
   const pathname = usePathname();
+  const appHref = useAppHref(ed.fixture.tenant.slug);
   const capable = ed.capable;
-  const repeated = problems.duplicates.map((name) => name.toLowerCase());
+  const nameError = ed.variantNameError(variant);
+  const shortError = ed.shortNameError(variant);
 
   return (
     <section className="sp-form-section sp-form-section--stack" aria-labelledby="sv-s2">
       <StackHead
         id="sv-s2"
         title="Biến thể"
-        desc="Khách tự chọn một biến thể khi đặt; mỗi biến thể có thời gian và giá riêng (BR-13)."
+        desc={`Khách tự chọn một biến thể khi đặt; mỗi biến thể có thời gian và giá riêng (BR-13).${
+          ed.canAddVariant ? '' : ` Tối đa ${LIMITS.variants} biến thể.`
+        }`}
         action={
-          <Button size="sm" onClick={() => ed.addVariant()}>
+          <Button size="sm" disabled={!ed.canAddVariant} onClick={() => ed.addVariant()}>
             {PlusIcon}
             Thêm biến thể
           </Button>
@@ -136,6 +158,27 @@ export function VariantsSection({ ed }: { ed: ServiceEditor }) {
           </span>
         </div>
       )}
+      {ed.missing.length > 0 && (
+        <div
+          className="sp-banner sp-banner--warning"
+          role="status"
+          style={{ borderRadius: 'var(--radius-md)' }}
+        >
+          <span className="sp-banner__text">
+            <ul className="m-0 list-none p-0">
+              {ed.missing.map((m) => (
+                <li key={`${m.branchId}:${m.variantId}`}>{missingText(m)}</li>
+              ))}
+            </ul>
+          </span>
+          <Link
+            href={appHref('settings/resources')}
+            className="sp-btn sp-btn--secondary sp-btn--sm no-underline"
+          >
+            Mở Tài nguyên
+          </Link>
+        </div>
+      )}
       <div
         className="sp-table-wrap"
         tabIndex={0}
@@ -151,9 +194,6 @@ export function VariantsSection({ ed }: { ed: ServiceEditor }) {
               <th scope="col">Khách thấy</th>
               <th scope="col" className="sp-table__num">
                 Giá
-              </th>
-              <th scope="col">
-                <span className="sp-sr-only">Thao tác</span>
               </th>
             </tr>
           </thead>
@@ -184,31 +224,8 @@ export function VariantsSection({ ed }: { ed: ServiceEditor }) {
                     <span className="sp-num">{durationText([v])}</span>
                   </td>
                   <td className="sp-table__num">
-                    <span className="sp-num whitespace-nowrap">{priceText(v, capable)}</span>
-                  </td>
-                  <td className="sp-table__actions">
-                    <span className="inline-flex items-center gap-1">
-                      <Tip label="Nhân bản" side="bottom-end">
-                        <button
-                          type="button"
-                          className="sp-icon-btn"
-                          aria-label={`Nhân bản biến thể ${v.name}`}
-                          onClick={() => ed.addVariant(v)}
-                        >
-                          <Copy size={16} aria-hidden="true" />
-                        </button>
-                      </Tip>
-                      <Tip label="Xóa" side="bottom-end">
-                        <button
-                          type="button"
-                          className="sp-icon-btn"
-                          aria-label={`Xóa biến thể ${v.name}`}
-                          disabled={draft.variants.length === 1}
-                          onClick={() => ed.removeVariant(v.id)}
-                        >
-                          <Trash2 size={16} aria-hidden="true" />
-                        </button>
-                      </Tip>
+                    <span className="sp-num whitespace-nowrap">
+                      {priceText(v, capable, ed.branchPriceList(v.id))}
                     </span>
                   </td>
                 </tr>
@@ -218,36 +235,65 @@ export function VariantsSection({ ed }: { ed: ServiceEditor }) {
         </table>
       </div>
       <div className="sp-panel shadow-[0_0_0_1px_var(--line)]!">
-        <h3 className="sp-panel__title text-sm!">Tên của “{variant.name}”</h3>
-        <div className="flex flex-wrap items-end gap-(--space-3)">
-          <Field
-            id="vr-name"
-            label="Tên biến thể"
-            error={
-              !variant.name.trim()
-                ? 'Nhập tên biến thể.'
-                : repeated.includes(variant.name.trim().toLowerCase())
-                  ? 'Tên này đã có ở biến thể khác.'
-                  : undefined
-            }
-          >
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="sp-panel__title m-0 text-sm!">Tên của “{variant.name}”</h3>
+          <span className="flex flex-wrap gap-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={ed.variantIndex === 0}
+              onClick={() => ed.moveVariant(variant.id, -1)}
+            >
+              <ArrowUp size={14} aria-hidden="true" />
+              Lên
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={ed.variantIndex === draft.variants.length - 1}
+              onClick={() => ed.moveVariant(variant.id, 1)}
+            >
+              <ArrowDown size={14} aria-hidden="true" />
+              Xuống
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={!ed.canAddVariant}
+              onClick={() => ed.addVariant(variant)}
+            >
+              <Copy size={14} aria-hidden="true" />
+              Nhân bản
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={draft.variants.length === 1}
+              onClick={() => ed.removeVariant(variant.id)}
+            >
+              <Trash2 size={14} aria-hidden="true" />
+              Xóa biến thể
+            </Button>
+          </span>
+        </div>
+        <div className="flex flex-wrap items-start gap-(--space-3)">
+          <Field id="vr-name" label="Tên biến thể" error={nameError}>
             <input
               id="vr-name"
               type="text"
+              maxLength={LIMITS.variantName}
               value={variant.name}
-              aria-invalid={
-                !variant.name.trim() || repeated.includes(variant.name.trim().toLowerCase())
-                  ? true
-                  : undefined
-              }
+              aria-invalid={nameError ? true : undefined}
               onChange={(e) => ed.updateCurrent((v) => ({ ...v, name: e.target.value }))}
             />
           </Field>
-          <Field id="vr-short" label="Tên trên lịch">
+          <Field id="vr-short" label="Tên trên lịch" error={shortError}>
             <input
               id="vr-short"
               type="text"
+              maxLength={LIMITS.shortName}
               value={variant.shortName}
+              aria-invalid={shortError ? true : undefined}
               onChange={(e) => ed.updateCurrent((v) => ({ ...v, shortName: e.target.value }))}
             />
           </Field>
@@ -259,10 +305,10 @@ export function VariantsSection({ ed }: { ed: ServiceEditor }) {
 
 /** "Thời gian và tài nguyên": timeline, segment table, cleanup per resource type. */
 export function SegmentsSection({ ed }: { ed: ServiceEditor }) {
-  const { variant, fixture } = ed;
-  const { segments, types } = timelineOf(variant, fixture.resourceTypes);
+  const { variant } = ed;
+  const { segments, types } = timelineOf(variant, ed.resourceTypes);
   const exampleStart = PREVIEW_START;
-  const tableTypes = fixture.resourceTypes.map((t) => ({
+  const tableTypes = ed.resourceTypes.map((t) => ({
     id: t.id,
     name: t.name,
     isStaff: t.isStaff,
@@ -273,9 +319,11 @@ export function SegmentsSection({ ed }: { ed: ServiceEditor }) {
       <StackHead
         id="sv-s3"
         title={`Thời gian và tài nguyên · ${variant.name}`}
-        desc="Chia dịch vụ thành từng đoạn; mỗi đoạn chọn loại tài nguyên bị chiếm. Trục vẽ ví dụ hẹn lúc 09:00."
+        desc={`Chia dịch vụ thành từng đoạn; mỗi đoạn chọn loại tài nguyên bị chiếm. Trục vẽ ví dụ hẹn lúc 09:00.${
+          ed.segments.canAdd ? '' : ` Tối đa ${LIMITS.segments} đoạn.`
+        }`}
         action={
-          <Button size="sm" onClick={ed.segments.add}>
+          <Button size="sm" disabled={!ed.segments.canAdd} onClick={ed.segments.add}>
             {PlusIcon}
             Thêm đoạn
           </Button>
@@ -306,19 +354,18 @@ export function SegmentsSection({ ed }: { ed: ServiceEditor }) {
         onRemove={ed.segments.remove}
       />
       {variant.segments.length > 0 && !variant.segments.some((s) => s.kind === 'work') && (
-        <p className="sp-field--error m-0">
-          <span className="sp-field__help">Cần ít nhất một đoạn Làm: đó là lúc khách có mặt.</span>
-        </p>
+        <ErrorLine>Cần ít nhất một đoạn Làm: đó là lúc khách có mặt.</ErrorLine>
       )}
+      {ed.tooLong && <ErrorLine>{ed.tooLong}</ErrorLine>}
       <CleanupFields ed={ed} />
     </section>
   );
 }
 
-/** "Dọn dẹp sau khi dùng": one box for each resource type that is not staff (BR-52). */
+/** "Dọn dẹp sau khi dùng": one box for each resource type that is not staff (BR-52, BR-94.28). */
 export function CleanupFields({ ed }: { ed: ServiceEditor }) {
-  const { variant, fixture } = ed;
-  const cleanable = fixture.resourceTypes.filter(
+  const { variant } = ed;
+  const cleanable = ed.resourceTypes.filter(
     (t) => !t.isStaff && variant.segments.some((s) => s.resourceTypeIds.includes(t.id)),
   );
   return (
@@ -357,9 +404,7 @@ export function CleanupFields({ ed }: { ed: ServiceEditor }) {
   );
 }
 
-const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
-
-/** "Giá theo cấp": one price for everyone, or one per staff level (BR-56). */
+/** "Giá": the base price, the price by staff level (BR-56), and the price of each branch (BR-94.29). */
 export function PricingSection({ ed }: { ed: ServiceEditor }) {
   const { variant, fixture, staff } = ed;
   const levels = fixture.staffLevels;
@@ -371,8 +416,8 @@ export function PricingSection({ ed }: { ed: ServiceEditor }) {
     <section className="sp-form-section sp-form-section--stack" aria-labelledby="sv-s4">
       <StackHead
         id="sv-s4"
-        title={`Giá theo cấp · ${variant.name}`}
-        desc="Cấp đặt trong hồ sơ nhân viên."
+        title={`Giá · ${variant.name}`}
+        desc="Chi nhánh không đặt giá riêng thì dùng giá gốc (BR-02). Cấp đặt trong hồ sơ nhân viên."
       />
       <label className="sp-switch">
         <span>
@@ -420,6 +465,7 @@ export function PricingSection({ ed }: { ed: ServiceEditor }) {
                       <PriceBox
                         value={ed.priceValue(i)}
                         label={`Giá cấp ${name}`}
+                        error={ed.priceError(i)}
                         onChange={(text) => ed.setPrice(i, text)}
                       />
                     </td>
@@ -440,6 +486,7 @@ export function PricingSection({ ed }: { ed: ServiceEditor }) {
                   <PriceBox
                     value={ed.priceValue('flat')}
                     label="Giá cho mọi cấp"
+                    error={ed.priceError('flat')}
                     onChange={(text) => ed.setPrice('flat', text)}
                   />
                 </td>
@@ -457,7 +504,70 @@ export function PricingSection({ ed }: { ed: ServiceEditor }) {
             ` Khách chọn đích danh ${topName} thì trả ${formatVnd(priceFor2(ed, topName))}.`}
         </p>
       )}
+      {ed.showBranchPrices && <BranchPrices ed={ed} />}
     </section>
+  );
+}
+
+/** One price for each branch in use; an empty box is the base price (BR-94.29). */
+function BranchPrices({ ed }: { ed: ServiceEditor }) {
+  const { variant } = ed;
+  return (
+    <div className="flex flex-col gap-(--space-2)">
+      <h3 className="sp-panel__title text-sm!">Giá riêng chi nhánh</h3>
+      <div
+        className="sp-table-wrap"
+        tabIndex={0}
+        role="region"
+        aria-label={`Giá riêng chi nhánh, biến thể ${variant.name}, cuộn được`}
+      >
+        <table className="sp-table">
+          <caption className="sp-sr-only">Giá riêng chi nhánh, biến thể {variant.name}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Chi nhánh</th>
+              <th scope="col" className="sp-table__num">
+                Giá
+              </th>
+              <th scope="col">
+                <span className="sp-sr-only">Thao tác</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {ed.branches.map((branch) => {
+              const value = ed.branchPriceValue(branch.id);
+              return (
+                <tr key={branch.id}>
+                  <td>{branch.name}</td>
+                  <td className="sp-table__num">
+                    <PriceBox
+                      value={value}
+                      label={`Giá ${variant.name} ở ${branch.name}`}
+                      placeholder={`Giá gốc ${formatVnd(variant.priceVnd)}`}
+                      error={ed.branchPriceError(branch.id)}
+                      allowEmpty
+                      onChange={(text) => ed.setBranchPrice(branch.id, text)}
+                    />
+                  </td>
+                  <td className="sp-table__actions">
+                    {value !== '' && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => ed.setBranchPrice(branch.id, '')}
+                      >
+                        Dùng giá gốc
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
@@ -471,24 +581,40 @@ export function PriceBox({
   value,
   label,
   onChange,
+  placeholder,
+  error,
+  allowEmpty = false,
 }: {
   value: string;
   label: string;
   onChange: (text: string) => void;
+  placeholder?: string;
+  error?: string | undefined;
+  /** An empty box is a choice (the branch has no price of its own), not a mistake. */
+  allowEmpty?: boolean;
 }) {
+  const bad = Boolean(error) || (!allowEmpty && value === '');
   return (
-    <label className="sp-mins justify-end">
-      <input
-        type="text"
-        inputMode="numeric"
-        className="w-28!"
-        value={value}
-        aria-label={label}
-        aria-invalid={value === '' ? true : undefined}
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <span>₫</span>
-    </label>
+    <span className="flex flex-col items-end gap-1">
+      <label className="sp-mins justify-end">
+        <input
+          type="text"
+          inputMode="numeric"
+          className="w-28!"
+          value={value}
+          placeholder={placeholder}
+          aria-label={label}
+          aria-invalid={bad ? true : undefined}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <span>₫</span>
+      </label>
+      {error && (
+        <span className="sp-field--error">
+          <span className="sp-field__help max-w-56 text-right">{error}</span>
+        </span>
+      )}
+    </span>
   );
 }
 

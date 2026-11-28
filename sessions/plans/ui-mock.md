@@ -433,7 +433,7 @@ Bản chép `app/sapio/components.css` đã cập nhật sẵn, gồm cả thanh
 
 ### 10c. Chi tiết dịch vụ (MH-45): `/mock/app/[tenant]/settings/services/[id]`
 
-Làm đúng `DichVuChiTiet` (Tóc Mây, `may-dye`), `DichVuThuCung` (Pawpaw, `paw-bath`) và `DichVuDienThoai` (dưới 768px).
+Làm đúng `DichVuChiTiet` (Tóc Mây, `may-dye`) và `DichVuDienThoai` (dưới 768px).
 
 **Component mới:** `SegmentTimeline`, `SegmentTable`, `DetailLayout`, `Panel`, `KeyValueList`. Mỗi cái một ví dụ trên `/mock/components`.
 - Trục vẽ từ `occupation()`, thước giờ lấy ví dụ hẹn 09:00.

@@ -4,6 +4,7 @@
     "auth",
     "signup",
     "branch-settings",
+    "services",
     "business-rules"
   ]
 }

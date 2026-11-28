@@ -80,7 +80,7 @@ description: Chủ cơ sở quản lý chi nhánh, giờ mở cửa, ngày đặ
 | BR-93.16 | Cơ sở mới có bốn loại (BR-74.18). Loại nhân viên không sửa, không xóa, và không có loại nhân viên thứ hai: loại thêm ở đây luôn không phải nhân viên. Thao tác vào loại nhân viên: 409 `RESOURCE_TYPE_PROTECTED` |
 | BR-93.17 | Thêm loại: tên 1 đến 50 ký tự, không trùng tên loại nào của cơ sở (không phân biệt hoa thường): 409 `NAME_TAKEN` |
 | BR-93.18 | Đổi tên loại không phải nhân viên. Dịch vụ và tài nguyên tham chiếu theo id nên không đổi |
-| BR-93.19 | Xóa loại không phải nhân viên khi không còn tài nguyên nào thuộc loại đó (kể cả đã ngừng dùng) và **áp dụng khi có dịch vụ:** không đoạn nào của dịch vụ chiếm loại đó (BR-50, BR-52). Còn thì 409 `RESOURCE_TYPE_IN_USE`. Xóa là xóa dòng |
+| BR-93.19 | Xóa loại không phải nhân viên khi không còn tài nguyên nào thuộc loại đó (kể cả đã ngừng dùng) và không đoạn hay dòng dọn dẹp nào của biến thể nào chiếm loại đó, kể cả biến thể đã xóa hay dịch vụ đã ngừng dùng (BR-50, BR-52, [BR-94.32](./services.md)). Còn thì 409 `RESOURCE_TYPE_IN_USE`. Xóa là xóa dòng |
 
 ### Tài nguyên (BR-93.20 đến BR-93.27)
 
@@ -186,7 +186,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 | AC-86 | Chủ `toc-may` | Thêm loại "Bồn ngâm"; thêm "ghế cắt"; thêm loại với `isStaff: true` | 201 với `isStaff = false`; 409 `NAME_TAKEN`; 400 `VALIDATION_FAILED` ở trường `isStaff` | BR-93.16, BR-93.17 |
 | AC-87 | Chủ `toc-may` | Đổi tên "Ghế cắt" thành "Ghế"; đổi tên loại nhân viên | 200; 409 `RESOURCE_TYPE_PROTECTED` | BR-93.16, BR-93.18 |
 | AC-88 | Loại X có một tài nguyên đã ngừng dùng; loại Y không có tài nguyên | Xóa X; xóa Y; xóa loại nhân viên | 409 `RESOURCE_TYPE_IN_USE`; 204 và dòng Y mất; 409 `RESOURCE_TYPE_PROTECTED` | BR-93.16, BR-93.19 |
-| AC-89 | **Áp dụng khi có dịch vụ.** Một dịch vụ có đoạn chiếm loại Z, Z không có tài nguyên | Xóa Z | 409 `RESOURCE_TYPE_IN_USE` | BR-93.19 |
+| AC-89 | Một dịch vụ có đoạn chiếm loại Z, Z không có tài nguyên (test cùng [AC-155](./services.md#loại-tài-nguyên)) | Xóa Z | 409 `RESOURCE_TYPE_IN_USE` | BR-93.19 |
 
 ### Tài nguyên
 

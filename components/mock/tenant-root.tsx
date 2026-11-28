@@ -16,9 +16,12 @@ interface TenantRoot {
   /** Staff lists changed by an edit, by tenant slug; a tenant with no edit is absent. */
   staff: Record<string, Staff[]>;
   services: Record<string, Service[]>;
+  /** Service group names in order, by tenant slug (BR-94.5); a tenant with no edit is absent. */
+  serviceGroups: Record<string, string[]>;
   plans: Record<string, HeldPlan>;
   setStaff: (slug: string, list: Staff[]) => void;
   setServices: (slug: string, list: Service[]) => void;
+  setServiceGroups: (slug: string, list: string[]) => void;
   setPlan: (slug: string, plan: HeldPlan) => void;
 }
 
@@ -34,6 +37,10 @@ export function TenantRootProvider({ children }: { children: ReactNode }) {
     'tenant-services',
     {},
   );
+  const [serviceGroups, setServiceGroupsMap] = usePersistedState<Record<string, string[]>>(
+    'tenant-service-groups',
+    {},
+  );
   const [plans, setPlans] = usePersistedState<Record<string, HeldPlan>>('tenant-plans', {});
 
   const setStaff = useCallback(
@@ -44,14 +51,27 @@ export function TenantRootProvider({ children }: { children: ReactNode }) {
     (slug: string, list: Service[]) => setServicesMap((m) => ({ ...m, [slug]: list })),
     [],
   );
+  const setServiceGroups = useCallback(
+    (slug: string, list: string[]) => setServiceGroupsMap((m) => ({ ...m, [slug]: list })),
+    [],
+  );
   const setPlan = useCallback(
     (slug: string, plan: HeldPlan) => setPlans((m) => ({ ...m, [slug]: plan })),
     [],
   );
 
   const value = useMemo(
-    () => ({ staff, services, plans, setStaff, setServices, setPlan }),
-    [staff, services, plans, setStaff, setServices, setPlan],
+    () => ({
+      staff,
+      services,
+      serviceGroups,
+      plans,
+      setStaff,
+      setServices,
+      setServiceGroups,
+      setPlan,
+    }),
+    [staff, services, serviceGroups, plans, setStaff, setServices, setServiceGroups, setPlan],
   );
   return <TenantRootContext.Provider value={value}>{children}</TenantRootContext.Provider>;
 }
