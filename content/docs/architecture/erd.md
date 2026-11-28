@@ -61,12 +61,12 @@ erDiagram
 |---|---|---|
 | `tenant_profiles` | `tenant_id` PK, `brand_color`, `logo_url?` | Thương hiệu của cơ sở. Bảng do tính năng dùng nó thêm vào, kèm migration điền dòng mặc định cho cơ sở có sẵn; từ migration đó, bước tạo cơ sở ở đăng ký tạo luôn dòng này |
 | `booking_policies` | `tenant_id` PK, `min_lead_minutes`, `max_days_ahead`, `change_cutoff_minutes`, `max_reschedules`, `no_show_after_minutes`, `deposit_after_no_shows`, `hold_minutes` (10), `otp_ttl_minutes`, `otp_max_attempts`, `refund_rules jsonb` | Các tham số X, Y, N, M, K của BR-06 đến BR-10, BR-16, BR-23. Bảng do tính năng dùng nó thêm vào, kèm migration điền dòng mặc định cho cơ sở có sẵn; từ migration đó, bước tạo cơ sở ở đăng ký tạo luôn dòng này |
-| `branches` | `tenant_id`, `name`, `address`, `phone`, `timezone` (`Asia/Ho_Chi_Minh`), `slot_step_minutes` (15), `archived_at?` | BR-58. Gói Cơ bản chỉ 1 chi nhánh đang dùng (BR-83) |
-| `opening_hours` | `tenant_id`, `branch_id` FK, `weekday smallint`, `opens time`, `closes time` | Nhiều dòng mỗi ngày là nhiều khung (sáng, chiều). `check (opens < closes)` |
-| `special_days` | `tenant_id`, `branch_id` FK, `date`, `note` | U `(branch_id, date)`. Ngày đặc biệt thay giờ thường lệ (BR-02) |
-| `special_day_hours` | `tenant_id`, `special_day_id` FK, `opens`, `closes` | Không có dòng nào là đóng cả ngày |
+| `branches` | `tenant_id`, `name`, `address`, `phone` (E.164), `timezone` (`Asia/Ho_Chi_Minh`), `slot_step_minutes` (15), `archived_at?`, `updated_at` | BR-58. U `(tenant_id, lower(name))` trên các dòng `archived_at is null` (BR-93.4). Gói Cơ bản chỉ 1 chi nhánh đang dùng (BR-83, BR-93.2). `archived_at` có giá trị là ngừng dùng: không xóa, không dùng lại (BR-93.9) |
+| `opening_hours` | `tenant_id`, `branch_id` FK, `weekday smallint`, `opens time`, `closes time` | Nhiều dòng mỗi ngày là nhiều khung (sáng, chiều). `check (opens < closes)`; exclusion constraint chống chồng khung ở [mục 10](#10-ràng-buộc-quan-trọng) (BR-93.12) |
+| `special_days` | `tenant_id`, `branch_id` FK, `date`, `note` | U `(branch_id, date)`. Ngày đặc biệt thay giờ thường lệ (BR-02, BR-93.13) |
+| `special_day_hours` | `tenant_id`, `special_day_id` FK, `opens`, `closes` | Không có dòng nào là đóng cả ngày. `check (opens < closes)` và exclusion constraint như `opening_hours` |
 
-Khung giờ trong cùng một ngày không được chồng nhau. Ràng buộc này kiểm ở tầng ứng dụng, vì hai cột `time` không dựng được exclusion constraint gọn gàng.
+Khung giờ trong cùng một ngày không được chồng nhau; khung nối liền thì hợp lệ. Cơ sở dữ liệu giữ ràng buộc này bằng exclusion constraint trên khoảng `tsrange` dựng từ hai cột `time` ([mục 10](#10-ràng-buộc-quan-trọng)), ngoài kiểm ở ứng dụng.
 
 ## 4. Tài nguyên và nhân sự
 
@@ -74,9 +74,9 @@ Nhân viên là một **tài nguyên** có loại `is_staff` (thuật ngữ). M�
 
 | Bảng | Cột chính | Ràng buộc, ghi chú |
 |---|---|---|
-| `resource_types` | `tenant_id`, `name`, `is_staff bool`, `sort` | Cơ sở mới có sẵn: Nhân viên, Ghế, Giường, Phòng; chủ cơ sở sửa, thêm, xóa được. Ví dụ Tóc Mây: Thợ, Ghế cắt, Giường gội; Lá Sen: Kỹ thuật viên, Giường, Bồn ngâm, Phòng xông |
-| `resources` | `tenant_id`, `branch_id` FK, `resource_type_id` FK, `name`, `sort`, `archived_at?` | Ghế 1, Phòng xông 2, Mai |
-| `resource_pauses` | `tenant_id`, `resource_id` FK, `starts_at`, `ends_at`, `reason` | Tạm ngưng bảo trì (MH-46). Trừ khỏi thời gian khả dụng |
+| `resource_types` | `tenant_id`, `name`, `is_staff bool`, `sort` | Cơ sở mới có sẵn: Nhân viên, Ghế, Giường, Phòng. Loại `is_staff` không sửa, không xóa; loại khác thêm, đổi tên, xóa khi không còn tài nguyên (BR-93.16 đến 93.19). U `(tenant_id, lower(name))`. Ví dụ Tóc Mây: Thợ, Ghế cắt, Giường gội; Lá Sen: Kỹ thuật viên, Giường, Bồn ngâm, Phòng xông |
+| `resources` | `tenant_id`, `branch_id` FK, `resource_type_id` FK, `name`, `sort`, `archived_at?` | Ghế 1, Phòng xông 2, Mai. U `(tenant_id, branch_id, lower(name))` trên các dòng `archived_at is null` (BR-93.21). `sort` là thứ tự trong nhóm (chi nhánh, loại) (BR-93.23). `archived_at` có giá trị là ngừng dùng, không dùng lại (BR-93.27) |
+| `resource_pauses` | `tenant_id`, `resource_id` FK, `starts_at`, `ends_at`, `reason`, `created_at` | Tạm ngưng bảo trì (MH-46, BR-93.24). `check (starts_at < ends_at)`; exclusion constraint chống hai khoảng của một tài nguyên chồng nhau ([mục 10](#10-ràng-buộc-quan-trọng)). Mở lại đặt `ends_at` là lúc bấm hoặc xóa dòng chưa bắt đầu (BR-93.25). Trừ khỏi thời gian khả dụng |
 | `staff_levels` | `tenant_id`, `level smallint`, `name` | U `(tenant_id, level)`. Thợ, Thợ chính, Thợ cả (BR-56) |
 | `staff_profiles` | `tenant_id`, `resource_id` PK FK, `display_name`, `title`, `specialty?`, `avatar_url?`, `bookable_online bool`, `full_name`, `employee_code`, `phone`, `level smallint` | Hai lớp công khai, nội bộ (BR-15). FK `(tenant_id, level)` sang `staff_levels`. Tài nguyên phải có loại `is_staff` (trigger kiểm) |
 | `staff_skills` | `tenant_id`, `staff_resource_id` FK, `service_id` FK | PK `(staff_resource_id, service_id)` (BR-03) |
@@ -213,6 +213,35 @@ alter table resource_bookings add constraint resource_bookings_no_overlap
 - Ràng buộc không đọc được `now()`. Nên trong transaction giữ chỗ, ứng dụng xóa các `hold` đã quá `expires_at` của đúng các tài nguyên sắp dùng, rồi mới insert. Job định kỳ dọn phần còn lại (BR-07).
 - `shifts` và `commission_periods` có exclusion constraint cùng kiểu.
 
+**Khung giờ không chồng nhau (BR-93.12):**
+
+```sql
+alter table opening_hours add constraint opening_hours_no_overlap
+  exclude using gist (
+    tenant_id with =,
+    branch_id with =,
+    weekday with =,
+    tsrange(date '2000-01-01' + opens, date '2000-01-01' + closes, '[)') with &&
+  );
+
+alter table special_day_hours add constraint special_day_hours_no_overlap
+  exclude using gist (
+    tenant_id with =,
+    special_day_id with =,
+    tsrange(date '2000-01-01' + opens, date '2000-01-01' + closes, '[)') with &&
+  );
+
+alter table resource_pauses add constraint resource_pauses_no_overlap
+  exclude using gist (
+    tenant_id with =,
+    resource_id with =,
+    tstzrange(starts_at, ends_at, '[)') with &&
+  );
+```
+
+- Ngày `2000-01-01` chỉ để đổi `time` thành `timestamp`; `date + time` là phép toán bất biến nên dùng được trong chỉ mục. Khoảng nửa mở `[)` cho phép khung nối liền (đóng 12:00, mở 12:00).
+- Các ràng buộc duy nhất theo tên (BR-93.4, BR-93.17, BR-93.21) là chỉ mục duy nhất trên `lower(name)`, một phần với điều kiện `archived_at is null` cho `branches` và `resources`. Lúc hai yêu cầu cùng lúc, vi phạm chỉ mục báo `NAME_TAKEN`, không báo 500.
+
 **Khóa ngoại kèm tenant:** ví dụ
 
 ```sql
@@ -271,7 +300,7 @@ Tiêu chí của giai đoạn 1: mọi BR có chỗ đứng trong ERD.
 | BR | Chỗ đứng |
 |---|---|
 | BR-01 | Exclusion constraint trên `resource_bookings` |
-| BR-02 | `opening_hours`, `special_days`, `special_day_hours` |
+| BR-02 | `opening_hours`, `special_days`, `special_day_hours`; exclusion constraint chống chồng khung |
 | BR-03 | `staff_skills`; trigger trên `appointment_items` |
 | BR-04, BR-05, BR-50 đến BR-54 | `service_segments`, `segment_resource_types`, `variant_cleanups`; `resource_bookings.kind` |
 | BR-06 đến BR-10 | `booking_policies`; `appointments.status`, `reschedule_count`; `customers.requires_deposit` |
@@ -297,6 +326,7 @@ Tiêu chí của giai đoạn 1: mọi BR có chỗ đứng trong ERD.
 | BR-77 | `password_resets`, `sessions.revoked_at` |
 | BR-74 | `email_verifications`, `users.email_verified_at`, `trial_claims` |
 | BR-80 đến BR-88 | `plans`, `subscriptions`, `platform_payments` (T-17) |
+| BR-93 | `branches.archived_at`, `opening_hours`, `special_days`, `special_day_hours`, `resource_types`, `resources.archived_at`, `resources.sort`, `resource_pauses`; `plans.limits` |
 
 ## 13. Câu hỏi còn mở
 

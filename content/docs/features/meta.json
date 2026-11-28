@@ -3,6 +3,7 @@
   "pages": [
     "auth",
     "signup",
+    "branch-settings",
     "business-rules"
   ]
 }

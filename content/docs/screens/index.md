@@ -60,7 +60,7 @@ Danh sách này rút từ [phạm vi làm chắc](../overview/scope.md#31-làm-c
 
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
-| MH-07 | Khung ứng dụng | mọi route `/app/[tenant]` | Nhân sự | 1 | Vẽ | Thanh bên theo vai trò, đổi chi nhánh, tìm nhanh khách, menu tài khoản, nút sáng/tối. Máy tính: thanh bên; iPad: thu gọn thành icon; điện thoại: thanh điều hướng dưới (như `LeTanDienThoai`). Dải báo dùng thử, sắp hết hạn (`Banner`, BR-86); mục ngoài gói có ổ khóa (BR-87) |
+| MH-07 | Khung ứng dụng | mọi route `/app/[tenant]` | Nhân sự | 1 | Vẽ | Thanh bên theo vai trò, đổi chi nhánh, tìm nhanh khách, menu tài khoản, nút sáng/tối. Máy tính: thanh bên; iPad: thu gọn thành icon; điện thoại: thanh điều hướng dưới (như `LeTanDienThoai`). Bộ chọn chi nhánh chỉ liệt kê chi nhánh đang dùng (BR-93.9). Dải báo dùng thử, sắp hết hạn (`Banner`, BR-86); mục ngoài gói có ổ khóa (BR-87) |
 | MH-08 | Mẫu trang danh sách | | | 1 | Vẽ | Dùng cho mọi màn mức DS |
 | MH-09 | Mẫu trang form | | | 1 | Vẽ | Dùng cho mọi màn mức Form; có thanh "Còn thay đổi chưa lưu" |
 | MH-10 | Trang lỗi và trạng thái | | Mọi người | 1 | Vẽ | **Đã chọn.** 403 trong khung; 404 nội bộ và 404 tên miền con không có; 500 kèm mã lỗi; cơ sở bị khóa (chủ thấy lý do, nhân viên và khách không); mất kết nối realtime trên lịch (BR-75, BR-79) |
@@ -124,11 +124,11 @@ Báo cáo chi nhánh dùng chung MH-55 với bộ lọc chi nhánh.
 | Mã | Màn hình | Route | Vai trò | Đợt | Mức | Ghi chú |
 |---|---|---|---|---|---|---|
 | MH-41 | Tổng quan | `/app/[tenant]` | CCS, QL | 3 | Vẽ | **Đã chọn.** Bốn ô: lịch hôm nay, đã thu hôm nay, lấp đầy hôm nay, không đến 7 ngày (BR-45 đến BR-47). "Việc cần xử lý": đơn nghỉ chờ duyệt, hoàn tiền chờ duyệt, "Cần xếp lại", kỳ hoa hồng hết 7 ngày chưa chốt (BR-42). Lịch đang diễn ra; lấp đầy 7 ngày tới |
-| MH-42 | Chi nhánh | `/app/[tenant]/settings/branches` | CCS | 1 | DS | **Đã chọn.** Mẫu danh sách. |
-| MH-43 | Chi tiết chi nhánh | `/app/[tenant]/settings/branches/[id]` | CCS | 1 | Vẽ | **Đã chọn.** Giờ mở cửa nhiều khung mỗi ngày, ngày đặc biệt (BR-02), giá riêng của chi nhánh |
+| MH-42 | Chi nhánh | `/app/[tenant]/settings/branches` | CCS | 1 | DS | **Đã chọn.** Mẫu danh sách. Cột chi nhánh, địa chỉ, số nhân viên, số tài nguyên, trạng thái; lọc theo trạng thái; thêm chi nhánh trong giới hạn của gói, vượt thì báo (BR-93.2). [Đặc tả](./branch-settings.md) |
+| MH-43 | Chi tiết chi nhánh | `/app/[tenant]/settings/branches/[id]` | CCS | 1 | Vẽ | **Đã chọn.** Thông tin, giờ mở cửa nhiều khung mỗi ngày, ngày đặc biệt (BR-02), ngừng dùng chi nhánh. Giá riêng của chi nhánh làm cùng Dịch vụ (MH-45). [Đặc tả](./branch-settings.md) |
 | MH-44 | Dịch vụ | `/app/[tenant]/settings/services` | CCS | 1 | DS | Nhóm dịch vụ, kéo đổi thứ tự, bật/tắt đặt online |
 | MH-45 | Chi tiết dịch vụ | `/app/[tenant]/settings/services/[id]` | CCS | 1 | Vẽ | **Đã chọn. Màn đặc trưng thứ hai.** Biến thể khách tự chọn, tên không trùng (BR-13, BR-55); trục thời gian theo từng loại tài nguyên, đoạn Chuẩn bị, Làm, Chờ, dọn dẹp theo loại tài nguyên (BR-50 đến BR-52); giá theo cấp nhân viên (BR-56); ai làm được (BR-03); cột phải xem trước trên lịch lễ tân và thẻ khách thấy; lịch đã đặt giữ thời gian, giá cũ (BR-59) |
-| MH-46 | Tài nguyên | `/app/[tenant]/settings/resources` | CCS | 1 | DS | **Đã chọn.** Nhóm theo loại tài nguyên, chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng |
+| MH-46 | Tài nguyên | `/app/[tenant]/settings/resources` | CCS | 1 | DS | **Đã chọn.** Nhóm theo loại tài nguyên, chi nhánh, đổi thứ tự, loại tài nguyên (thêm, đổi tên, xóa), tạm ngưng bảo trì, ngừng dùng. Số lịch bị ảnh hưởng áp dụng khi có lịch hẹn. [Đặc tả](./branch-settings.md) |
 | MH-47 | Nhân sự | `/app/[tenant]/settings/staff` | CCS | 1 | DS | Mọi thành viên kèm cột "Nhận khách trên lịch", lời mời đang chờ (gửi lại, thu hồi, mời lại), hộp "Mời nhân viên"; quản lý chỉ mời Lễ tân và Kỹ thuật viên (BR-78). **Đã chọn** |
 | MH-48 | Hồ sơ nhân viên | `/app/[tenant]/settings/staff/[id]` | CCS | 1 | Form | Hai lớp hồ sơ (BR-15), kỹ năng, cấp, chi nhánh, vai trò |
 | MH-49 | Chính sách | `/app/[tenant]/settings/policies` | CCS | 1 (cọc ở 2) | Form | **Đã chọn.** Tham số X, Y, N, M, K của BR-06 đến BR-10; mức hoàn cọc (BR-23); mỗi trường có câu giải thích bằng ví dụ |

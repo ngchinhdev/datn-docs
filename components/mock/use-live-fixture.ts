@@ -9,9 +9,9 @@ import { applyBranchPrices } from '@/mock/shop';
 
 /**
  * The tenant's fixture with what the session changed: staff skills, services, appointments,
- * customers and pets, and what Cài đặt keeps: the branch with its hours and prices, resources,
- * policies, packages, bonus tiers and the rest. Screens that look things up or ask for free times
- * read this one.
+ * customers and pets, and what Cài đặt keeps: the first branch with its hours and prices, resource
+ * types, resources, policies, packages, bonus tiers and the rest. Screens that look things up or
+ * ask for free times read this one; the other branches of Cài đặt are in the store.
  */
 export function useLiveFixture(tenantSlug: string): TenantFixture {
   const base = tenantFixtures.find((f) => f.tenant.slug === tenantSlug) ?? tenantFixtures[0]!;
@@ -26,6 +26,7 @@ export function useLiveFixture(tenantSlug: string): TenantFixture {
     staffSeesCustomerPhone,
     policies,
     branch,
+    resourceTypes,
     resources,
     packageCatalog,
     topupBonusTiers,
@@ -43,8 +44,11 @@ export function useLiveFixture(tenantSlug: string): TenantFixture {
       staffTimeOff: leaves,
       staffSeesCustomerPhone,
       policies,
-      branches: [branch, ...base.branches.slice(1)],
-      resources,
+      // Calendar, shifts and services of the mock know the first branch only; the branches added
+      // in Cài đặt live in the store and show on Chi nhánh and Tài nguyên.
+      branches: [branch],
+      resourceTypes,
+      resources: resources.filter((r) => r.branchId === branch.id),
       packageCatalog,
       topupBonusTiers,
       config,
@@ -60,6 +64,7 @@ export function useLiveFixture(tenantSlug: string): TenantFixture {
       staffSeesCustomerPhone,
       policies,
       branch,
+      resourceTypes,
       resources,
       packageCatalog,
       topupBonusTiers,

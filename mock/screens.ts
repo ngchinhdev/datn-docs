@@ -212,7 +212,10 @@ const built: Record<string, ScreenLink[]> = {
     { label: 'Nhân sự, vai Quản lý', href: app('settings/staff?role=manager') },
   ],
   'MH-41': [{ label: 'Tổng quan', href: app('?role=owner') }],
-  'MH-42': [{ label: 'Chi nhánh', href: app('settings/branches') }],
+  'MH-42': [
+    { label: 'Chi nhánh', href: app('settings/branches') },
+    { label: 'Chi nhánh, gói Cơ bản (đã đủ giới hạn)', href: app('settings/branches?plan=basic') },
+  ],
   'MH-43': [
     {
       label: 'Chi tiết chi nhánh',
@@ -667,7 +670,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'DS',
     routes: ['/app/[tenant]/settings/branches'],
-    note: '',
+    note: 'Danh sách chi nhánh, lọc trạng thái; thêm chi nhánh trong giới hạn của gói, vượt thì báo PLAN_LIMIT_REACHED (BR-93.2)',
   },
   {
     code: 'MH-43',
@@ -677,7 +680,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/app/[tenant]/settings/branches/[id]'],
-    note: 'Giờ mở cửa nhiều khung mỗi ngày, ngày đặc biệt (BR-02), giá riêng của chi nhánh',
+    note: 'Thông tin, giờ mở cửa nhiều khung mỗi ngày, ngày đặc biệt (BR-02), ngừng dùng chi nhánh. Giá riêng của chi nhánh làm cùng Dịch vụ',
   },
   {
     code: 'MH-44',
@@ -707,7 +710,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'DS',
     routes: ['/app/[tenant]/settings/resources'],
-    note: 'Nhóm theo loại, chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng',
+    note: 'Nhóm theo loại, chi nhánh, đổi thứ tự, loại tài nguyên (thêm, đổi tên, xóa), tạm ngưng bảo trì, ngừng dùng; số lịch bị ảnh hưởng áp dụng khi có lịch hẹn',
   },
   {
     code: 'MH-47',
@@ -872,7 +875,7 @@ const rows: Row[] = [
 ];
 
 /** Screens that are signed off; every other screen with links is in progress. */
-const APPROVED = new Set(['MH-02']);
+const APPROVED = new Set(['MH-02', 'MH-42', 'MH-43', 'MH-46']);
 
 /** Screens to agree on with the supervisor. */
 export const mockScreens: (MockScreen & { status: ScreenStatus; links: ScreenLink[] })[] = (
