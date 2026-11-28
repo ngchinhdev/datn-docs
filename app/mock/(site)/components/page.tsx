@@ -69,7 +69,7 @@ export default function ComponentsPage() {
   const toast = useToast();
   const [dialog, setDialog] = useState(false);
   const [part, setPart] = useState('morning');
-  const [industry, setIndustry] = useState('salon');
+  const [kind, setKind] = useState('chair');
   const [quantity, setQuantity] = useState(3);
   const [otp, setOtp] = useState('');
   const [months, setMonths] = useState('1');
@@ -387,29 +387,29 @@ export default function ComponentsPage() {
 
       <Example name="ChoiceCards">
         <ChoiceCards
-          name="gallery-industry"
-          labelledBy="gallery-industry-title"
-          value={industry}
-          onChange={setIndustry}
+          name="gallery-kind"
+          labelledBy="gallery-kind-title"
+          value={kind}
+          onChange={setKind}
           options={[
             {
-              value: 'salon',
-              title: 'Salon tóc',
-              description: 'Cắt, gội, nhuộm, uốn. Ghế cắt, giường gội.',
+              value: 'chair',
+              title: 'Ghế',
+              description: 'Mỗi ghế một khách một lúc.',
               icon: <Scissors />,
             },
             {
-              value: 'nail',
-              title: 'Tiệm nail',
-              description: 'Sơn gel, đắp bột. Bàn nail, ghế pedicure.',
+              value: 'room',
+              title: 'Phòng',
+              description: 'Phòng xông, phòng riêng.',
               icon: <Scissors />,
               disabled: true,
               tag: 'Sắp có',
             },
           ]}
         />
-        <p id="gallery-industry-title" className="body-sm m-0 text-(--ink-muted)">
-          Cơ sở của bạn thuộc ngành nào?
+        <p id="gallery-kind-title" className="body-sm m-0 text-(--ink-muted)">
+          Bạn có loại tài nguyên nào?
         </p>
       </Example>
 

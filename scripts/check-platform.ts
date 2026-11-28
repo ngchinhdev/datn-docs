@@ -60,7 +60,7 @@ const viewsAt = (now: string, locks: typeof SEED_LOCKS = SEED_LOCKS): TenantView
   platformTenants.map((t) => tenantView(t, t.subscription, locks[t.id] ?? null, now));
 const views = viewsAt(MOCK_NOW);
 const viewOf = (id: string) => views.find((v) => v.tenant.id === id)!;
-const none: TenantFilter = { q: '', state: '', plan: '', industry: '', lockedOnly: false };
+const none: TenantFilter = { q: '', state: '', plan: '', lockedOnly: false };
 const names = (list: TenantView[]) => list.map((v) => v.tenant.name);
 
 // ---- The sample tenants ----
@@ -370,14 +370,6 @@ report(
   `${ov.total} = ${ov.paid} + ${ov.trial} + ${ov.expired}`,
 );
 report(
-  ov.industriesTotal.tenants === filterTenants(views, none).length &&
-    ov.industries.reduce((s, r) => s + r.tenants, 0) === 23 &&
-    ov.industriesTotal.appointmentsMonth ===
-      platformTenants.reduce((s, t) => s + t.totals.appointmentsMonth, 0) &&
-    ov.industries.every((r) => r.paid + r.trial + r.expired === r.tenants),
-  'BR-89: bảng cơ sở theo ngành cộng khớp với danh sách 23 cơ sở',
-);
-report(
   ov.createdSince === 6 &&
     ov.since === '2026-11-01' &&
     ov.trialEndingSoon === 1 &&
@@ -440,10 +432,8 @@ report(
   filterTenants(views, { ...none, state: 'expired' }).length === 3 &&
     filterTenants(views, { ...none, state: 'trial' }).length === 5 &&
     filterTenants(views, { ...none, plan: 'basic' }).length === 12 &&
-    filterTenants(views, { ...none, plan: 'pro' }).length === 11 &&
-    filterTenants(views, { ...none, industry: 'beauty_spa' }).length === 7 &&
-    filterTenants(views, { ...none, industry: 'beauty_spa', state: 'expired' }).length === 1,
-  'BR-89: lọc theo trạng thái, gói và ngành',
+    filterTenants(views, { ...none, plan: 'pro' }).length === 11,
+  'BR-89: lọc theo trạng thái và gói',
 );
 {
   const all = filterTenants(views, none);

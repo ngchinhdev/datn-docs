@@ -4,7 +4,7 @@ import { generatePeople, withVisitCounts } from './people.ts';
 import { laSenMoney } from './la-sen-money.ts';
 import { laSenConfig } from './shop-config.ts';
 import { spaServices as services } from './la-sen-services.ts';
-import { beautySpaTemplate } from './templates.ts';
+import { defaultPolicies } from './policies.ts';
 import type {
   Appointment,
   Branch,
@@ -374,10 +374,8 @@ export const spaLaSen: TenantFixture = {
     id: tenantId,
     slug: 'la-sen',
     name: 'Spa Lá Sen',
-    industry: 'beauty_spa',
     monogram: 'L',
   },
-  template: beautySpaTemplate,
   branches: [
     {
       id: branchId,
@@ -411,7 +409,7 @@ export const spaLaSen: TenantFixture = {
   services,
   customers: withVisitCounts(everyone, appointments),
   appointments,
-  policies: beautySpaTemplate.defaultPolicies,
+  policies: defaultPolicies,
   packageCatalog: [
     {
       id: 'sen-pkg-5',

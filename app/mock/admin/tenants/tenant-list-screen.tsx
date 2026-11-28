@@ -68,7 +68,7 @@ export function TenantListScreen() {
   };
 
   const rows = useMemo(
-    () => filterTenants(views, { q, state, plan, industry: '', lockedOnly }),
+    () => filterTenants(views, { q, state, plan, lockedOnly }),
     [views, q, state, plan, lockedOnly],
   );
   const page = paginate(rows, Number(params.get('page')) || 1, size);

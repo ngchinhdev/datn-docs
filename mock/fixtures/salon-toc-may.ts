@@ -4,7 +4,7 @@ import { generatePeople, withVisitCounts } from './people.ts';
 import { salonMoney } from './salon-money.ts';
 import { salonConfig } from './shop-config.ts';
 import { salonServices as services } from './salon-services.ts';
-import { hairSalonTemplate } from './templates.ts';
+import { defaultPolicies } from './policies.ts';
 import type {
   Appointment,
   Branch,
@@ -804,10 +804,8 @@ export const salonTocMay: TenantFixture = {
     id: tenantId,
     slug: 'toc-may',
     name: 'Salon Tóc Mây',
-    industry: 'hair_salon',
     monogram: 'M',
   },
-  template: hairSalonTemplate,
   branches: [
     {
       id: branchId,
@@ -840,7 +838,7 @@ export const salonTocMay: TenantFixture = {
   services,
   customers: withVisitCounts(everyone, appointments),
   appointments,
-  policies: hairSalonTemplate.defaultPolicies,
+  policies: defaultPolicies,
   packageCatalog: [
     {
       id: 'may-pkg-10',

@@ -72,7 +72,7 @@ export function GeneralSection({ ed }: { ed: ServiceEditor }) {
           value={draft.group}
           onChange={(e) => ed.patchService({ group: e.target.value })}
         >
-          {fixture.template.serviceGroups.map((group) => (
+          {[...new Set([...fixture.services.map((s) => s.group), draft.group])].map((group) => (
             <option key={group}>{group}</option>
           ))}
         </select>

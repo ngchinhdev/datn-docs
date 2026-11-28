@@ -11,6 +11,7 @@ import { lookups } from '@/mock/reception';
 import { minutesOf, localMinutes } from '@/mock/shifts';
 import { formatDay, formatTime } from '@/mock/time';
 import type { DragTarget } from './use-calendar-drag';
+import { staffNounOf } from '@/mock/staff-noun';
 
 const hhmm = (minute: number) =>
   `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
@@ -93,7 +94,7 @@ export function MoveDialog({
       <div className="grid grid-cols-2 gap-(--space-3)">
         <Field
           id={`${uid}-staff`}
-          label={fixture.template.vocabulary.staff.replace(/^./, (c) => c.toUpperCase())}
+          label={staffNounOf(fixture).replace(/^./, (c) => c.toUpperCase())}
         >
           <select id={`${uid}-staff`} value={staffId} onChange={(e) => setStaffId(e.target.value)}>
             {capable.map((s) => (

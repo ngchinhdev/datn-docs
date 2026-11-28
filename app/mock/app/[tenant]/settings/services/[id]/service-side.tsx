@@ -9,6 +9,7 @@ import { previewCalendar, PREVIEW_DATE, PREVIEW_START } from '@/mock/service-pre
 import { anyPrice, durationText } from '@/mock/services';
 import { MOCK_NOW } from '@/mock/time';
 import type { ServiceEditor } from './use-service-editor';
+import { staffNounOf } from '@/mock/staff-noun';
 
 /** The aside of the detail page: what the variant looks like on the calendar, to the customer, in numbers. */
 export function ServiceSide({ ed }: { ed: ServiceEditor }) {
@@ -32,7 +33,7 @@ export function ServiceSide({ ed }: { ed: ServiceEditor }) {
   ]) as [string, string][];
 
   const topStaff = capable.find((s) => s.level > 1);
-  const staffWord = fixture.template.vocabulary.staff;
+  const staffWord = staffNounOf(fixture);
 
   return (
     <>
@@ -42,7 +43,7 @@ export function ServiceSide({ ed }: { ed: ServiceEditor }) {
           titleId="pv-cal"
           note={
             current.segments.some((s) => s.kind === 'wait')
-              ? `Trong lúc chờ, ${fixture.template.vocabulary.staff.toLowerCase()} nhận được lịch ngắn khác.`
+              ? `Trong lúc chờ, ${staffNounOf(fixture).toLowerCase()} nhận được lịch ngắn khác.`
               : `Ví dụ hẹn lúc ${PREVIEW_START}.`
           }
         >

@@ -14,6 +14,7 @@ import { formatDuration, formatPhone, formatVnd, normalizePhone } from '@/mock/f
 import { ANY_STAFF, priceFor, visibleMinutes } from '@/mock/occupation';
 import { parseTime, placeItem } from '@/mock/placement';
 import { capableStaff, pricedStaff } from '@/mock/services';
+import { staffNounOf } from '@/mock/staff-noun';
 import { formatDay, formatTime, localToUtc } from '@/mock/time';
 
 type Pick = { kind: 'existing'; id: string } | { kind: 'new' } | { kind: 'walkin' };
@@ -61,7 +62,7 @@ export function CreatePanel({
   const uid = useId();
   const toast = useToast();
   const store = useScheduleStore();
-  const { vocabulary } = fixture.template;
+  const staffWord = staffNounOf(fixture);
   const tenantId = fixture.tenant.id;
   const nameOf = (id: string) => fixture.resources.find((r) => r.id === id)?.name ?? id;
 
@@ -236,14 +237,14 @@ export function CreatePanel({
   }
 
   // ---- Pieces ----
-  const staffNoun = vocabulary.staff.charAt(0).toUpperCase() + vocabulary.staff.slice(1);
+  const staffNoun = staffWord.charAt(0).toUpperCase() + staffWord.slice(1);
   const staffName = staffId === ANY_STAFF ? '' : nameOf(staffId);
   const customerMeta = (c: Customer) => {
     const preferred = preferredStaffOf(fixture, c.id);
     return [
       c.phone ? formatPhone(c.phone) : null,
       c.visitCount ? `lần thứ ${c.visitCount}` : null,
-      preferred ? `${lowerFirst(vocabulary.staff)} quen ${nameOf(preferred)}` : null,
+      preferred ? `${lowerFirst(staffWord)} quen ${nameOf(preferred)}` : null,
     ]
       .filter(Boolean)
       .join(' · ');

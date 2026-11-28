@@ -12,6 +12,7 @@ import { heldItems, modeOf, openQuestion, rebookChoice } from '@/mock/reschedule
 import { fixtureBySlug } from '@/mock/selection';
 import type { Appointment } from '@/mock/fixtures';
 import { formatDay, formatTime, localDate, MOCK_NOW } from '@/mock/time';
+import { staffNounOf } from '@/mock/staff-noun';
 
 const UPCOMING: Appointment['status'][] = ['confirmed', 'checked_in'];
 
@@ -88,7 +89,7 @@ export function AppointmentsScreen({ tenantSlug }: { tenantSlug: string }) {
             href={`/mock/${tenantSlug}/me/appointments/${appt.id}`}
             className="sp-btn sp-btn--accent no-underline"
           >
-            Xem đề nghị đổi {fixture.template.vocabulary.staff.toLowerCase()}
+            Xem đề nghị đổi {staffNounOf(fixture).toLowerCase()}
           </Link>
         )}
         {kind === 'past' && appt.status === 'completed' && (

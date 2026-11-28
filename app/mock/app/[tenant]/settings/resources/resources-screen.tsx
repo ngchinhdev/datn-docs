@@ -248,9 +248,7 @@ export function ResourcesScreen({ tenantSlug }: { tenantSlug: string }) {
       <PageHeader
         crumbs={[{ label: 'Cài đặt', href: appHref('settings') }, { label: 'Tài nguyên' }]}
         title="Tài nguyên"
-        sub={`${
-          fixture.template.name
-        }: ${types.map((t) => t.name).join(', ')} mà dịch vụ cần (BR-03)`}
+        sub={`${types.map((t) => t.name).join(', ')} mà dịch vụ cần (BR-03)`}
         actions={
           <Button variant="primary" onClick={() => setEditing('new')}>
             <Plus size={16} aria-hidden="true" />
@@ -322,8 +320,7 @@ export function ResourcesScreen({ tenantSlug }: { tenantSlug: string }) {
               foot={
                 <div className="sp-table-foot">
                   <span>
-                    {rows.length} tài nguyên · loại lấy từ gói ngành {fixture.template.name} (
-                    {types.map((t) => t.name).join(', ')})
+                    {rows.length} tài nguyên ({types.map((t) => t.name).join(', ')})
                   </span>
                 </div>
               }
@@ -485,7 +482,7 @@ function ResourceDialog({
       <Field id="rs-name" label="Tên" error={name !== '' ? problem : undefined}>
         <input id="rs-name" value={name} onChange={(e) => setName(e.target.value)} />
       </Field>
-      <Field id="rs-type" label="Loại" help="Loại lấy từ gói ngành.">
+      <Field id="rs-type" label="Loại" help="Loại tài nguyên của cơ sở.">
         <select id="rs-type" value={typeId} onChange={(e) => setTypeId(e.target.value)}>
           {types.map((t) => (
             <option key={t.id} value={t.id}>

@@ -22,7 +22,6 @@ export interface Tenant {
   id: string;
   slug: string;
   name: string;
-  industry: string;
   /** Letter on the tenant's mark in the app shell; not the first letter of the full name. */
   monogram: string;
 }
@@ -127,7 +126,7 @@ export interface Service {
   id: string;
   tenantId: string;
   name: string;
-  /** One of `IndustryTemplate.serviceGroups`. */
+  /** The heading the service is listed under, e.g. "Massage". */
   group: string;
   /** Shown to the customer under the name. */
   description?: string;
@@ -338,15 +337,8 @@ export interface Requeue {
   title?: string;
 }
 
-/**
- * What differs between industries, as data: the staff word shown to people. Copied into a tenant
- * when it is created (BR-70).
- */
-/** `open`: a tenant can pick it at sign-up; `soon`: the card shows but cannot be picked; `hidden`: no card. */
-export type TemplateStatus = 'open' | 'soon' | 'hidden';
-
-/** Starting values of a new tenant's booking policies (BR-06, BR-08, BR-09, BR-10). */
-export interface TemplatePolicies {
+/** The booking policies of a tenant (BR-06, BR-08, BR-09, BR-10). */
+export interface BookingPolicies {
   /** Earliest booking, hours from now. */
   minNoticeHours: number;
   /** Latest booking, days from now. */
@@ -361,82 +353,8 @@ export interface TemplatePolicies {
   depositAfterNoShows: number;
 }
 
-/** The part of a template an administrator edits; a draft remembers it as it was when it began. */
-export interface TemplateContent {
-  name: string;
-  status: TemplateStatus;
-  cardDescription: string;
-  previewNote: string;
-  vocabulary: IndustryTemplate['vocabulary'];
-  defaultPolicies: TemplatePolicies;
-  sampleServices: SampleService[];
-}
-
-/** An industry template (BR-70): published versions are copied into a tenant when it is created. */
-export interface IndustryTemplate {
-  /** The code, e.g. `hair_salon`. */
-  id: string;
-  name: string;
-  status: TemplateStatus;
-  /** Text on the industry card at sign-up. */
-  cardDescription: string;
-  /** The version new tenants receive; `null` before the first publication. */
-  publishedVersion: { number: number; publishedAt: string; tenantsCreated: number } | null;
-  /** Changes waiting to be published; `base` is the content they started from. */
-  draft: { number: number; changes: string[]; base: Partial<TemplateContent> } | null;
-  defaultPolicies: TemplatePolicies;
-  /** Local date of the last edit, `YYYY-MM-DD`. */
-  updatedAt: string;
-  vocabulary: {
-    /** Plural-free noun for staff in this industry. */
-    staff: string;
-  };
-  /** Resources other than staff that a new tenant starts with. */
-  resourceTypes: TemplateResourceType[];
-  /** Groups a service can belong to. */
-  serviceGroups: string[];
-  /** Services created with the tenant; the sign-up preview lists them. */
-  sampleServices: SampleService[];
-  /** One sentence under the preview about what is special in this industry. */
-  previewNote: string;
-}
-
-export interface TemplateResourceType {
-  name: string;
-  /** The staff type: made with the owner's account, not counted at sign-up. */
-  isStaff: boolean;
-  /** One line under the name when the owner sets the count. */
-  hint: string;
-  /** Count suggested for the first branch. */
-  defaultCount: number;
-}
-
-/** One segment of a sample service; `types` are names from `IndustryTemplate.resourceTypes`. */
-export interface SampleSegment {
-  name: string;
-  kind: SegmentKind;
-  minutes: number;
-  types: string[];
-}
-
-export interface SampleServiceVariant {
-  name: string;
-  /** Integer VND. */
-  priceVnd: bigint;
-  /** In order; a `wait` segment frees the staff and keeps the other resources (BR-05). */
-  segments: SampleSegment[];
-  /** Minutes to clean each resource type after use, by type name (BR-52). */
-  cleanup?: Record<string, number>;
-}
-
-export interface SampleService {
-  name: string;
-  variants: SampleServiceVariant[];
-}
-
 export interface TenantFixture {
   tenant: Tenant;
-  template: IndustryTemplate;
   branches: Branch[];
   resourceTypes: ResourceType[];
   resources: Resource[];
@@ -453,8 +371,8 @@ export interface TenantFixture {
   services: Service[];
   customers: Customer[];
   appointments: Appointment[];
-  /** The tenant's booking policies, copied from the template when it was created (BR-70). */
-  policies: TemplatePolicies;
+  /** The tenant's booking policies. */
+  policies: BookingPolicies;
   /** Packages on sale (BR-26). */
   packageCatalog: PackageProduct[];
   /** Top-up bonus tiers of the payment settings (BR-25), highest `minVnd` last. */

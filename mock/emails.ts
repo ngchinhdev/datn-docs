@@ -9,6 +9,7 @@ import { refundPercent, refundVnd, replyDeadline } from './policy.ts';
 import { termsOfAppointment } from './terms.ts';
 import { heldItems, modeOf, openQuestion } from './reschedule.ts';
 import { addMinutes, formatDay, formatTime, localDate } from './time.ts';
+import { staffNounOf } from './staff-noun.ts';
 
 /** The code the mock shows in the confirmation email and accepts on the pages (BR-16). */
 export const MOCK_CODE = '482193';
@@ -18,7 +19,7 @@ export type EmailAction =
 
 export interface EmailSample {
   id: string;
-  /** "Mã xác nhận (BR-16)": the name of the template. */
+  /** "Mã xác nhận (BR-16)": the name of the email sample. */
   label: string;
   /** The `From:` line. */
   from: string;
@@ -157,7 +158,7 @@ export function buildEmails(
     rows: [
       ['Thời gian', b.when],
       ['Dịch vụ', b.services],
-      [fixture.template.vocabulary.staff, b.people],
+      [staffNounOf(fixture), b.people],
       ...(deposit > 0n
         ? ([
             ['Đã cọc', formatVnd(deposit)],
@@ -184,7 +185,7 @@ export function buildEmails(
     rows: [
       ['Thời gian', p.when],
       ['Dịch vụ', p.services],
-      [fixture.template.vocabulary.staff, p.people],
+      [staffNounOf(fixture), p.people],
     ],
     actions: [{ label: 'Xem lịch hẹn', to: 'detail' }],
     notes: [policyLine(plain)],
@@ -201,7 +202,7 @@ export function buildEmails(
     rows: [
       ['Thời gian', p.when],
       ['Dịch vụ', p.services],
-      [fixture.template.vocabulary.staff, p.people],
+      [staffNounOf(fixture), p.people],
     ],
     actions: [{ label: 'Xem lịch hẹn', to: 'detail' }],
     notes: [
@@ -222,7 +223,7 @@ export function buildEmails(
       ['Giờ mới', p.when],
       ['Giờ cũ', `${hhmm(oldStart)}, ${dayText(oldStart)}`],
       ['Dịch vụ', p.services],
-      [fixture.template.vocabulary.staff, p.people],
+      [staffNounOf(fixture), p.people],
       ['Giá', `${formatVnd(p.price)} · giữ như lúc đặt`],
     ],
     actions: [

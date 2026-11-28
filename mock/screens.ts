@@ -397,7 +397,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/[tenant]/book'],
-    note: 'Nhiều người hoặc nhiều bé cùng giờ, mỗi đối tượng một dịch vụ; không đủ chỗ thì gợi ý giờ lệch nhau',
+    note: 'Người đặt cùng tối đa 3 người đi cùng, mỗi người một dịch vụ; không đủ chỗ thì gợi ý giờ lệch nhau',
   },
   {
     code: 'MH-15',
@@ -577,7 +577,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/app/[tenant]/customers/[id]'],
-    note: 'Lịch sử, ghi chú nội bộ (BR-62), đối tượng được phục vụ, gói, ví, bắt buộc cọc (BR-10)',
+    note: 'Lịch sử, ghi chú nội bộ (BR-62), gói, ví, bắt buộc cọc (BR-10)',
   },
   {
     code: 'MH-34',
@@ -697,7 +697,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'Vẽ',
     routes: ['/app/[tenant]/settings/services/[id]'],
-    note: 'Màn đặc trưng thứ hai. Biến thể theo thuộc tính đối tượng (BR-13); các đoạn chiếm dụng vẽ trên trục thời gian, mỗi đoạn chọn loại tài nguyên (BR-04, BR-05); kỹ năng (BR-03); giá theo cấp nhân viên; xem trước khối lịch hẹn như trên lịch lễ tân',
+    note: 'Màn đặc trưng thứ hai. Biến thể khách tự chọn, tên không trùng (BR-13, BR-55); các đoạn chiếm dụng vẽ trên trục thời gian, mỗi đoạn chọn loại tài nguyên (BR-04, BR-05); kỹ năng (BR-03); giá theo cấp nhân viên; xem trước khối lịch hẹn như trên lịch lễ tân',
   },
   {
     code: 'MH-46',
@@ -707,7 +707,7 @@ const rows: Row[] = [
     wave: 1,
     level: 'DS',
     routes: ['/app/[tenant]/settings/resources'],
-    note: 'Nhóm theo loại (từ gói ngành), chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng',
+    note: 'Nhóm theo loại, chi nhánh, tạm ngưng bảo trì kèm số lịch bị ảnh hưởng',
   },
   {
     code: 'MH-47',
@@ -837,7 +837,7 @@ const rows: Row[] = [
     wave: 3,
     level: 'Nhẹ',
     routes: ['/admin'],
-    note: 'Số cơ sở theo ngành, số lịch đặt, cơ sở mới',
+    note: 'Số cơ sở theo trạng thái, doanh thu tháng, cơ sở mới',
   },
   {
     code: 'MH-61',

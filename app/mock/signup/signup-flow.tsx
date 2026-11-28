@@ -37,8 +37,7 @@ function load(): SignupDraft {
  */
 export function SignupFlow() {
   const router = useRouter();
-  const rawStep = useSearchParams().get('step');
-  const step = stepOf(rawStep);
+  const step = stepOf(useSearchParams().get('step'));
   const [draft, setDraft] = useState<SignupDraft>(emptyDraft);
   const [password, setPassword] = useState('');
   const [ready, setReady] = useState(false);
@@ -52,11 +51,6 @@ export function SignupFlow() {
   useEffect(() => {
     if (ready) sessionStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
   }, [draft, ready]);
-
-  // An old `?step=industry` link goes to the address of the step it became.
-  useEffect(() => {
-    if (rawStep === 'industry') router.replace(stepHref('business'));
-  }, [rawStep, router]);
 
   const allowed = canOpen(step, draft);
   useEffect(() => {

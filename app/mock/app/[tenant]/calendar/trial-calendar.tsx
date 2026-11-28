@@ -9,6 +9,7 @@ import { Checklist, type ChecklistItem } from '@/components/sapio/checklist';
 import { PageHeader } from '@/components/sapio/page-header';
 import { tenantFixtures } from '@/mock/fixtures';
 import { formatDay, MOCK_TODAY } from '@/mock/time';
+import { staffNounOf } from '@/mock/staff-noun';
 
 /** "3 ghế, 1 giường": the count of each kind of resource, by the first word of its name. */
 function describeResources(counts: Map<string, number>) {
@@ -50,7 +51,7 @@ export function TrialCalendar({ tenantSlug }: { tenantSlug: string }) {
       href: appHref('settings/resources'),
     },
     {
-      label: `Thêm ${fixture.template.vocabulary.staff.toLowerCase()} nhận đặt online`,
+      label: `Thêm ${staffNounOf(fixture).toLowerCase()} nhận đặt online`,
       meta: `${online} người`,
       done: online > 0,
       href: appHref('settings/staff'),

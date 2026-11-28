@@ -59,6 +59,7 @@ import {
   MOCK_NOW,
   weekdayShort,
 } from '@/mock/time';
+import { staffNounOf } from '@/mock/staff-noun';
 
 type Step = 'service' | 'datetime' | 'info' | 'confirm';
 type Part = 'morning' | 'afternoon' | 'evening';
@@ -118,7 +119,7 @@ export function BookingFlow({
   const { tenant, services, staff, resources } = fixture;
   const branch = fixture.branches[0]!;
   const toast = useToast();
-  const staffNoun = fixture.template.vocabulary.staff;
+  const staffNoun = staffNounOf(fixture);
   /** BR-56: who is asked decides the price; people who can do the service, online only (BR-14). */
   const pricedStaff = (forService: string) =>
     staff

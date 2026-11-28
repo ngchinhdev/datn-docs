@@ -10,6 +10,7 @@ import { lookups } from '@/mock/reception';
 import { formatRange, formatTime } from '@/mock/time';
 import { MoveDialog } from './move-dialog';
 import type { DragTarget } from './use-calendar-drag';
+import { staffNounOf } from '@/mock/staff-noun';
 
 /** When the customer is done with an appointment (the end of its last work or wait part). */
 export const endOf = (appt: Appointment) =>
@@ -119,7 +120,7 @@ export function useMoveFlow(args: {
               value: `${formatRange(swap.appt.startAt, endOf(swap.appt))} → ${formatRange(swapMoved.startAt, endOf(swapMoved))}`,
             },
             {
-              term: fixture.template.vocabulary.staff.replace(/^./, (c) => c.toUpperCase()),
+              term: staffNounOf(fixture).replace(/^./, (c) => c.toUpperCase()),
               value: `${staffName(swap.appt.items[0]?.staffResourceId ?? '')} → ${staffName(swap.target.columnId)}`,
             },
             {

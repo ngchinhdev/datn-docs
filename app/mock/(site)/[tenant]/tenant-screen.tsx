@@ -13,6 +13,7 @@ import { visibleMinutes } from '@/mock/occupation';
 import { formatTime, MOCK_NOW, MOCK_TODAY } from '@/mock/time';
 import type { BusinessHours, Service, ServiceVariant, Weekday } from '@/mock/fixtures';
 import { hoursByDay, WEEK, WEEKDAY_NAME, windowsText } from '@/mock/shop';
+import { staffNounOf } from '@/mock/staff-noun';
 
 function variantSummary(service: Service): string {
   if (service.variants.length === 1) {
@@ -133,7 +134,7 @@ function TenantContent({ tenantSlug }: { tenantSlug: string }) {
   const depositService = fixture.services.find((s) => s.variants.some((v) => v.depositVnd));
   const depositVnd = depositService?.variants.find((v) => v.depositVnd)?.depositVnd;
 
-  const staffLabel = fixture.template.vocabulary.staff;
+  const staffLabel = staffNounOf(fixture);
 
   const isLaSen = fixture.tenant.slug === 'la-sen';
   const phone = branchPhone(fixture.tenant.slug, branch.phone);

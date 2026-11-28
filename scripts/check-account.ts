@@ -835,12 +835,12 @@ report(
   'T-18: quản trị nền tảng không tự đặt lại mật khẩu, không cấp link',
 );
 
-// ---- D-16: sign-up has no industry step ----
+// ---- D-16: sign-up has four steps ----
 const stepsSource = readFileSync(new URL('../mock/signup.ts', import.meta.url), 'utf8');
 const stepsList = /export const STEPS = \[([^\]]*)\]/.exec(stepsSource)?.[1] ?? '';
 report(
-  stepsList.includes('business') && !stepsList.includes('industry'),
-  'D-16: các bước đăng ký không còn chọn ngành',
+  stepsList.replace(/[\s']/g, '') === 'account,verify,business,done',
+  'D-16: đăng ký có bốn bước: tài khoản, mã, cơ sở, xong',
   stepsList,
 );
 

@@ -19,6 +19,7 @@ import { withdrawReal } from '@/mock/money-ops';
 import { lookups } from '@/mock/reception';
 import { formatDateTime, formatFullDate, localDate, MOCK_NOW } from '@/mock/time';
 import { dayMonth, entryAmountText, ledgerOf, signedVnd } from '@/mock/wallet-view';
+import { staffNounOf } from '@/mock/staff-noun';
 
 const HISTORY_SHORT = 4;
 
@@ -169,7 +170,7 @@ export function CustomerProfile({ tenantSlug, id }: { tenantSlug: string; id: st
                     <tr>
                       <th scope="col">Giờ</th>
                       <th scope="col">Dịch vụ</th>
-                      <th scope="col">{fixture.template.vocabulary.staff}</th>
+                      <th scope="col">{staffNounOf(fixture)}</th>
                       <th scope="col">Trạng thái</th>
                       <th scope="col">Hóa đơn</th>
                     </tr>
