@@ -37,6 +37,12 @@ export interface AppointmentBlockProps {
 }
 
 const SLOT_MINUTES = 15;
+/** The `slot-height` token in pixels; text that does not fit a segment of this height is left out. */
+const SLOT_PX = 16;
+/** Line heights of `.sp-appt__title`, `.sp-appt__meta` and the buffer text; padding of a segment is 4px above and below. */
+const LINE_PX = 16;
+const BUFFER_LINE_PX = 14;
+const PAD_PX = 8;
 /** `n` slots tall, in multiples of the `slot-height` token. */
 const slots = (minutes: number) => `calc(var(--slot-height) * ${minutes / SLOT_MINUTES})`;
 
@@ -70,6 +76,33 @@ export function AppointmentBlock({
   const titleAt = seen[0] ?? 0;
   const metaAt = seen.at(-1) ?? 0;
   const showsMeta = (i: number) => i === metaAt && (seen.length === 1 || i > titleAt);
+  /**
+   * What a segment shows, in order of priority: title, note, time and resources. Lines that do not
+   * fit its height are left out (the full text stays in the name and the tooltip), so nothing is cut
+   * off or spills onto the next segment. A one-slot segment drops its padding to keep the title.
+   */
+  const shown = (segment: BlockSegment, i: number) => {
+    const lines = [
+      i === titleAt ? 'title' : null,
+      segment.note ? 'note' : null,
+      meta && showsMeta(i) ? 'meta' : null,
+    ].filter((x): x is 'title' | 'note' | 'meta' => x !== null);
+    const height = (minutesBetween(segment.startAt, segment.endAt) / SLOT_MINUTES) * SLOT_PX;
+    const lineHeight = segment.kind === 'buffer' ? BUFFER_LINE_PX : LINE_PX;
+    const padding = segment.kind === 'buffer' ? 0 : PAD_PX;
+    let count = lines.length;
+    while (count > 1 && count * lineHeight + padding > height) count -= 1;
+    // Only the title keeps a segment that is too short for its padding, so the name is never lost.
+    const tight = count === 1 && lines[0] === 'title' && lineHeight + padding > height;
+    if (count === 1 && lineHeight + (tight ? 0 : padding) > height) count = 0;
+    const kept = lines.slice(0, count);
+    return {
+      title: kept.includes('title'),
+      note: kept.includes('note'),
+      meta: kept.includes('meta'),
+      tight,
+    };
+  };
   // Same texts in the same order as on screen, so the name contains what is visible.
   const label = segments
     .flatMap((s, i) => [
@@ -87,6 +120,7 @@ export function AppointmentBlock({
       onPointerDown={onPointerDown}
       aria-pressed={selected}
       aria-label={label}
+      title={label}
       {...(appointmentId ? { 'data-appointment-id': appointmentId } : {})}
       className={cn(
         'sp-appt border-0 p-0 text-left',
@@ -98,33 +132,37 @@ export function AppointmentBlock({
       )}
       style={style}
     >
-      {segments.map((segment, i) => (
-        <span
-          key={segment.startAt}
-          className={cn(
-            'sp-appt__seg block',
-            segment.kind === 'wait' && 'sp-appt__seg--wait',
-            segment.kind === 'buffer' && 'sp-appt__seg--buffer',
-          )}
-          style={{ height: slots(minutesBetween(segment.startAt, segment.endAt)) }}
-        >
-          {i === titleAt && (
-            <>
-              <span className="sp-appt__title">{title}</span>{' '}
-            </>
-          )}
-          {segment.note && (
-            <>
-              <span className="sp-appt__meta block">{segment.note}</span>{' '}
-            </>
-          )}
-          {meta && showsMeta(i) && (
-            <>
-              <span className="sp-appt__meta block">{meta}</span>{' '}
-            </>
-          )}
-        </span>
-      ))}
+      {segments.map((segment, i) => {
+        const text = shown(segment, i);
+        return (
+          <span
+            key={segment.startAt}
+            className={cn(
+              'sp-appt__seg block',
+              text.tight && 'py-0!',
+              segment.kind === 'wait' && 'sp-appt__seg--wait',
+              segment.kind === 'buffer' && 'sp-appt__seg--buffer',
+            )}
+            style={{ height: slots(minutesBetween(segment.startAt, segment.endAt)) }}
+          >
+            {text.title && (
+              <>
+                <span className="sp-appt__title">{title}</span>{' '}
+              </>
+            )}
+            {text.note && segment.note && (
+              <>
+                <span className="sp-appt__meta block">{segment.note}</span>{' '}
+              </>
+            )}
+            {text.meta && meta && (
+              <>
+                <span className="sp-appt__meta block">{meta}</span>{' '}
+              </>
+            )}
+          </span>
+        );
+      })}
     </button>
   );
 }
