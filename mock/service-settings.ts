@@ -185,7 +185,7 @@ export function buildService(
       {
         id: `${id}-v1`,
         name: variantName,
-        shortName: variantName.slice(0, LIMITS.shortName).trim(),
+        shortName: cleanName(input.name).slice(0, LIMITS.shortName).trim(),
         priceVnd: input.priceVnd,
         segments: [
           {

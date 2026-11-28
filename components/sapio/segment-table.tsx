@@ -1,7 +1,7 @@
 'use client';
 
-import { GripVertical, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { ArrowDown, ArrowUp, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { SegmentKind } from '@/mock/fixtures';
 import {
@@ -48,7 +48,7 @@ function CellField({
 
 /**
  * One editable row per segment (BR-50): name, kind, minutes and the resource types it holds.
- * Rows move by dragging the handle or by focusing it and pressing the arrow keys.
+ * A row moves one place up or down with its two buttons; the first row cannot go up, the last cannot go down.
  */
 export function SegmentTable({
   caption,
@@ -72,32 +72,28 @@ export function SegmentTable({
   onMove: (from: number, to: number) => void;
   onRemove: (index: number) => void;
 }) {
-  const handles = useRef<(HTMLButtonElement | null)[]>([]);
-  const [focusAt, setFocusAt] = useState<number | null>(null);
-  const [armed, setArmed] = useState<number | null>(null);
-  const [over, setOver] = useState<number | null>(null);
+  const buttons = useRef<Record<string, HTMLButtonElement | null>>({});
+  /** After a row moves, the button that was pressed goes with it: `{row}:{-1 or 1}`. */
+  const [focusKey, setFocusKey] = useState<string | null>(null);
   const [said, setSaid] = useState('');
 
-  // After a row moves with the keyboard, focus follows it to its new place.
   useEffect(() => {
-    if (focusAt !== null) {
-      handles.current[focusAt]?.focus();
-      setFocusAt(null);
-    }
-  }, [focusAt]);
+    if (focusKey === null) return;
+    const [row, dir] = focusKey.split(':') as [string, '-1' | '1'];
+    const other = dir === '-1' ? '1' : '-1';
+    const target = [buttons.current[`${row}:${dir}`], buttons.current[`${row}:${other}`]].find(
+      (el) => el && !el.disabled,
+    );
+    target?.focus();
+    setFocusKey(null);
+  }, [focusKey]);
 
   function moveBy(index: number, step: -1 | 1) {
     const to = index + step;
     if (to < 0 || to >= segments.length) return;
     onMove(index, to);
-    setFocusAt(to);
+    setFocusKey(`${to}:${step}`);
     setSaid(`Đoạn ${segments[index]?.name ?? index + 1} chuyển sang vị trí ${to + 1}.`);
-  }
-
-  function onHandleKey(e: KeyboardEvent, index: number) {
-    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
-    e.preventDefault();
-    moveBy(index, e.key === 'ArrowUp' ? -1 : 1);
   }
 
   return (
@@ -127,52 +123,34 @@ export function SegmentTable({
               <tr
                 key={i}
                 aria-selected={selected === i}
-                draggable={armed === i}
-                className={cn(
-                  over === i &&
-                    armed !== null &&
-                    armed !== i &&
-                    'shadow-[inset_0_2px_0_var(--brand)]',
-                )}
                 onFocusCapture={() => onSelect(i)}
                 onClick={(ev) => {
                   if (!(ev.target as HTMLElement).closest('input, select, button')) onSelect(i);
                 }}
-                onDragStart={(ev) => {
-                  ev.dataTransfer.effectAllowed = 'move';
-                  ev.dataTransfer.setData('text/plain', String(i));
-                }}
-                onDragOver={(ev) => {
-                  if (armed === null) return;
-                  ev.preventDefault();
-                  setOver(i);
-                }}
-                onDrop={(ev) => {
-                  ev.preventDefault();
-                  if (armed !== null) onMove(armed, i);
-                  setArmed(null);
-                  setOver(null);
-                }}
-                onDragEnd={() => {
-                  setArmed(null);
-                  setOver(null);
-                }}
               >
                 <td>
-                  <button
-                    ref={(el) => {
-                      handles.current[i] = el;
-                    }}
-                    type="button"
-                    className="sp-icon-btn cursor-grab"
-                    aria-label={`Kéo để đổi thứ tự đoạn ${n}`}
-                    title="Kéo, hoặc bấm ↑ ↓ để đổi thứ tự"
-                    onPointerDown={() => setArmed(i)}
-                    onPointerUp={() => setArmed(null)}
-                    onKeyDown={(ev) => onHandleKey(ev, i)}
-                  >
-                    <GripVertical size={16} aria-hidden="true" />
-                  </button>
+                  <span className="inline-flex gap-1">
+                    {([-1, 1] as const).map((step) => (
+                      <button
+                        key={step}
+                        ref={(el) => {
+                          buttons.current[`${i}:${step}`] = el;
+                        }}
+                        type="button"
+                        className="sp-icon-btn"
+                        aria-label={`${step === -1 ? 'Lên' : 'Xuống'}: đoạn ${n}`}
+                        title={step === -1 ? 'Lên' : 'Xuống'}
+                        disabled={step === -1 ? i === 0 : i === segments.length - 1}
+                        onClick={() => moveBy(i, step)}
+                      >
+                        {step === -1 ? (
+                          <ArrowUp size={16} aria-hidden="true" />
+                        ) : (
+                          <ArrowDown size={16} aria-hidden="true" />
+                        )}
+                      </button>
+                    ))}
+                  </span>
                 </td>
                 <td>
                   <span className="sp-segtable__kind">

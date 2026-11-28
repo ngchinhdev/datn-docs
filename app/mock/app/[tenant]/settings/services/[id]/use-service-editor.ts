@@ -91,8 +91,6 @@ export function useServiceEditor(tenantSlug: string, serviceId: string) {
     () => [schedule.branch, ...schedule.extraBranches].filter(isActive),
     [schedule.branch, schedule.extraBranches],
   );
-  /** BR-94.29: the prices of the branches are set only where there are two or more in use. */
-  const showBranchPrices = branches.length >= 2;
   const savedBranchPrices = useMemo(() => branchPricesOf(branches, saved), [branches, saved]);
 
   const [draft, setDraft] = useState<DraftService>(() => toDraft(saved));
@@ -111,6 +109,13 @@ export function useServiceEditor(tenantSlug: string, serviceId: string) {
   const variant = draft.variants.find((v) => v.id === variantId) ?? draft.variants[0]!;
   const variantIndex = draft.variants.indexOf(variant);
   const readOnly = Boolean(saved.archivedAt);
+  /**
+   * BR-94.29: the prices of the branches show where there are two or more branches in use, or when
+   * the variant already has a price of its own in a branch in use, so it can be seen and cleared.
+   */
+  const showBranchPrices =
+    branches.length >= 2 ||
+    branches.some((b) => savedBranchPrices[b.id]?.[variant.id] !== undefined);
 
   const staffType = resourceTypes.find((t) => t.isStaff);
   const staffTypeIds = useMemo(
@@ -138,9 +143,7 @@ export function useServiceEditor(tenantSlug: string, serviceId: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branchPrices, draft.variants]);
   const allVariantIds = new Set([...saved.variants.map((v) => v.id), ...variantIds]);
-  const branchChanges = showBranchPrices
-    ? branchPriceChanges(savedBranchPrices, liveBranchPrices, allVariantIds)
-    : 0;
+  const branchChanges = branchPriceChanges(savedBranchPrices, liveBranchPrices, allVariantIds);
   const branchPriceBad = Object.values(liveBranchPrices).some((byVariant) =>
     Object.values(byVariant).some((price) => priceProblem(price)),
   );
@@ -405,7 +408,7 @@ export function useServiceEditor(tenantSlug: string, serviceId: string) {
     // BR-12, BR-59: appointments already booked keep their own bookings and prices; only the
     // service itself changes, so nothing else is rewritten here.
     save(next);
-    if (showBranchPrices && branchChanges > 0) writeBranchPrices(next);
+    if (branchChanges > 0) writeBranchPrices(next);
     for (const member of staff) {
       const has = member.skillServiceIds.includes(next.id);
       const wants = skills.includes(member.resourceId);

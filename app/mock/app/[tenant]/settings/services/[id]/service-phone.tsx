@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/sapio/button';
 import { CheckRow, Field } from '@/components/sapio/form';
@@ -188,6 +188,30 @@ export function ServicePhone({ ed }: { ed: ServiceEditor }) {
       >
         {open && sheetAt !== null && (
           <>
+            <span className="flex gap-2">
+              <Button
+                size="sm"
+                disabled={sheetAt === 0}
+                onClick={() => {
+                  ed.segments.move(sheetAt, sheetAt - 1);
+                  setSheetAt(sheetAt - 1);
+                }}
+              >
+                <ArrowUp size={14} aria-hidden="true" />
+                Lên
+              </Button>
+              <Button
+                size="sm"
+                disabled={sheetAt === variant.segments.length - 1}
+                onClick={() => {
+                  ed.segments.move(sheetAt, sheetAt + 1);
+                  setSheetAt(sheetAt + 1);
+                }}
+              >
+                <ArrowDown size={14} aria-hidden="true" />
+                Xuống
+              </Button>
+            </span>
             <Field id="ms-name" size="md" label="Tên trên lịch" error={err.name}>
               <input
                 id="ms-name"

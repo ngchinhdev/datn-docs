@@ -119,7 +119,7 @@ export function segmentErrors(
     const e: SegmentErrors = {};
     if (!s.name.trim()) e.name = 'Nhập tên đoạn.';
     if (s.kind === 'prep') {
-      if (i !== 0) e.kind = 'Chuẩn bị chỉ đứng đầu. Kéo đoạn này lên đầu hoặc đổi loại.';
+      if (i !== 0) e.kind = 'Chuẩn bị chỉ đứng đầu. Đưa đoạn này lên đầu hoặc đổi loại.';
       else if (segments[1]?.kind !== 'work') e.kind = 'Sau đoạn Chuẩn bị phải là đoạn Làm.';
     }
     if (
@@ -181,6 +181,8 @@ export const fromDraft = (draft: DraftService): Service => ({
   variants: draft.variants.map((v) => ({
     ...v,
     segments: layout(v.segments).map(({ minutesText: _text, ...s }) => s),
+    // 0 minutes is no cleaning: the type has no entry (BR-94.28).
+    cleanupMinutes: Object.fromEntries(Object.entries(v.cleanupMinutes).filter(([, m]) => m > 0)),
   })),
 });
 
