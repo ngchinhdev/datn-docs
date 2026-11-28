@@ -97,10 +97,10 @@ Lệnh của `datn-saas` xem `datn-saas/CLAUDE.md`.
 ## Mock giao diện
 
 - Nằm ở `app/mock/*` trong repo này, dùng dữ liệu giả trong `mock/fixtures/` (TypeScript), không gọi API thật.
-- Có bộ chọn tenant (Salon Tóc Mây; Pawpaw sẽ được thay bằng Spa Lá Sen, xem `sessions/plans/d16-cleanup.md`) và bộ chọn vai trò.
+- Có bộ chọn tenant (Salon Tóc Mây, Spa Lá Sen) và bộ chọn vai trò.
 - Dùng cùng Tailwind 4 + shadcn/ui với `apps/web` để chuyển component sang dễ.
 - Giao diện theo hệ thống thiết kế **Sapio** (`design/sapio/`): chỉ dùng biến trong `tokens.css` và class trong `components.css`, không tự đặt màu; không nền đen ở đâu. Màn hình tham chiếu ở `design/screens/`.
 - Chia việc: phiên claude.ai lo phân tích, thiết kế, review; Claude Code trên máy lo code theo kế hoạch, làm trên nhánh riêng và mở pull request để review, không tự merge.
-- Mock là bản phác để chốt luồng với giảng viên; khi chốt, đổi trạng thái màn hình thành "đã chốt".
+- Mock là bản phác của luồng. Màn xong đặc tả và mock thì đổi trạng thái thành "đã chốt" và dùng làm căn cứ để code; giảng viên xem sau, góp ý thì sửa và ghi vào `sessions/progress/`.
 - **Kiểm trên máy chỉ chạy** `pnpm check:availability`, `pnpm typecheck`, `pnpm build`, `prettier --check`, và **`pnpm shot`** cho bước có giao diện. Không tự viết script Playwright hay axe nào khác, không tạo file trong thư mục tạm của hệ điều hành. Mục "Xong khi" trong kế hoạch là danh sách để người dùng kiểm.
 - **Tự so với bản vẽ (bước có giao diện):** trước khi báo xong, chạy `pnpm dev` rồi `pnpm shot <route>...` cho các route của bước (ảnh 1440×900, thêm `--phone` cho 390×844, `--dark` cho theme tối), mở từng ảnh trong `.shots/` bằng công cụ đọc ảnh, so với file `design/screens/*.dc.html` tương ứng: bố cục, khoảng cách, màu chữ và link, chữ bị cắt, phần tử chồng nhau. Sửa hết chỗ lệch rồi mới báo xong; chỗ cố ý khác bản vẽ thì ghi vào mục "Tự quyết" của PR. Không commit ảnh (`.shots/` nằm trong `.gitignore`).

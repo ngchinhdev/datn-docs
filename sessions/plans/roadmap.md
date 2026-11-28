@@ -51,23 +51,22 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 
 - [ ] Use case theo 6 vai trò; đặc tả các luồng chính
 - [ ] Hoàn thiện danh sách BR (mục 7)
-- [ ] **Thiết kế gói cấu hình ngành:** định dạng file, danh sách thành phần; viết sẵn gói salon và gói spa thú cưng ở dạng tài liệu
-- [ ] ERD đầy đủ (có `industry_templates`, `served_subjects`); sơ đồ trạng thái; sequence cho: đặt lịch online có cọc, webhook thanh toán, hoàn thành lịch → outbox. Bản 1 của ERD và bảng trạng thái: 08/11, [ERD](../../content/docs/architecture/erd.md); còn sequence
-- [ ] Mock UI và prototype click được: trang đặt lịch của khách (cả hai ngành), lịch lễ tân, cấu hình dịch vụ, thu tiền
-- [x] Thiết kế thuật toán tính giờ trống bằng mã giả, kèm 10 ví dụ tính tay (có ví dụ ngành thú cưng) (08/11, [trang thuật toán](../../content/docs/architecture/availability-algorithm.md))
+- [ ] ERD đầy đủ; sơ đồ trạng thái; sequence cho: đặt lịch online có cọc, webhook thanh toán, hoàn thành lịch → outbox. Bản 1 của ERD và bảng trạng thái: 08/11, [ERD](../../content/docs/architecture/erd.md); còn sequence
+- [ ] Mock UI và prototype click được: trang đặt lịch của khách (Salon Tóc Mây và Spa Lá Sen), lịch lễ tân, cấu hình dịch vụ, thu tiền
+- [x] Thiết kế thuật toán tính giờ trống bằng mã giả, kèm 10 ví dụ tính tay (có ví dụ Spa Lá Sen) (08/11, [trang thuật toán](../../content/docs/architecture/availability-algorithm.md))
 
-**Tiêu chí:** đi hết luồng đặt lịch → thanh toán → hoàn thành trên prototype; mọi BR có chỗ đứng trong ERD; hai gói cấu hình viết xong mà không cần thêm bảng riêng cho ngành nào.
+**Tiêu chí:** đi hết luồng đặt lịch → thanh toán → hoàn thành trên prototype; mọi BR có chỗ đứng trong ERD.
 
 ### Giai đoạn 2 — Nền tảng (Tuần 6–8: 07/12 – 27/12)
 
-- [ ] Đăng ký khách thuê, chọn ngành, nạp gói cấu hình, xác thực email, slug
-- [ ] Đăng nhập bằng session token trong cookie httpOnly ([T-08](../../content/docs/decisions/t08-staff-session-cookie.md)), `memberships`, guard theo (tenant, role)
+- [x] Đăng ký khách thuê, xác thực email, slug (MH-02; 28/11, [kế hoạch](./signup.md))
+- [x] Đăng nhập bằng session token trong cookie httpOnly ([T-08](../../content/docs/decisions/t08-staff-session-cookie.md)), `memberships`, chọn cơ sở (24/11 đến 26/11, A1 đến A4 của [kế hoạch](./auth.md))
+- [ ] Guard theo (tenant, role)
 - [ ] **RLS** trên mọi bảng nghiệp vụ + bộ test truy cập chéo tenant (BT6)
 - [ ] CRUD chi nhánh, giờ mở cửa, ngày đặc biệt, loại tài nguyên, tài nguyên, dịch vụ (biến thể, đoạn, yêu cầu tài nguyên), nhân sự, kỹ năng, ca làm
-- [ ] Đối tượng được phục vụ với thuộc tính kiểm tra theo JSON Schema
-- [ ] Nhật ký thao tác nhạy cảm; lint chặn từ khóa ngành trong code lõi
+- [ ] Nhật ký thao tác nhạy cảm
 
-**Tiêu chí:** một tenant salon và một tenant spa thú cưng seed chạy song song; test cô lập xanh 100%.
+**Tiêu chí:** một tenant salon tóc (Tóc Mây) và một tenant spa (Spa Lá Sen) seed chạy song song; test cô lập xanh 100%.
 
 ### Giai đoạn 3 — Lõi đặt lịch (Tuần 9–14: 28/12/2026 – 07/02/2027)
 
@@ -139,7 +138,7 @@ Tóm tắt; lý do, phiên bản và nguồn xem [Quyết định kỹ thuật](
 | Mốc | Ngày | Tiêu chí |
 |---|---|---|
 | M0 | 15/11/2026 | Đề cương được duyệt, đã dùng thử đối thủ |
-| M1 | 06/12/2026 | Thiết kế + prototype + hai gói cấu hình ngành |
+| M1 | 06/12/2026 | Thiết kế + prototype |
 | M2 | 27/12/2026 | Nền tảng, cô lập tenant đã kiểm chứng |
 | M3 | 07/02/2027 | Lõi đặt lịch chống trùng tuyệt đối |
 | M4 | 21/03/2027 | Tiền: thanh toán, ví, gói |
