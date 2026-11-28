@@ -158,7 +158,7 @@ Mỗi dòng là ít nhất một test. Tên test bắt đầu bằng mã quy t�
 
 | # | Cho | Khi | Thì | Quy tắc |
 |---|---|---|---|---|
-| AC-66 | Chủ `toc-may` | `GET` danh sách chi nhánh | 200; mặc định chỉ chi nhánh đang dùng; `status=archived` chỉ chi nhánh ngừng dùng, `status=all` cả hai; có `plan.maxBranches`, `plan.activeBranches` | BR-93.2, BR-93.9 |
+| AC-66 | Chủ `toc-may` | `GET` danh sách chi nhánh | 200; mặc định chỉ chi nhánh đang dùng; `status=archived` chỉ chi nhánh ngừng dùng, `status=all` cả hai; có `plan.name`, `plan.maxBranches`, `plan.activeBranches` | BR-93.2, BR-93.9 |
 | AC-67 | Chủ `toc-may` | Thêm chi nhánh "Quận 7", số `028 3930 1234`, địa chỉ hợp lệ | 201; số lưu `+842839301234`; `timezone = Asia/Ho_Chi_Minh`; giờ mở cửa 08:00 đến 20:00 Thứ Hai đến Thứ Bảy, Chủ Nhật không có khung; không có tài nguyên | BR-93.5, BR-93.6, BR-93.7 |
 | AC-68 | Chủ `toc-may` | Thêm chi nhánh với tên rỗng / tên 101 ký tự / địa chỉ rỗng / số `123` / có trường `timezone` | 400 `VALIDATION_FAILED`, `errors` chỉ đúng trường (`name`, `name`, `address`, `phone`, `timezone`); không tạo gì | BR-93.4, BR-93.5, BR-93.6 |
 | AC-69 | Đã có "Tóc Mây Quận 3" | Thêm chi nhánh tên " tóc mây  quận 3 "; thêm chi nhánh trùng tên một chi nhánh đã ngừng dùng | 409 `NAME_TAKEN`; 201 | BR-93.4 |

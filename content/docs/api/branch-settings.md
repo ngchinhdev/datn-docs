@@ -85,11 +85,11 @@ Tham chiếu: [Danh sách chi nhánh](./reference/branch-settings/branchesList.m
       "resourceCount": 4
     }
   ],
-  "plan": { "maxBranches": null, "activeBranches": 1 }
+  "plan": { "name": "Chuyên nghiệp", "maxBranches": null, "activeBranches": 1 }
 }
 ```
 
-`isFirst` là chi nhánh có `created_at` sớm nhất của cơ sở. `resourceCount` đếm tài nguyên đang dùng không phải nhân viên, `staffCount` đếm tài nguyên nhân viên đang dùng. `plan.maxBranches` là `plans.limits.branches` (`null` là không giới hạn); `plan.activeBranches` luôn đếm chi nhánh đang dùng, bất kể `status`. Sắp theo `created_at`.
+`isFirst` là chi nhánh có `created_at` sớm nhất của cơ sở. `resourceCount` đếm tài nguyên đang dùng không phải nhân viên, `staffCount` đếm tài nguyên nhân viên đang dùng. `plan.name` là `plans.name` của gói đang áp dụng (cơ sở dùng thử là gói Chuyên nghiệp); `plan.maxBranches` là `plans.limits.branches` (`null` là không giới hạn); `plan.activeBranches` luôn đếm chi nhánh đang dùng, bất kể `status`. Sắp theo `created_at`.
 
 ## 2. Thêm chi nhánh
 
@@ -402,8 +402,8 @@ Mọi tài khoản mẫu có mật khẩu `123456`. Dữ liệu mẫu có `toc-m
 
 | Ca | Endpoint | Đăng nhập là | Đầu vào | Kết quả |
 |---|---|---|---|---|
-| Danh sách, gói Chuyên nghiệp | #1 | `chinh@tocmay.vn` | `slug = toc-may` | 200, một chi nhánh, `plan.maxBranches` là `null` |
-| Danh sách, gói Cơ bản | #1 | `ha.le@lasen.vn` | `slug = la-sen` | 200, một chi nhánh, `plan.maxBranches` là 1 |
+| Danh sách, gói Chuyên nghiệp | #1 | `chinh@tocmay.vn` | `slug = toc-may` | 200, một chi nhánh, `plan.name` là "Chuyên nghiệp", `plan.maxBranches` là `null` |
+| Danh sách, gói Cơ bản | #1 | `ha.le@lasen.vn` | `slug = la-sen` | 200, một chi nhánh, `plan.name` là "Cơ bản", `plan.maxBranches` là 1 |
 | Thêm chi nhánh | #2 | `chinh@tocmay.vn` | "Tóc Mây Quận 7", `0283 930 5678`, "12 Nguyễn Thị Thập, TP.HCM" | 201, giờ mặc định 08:00 đến 20:00, Chủ Nhật nghỉ |
 | Vượt giới hạn gói | #2 | `ha.le@lasen.vn` | "Lá Sen Quận 1" | 403 `PLAN_LIMIT_REACHED`, `max` là 1 |
 | Tên trùng | #2 | `chinh@tocmay.vn` | "tóc mây quận 3" | 409 `NAME_TAKEN` |
