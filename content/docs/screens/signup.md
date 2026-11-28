@@ -47,9 +47,9 @@ Tiêu đề trang: "Đăng ký cơ sở · Sapio".
 | Khi | Xử lý |
 |---|---|
 | Rời mục 5, 6, 7 | Hiện lỗi của mục đó nếu có. Lỗi của mục 8 hiện khi bấm mục 10 |
-| Nhấn mục 10 hoặc Enter | Kiểm trên máy trước, đặt con trỏ vào mục lỗi đầu tiên và không gọi API: mục 5 trống "Nhập họ và tên."; mục 6 sai dạng "Email chưa đúng. Ví dụ: an@tiemcuaban.vn."; mục 7 trống "Nhập mật khẩu.", ngắn hơn 15 ký tự "Mật khẩu cần ít nhất 15 ký tự.", dài hơn 128 "Mật khẩu dài tối đa 128 ký tự.", nằm trong danh sách phổ biến "Mật khẩu này quá phổ biến, chọn câu khác."; mục 8 chưa chọn "Cần đồng ý điều khoản để tiếp tục." Hết lỗi thì gọi API #1 với `{ fullName, email, password, acceptTerms }`; trong lúc chờ, mục 10 hiện vòng xoay và không bấm được |
+| Nhấn mục 10 hoặc Enter | Kiểm trên máy trước, đặt con trỏ vào mục lỗi đầu tiên và không gọi API: mục 5 trống "Nhập họ và tên."; mục 6 sai dạng "Email chưa đúng. Ví dụ: an@tiemcuaban.vn."; mục 7 trống "Nhập mật khẩu.", ngắn hơn 15 ký tự "Mật khẩu cần ít nhất 15 ký tự.", dài hơn 128 "Mật khẩu dài tối đa 128 ký tự."; mục 8 chưa chọn "Cần đồng ý điều khoản để tiếp tục." Hết lỗi thì gọi API #1 với `{ fullName, email, password, acceptTerms }`; trong lúc chờ, mục 10 hiện vòng xoay và không bấm được |
 | API trả 201 | Chuyển tới bước 2. Giữ `resendAt` và `codeExpiresAt` trong bản nháp |
-| API trả 400 `VALIDATION_FAILED` | Mỗi phần tử của `errors` báo bằng `message` dưới mục có `field`: `fullName` là mục 5, `email` là mục 6, `password` là mục 7, `acceptTerms` là mục 8 |
+| API trả 400 `VALIDATION_FAILED` | Mỗi phần tử của `errors` báo bằng `message` dưới mục có `field`: `fullName` là mục 5, `email` là mục 6, `password` là mục 7, `acceptTerms` là mục 8. Mật khẩu nằm trong danh sách phổ biến chỉ do API báo (`TOO_COMMON`, "Mật khẩu quá phổ biến, dễ bị đoán. Chọn mật khẩu khác."), vì danh sách nằm ở máy chủ |
 | API trả 409 `EMAIL_TAKEN` | Mục 6: "Email này đã có tài khoản Sapio." kèm link "Đăng nhập" tới `/login?email={mục 6}`. Con trỏ vào mục 6 |
 | API trả 429 `CODE_LIMIT_REACHED` | Mục 6: "Đã gửi quá nhiều mã tới email này. Thử lại sau {n} phút." với `n` là `Retry-After` đổi sang phút, làm tròn lên |
 | API trả 429 `RATE_LIMITED` | Mục 9: "Thử quá nhiều lần. Thử lại sau {Retry-After} giây." |
