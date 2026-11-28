@@ -98,4 +98,26 @@ datn-docs, không merge.
 
 ## Prompt S2
 
-Viết sau khi review S0.
+```
+Làm trong datn-saas: git checkout main && git pull && git checkout -b feat/branch-settings-web.
+Đọc datn-docs/CLAUDE.md, mục mới nhất trong datn-docs/sessions/progress/, sessions/plans/branch-settings.md
+(mục S2), screens/branch-settings.md, features/branch-settings.md, api/branch-settings.md, và mock
+app/mock/app/[tenant]/settings/{branches,resources}.
+Làm đúng các đầu việc S2 của kế hoạch, theo screens/branch-settings.md. Lưu ý:
+- Kiểm khung giờ ở form dùng lại openingHoursSchema và windowIssues của packages/shared, không viết
+  lại luật. Mã lỗi API xử lý theo bảng "Xử lý" của từng màn; lỗi theo trường gắn vào đúng ô.
+- Màn chi tiết lưu một lần (thanh lưu như mock); rời trang khi còn thay đổi chưa lưu thì hỏi.
+- PLAN_LIMIT_REACHED hiện trong hộp "Thêm chi nhánh" kèm link Gói Sapio; dải báo giới hạn ở danh
+  sách theo plan.maxBranches, plan.activeBranches.
+- Ô Múi giờ bị khóa như đặc tả. Ngày giờ hiện theo Asia/Ho_Chi_Minh, gửi lên ISO UTC.
+- Phần "áp dụng khi có lịch hẹn" (cột Lịch 7 ngày tới, dải lịch ngoài giờ, danh sách lịch bị ảnh
+  hưởng) chưa làm, không hiện chỗ trống.
+- Chữ ở messages/{vi,en}.json (T-21). Chỉ dùng token và class sẵn có, chuyển component từ mock nếu
+  được.
+- e2e và axe đúng như kế hoạch, dữ liệu từ seed (toc-may, la-sen, hung@tocmay.vn).
+Chụp ba màn ở 1440 và 390, theme sáng, cho toc-may và la-sen; ảnh để ở
+datn-docs/sessions/progress/branch-settings-web/, đính vào PR saas.
+Tài liệu là đặc tả; chỗ thiếu hoặc mâu thuẫn thì dừng lại hỏi mình. Chạy pnpm lint, pnpm typecheck,
+pnpm test, pnpm test:e2e. Mở PR ở cả hai repo, ghi mục "Tự quyết", thêm mục tiến độ, không merge.
+MH-42, MH-43, MH-46 giữ "Đã chốt".
+```

@@ -44,7 +44,7 @@ Mọi endpoint có `{slug}` trong đường dẫn (`/v1/tenants/{slug}/...`) và
 | `GET` | 300 |
 | `POST`, `PUT`, `PATCH`, `DELETE` | 60 |
 
-Giới hạn của gói (`PLAN_LIMIT_REACHED`) khác với giới hạn này: nó tính theo dữ liệu của cơ sở (BR-93.2).
+Bộ đếm nằm trong bộ nhớ của từng instance API, theo cửa sổ một phút; nhiều instance chạy cùng lúc cần bộ đếm chung bằng Redis. Giới hạn của gói (`PLAN_LIMIT_REACHED`) khác với giới hạn này: nó tính theo dữ liệu của cơ sở (BR-93.2).
 
 ## Mã lỗi của nhóm này
 
@@ -57,7 +57,7 @@ Giới hạn của gói (`PLAN_LIMIT_REACHED`) khác với giới hạn này: n�
 | 409 | `BRANCH_HAS_UPCOMING_APPOINTMENTS` | `count` | **Áp dụng khi có lịch hẹn.** Ngừng dùng chi nhánh còn lịch sắp tới |
 | 409 | `RESOURCE_TYPE_PROTECTED` | | Sửa hoặc xóa loại nhân viên |
 | 409 | `RESOURCE_TYPE_IN_USE` | | Xóa loại còn tài nguyên (kể cả đã ngừng dùng), hoặc **áp dụng khi có dịch vụ:** còn dịch vụ chiếm loại đó |
-| 409 | `RESOURCE_ARCHIVED` | | Đổi tên, tạm ngưng hoặc ngừng dùng tài nguyên đã ngừng dùng |
+| 409 | `RESOURCE_ARCHIVED` | | Đổi tên, tạm ngưng hoặc ngừng dùng tài nguyên đã ngừng dùng, kể cả tài nguyên của chi nhánh đã ngừng dùng (BR-93.9) |
 | 409 | `ORDER_MISMATCH` | | Danh sách `ids` không đúng bằng tập tài nguyên đang dùng của nhóm |
 | 409 | `PAUSE_OVERLAP` | | Khoảng tạm ngưng chồng một khoảng khác của cùng tài nguyên |
 | 409 | `PAUSE_ENDED` | | Mở lại một khoảng đã kết thúc |
@@ -85,11 +85,11 @@ Tham chiếu: [Danh sách chi nhánh](./reference/branch-settings/branchesList.m
       "resourceCount": 4
     }
   ],
-  "plan": { "maxBranches": null, "activeBranches": 1 }
+  "plan": { "name": "Chuyên nghiệp", "maxBranches": null, "activeBranches": 1 }
 }
 ```
 
-`isFirst` là chi nhánh có `created_at` sớm nhất của cơ sở. `resourceCount` đếm tài nguyên đang dùng không phải nhân viên, `staffCount` đếm tài nguyên nhân viên đang dùng. `plan.maxBranches` là `plans.limits.branches` (`null` là không giới hạn); `plan.activeBranches` luôn đếm chi nhánh đang dùng, bất kể `status`. Sắp theo `created_at`.
+`isFirst` là chi nhánh có `created_at` sớm nhất của cơ sở. `resourceCount` đếm tài nguyên đang dùng không phải nhân viên, `staffCount` đếm tài nguyên nhân viên đang dùng. `plan.name` là `plans.name` của gói đang áp dụng (cơ sở dùng thử là gói Chuyên nghiệp); `plan.maxBranches` là `plans.limits.branches` (`null` là không giới hạn); `plan.activeBranches` luôn đếm chi nhánh đang dùng, bất kể `status`. Sắp theo `created_at`.
 
 ## 2. Thêm chi nhánh
 
@@ -169,7 +169,7 @@ Một lần lưu cả thông tin, giờ mở cửa và ngày đặc biệt (BR-9
 
 Xử lý, sau các bước chung:
 
-1. Schema (bước chung 2). Ngoài kiểm từng trường, schema kiểm: có ít nhất một ngày mở (`openingHours` rỗng báo `INVALID_VALUE` ở `openingHours`); khung của một `weekday` không chồng nhau (khung sau có `opens` trước `closes` của khung liền trước báo `INVALID_VALUE` ở `openingHours.{i}.opens` của khung sau; nối liền hợp lệ); mỗi ngày đặc biệt kiểm như ngày thường, báo ở `specialDays.{i}.windows.{j}.opens` hoặc `specialDays.{i}.windows`; `specialDays.{i}.date` trong quá khứ hoặc trùng ngày khác báo `INVALID_VALUE`.
+1. Schema (bước chung 2). Ngoài kiểm từng trường, schema kiểm: có ít nhất một ngày mở (`openingHours` rỗng báo `INVALID_VALUE` ở `openingHours`); khung của một `weekday` không quá 4 (khung thứ 5 báo `INVALID_VALUE` ở `openingHours.{i}.weekday`) và không chồng nhau (khung sau có `opens` trước `closes` của khung liền trước báo `INVALID_VALUE` ở `openingHours.{i}.opens` của khung sau; nối liền hợp lệ); mỗi ngày đặc biệt kiểm như ngày thường, báo ở `specialDays.{i}.windows.{j}.opens` hoặc `specialDays.{i}.windows`; `specialDays.{i}.date` trong quá khứ hoặc trùng ngày khác báo `INVALID_VALUE`.
 2. Chi nhánh đã ngừng dùng: **409** `BRANCH_ARCHIVED`.
 3. Tên trùng chi nhánh đang dùng khác: **409** `NAME_TAKEN`.
 4. Cập nhật `name`, `phone`, `address`, `updated_at`; thay toàn bộ `opening_hours` của chi nhánh; với ngày đặc biệt: xóa mọi dòng từ hôm nay trở đi rồi thêm các dòng trong body. Ngày đã qua không bị chạm tới (BR-93.14). Vi phạm exclusion constraint của khung giờ trả 400 như bước 1.
@@ -324,7 +324,7 @@ Tham chiếu: [Đổi tên tài nguyên](./reference/branch-settings/resourcesRe
 `PATCH /v1/tenants/{slug}/resources/{resourceId}`, body `{ "name": "..." }`. Body có `branchId` hoặc `resourceTypeId` bị từ chối ở bước chung 2.
 
 1. Tài nguyên có loại nhân viên: **404** `NOT_FOUND` (màn này không quản lý nhân viên).
-2. Tài nguyên đã ngừng dùng: **409** `RESOURCE_ARCHIVED`.
+2. Tài nguyên đã ngừng dùng, hoặc thuộc chi nhánh đã ngừng dùng: **409** `RESOURCE_ARCHIVED`.
 3. Tên trùng tài nguyên đang dùng khác cùng chi nhánh: **409** `NAME_TAKEN`.
 
 Trả về 200 với một phần tử như ở #10.
@@ -341,7 +341,7 @@ Tham chiếu: [Đổi thứ tự tài nguyên](./reference/branch-settings/resou
 | `resourceTypeId` | uuid | Có | |
 | `ids` | mảng uuid | Có | Thứ tự mới của cả nhóm |
 
-1. `branchId` hoặc `resourceTypeId` không thuộc cơ sở: **404** `NOT_FOUND`.
+1. `branchId` hoặc `resourceTypeId` không thuộc cơ sở: **404** `NOT_FOUND`. `resourceTypeId` là loại nhân viên: **400** `VALIDATION_FAILED`, `errors` có `resourceTypeId` với `INVALID_VALUE`. Chi nhánh đã ngừng dùng vẫn đổi thứ tự được.
 2. Khóa các dòng tài nguyên đang dùng của nhóm (`SELECT ... FOR UPDATE`). `ids` không đúng bằng tập các id đó (thiếu, thừa, trùng, hoặc id của nhóm khác): **409** `ORDER_MISMATCH`.
 3. Đặt `sort` là 1, 2, 3... theo thứ tự `ids`.
 
@@ -361,7 +361,7 @@ Tham chiếu: [Tạm ngưng tài nguyên](./reference/branch-settings/resourcesC
 
 Xử lý, sau các bước chung:
 
-1. Tài nguyên có loại nhân viên: **404** `NOT_FOUND`. Đã ngừng dùng: **409** `RESOURCE_ARCHIVED`.
+1. Tài nguyên có loại nhân viên: **404** `NOT_FOUND`. Đã ngừng dùng, hoặc thuộc chi nhánh đã ngừng dùng: **409** `RESOURCE_ARCHIVED`.
 2. Khoảng chồng một khoảng khác của cùng tài nguyên: **409** `PAUSE_OVERLAP`. Khoảng `[startsAt, endsAt)` nối liền khoảng khác không chồng. Ràng buộc là exclusion constraint trên `resource_pauses`, nên hai yêu cầu cùng lúc cũng chỉ một yêu cầu thành công.
 3. **Áp dụng khi có lịch hẹn:** với từng lịch sắp tới dùng tài nguyên trong khoảng, chuyển sang tài nguyên cùng loại còn trống hoặc đặt vào "Cần xếp lại" (BR-93.26), trong cùng transaction.
 
@@ -390,7 +390,7 @@ Tham chiếu: [Ngừng dùng tài nguyên](./reference/branch-settings/resources
 
 `POST /v1/tenants/{slug}/resources/{resourceId}/archive`, không có body.
 
-1. Tài nguyên có loại nhân viên: **404** `NOT_FOUND`. Đã ngừng dùng: **409** `RESOURCE_ARCHIVED`.
+1. Tài nguyên có loại nhân viên: **404** `NOT_FOUND`. Đã ngừng dùng, hoặc thuộc chi nhánh đã ngừng dùng: **409** `RESOURCE_ARCHIVED`.
 2. Đặt `archived_at` bằng `Clock.now()`. Không xóa dòng, không đổi các khoảng tạm ngưng.
 3. **Áp dụng khi có lịch hẹn:** xử lý lịch sắp tới dùng tài nguyên như bước 3 của [#14](#14-tạm-ngưng-tài-nguyên).
 
@@ -402,8 +402,8 @@ Mọi tài khoản mẫu có mật khẩu `123456`. Dữ liệu mẫu có `toc-m
 
 | Ca | Endpoint | Đăng nhập là | Đầu vào | Kết quả |
 |---|---|---|---|---|
-| Danh sách, gói Chuyên nghiệp | #1 | `chinh@tocmay.vn` | `slug = toc-may` | 200, một chi nhánh, `plan.maxBranches` là `null` |
-| Danh sách, gói Cơ bản | #1 | `ha.le@lasen.vn` | `slug = la-sen` | 200, một chi nhánh, `plan.maxBranches` là 1 |
+| Danh sách, gói Chuyên nghiệp | #1 | `chinh@tocmay.vn` | `slug = toc-may` | 200, một chi nhánh, `plan.name` là "Chuyên nghiệp", `plan.maxBranches` là `null` |
+| Danh sách, gói Cơ bản | #1 | `ha.le@lasen.vn` | `slug = la-sen` | 200, một chi nhánh, `plan.name` là "Cơ bản", `plan.maxBranches` là 1 |
 | Thêm chi nhánh | #2 | `chinh@tocmay.vn` | "Tóc Mây Quận 7", `0283 930 5678`, "12 Nguyễn Thị Thập, TP.HCM" | 201, giờ mặc định 08:00 đến 20:00, Chủ Nhật nghỉ |
 | Vượt giới hạn gói | #2 | `ha.le@lasen.vn` | "Lá Sen Quận 1" | 403 `PLAN_LIMIT_REACHED`, `max` là 1 |
 | Tên trùng | #2 | `chinh@tocmay.vn` | "tóc mây quận 3" | 409 `NAME_TAKEN` |
