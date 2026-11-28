@@ -24,7 +24,7 @@ Danh sách này rút từ [phạm vi làm chắc](../overview/scope.md#31-làm-c
 - **Form:** dựng từ *mẫu trang form* (MH-09): các nhóm trường, lưu, hủy thay đổi, lỗi từng trường. Ghi rõ trường là đủ.
 - **Nhẹ:** trang đơn giản theo khung chung, không cần vẽ.
 
-**Trạng thái:** Chưa làm · Đang làm · Đã chốt (cô đồng ý). Trạng thái hiện trên trang `/mock/screens` (lấy từ `mock/screens.ts`).
+**Trạng thái:** Chưa làm · Đang làm · Đã chốt. Đã chốt nghĩa là màn đã xong đặc tả và mock, dùng làm căn cứ để code; giảng viên xem sau, góp ý thì sửa màn và ghi vào tiến độ. Trạng thái hiện trên trang `/mock/screens` (lấy từ `mock/screens.ts`).
 
 ## Quy ước route
 
